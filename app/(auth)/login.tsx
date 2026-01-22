@@ -46,22 +46,6 @@ const Login: React.FC = () => {
 
   //supabase
   const onSubmit = async (data: FormData) => {
-    // try {
-    //   const g = await fetch("https://www.google.com");
-    //   console.log("GOOGLE OK:", g.status);
-    // } catch (e) {
-    //   console.log("GOOGLE FAILED:", e);
-    // }
-
-    // try {
-    //   const s = await fetch(
-    //     "https://vsvlywnllgzgnvqjydrc.supabase.co/auth/v1/health",
-    //   );
-    //   console.log("SUPABASE HEALTH OK:", s.status);
-    // } catch (e) {
-    //   console.log("SUPABASE HEALTH FAILED:", e);
-    // }
-
     try {
       const email = data.email.trim().toLowerCase();
       const password = data.password;
@@ -87,7 +71,7 @@ const Login: React.FC = () => {
       // 2) Check approval_status from profiles
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
-        .select("approval_status, role")
+        .select("role")
         .eq("id", userId)
         .single();
 
@@ -96,31 +80,10 @@ const Login: React.FC = () => {
         return;
       }
 
-      // 3) Route based on status
-      if (
-        profile.approval_status === "pending" &&
-        profile.role === "employee"
-      ) {
-        // for alert
-        Alert.alert("Pending", "Please wait for approval.");
-        //  router.replace("/pending"); if pending page
-        return;
-      }
-
-      if (
-        profile.approval_status === "rejected" &&
-        profile.role === "employee"
-      ) {
-        Alert.alert("Rejected", "Your request was rejected.");
-        await supabase.auth.signOut();
-        return;
-      }
       if (profile.role === "admin") {
         router.replace("/(admin)/admin_dashboard");
-        Alert.alert("Admin Login Successfully.");
       } else {
         router.replace("/(tabs)/home");
-        Alert.alert("Employee Login Successfully.");
       }
 
       // approved
@@ -212,7 +175,7 @@ const Login: React.FC = () => {
           </Pressable>
 
           <Text style={styles.footerText}>
-            Don’t have an account?{" "}
+            Organization sign-up{" "}
             <Text
               style={styles.footerLink}
               onPress={() => router.push("/register")}
