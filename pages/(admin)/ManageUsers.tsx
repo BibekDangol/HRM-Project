@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   Alert,
   FlatList,
@@ -24,6 +24,7 @@ type UserProfile = {
 
 const ManageUsers = () => {
   const [users, setUsers] = useState<UserProfile[]>([]);
+  const [adminOrgName, setAdminOrgName] = useState<string>("");
   const user = useAuthStore.getState().user;
   if (!user) throw new Error("No logged in user");
 
@@ -37,39 +38,52 @@ const ManageUsers = () => {
   });
 
   const fetchUsers = async () => {
+    if (!user) return;
     setLoading(true);
-    const { data: ProfileData, error: ProfileError } = await supabase
+
+    // 1️⃣ get admin's org id
+    const { data: profileData, error: profileError } = await supabase
       .from("profiles")
       .select("organization_id")
       .eq("id", user.id)
       .single();
-    if (ProfileError) throw ProfileError;
-    const orgId = ProfileData?.organization_id;
+    if (profileError) {
+      console.log(profileError);
+      setLoading(false);
+      return;
+    }
+    const orgId = profileData.organization_id;
 
+    // 2️⃣ get all users in the same org
     const { data, error } = await supabase
       .from("profiles")
-      .select(`*, organization_id, organization(name)`)
+      .select(`*, organization(name)`)
       .eq("organization_id", orgId);
+
     if (error) console.log("Fetch users error:", error);
     else setUsers(data || []);
     setLoading(false);
+    if (data && data.length > 0) {
+      setAdminOrgName(data[0].organization.name);
+    }
   };
-
-  useEffect(() => {
-    fetchUsers();
-  }, []);
-
   const handleAddUser = async () => {
+    if (!adminOrgName) {
+      Alert.alert("Error", "Admin organization not loaded yet.");
+      return;
+    }
+
     try {
       await signUp({
         email: newUser.email,
         password: "TEMP@1234",
         firstName: newUser.first_name,
         lastName: newUser.last_name,
-        organizationName: "Same ORG",
+        organizationName: adminOrgName, // dynamically use admin org
       });
       Alert.alert("Success", "User created");
-      fetchUsers();
+      fetchUsers(); // refresh list
+      setNewUser({ first_name: "", last_name: "", email: "", role: "user" });
     } catch (err: any) {
       Alert.alert("Error", err.message);
     }
@@ -164,7 +178,6 @@ const ManageUsers = () => {
     </KeyboardAvoidingView>
   );
 };
-
 const styles = StyleSheet.create({
   container: { padding: 16, backgroundColor: "#f3f4f6" },
   title: { fontSize: 24, fontWeight: "bold", marginBottom: 16 },

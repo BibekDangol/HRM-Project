@@ -11,6 +11,7 @@ type SignUpData = {
   lastName: string;
   organizationName: string;
 };
+type SignInResult = { error: string } | { role: string };
 
 // Auth state type
 type AuthState = {
@@ -20,7 +21,7 @@ type AuthState = {
   loading: boolean;
 
   signUp: (data: SignUpData) => Promise<void>;
-  signIn: (email: string, password: string) => Promise<{ error?: string }>;
+  signIn: (email: string, password: string) => Promise<SignInResult>;
   signOut: () => Promise<void>;
   restoreSession: () => Promise<void>;
 };
@@ -125,8 +126,9 @@ export const useAuthStore = create<AuthState>((set) => ({
         .select("role")
         .eq("id", userId)
         .maybeSingle();
-      if (profileError) throw profileError;
-
+      if (profileError || !profileData) {
+        return { error: "Failed to fetch user role" };
+      }
       set({
         session: data.session,
         user: data.user,
@@ -134,7 +136,11 @@ export const useAuthStore = create<AuthState>((set) => ({
         loading: false,
       });
 
-      return {};
+      return { role: profileData.role };
+      // return the value of signin
+      //State updates are async. You can’t rely on them immediately after calling an async function.
+      //Zustand ≠ synchronous return value
+      //You must use the return value of signIn, not the store state.
     } catch (err: any) {
       console.log("Login error:", err);
       return { error: err.message };
