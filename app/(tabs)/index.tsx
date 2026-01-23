@@ -1,27 +1,11 @@
+import AppNavigator from "@/src/navigation/AppNavigator";
+import { Stack } from "expo-router";
 
-import { Text, View, TextInput } from "react-native";
-
-import { Redirect } from "expo-router";
-
-export default function HomeScreen() {
-  const isLoggedIn = false; // example
-
-  if (!isLoggedIn) {
-    return <Redirect href="/login" />;
-  }
-
-  // const router = useRouter()
-
-  // useEffect(() => {
-  //   router.push("/(auth)/login")
-  // }, [router])
-
+export default function Index() {
   return (
-    <View>
-      <Text>Welcome to the application</Text>
-      <TextInput></TextInput>
-    </View>
+    <>
+      <AppNavigator />
+      <Stack.Screen options={{ headerShown: false }} />
+    </>
   );
 }
-
-
