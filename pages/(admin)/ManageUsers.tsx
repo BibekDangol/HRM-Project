@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Alert,
   FlatList,
@@ -15,20 +15,22 @@ import { supabase } from "../../supabase/supabaseClient";
 
 type UserProfile = {
   id: string;
-  email: string;
-  first_name: string;
-  last_name: string;
+  email: string | null;
+  first_name: string | null;
+  last_name: string | null;
   role: string;
-  organization_id: string;
+  organization_id: number;
 };
-
+type AdminProfile = {
+  id: string;
+  organization_id: number;
+};
 const ManageUsers = () => {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [adminOrgName, setAdminOrgName] = useState<string>("");
-  const user = useAuthStore.getState().user;
+  const { user } = useAuthStore();
+  const [adminProfile, setAdminProfile] = useState<AdminProfile | null>(null);
   if (!user) throw new Error("No logged in user");
-
-  const signUp = useAuthStore((state) => state.signUp);
   const [loading, setLoading] = useState<boolean>(true);
   const [newUser, setNewUser] = useState({
     first_name: "",
@@ -37,16 +39,36 @@ const ManageUsers = () => {
     role: "user",
   });
 
+  useEffect(() => {
+    fetchAdminProfile();
+    fetchUsers();
+  }, []);
+
+  const fetchAdminProfile = async () => {
+    if (!user) return;
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("id, organization_id")
+      .eq("id", user.id)
+      .single();
+    if (error) {
+      console.log("Admin profile  fetching error", error);
+      return;
+    }
+    setAdminProfile(data);
+  };
+
   const fetchUsers = async () => {
     if (!user) return;
     setLoading(true);
-
+    console.log("loading");
     // 1️⃣ get admin's org id
     const { data: profileData, error: profileError } = await supabase
       .from("profiles")
       .select("organization_id")
       .eq("id", user.id)
       .single();
+
     if (profileError) {
       console.log(profileError);
       setLoading(false);
@@ -58,36 +80,57 @@ const ManageUsers = () => {
     const { data, error } = await supabase
       .from("profiles")
       .select(`*, organization(name)`)
-      .eq("organization_id", orgId);
+      .eq("organization_id", orgId)
+      .neq("id", user.id);
 
     if (error) console.log("Fetch users error:", error);
     else setUsers(data || []);
     setLoading(false);
     if (data && data.length > 0) {
-      setAdminOrgName(data[0].organization.name);
+      setAdminOrgName(data[0].organization.name ?? "");
     }
   };
   const handleAddUser = async () => {
-    if (!adminOrgName) {
-      Alert.alert("Error", "Admin organization not loaded yet.");
+    const { session } = useAuthStore.getState();
+    if (!session || !adminProfile) {
+      Alert.alert("Wait", "Admin profile loading");
       return;
     }
-
     try {
-      await signUp({
-        email: newUser.email,
-        password: "TEMP@1234",
-        firstName: newUser.first_name,
-        lastName: newUser.last_name,
-        organizationName: adminOrgName, // dynamically use admin org
-      });
+      const response = await fetch(
+        "https://dibcpzqlaypincnthhnm.supabase.co/functions/v1/hyper-service",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer sb_publishable_D6xlYx7potWjgTvOXIdjTA_4LkPnxIc`,
+          },
+          body: JSON.stringify({
+            email: newUser.email,
+            password: "Temp@1234",
+            firstName: newUser.first_name,
+            lastName: newUser.last_name,
+            orgId: adminProfile.organization_id,
+          }),
+        },
+      );
+      console.log("SESSION", session);
+      console.log("AccessToken", session.access_token);
+      const result = await response.json();
+      console.log(result);
+      if (!response.ok) {
+        Alert.alert("Error", result.error);
+        return;
+      }
       Alert.alert("Success", "User created");
-      fetchUsers(); // refresh list
+      fetchUsers();
       setNewUser({ first_name: "", last_name: "", email: "", role: "user" });
+      //after you add a user, this makes "add user form back to empty"
     } catch (err: any) {
       Alert.alert("Error", err.message);
     }
   };
+
   const handleEditUser = (id: string) => {
     Alert.alert("Edit User", `Edit user: ${id}`);
   };
@@ -154,6 +197,12 @@ const ManageUsers = () => {
           placeholder="Role (user/admin)"
           style={styles.input}
           value={newUser.role}
+          onChangeText={(text) => setNewUser({ ...newUser, role: text })}
+        />
+        <TextInput
+          placeholder="Organization"
+          style={styles.input}
+          value={adminOrgName}
           onChangeText={(text) => setNewUser({ ...newUser, role: text })}
         />
         <TouchableOpacity style={styles.addButton} onPress={handleAddUser}>

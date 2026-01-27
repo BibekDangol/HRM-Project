@@ -11,8 +11,17 @@ type SignUpData = {
   lastName: string;
   organizationName: string;
 };
-type SignInResult = { error: string } | { role: string };
+type AdminData = {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  orgId: number;
+};
 
+type SignInResult = { error: string } | { role: string };
+type AdminCreateUserResult = { success: boolean; userId: string };
+//function returns {success:boolean and string userId} so we must define its return type;
 // Auth state type
 type AuthState = {
   user: User | null;
@@ -21,6 +30,7 @@ type AuthState = {
   loading: boolean;
 
   signUp: (data: SignUpData) => Promise<void>;
+  adminCreateUser: (data: AdminData) => Promise<AdminCreateUserResult>;
   signIn: (email: string, password: string) => Promise<SignInResult>;
   signOut: () => Promise<void>;
   restoreSession: () => Promise<void>;
@@ -51,7 +61,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         .maybeSingle();
       if (orgError) throw orgError;
 
-      let orgId: string;
+      let orgId: number;
       if (orgData) {
         // org exists
         orgId = orgData.id;
@@ -78,33 +88,54 @@ export const useAuthStore = create<AuthState>((set) => ({
       const userId = authData.user.id;
 
       // 4️⃣ Insert profile
-      const { error: profileError } = await supabase.from("profiles").insert({
+      const { data:profile, error: profileError } = await supabase.from("profiles").insert({
         id: userId,
-        email,
+        email:email,
         first_name: firstName,
         last_name: lastName,
         organization_id: orgId,
         role: "user",
-      });
+      }).select();
+      // insert and select from profile together
       if (profileError) throw profileError;
-
-      const { data: profile, error: profileFetchError } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", userId)
-        .single();
-      if (profileFetchError) throw profileFetchError;
-
-      // 5️⃣ Update Zustand state
       set({
         session: authData.session,
         user: authData.user,
-        role: profile.role,
+        role: profile[0].role,
         loading: false,
       });
+      set({ loading: false });
     } catch (err: any) {
       console.log("Signup error:", err);
       set({ loading: false });
+      throw err;
+    }
+  },
+  adminCreateUser: async (data: AdminData) => {
+    try {
+      const { data: authData, error: authError } =
+        await supabase.auth.admin.createUser({
+          email: data.email,
+          password: data.password,
+          user_metadata: { firstName: data.firstName, lastName: data.lastName },
+          email_confirm: true, //optional: auto-confirm email
+        });
+      if (authError || !authData.user)
+        throw authError || new Error("User creation failed");
+      const userId = authData.user.id;
+      //Insert profile row
+      const { error: profileError } = await supabase.from("profiles").insert({
+        id: userId,
+        email: data.email,
+        first_name: data.firstName,
+        last_name: data.lastName,
+        organization_id: data.orgId,
+        role: "user",
+      });
+      if (profileError) throw profileError;
+      return { success: true, userId };
+    } catch (err: any) {
+      console.log("Admin create user error", err);
       throw err;
     }
   },
@@ -136,7 +167,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         loading: false,
       });
 
-      return { role: profileData.role };
+      return { role: profileData.role};
       // return the value of signin
       //State updates are async. You can’t rely on them immediately after calling an async function.
       //Zustand ≠ synchronous return value
