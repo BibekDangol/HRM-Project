@@ -20,7 +20,7 @@ import tw from "twrnc";
 import { z } from "zod";
 
 const schema = z.object({
-  email: z.string().email("Invalid email address"),
+  email: z.string().email({ message: "Invalid email" }),
   password: z.string().min(1, "Password is required"),
 });
 
@@ -28,7 +28,6 @@ type FormData = z.infer<typeof schema>;
 type Props = NativeStackScreenProps<RootStackParamList, "Login">;
 
 const LoginScreen = ({ navigation }: Props) => {
-  const role = useAuthStore((state) => state.role);
   const signIn = useAuthStore((state) => state.signIn);
 
   // keep your existing state + logic

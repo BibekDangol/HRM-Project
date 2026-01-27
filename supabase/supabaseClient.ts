@@ -1,3 +1,4 @@
+import { Database } from '@/database.types';
 import { createClient } from '@supabase/supabase-js';
 import { secureStoreAdapter } from './secureStoreAdapter';
 
@@ -8,7 +9,7 @@ if(!SUPABASE_URL || !SUPABASE_ANON_KEY){
 }
 
 //tells supabase to use expo store rather than localstoarage
-export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY,{
+export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY,{
   auth:{
     storage:secureStoreAdapter,
     autoRefreshToken:true,
