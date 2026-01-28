@@ -1,42 +1,24 @@
-import * as React from "react";
-import { Alert, View } from "react-native";
-import tw from "twrnc";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { Pressable } from "react-native";
-import { useCallback, useState } from "react";
-import { ScrollView, RefreshControl } from "react-native";
-
-import {
-  useLinkBuilder,
-  useTheme,
-  useNavigation,
-} from "@react-navigation/native";
-import { Text, PlatformPressable } from "@react-navigation/elements";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "@/src/navigation/types";
-import { useAuthStore } from "@/store/useAuthStore";
-import ManageUsers from "./ManageUsers";
+// import { useAuthStore } from "@/store/useAuthStore";
+import { Ionicons } from "@expo/vector-icons";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { PlatformPressable, Text } from "@react-navigation/elements";
+import { useLinkBuilder } from "@react-navigation/native";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import * as React from "react";
+import { ScrollView, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import tw from "twrnc";
+import ManageUsers from "./ManageUsers";
+import onLogout from "./Moretab";
 
 /** This file is mounted by your Root Stack as: <Stack.Screen name="Admin" component={AdminScreen} /> */
 type RootProps = NativeStackScreenProps<RootStackParamList, "Admin">;
 
 /* ---------------- Custom Tab Bar (from your snippet) ---------------- */
 function MyTabBar({ state, descriptors, navigation }: any) {
-  const { colors } = useTheme();
   const { buildHref } = useLinkBuilder();
-  const iconByRoute: Record<
-    string,
-    keyof typeof MaterialCommunityIcons.glyphMap
-  > = {
-    Dashboard: "view-dashboard",
-    Employees: "account-group-outline",
-    Leaves: "calendar-month-outline",
-    More: "dots-horizontal",
-  };
   const tabConfig: Record<
     string,
     {
@@ -47,7 +29,7 @@ function MyTabBar({ state, descriptors, navigation }: any) {
     }
   > = {
     Dashboard: { icon: "view-dashboard", iconSize: 26, mt: 2, pt: 2 },
-    Employees: { icon: "account-group-outline", iconSize: 26, mt: 2, pt: 2 },
+    Employees: { icon: "account-outline", iconSize: 26, mt: 2, pt: 2 },
     Leaves: { icon: "calendar-month-outline", iconSize: 26, mt: 2, pt: 2 },
     More: { icon: "dots-horizontal", iconSize: 26, mt: 2, pt: 2 },
   };
@@ -58,28 +40,13 @@ function MyTabBar({ state, descriptors, navigation }: any) {
         tw`flex-row border-t border-gray-300 bg-gray-100`,
         {
           height: 80,
-          paddingHorizontal: 18, 
+          paddingHorizontal: 18,
           paddingTop: 8,
           paddingBottom: 16,
-          // // shadow (ios)
-          // shadowColor: "#000",
-          // shadowOpacity: 0.08,
-          // shadowRadius: 14,
-          // shadowOffset: { width: 0, height: 6 },
-          // // shadow (android)
-          // elevation: 10,
         },
       ]}
     >
       {state.routes.map((route: any, index: number) => {
-        const { options } = descriptors[route.key];
-        const label =
-          options.tabBarLabel !== undefined
-            ? options.tabBarLabel
-            : options.title !== undefined
-              ? options.title
-              : route.name;
-
         const isFocused = state.index === index;
 
         const onPress = () => {
@@ -106,8 +73,6 @@ function MyTabBar({ state, descriptors, navigation }: any) {
           mt: 2,
           pt: 0,
         };
-        const ACTIVE = "#1F7A4D"; // green (or whatever you want)
-        const INACTIVE = "#374151"; // gray-900
 
         return (
           <PlatformPressable
@@ -124,19 +89,8 @@ function MyTabBar({ state, descriptors, navigation }: any) {
             <MaterialCommunityIcons
               name={cfg.icon}
               size={cfg.iconSize ?? 24}
-              color={isFocused ? ACTIVE : INACTIVE}
+              color={isFocused ? "#1F7A4D" : "#374151"}
             />
-            {/* 
-            <Text
-              style={{
-                color: isFocused ? colors.primary : "#111827",
-                fontWeight: "700",
-                fontSize: 12,
-                marginTop: cfg.mt ?? 2,
-              }}
-            >
-              {label}
-            </Text> */}
           </PlatformPressable>
         );
       })}
@@ -145,103 +99,102 @@ function MyTabBar({ state, descriptors, navigation }: any) {
 }
 
 function AdminDashboardTab() {
-  const signOut = useAuthStore((s) => s.signOut);
-  const navigation = useNavigation<any>();
-
-  const onLogout = async () => {
-    try {
-      await signOut();
-      // Back to Login in your ROOT stack
-      navigation.reset({
-        index: 0,
-        routes: [{ name: "Login" }],
-      });
-    } catch (e: any) {
-      Alert.alert("Logout failed", e?.message ?? "Please try again.");
-    }
-  };
-  const [refreshing, setRefreshing] = useState(false);
-
-  const onRefresh = useCallback(async () => {
-    setRefreshing(true);
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      // TODO: re-fetch your dashboard data here
-    } finally {
-      setRefreshing(false);
-    }
-  }, []);
-
   return (
     <SafeAreaView style={tw`flex-1 bg-[#F5F5F5]`}>
-      <ScrollView
-        contentContainerStyle={tw`px-4 pt-4 pb-8`}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor="#1F7A4D"
-            colors={["#1F7A4D"]}
-          />
-        }
-      >
+      <ScrollView contentContainerStyle={tw`px-4 pt-4 pb-8`}>
         <Text style={tw`text-2xl font-extrabold text-gray-800`}>
           Hello, Admin
         </Text>
+        <Text>
+          Welcome to your <Text style={{ fontWeight: "bold" }}>Dashboard</Text>.
+        </Text>
 
-        <Pressable
-          onPress={() => navigation.navigate("ManageUsers")}
-          style={({ pressed }: any) => [
-            tw`h-[56px] rounded-2xl bg-[#1F7A4D] items-center justify-center mt-6`,
-            pressed && tw`opacity-90`,
-          ]}
-        >
-          <Text style={tw`text-white font-bold text-[18px]`}>Manage Users</Text>
-        </Pressable>
+        <View style={tw`mt-6`}>
+          {/* Row 1 */}
+          <View style={tw`flex-row  justify-center`}>
+            {/* //total employee */}
+            <View
+              style={tw`flex-1 bg-white rounded-2xl px-4 py-4  border border-gray-100 shadow-sm flex-row items-center`}
+            >
+              <View
+                style={tw`w-12 h-12 rounded-full bg-blue-600 items-center justify-center`}
+              >
+                <Ionicons name="people" size={28} color="white" />
+              </View>
 
-        <Pressable
-          onPress={() => navigation.navigate("Home")}
-          style={({ pressed }: any) => [
-            tw`h-[56px] rounded-2xl bg-white border border-gray-200 items-center justify-center mt-3`,
-            pressed && tw`opacity-90`,
-          ]}
-        >
-          <Text style={tw`text-gray-900 font-bold text-[18px]`}>
-            Go to Home
-          </Text>
-        </Pressable>
+              <View style={tw`ml-3 flex-1`}>
+                <Text style={tw`text-gray-700 font-semibold`}>Employees</Text>
+                <Text style={tw`text-3xl font-extrabold text-[#1E3354] mt-1`}>
+                  150
+                </Text>
+              </View>
+            </View>
+            {/*//present today */}
+            <View
+              style={tw`flex-1 bg-white rounded-2xl px-4 py-4 ml-4 border border-gray-100 shadow-sm flex-row items-center`}
+            >
+              <View
+                style={tw`w-12 h-12 rounded-full bg-green-600 items-center justify-center`}
+              >
+                <Ionicons name="checkmark-circle" size={28} color="white" />
+              </View>
 
-        <Pressable
-          onPress={onLogout}
-          style={({ pressed }) => [tw`mt-6`, pressed && tw`opacity-80`]}
-        >
-          <Text style={tw`text-[#1F7A4D] font-semibold underline`}>Logout</Text>
-        </Pressable>
+              <View style={tw`ml-3 flex-1`}>
+                <Text style={tw`text-gray-700 font-semibold`}>Present</Text>
+                <Text style={tw`text-3xl font-extrabold text-gray-900 mt-1`}>
+                  1
+                </Text>
+              </View>
+            </View>
+          </View>
+          {/*Row 2 */}
+          <View style={tw`flex-row mt-3`}>
+            {/* //On Leave */}
+            <View
+              style={tw`flex-1 bg-white rounded-2xl px-4 py-4  border border-gray-100 shadow-sm flex-row items-center`}
+            >
+              <View
+                style={tw`w-12 h-12 rounded-full bg-orange-600 items-center justify-center`}
+              >
+                <Ionicons name="log-out-outline" size={28} color="white" />
+              </View>
+
+              <View style={tw`ml-3 flex-1`}>
+                <Text style={tw`text-gray-700 font-semibold`}>On Leave</Text>
+                <Text style={tw`text-3xl font-extrabold text-[#1E3354] mt-1`}>
+                  1
+                </Text>
+              </View>
+            </View>
+
+            {/*//Holidays */}
+            <View
+              style={tw`flex-1 bg-white rounded-2xl px-4 py-4 ml-4 border border-gray-100 shadow-sm flex-row items-center`}
+            >
+              <View
+                style={tw`w-12 h-12 rounded-full bg-red-600 items-center justify-center`}
+              >
+                <Ionicons name="calendar" size={28} color="white" />
+              </View>
+
+              <View style={tw`ml-3 flex-1`}>
+                <Text style={tw`text-gray-700 font-semibold`}>Holidays</Text>
+                <Text style={tw`text-3xl font-extrabold text-gray-900 mt-1`}>
+                  1
+                </Text>
+              </View>
+            </View>
+          </View>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-// function EmployeesTab() {
-//   return (
-//     <SafeAreaView style={tw`flex-1 bg-[#F5F5F5] items-center justify-center`}>
-//       <Text>Employees</Text>
-//     </SafeAreaView>
-//   );
-// }
-
 function LeavesTab() {
   return (
     <SafeAreaView style={tw`flex-1 bg-[#F5F5F5] items-center justify-center`}>
       <Text>Leaves</Text>
-    </SafeAreaView>
-  );
-}
-
-function MoreTab() {
-  return (
-    <SafeAreaView style={tw`flex-1 bg-[#F5F5F5] items-center justify-center`}>
-      <Text>More</Text>
     </SafeAreaView>
   );
 }
@@ -269,7 +222,7 @@ export default function AdminScreen(_props: RootProps) {
       <Tab.Screen name="Dashboard" component={AdminDashboardTab} />
       <Tab.Screen name="Employees" component={ManageUsers} />
       <Tab.Screen name="Leaves" component={LeavesTab} />
-      <Tab.Screen name="More" component={MoreTab} />
+      <Tab.Screen name="More" component={onLogout} />
     </Tab.Navigator>
   );
 }
