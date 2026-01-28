@@ -11,11 +11,10 @@ import {
   View,
 } from "react-native";
 
-import { RootStackParamList } from "@/src/navigation/types";
 import { useAuthStore } from "@/store/useAuthStore";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { useRouter } from "expo-router";
 import tw from "twrnc";
 import { z } from "zod";
 
@@ -25,9 +24,9 @@ const schema = z.object({
 });
 
 type FormData = z.infer<typeof schema>;
-type Props = NativeStackScreenProps<RootStackParamList, "Login">;
 
-const LoginScreen = ({ navigation }: Props) => {
+const LoginScreen = () => {
+  const router = useRouter();
   const signIn = useAuthStore((state) => state.signIn);
 
   // keep your existing state + logic
@@ -56,9 +55,9 @@ const LoginScreen = ({ navigation }: Props) => {
     }
     Alert.alert("Logged in sucessfully");
     if (result.role === "admin") {
-      navigation.replace("Admin");
+      router.push("/(admin)/dashboard");
     } else {
-      navigation.replace("Home");
+      router.push("/(users)/HomeScreen");
     }
   };
 
@@ -188,7 +187,7 @@ const LoginScreen = ({ navigation }: Props) => {
             <Text style={tw`text-[14px] text-[#1D1D1D]`}>
               Dont have an account?{" "}
             </Text>
-            <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
+            <TouchableOpacity onPress={() => router.push("/(auth)/signup")}>
               <Text style={tw`text-[#1F7A4D] font-semibold`}>Sign up</Text>
             </TouchableOpacity>
           </View>

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Controller, useForm } from "react-hook-form";
 import {
   Alert,
   KeyboardAvoidingView,
@@ -9,16 +10,11 @@ import {
   TouchableOpacity,
 } from "react-native";
 
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { RootStackParamList } from "@/src/navigation/types";
-import tw from "twrnc";
-import { useAuthStore } from "../store/useAuthStore";
-
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, Controller } from "react-hook-form";
-
-type Props = NativeStackScreenProps<RootStackParamList, "Signup">;
+import { useRouter } from "expo-router";
+import tw from "twrnc";
+import { z } from "zod";
+import { useAuthStore } from "../../store/useAuthStore";
 
 /* ---------------- ZOD SCHEMA ---------------- */
 const schema = z
@@ -37,7 +33,8 @@ const schema = z
 
 type FormData = z.infer<typeof schema>;
 
-export default function SignupScreen({ navigation }: Props) {
+export default function SignupScreen() {
+  const router = useRouter();
   const { signUp, loading } = useAuthStore();
 
   // ✅ keep your existing state (logic unchanged)
@@ -93,7 +90,7 @@ export default function SignupScreen({ navigation }: Props) {
       });
 
       Alert.alert("Success", "Organization created. Please login.");
-      navigation.replace("Login");
+      router.push("/(auth)/login");
     } catch (error: any) {
       Alert.alert("Signup Failed", error.message);
       console.log("SIGNUP ERROR 👉", error);
@@ -316,7 +313,7 @@ export default function SignupScreen({ navigation }: Props) {
         </TouchableOpacity>
 
         <TouchableOpacity
-          onPress={() => navigation.navigate("Login")}
+          onPress={() => router.push("/(auth)/login")}
           style={tw`mt-6`}
         >
           <Text style={tw`text-center text-[#1D1D1D]`}>
