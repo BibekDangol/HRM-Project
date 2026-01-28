@@ -1,25 +1,19 @@
 import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 
-import { RootStackParamList } from "@/src/navigation/types";
 import { useAuthStore } from "@/store/useAuthStore";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { useNavigation } from "expo-router";
+import { useRouter } from "expo-router";
 import React from "react";
 import tw from "twrnc";
 
-type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 const HomeScreen = () => {
-  const navigation = useNavigation<NavigationProp>();
+  const router = useRouter();
   const signOut = useAuthStore.getState().signOut;
   const handleLogout = async () => {
     await signOut();
     Alert.alert("success", "You have been logged out");
-    navigation.reset({
-      index: 0,
-      routes: [{ name: "Login" }],
-    });
+    router.push("/(auth)/login");
   };
-  // Dummy data for menu
+
   const menuItems = [
     { id: 1, title: "Employee Directory", description: "View all employees" },
     { id: 2, title: "Attendance", description: "Track employee attendance" },
