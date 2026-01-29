@@ -1,5 +1,3 @@
-import React, { useState } from "react";
-import { Controller, useForm } from "react-hook-form";
 import {
   Alert,
   KeyboardAvoidingView,
@@ -10,13 +8,15 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { Controller, useForm } from "react-hook-form";
+import React, { useState } from "react";
 
-import { useAuthStore } from "@/store/useAuthStore";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "expo-router";
 import tw from "twrnc";
+import { useAuthStore } from "@/store/useAuthStore";
+import { useRouter } from "expo-router";
 import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 const schema = z.object({
   email: z.string().email({ message: "Invalid email" }),
@@ -53,7 +53,12 @@ const LoginScreen = () => {
       Alert.alert("Login Failed", result.error);
       return; // stop execution if login fails-> dont redirect
     }
+
     Alert.alert("Logged in sucessfully");
+    if (result.status === "pending") {
+      router.push("/changePassword");
+      return;
+    }
     if (result.role === "admin") {
       router.push("/(admin)/dashboard");
     } else {

@@ -1,3 +1,5 @@
+import * as Clipboard from "expo-clipboard";
+
 import React, { useEffect, useState } from "react";
 import {
   Alert,
@@ -25,6 +27,8 @@ type UserProfile = {
   last_name: string | null;
   role: string;
   organization_id: number;
+  status?: string | null;
+  organization?: { name: string | null };
 };
 type AdminProfile = {
   id: string;
@@ -36,17 +40,20 @@ const ManageUsers = () => {
   const [showForm, setShowForm] = useState(false);
   const [tempPassword, setTempPassword] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"pending" | "active">("pending");
+  const [activeUsers, setActiveUsers] = useState<UserProfile[]>([]);
+  const [pendingUsers, setPendingUsers] = useState<UserProfile[]>([]);
   const { user } = useAuthStore();
   const { session } = useAuthStore.getState();
   const token = session?.access_token;
 
   const [adminProfile, setAdminProfile] = useState<AdminProfile | null>(null);
   const [loading, setLoading] = useState(true);
+
   const [newUser, setNewUser] = useState({
     first_name: "",
     last_name: "",
     email: "",
-    role: "user",
+    //I don't have to set role here
   });
 
   useEffect(() => {
@@ -89,17 +96,29 @@ const ManageUsers = () => {
     const { data, error } = await supabase
       .from("profiles")
       .select(`*, organization(name)`)
-      .eq("organization_id", orgId)
-      .neq("id", user.id);
-
+      .eq("organization_id", orgId) //fetch users with same org as admin
+      .neq("id", user.id); //wanted to exclude admin himself
     if (error) console.log("Fetch users error:", error);
-    else setUsers(data || []);
-    setLoading(false);
+    if (!data) {
+      setUsers([]);
+      console.log("No data returned");
+      return;
+    }
+    //filter users by their status
+    const pendingUsers = data.filter(
+      (u: UserProfile) => u.status === "pending",
+    );
+    const activeUsers = data.filter((u: UserProfile) => u.status === "active");
+    //store separately for tabs
+    setPendingUsers(pendingUsers);
+    setActiveUsers(activeUsers);
+    //or store all users
+
+    setUsers(data || []);
     if (data && data.length > 0) {
       setAdminOrgName(data[0].organization.name ?? "");
     }
   };
-
   const handleAddUser = async () => {
     const { session } = useAuthStore.getState();
     if (!session || !adminProfile) {
@@ -132,10 +151,12 @@ const ManageUsers = () => {
         Alert.alert("Error", result.error);
         return;
       }
-      Alert.alert("Success", "User created");
-      setTempPassword(result.tempPassword);
+      if (response.ok && result.tempPassword) {
+        //aayepachi matra set garne
+        setTempPassword(result.tempPassword);
+      }
       fetchUsers();
-      setNewUser({ first_name: "", last_name: "", email: "", role: "user" });
+      setNewUser({ first_name: "", last_name: "", email: "" });
       //after you add a user, this makes "add user form back to empty"
     } catch (err: any) {
       Alert.alert("Error", err.message);
@@ -148,12 +169,10 @@ const ManageUsers = () => {
 
   const handleDeleteUser = async (id?: string) => {
     if (!id) return;
-    console.log(id);
     if (!token) {
       Alert.alert("Error", "User is not logged in");
       return;
     }
-
     try {
       const response = await fetch(
         "https://dibcpzqlaypincnthhnm.supabase.co/functions/v1/hyper-api",
@@ -199,7 +218,20 @@ const ManageUsers = () => {
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.actionButton, { backgroundColor: "#ef4444" }]}
-          onPress={() => handleDeleteUser(item.id)}
+          onPress={() =>
+            Alert.alert(
+              "Delete User",
+              `Do you want to delete the ${item.first_name}?`,
+              [
+                { text: "cancel", style: "cancel" },
+                {
+                  text: "Delete",
+                  style: "destructive",
+                  onPress: () => handleDeleteUser(item.id),
+                },
+              ],
+            )
+          }
         >
           <Text style={styles.actionText}>Delete</Text>
         </TouchableOpacity>
@@ -219,7 +251,6 @@ const ManageUsers = () => {
             <Text style={tw`text-2xl font-bold text-gray-900`}>
               Manage Users
             </Text>
-
             <TouchableOpacity
               style={tw`bg-[#1F7A4D] w-12 h-12 rounded-full items-center justify-center`}
               onPress={() => setShowForm(true)}
@@ -227,7 +258,6 @@ const ManageUsers = () => {
               <Ionicons name="add" size={26} color="white" />
             </TouchableOpacity>
           </View>
-
           {/* Search */}
           <View
             style={tw`flex-row bg-white rounded-xl px-3 py-2 items-center mb-4 shadow`}
@@ -239,16 +269,18 @@ const ManageUsers = () => {
             />
             <Ionicons name="filter" size={20} color="#2563EB" />
           </View>
-
-          {/* User count */}
+          {/* User count and pending and active list */}
           <View style={tw`mb-3`}>
             <View>
               <Text style={tw`text-gray-600`}>5 Users</Text>
             </View>
 
             <View style={tw`flex-row bg-gray-100 rounded-lg p-2 `}>
+              {/* pending button */}
               <TouchableOpacity
-                onPress={() => setActiveTab("pending")}
+                onPress={() => {
+                  setActiveTab("pending");
+                }}
                 style={tw`flex-1 py-2 rounded-md ${
                   activeTab === "pending" ? "bg-white shadow" : ""
                 }`}
@@ -261,7 +293,7 @@ const ManageUsers = () => {
                   Pending
                 </Text>
               </TouchableOpacity>
-
+              {/* Active button */}
               <TouchableOpacity
                 onPress={() => setActiveTab("active")}
                 style={tw`flex-1 py-2 rounded-md ${
@@ -278,10 +310,9 @@ const ManageUsers = () => {
               </TouchableOpacity>
             </View>
           </View>
-
           {/* Users list */}
           <FlatList
-            data={users}
+            data={activeTab === "pending" ? pendingUsers : activeUsers}
             keyExtractor={(item) => item.id}
             renderItem={renderItem}
             scrollEnabled={false}
@@ -322,13 +353,12 @@ const ManageUsers = () => {
                 value={newUser.email}
                 onChangeText={(text) => setNewUser({ ...newUser, email: text })}
               />
-
-              <TextInput
+              {/* <TextInput
                 placeholder="Role (user/admin)"
                 style={tw`border border-gray-200 rounded-xl px-3 py-3 mb-5`}
                 value={newUser.role}
                 onChangeText={(text) => setNewUser({ ...newUser, role: text })}
-              />
+              /> */}
 
               {/* Buttons */}
               <View style={tw`flex-row justify-between`}>
@@ -353,6 +383,44 @@ const ManageUsers = () => {
           </KeyboardAvoidingView>
         </View>
       </Modal>
+      {tempPassword && (
+        <View
+          style={tw`absolute inset-0 bg-black/50 items-center justify-center`}
+        >
+          <View style={tw`bg-white p-6 rounded-xl w-4/5`}>
+            <Text style={tw`text-lg font-bold mb-2`}>User Created</Text>
+
+            <Text style={tw`text-gray-600 mb-2`}>
+              Temporary password (shown once)
+            </Text>
+
+            <View style={tw`bg-gray-100 p-3 rounded-lg mb-4`}>
+              <Text selectable style={tw`font-mono text-center`}>
+                {tempPassword}
+              </Text>
+            </View>
+            <TouchableOpacity
+              onPress={() => {
+                Clipboard.setStringAsync(tempPassword); //copy to clipboard
+                Alert.alert("copied", "Temporary password copied to clipboard");
+              }}
+              style={tw`bg-blue-500 py-3 rounded-lg mb-2`}
+            >
+              <Text style={tw`text-white text-center font-bold`}>
+                Copy password
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setTempPassword(null)}
+              style={tw`bg-emerald-500 py-3 rounded-lg`}
+            >
+              <Text style={tw`text-white text-center font-bold`}>
+                I have copied it
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
     </>
   );
 };
@@ -484,5 +552,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
 });
-
+// if active button click garyo vane fetch users: from profiles whose status is active
+//if pending button thichyo vane show users from profiles whose status is pending
+//fetch users ma status pani fetch garnu paryo
+// if status=Pending then show pending users when pending button is clicked
 export default ManageUsers;

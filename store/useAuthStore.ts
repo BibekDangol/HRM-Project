@@ -19,7 +19,7 @@ type AdminData = {
   orgId: number;
 };
 
-type SignInResult = { error: string } | { role: string };
+type SignInResult = { error: string } | { role: string; status: string | null; };
 type AdminCreateUserResult = { success: boolean; userId: string };
 //function returns {success:boolean and string userId} so we must define its return type;
 // Auth state type
@@ -28,12 +28,14 @@ type AuthState = {
   session: Session | null;
   role: string | null; // "admin" or "user"
   loading: boolean;
+  status:string | null,
 
   signUp: (data: SignUpData) => Promise<void>;
   adminCreateUser: (data: AdminData) => Promise<AdminCreateUserResult>;
   signIn: (email: string, password: string) => Promise<SignInResult>;
   signOut: () => Promise<void>;
   restoreSession: () => Promise<void>;
+  updateStatus: (status: "pending" | "active") => void; // <- helper
 };
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -41,6 +43,8 @@ export const useAuthStore = create<AuthState>((set) => ({
   session: null,
   role: null,
   loading: true,
+  status:null,
+  //initially null rakhdine ani pachi login function call gare pachi set garne status,role haru
 
   signUp: async ({
     email,
@@ -154,7 +158,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       // fetch profile to get role
       const { data: profileData, error: profileError } = await supabase
         .from("profiles")
-        .select("role")
+        .select("role, status")
         .eq("id", userId)
         .maybeSingle();
       if (profileError || !profileData) {
@@ -164,10 +168,11 @@ export const useAuthStore = create<AuthState>((set) => ({
         session: data.session,
         user: data.user,
         role: profileData?.role,
+        status:profileData.status,
         loading: false,
       });
 
-      return { role: profileData.role};
+      return { role: profileData.role, status: profileData.status};
       // return the value of signin
       //State updates are async. You can’t rely on them immediately after calling an async function.
       //Zustand ≠ synchronous return value
@@ -177,7 +182,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       return { error: err.message };
     }
   },
-
+updateStatus: (status) => set({ status }),
   signOut: async () => {
     try {
       await supabase.auth.signOut();
