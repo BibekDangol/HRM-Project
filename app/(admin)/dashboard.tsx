@@ -1,31 +1,25 @@
 import * as React from "react";
-
 import { useCallback, useState } from "react";
 import { Alert, Pressable, RefreshControl, ScrollView } from "react-native";
-
-import { useAuthStore } from "@/store/useAuthStore";
 import { Text } from "@react-navigation/elements";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import tw from "twrnc";
+import { useAuthStore } from "@/store/useAuthStore";
 
-function AdminDashboardTab() {
+export default function DashboardScreen() {
   const signOut = useAuthStore((s) => s.signOut);
   const router = useRouter();
 
   const onLogout = async () => {
     try {
       await signOut();
-      // Back to Login in your ROOT stack
-      // navigation.reset({
-      //   index: 0,
-      //   routes: [{ name: "Login" }],
-      // });
-      router.push("/(auth)/login");
+      router.replace("/(auth)/login");
     } catch (e: any) {
       Alert.alert("Logout failed", e?.message ?? "Please try again.");
     }
   };
+
   const [refreshing, setRefreshing] = useState(false);
 
   const onRefresh = useCallback(async () => {
@@ -54,9 +48,12 @@ function AdminDashboardTab() {
         <Text style={tw`text-2xl font-extrabold text-gray-800`}>
           Hello, Admin
         </Text>
+        <Text>
+          Welcome to your <Text style={{ fontWeight: "bold" }}>Dashboard</Text>.
+        </Text>
 
         <Pressable
-          onPress={() => router.push("/manage-users")}
+          onPress={() => router.push("/(admin)/manage_users")}
           style={({ pressed }: any) => [
             tw`h-[56px] rounded-2xl bg-[#1F7A4D] items-center justify-center mt-6`,
             pressed && tw`opacity-90`,
@@ -87,5 +84,3 @@ function AdminDashboardTab() {
     </SafeAreaView>
   );
 }
-
-export default AdminDashboardTab;
