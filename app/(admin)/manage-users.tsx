@@ -1,3 +1,5 @@
+import * as Clipboard from "expo-clipboard";
+
 import React, { useEffect, useState } from "react";
 import {
   Alert,
@@ -132,8 +134,10 @@ const ManageUsers = () => {
         Alert.alert("Error", result.error);
         return;
       }
-      Alert.alert("Success", "User created");
-      setTempPassword(result.tempPassword);
+      if (response.ok && result.tempPassword) {
+        //aayepachi matra set garne
+        setTempPassword(result.tempPassword);
+      }
       fetchUsers();
       setNewUser({ first_name: "", last_name: "", email: "", role: "user" });
       //after you add a user, this makes "add user form back to empty"
@@ -353,6 +357,44 @@ const ManageUsers = () => {
           </KeyboardAvoidingView>
         </View>
       </Modal>
+      {tempPassword && (
+        <View
+          style={tw`absolute inset-0 bg-black/50 items-center justify-center`}
+        >
+          <View style={tw`bg-white p-6 rounded-xl w-4/5`}>
+            <Text style={tw`text-lg font-bold mb-2`}>User Created</Text>
+
+            <Text style={tw`text-gray-600 mb-2`}>
+              Temporary password (shown once)
+            </Text>
+
+            <View style={tw`bg-gray-100 p-3 rounded-lg mb-4`}>
+              <Text selectable style={tw`font-mono text-center`}>
+                {tempPassword}
+              </Text>
+            </View>
+            <TouchableOpacity
+              onPress={() => {
+                Clipboard.setStringAsync(tempPassword); //copy to clipboard
+                Alert.alert("copied", "Temporary password copied to clipboard");
+              }}
+              style={tw`bg-blue-500 py-3 rounded-lg mb-2`}
+            >
+              <Text style={tw`text-white text-center font-bold`}>
+                Copy password
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setTempPassword(null)}
+              style={tw`bg-emerald-500 py-3 rounded-lg`}
+            >
+              <Text style={tw`text-white text-center font-bold`}>
+                I have copied it
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
     </>
   );
 };
