@@ -1,49 +1,16 @@
 import * as React from "react";
-import { useCallback, useState } from "react";
-import { Alert, Pressable, RefreshControl, ScrollView } from "react-native";
+import { ScrollView, View } from "react-native";
 import { Text } from "@react-navigation/elements";
-import { useRouter } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
+// import { useRouter } from "expo-router";
 import tw from "twrnc";
-import { useAuthStore } from "@/store/useAuthStore";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function DashboardScreen() {
-  const signOut = useAuthStore((s) => s.signOut);
-  const router = useRouter();
-
-  const onLogout = async () => {
-    try {
-      await signOut();
-      router.replace("/(auth)/login");
-    } catch (e: any) {
-      Alert.alert("Logout failed", e?.message ?? "Please try again.");
-    }
-  };
-
-  const [refreshing, setRefreshing] = useState(false);
-
-  const onRefresh = useCallback(async () => {
-    setRefreshing(true);
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      // TODO: re-fetch your dashboard data here
-    } finally {
-      setRefreshing(false);
-    }
-  }, []);
-
-  return (
-    <SafeAreaView style={tw`flex-1 bg-[#F5F5F5]`}>
+    return (
+    <View style={tw`flex-1 bg-white`}>
       <ScrollView
+        style={tw`bg-white`}
         contentContainerStyle={tw`px-4 pt-4 pb-8`}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor="#1F7A4D"
-            colors={["#1F7A4D"]}
-          />
-        }
       >
         <Text style={tw`text-2xl font-extrabold text-gray-800`}>
           Hello, Admin
@@ -52,35 +19,84 @@ export default function DashboardScreen() {
           Welcome to your <Text style={{ fontWeight: "bold" }}>Dashboard</Text>.
         </Text>
 
-        <Pressable
-          onPress={() => router.push("/(admin)/manage_users")}
-          style={({ pressed }: any) => [
-            tw`h-[56px] rounded-2xl bg-[#1F7A4D] items-center justify-center mt-6`,
-            pressed && tw`opacity-90`,
-          ]}
-        >
-          <Text style={tw`text-white font-bold text-[18px]`}>Manage Users</Text>
-        </Pressable>
+        <View style={tw`flex-1 mt-6`}>
+          {/* Row 1 */}
+          <View style={tw`flex-row  justify-center`}>
+            {/* //total employee */}
+            <View
+              style={tw`flex-1 bg-white rounded-2xl px-4 py-4 border border-gray-100 shadow- flex-row items-center`}
+            >
+              <View
+                style={tw`w-12 h-12 rounded-full bg-blue-600 items-center justify-center`}
+              >
+                <Ionicons name="people" size={28} color="white" />
+              </View>
 
-        <Pressable
-          onPress={() => router.push("/(users)/HomeScreen")}
-          style={({ pressed }: any) => [
-            tw`h-[56px] rounded-2xl bg-white border border-gray-200 items-center justify-center mt-3`,
-            pressed && tw`opacity-90`,
-          ]}
-        >
-          <Text style={tw`text-gray-900 font-bold text-[18px]`}>
-            Go to Home
-          </Text>
-        </Pressable>
+              <View style={tw`ml-3 flex-1`}>
+                <Text style={tw`text-gray-700 font-semibold`}>Employees</Text>
+                <Text style={tw`text-3xl font-extrabold text-[#1E3354] mt-1`}>
+                  150
+                </Text>
+              </View>
+            </View>
+            {/*//present today */}
+            <View
+              style={tw`flex-1 bg-white rounded-2xl px-4 py-4 ml-4 border border-gray-100 shadow-sm flex-row items-center`}
+            >
+              <View
+                style={tw`w-12 h-12 rounded-full bg-green-600 items-center justify-center`}
+              >
+                <Ionicons name="checkmark-circle" size={28} color="white" />
+              </View>
 
-        <Pressable
-          onPress={onLogout}
-          style={({ pressed }) => [tw`mt-6`, pressed && tw`opacity-80`]}
-        >
-          <Text style={tw`text-[#1F7A4D] font-semibold underline`}>Logout</Text>
-        </Pressable>
+              <View style={tw`ml-3 flex-1`}>
+                <Text style={tw`text-gray-700 font-semibold`}>Present</Text>
+                <Text style={tw`text-3xl font-extrabold text-gray-900 mt-1`}>
+                  1
+                </Text>
+              </View>
+            </View>
+          </View>
+          {/*Row 2 */}
+          <View style={tw`flex-row mt-3`}>
+            {/* //On Leave */}
+            <View
+              style={tw`flex-1 bg-white rounded-2xl px-4 py-4  border border-gray-100 shadow-sm flex-row items-center`}
+            >
+              <View
+                style={tw`w-12 h-12 rounded-full bg-orange-600 items-center justify-center`}
+              >
+                <Ionicons name="log-out-outline" size={28} color="white" />
+              </View>
+
+              <View style={tw`ml-3 flex-1`}>
+                <Text style={tw`text-gray-700 font-semibold`}>On Leave</Text>
+                <Text style={tw`text-3xl font-extrabold text-[#1E3354] mt-1`}>
+                  1
+                </Text>
+              </View>
+            </View>
+
+            {/*//Holidays */}
+            <View
+              style={tw`flex-1 bg-white rounded-2xl px-4 py-4 ml-4 border border-gray-100 shadow-sm flex-row items-center`}
+            >
+              <View
+                style={tw`w-12 h-12 rounded-full bg-red-600 items-center justify-center`}
+              >
+                <Ionicons name="calendar" size={28} color="white" />
+              </View>
+
+              <View style={tw`ml-3 flex-1`}>
+                <Text style={tw`text-gray-700 font-semibold`}>Holidays</Text>
+                <Text style={tw`text-3xl font-extrabold text-gray-900 mt-1`}>
+                  1
+                </Text>
+              </View>
+            </View>
+          </View>
+        </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
