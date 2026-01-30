@@ -57,7 +57,7 @@ const LoginScreen = () => {
     if (result.role === "admin") {
       router.push("/(admin)/dashboard");
     } else {
-      router.push("/(users)/HomeScreen");
+      router.push("/(users)/dashboard");
     }
   };
 

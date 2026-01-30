@@ -1,11 +1,10 @@
 import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
-
 import { useAuthStore } from "@/store/useAuthStore";
 import { useRouter } from "expo-router";
 import React from "react";
 import tw from "twrnc";
 
-const HomeScreen = () => {
+export default function HomeScreen () {
   const router = useRouter();
   const signOut = useAuthStore.getState().signOut;
   const handleLogout = async () => {
@@ -72,4 +71,4 @@ const HomeScreen = () => {
   );
 };
 
-export default HomeScreen;
+
