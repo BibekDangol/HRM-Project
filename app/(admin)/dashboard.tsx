@@ -1,12 +1,13 @@
 import * as React from "react";
+
 import { ScrollView, View } from "react-native";
-import { Text } from "@react-navigation/elements";
-// import { useRouter } from "expo-router";
-import tw from "twrnc";
+
 import { Ionicons } from "@expo/vector-icons";
+import { Text } from "@react-navigation/elements";
+import tw from "twrnc";
 
 export default function DashboardScreen() {
-    return (
+  return (
     <View style={tw`flex-1 bg-white`}>
       <ScrollView
         style={tw`bg-white`}
