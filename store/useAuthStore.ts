@@ -42,7 +42,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   session: null,
   role: null,
-  loading: true,
+  loading: false,
   status:null,
   //initially null rakhdine ani pachi login function call gare pachi set garne status,role haru
 
@@ -198,6 +198,7 @@ updateStatus: (status) => set({ status }),
       set({ loading: true });
 
       const { data, error } = await supabase.auth.getSession();
+      console.log(data);
       if (error || !data.session) {
         set({ session: null, user: null, role: "user", loading: false });
         return;

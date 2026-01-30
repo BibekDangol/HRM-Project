@@ -1,5 +1,5 @@
-import axios from "axios";
 import { useAuthStore } from "@/store/useAuthStore";
+import axios from "axios";
 
 export const apiClient = axios.create({
   baseURL: "https://dibcpzqlaypincnthhnm.supabase.co/functions/v1",

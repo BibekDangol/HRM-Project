@@ -1,8 +1,11 @@
 import * as Clipboard from "expo-clipboard";
 
+import React, { useCallback, useEffect, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
 import {
   Alert,
   FlatList,
+  Keyboard,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -10,18 +13,18 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View
 } from "react-native";
-import { Controller, useForm } from "react-hook-form";
-import React, { useEffect, useState } from "react";
 
-import { Ionicons } from "@expo/vector-icons";
 import { apiClient } from "@/src/api/apiClient";
-import { supabase } from "../../supabase/supabaseClient";
-import tw from "twrnc";
 import { useAuthStore } from "@/store/useAuthStore";
-import { z } from "zod";
+import { Ionicons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Picker } from '@react-native-picker/picker';
+import tw from "twrnc";
+import { z } from "zod";
+import { supabase } from "../../supabase/supabaseClient";
 
 type UserProfile = {
   id: string;
@@ -53,6 +56,10 @@ const ManageUsers = () => {
   const [activeTab, setActiveTab] = useState<"pending" | "active">("pending");
   const [activeUsers, setActiveUsers] = useState<UserProfile[]>([]);
   const [menuOpenUserId, setMenuOpenUserId] = useState<string | null>(null);
+  const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editRole, setEditRole] = useState<string>("user");
+  const [editStatus, setEditStatus] = useState<string>("pending");
   const [pendingUsers, setPendingUsers] = useState<UserProfile[]>([]);
   const pendingCount = pendingUsers.length;
   const activeCount = activeUsers.length;
@@ -78,10 +85,7 @@ const ManageUsers = () => {
     reset(); // clear form
     setShowForm(false); // close modal
   };
-  useEffect(() => {
-    fetchAdminProfile();
-    fetchUsers();
-  }, []);
+
 
   const fetchAdminProfile = async () => {
     if (!user) return;
@@ -96,11 +100,13 @@ const ManageUsers = () => {
     }
     setAdminProfile(data);
   };
-  const fetchUsers = async () => {
-    if (!user) return;
+
+  const fetchUsers = useCallback(async () => {
+    if (!user?.id) return;
     //  get admin's org id
     if (!adminProfile?.organization_id) return;
     //trust me i am not undefined now to ts->supabase
+
     const orgId = adminProfile.organization_id;
     // get all users in the same org
     const { data, error } = await supabase
@@ -128,7 +134,8 @@ const ManageUsers = () => {
     if (data && data.length > 0) {
       setAdminOrgName(data[0].organization.name ?? "");
     }
-  };
+  }, [adminProfile?.organization_id, user?.id]);
+
   const handleAddUser = async (newUser: AddUserFormData) => {
     const { session } = useAuthStore.getState();
     if (!session || !adminProfile) {
@@ -146,6 +153,8 @@ const ManageUsers = () => {
         lastName: newUser.last_name,
         orgId: adminProfile.organization_id,
       });
+
+
       if (!response.data.success) {
         Alert.alert("Error", response.data.error);
         return;
@@ -158,8 +167,11 @@ const ManageUsers = () => {
       Alert.alert("Errors", err.message);
     }
   };
-  const handleEditUser = (id: any) => {
-    console.log("handle edit user")
+  const handleEditUser = (user: UserProfile) => {
+    setShowEditModal(true);
+    setEditingUser(user);
+    setEditRole(user.role);
+    setEditStatus(user.status || "pending");
   };
   const handleDeleteUser = async (id?: string) => {
     if (!id) return;
@@ -181,7 +193,32 @@ const ManageUsers = () => {
       return false;
     }
   };
-
+  const handleSubmitEdit = async (userId: string) => {
+    if (!user) return;
+    try {
+      const response = await apiClient.post("/hyper-edit", {
+        userId,
+        role: editRole,
+        status: editStatus,
+      });
+      if (!response.data.success) {
+        Alert.alert("Error", response.data.error);
+        return;
+      }
+      Alert.alert("success", "user updated successfully");
+      setShowEditModal(false);
+      setEditingUser(null);
+      fetchUsers(); //to refresh list
+    } catch (error: any) {
+      Alert.alert("Error", error.message);
+    }
+  }
+  useEffect(() => {
+    fetchAdminProfile();
+  }, []);
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers])
   const renderItem = ({ item }: { item: UserProfile }) => (
     <View style={tw`bg-white rounded-xl shadow p-4 mb-4 flex-row items-center`}>
       <View style={tw`flex-1`}>
@@ -192,7 +229,7 @@ const ManageUsers = () => {
       </View>
       <View style={tw`flex-row gap-2 `}>
         <TouchableOpacity
-          onPress={() => handleEditUser(item.id)}
+          onPress={() => handleEditUser(item)}
           style={tw`p-2 bg-green-700 rounded-lg`}
         >
           <Ionicons name="create-outline" size={20} color="white" />
@@ -216,91 +253,94 @@ const ManageUsers = () => {
         >
           <Ionicons name="trash-outline" size={20} color="white" />
         </TouchableOpacity>
-
       </View>
     </View>
   );
-
   return (
     <>
-      <KeyboardAvoidingView
-        style={tw`flex-1 bg-[#F2F6FC] pt-8`}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-      >
-        <ScrollView contentContainerStyle={tw`p-4`} keyboardShouldPersistTaps="always">
-          {/* Header */}
-          <View style={tw`flex-row items-center justify-between mb-4`}>
-            <Text style={tw`text-2xl font-bold text-gray-900`}>
-              {adminOrgName}
-            </Text>
-            <TouchableOpacity
-              style={tw`bg-[#1F7A4D] w-12 h-12 rounded-full items-center justify-center`}
-              onPress={() => setShowForm(true)}
-            >
-              <Ionicons name="add" size={26} color="white" />
-            </TouchableOpacity>
-          </View>
-          {/* Search */}
-          <View pointerEvents="box-none"
-            style={tw`flex-row bg-white rounded-xl px-3 py-2 items-center mb-4 shadow`}
+      <View style={tw`flex-1 bg-white`}>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}
+        >
+          <KeyboardAvoidingView
+            style={tw``}
+            behavior={Platform.OS === "ios" ? "padding" : undefined}
           >
-            <Ionicons name="search" size={20} color="#94A3B8" />
-            <TextInput
-              autoFocus
-              placeholder="Search users..."
-              value={search}
-              onChangeText={setSearch}
-              style={tw`flex-1 ml-2 text-base pr-4`}
-            />
-            {search.length > 0 &&
-              <TouchableOpacity onPressIn={() => setSearch('')} style={tw`p-1`}
-                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-                <Ionicons name="close-outline" size={24} color="#94A3B8" />
-              </TouchableOpacity>}
-          </View>
-          {/* User count and pending and active list */}
-          <View style={tw`mb-3`}>
-            <View>
-              <Text style={tw`text-gray-600`}>{activeTab === "pending" ? pendingCount : activeCount} Users</Text>
-            </View>
-            <View style={tw`flex-row bg-gray-100 rounded-lg p-2 `}>
-              <TouchableOpacity
-                onPress={() => {
-                  setActiveTab("pending");
-                }}
-                style={tw`flex-1 py-2 rounded-md ${activeTab === "pending" ? "bg-white shadow" : ""
-                  }`}
-              >
-                <Text
-                  style={tw`text-center font-medium ${activeTab === "pending" ? "text-blue-600" : "text-gray-500"
-                    }`}
-                >
-                  Pending
+            <ScrollView contentContainerStyle={tw`p-4`} keyboardShouldPersistTaps="always">
+              {/* Header */}
+              <View style={tw`flex-row items-center justify-between mb-4`}>
+                <Text style={tw`text-2xl font-bold text-gray-900`}>
+                  {adminOrgName}
                 </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => setActiveTab("active")}
-                style={tw`flex-1 py-2 rounded-md ${activeTab === "active" ? "bg-white shadow" : ""
-                  }`}
-              >
-                <Text
-                  style={tw`text-center font-medium ${activeTab === "active" ? "text-blue-600" : "text-gray-500"
-                    }`}
+                <TouchableOpacity
+                  style={tw`bg-[#1F7A4D] w-12 h-12 rounded-full items-center justify-center`}
+                  onPress={() => setShowForm(true)}
                 >
-                  Active
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-          {/* Users list */}
-          <FlatList
-            data={activeTab === "pending" ? pendingUsers : activeUsers}
-            keyExtractor={(item) => item.id}
-            renderItem={renderItem}
-            scrollEnabled={false}
-          />
-        </ScrollView>
-      </KeyboardAvoidingView>
+                  <Ionicons name="add" size={26} color="white" />
+                </TouchableOpacity>
+              </View>
+              {/* Search */}
+              <View pointerEvents="box-none"
+                style={tw`flex-row bg-white rounded-xl px-3 py-2 items-center mb-4 shadow`}
+              >
+                <Ionicons name="search" size={20} color="#94A3B8" />
+                <TextInput
+                  autoFocus
+                  placeholder="Search users..."
+                  value={search}
+                  onChangeText={setSearch}
+                  style={tw`flex-1 ml-2 text-base pr-4`}
+                />
+                {search.length > 0 &&
+                  <TouchableOpacity onPressIn={() => setSearch('')} style={tw`p-1`}
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                    <Ionicons name="close-outline" size={24} color="#94A3B8" />
+                  </TouchableOpacity>}
+              </View>
+              {/* User count and pending and active list */}
+              <View style={tw`mb-3`}>
+                <View>
+                  <Text style={tw`text-gray-600`}>{activeTab === "pending" ? pendingCount : activeCount} Users</Text>
+                </View>
+                <View style={tw`flex-row bg-gray-100 rounded-lg p-2 `}>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setActiveTab("pending");
+                    }}
+                    style={tw`flex-1 py-2 rounded-md ${activeTab === "pending" ? "bg-white shadow" : ""
+                      }`}
+                  >
+                    <Text
+                      style={tw`text-center font-medium ${activeTab === "pending" ? "text-blue-600" : "text-gray-500"
+                        }`}
+                    >
+                      Pending
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => setActiveTab("active")}
+                    style={tw`flex-1 py-2 rounded-md ${activeTab === "active" ? "bg-white shadow" : ""
+                      }`}
+                  >
+                    <Text
+                      style={tw`text-center font-medium ${activeTab === "active" ? "text-blue-600" : "text-gray-500"
+                        }`}
+                    >
+                      Active
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+              {/* Users list */}
+              <FlatList
+                data={activeTab === "pending" ? pendingUsers : activeUsers}
+                keyExtractor={(item) => item.id}
+                renderItem={renderItem}
+                scrollEnabled={false}
+              />
+            </ScrollView>
+          </KeyboardAvoidingView>
+        </TouchableWithoutFeedback>
+      </View>
       <Modal visible={showForm} animationType="slide" transparent>
         <View style={tw`flex-1 bg-black/40`}>
           <KeyboardAvoidingView
@@ -443,6 +483,59 @@ const ManageUsers = () => {
           </KeyboardAvoidingView>
         </View>
       </Modal>
+      <Modal visible={showEditModal} transparent animationType="fade">
+        <View style={tw`flex-1 bg-black/40 items-center justify-center`}>
+          <View style={tw`bg-white p-6 rounded-xl w-4/5`}>
+            <Text style={tw`text-xl font-bold mb-4 text-gray-900`}>Edit User</Text>
+
+            {/* Role Dropdown */}
+            <Text style={tw`text-gray-700 mb-2`}>Role</Text>
+            <View style={tw`border rounded-lg mb-4`}>
+              <Picker
+                selectedValue={editRole}
+                onValueChange={(value) => setEditRole(value)}
+              >
+                <Picker.Item label="User" value="user" />
+                <Picker.Item label="Admin" value="admin" />
+              </Picker>
+            </View>
+
+            {/* Status Dropdown */}
+            <Text style={tw`text-gray-700 mb-2`}>Status</Text>
+            <View style={tw`border rounded-lg mb-4`}>
+              <Picker
+                selectedValue={editStatus}
+                onValueChange={(value) => setEditStatus(value)}
+              >
+                <Picker.Item label="Pending" value="pending" />
+                <Picker.Item label="Active" value="active" />
+              </Picker>
+            </View>
+
+            {/* Buttons */}
+            <View style={tw`flex-row justify-between`}>
+              <TouchableOpacity
+                onPress={() => setShowEditModal(false)}
+                style={tw`py-2 px-4 rounded-lg bg-gray-200`}
+              >
+                <Text style={tw`text-gray-700`}>Cancel</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={async () => {
+                  if (editingUser) {
+                    await handleSubmitEdit(editingUser.id);
+                  }
+                }}
+                style={tw`py-2 px-4 rounded-lg bg-green-500`}
+              >
+                <Text style={tw`text-white`}>Save</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
       {tempPassword && (
         <View style={tw`absolute inset-0 bg-black/40 items-center justify-center`}>
           <View style={tw`bg-white p-6 rounded-xl w-4/5`}>
