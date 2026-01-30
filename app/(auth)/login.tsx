@@ -1,3 +1,5 @@
+import React, { useState } from "react";
+import { Controller, useForm } from "react-hook-form";
 import {
   Alert,
   KeyboardAvoidingView,
@@ -8,15 +10,13 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { Controller, useForm } from "react-hook-form";
-import React, { useState } from "react";
 
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import tw from "twrnc";
 import { useAuthStore } from "@/store/useAuthStore";
-import { useRouter } from "expo-router";
-import { z } from "zod";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "expo-router";
+import tw from "twrnc";
+import { z } from "zod";
 
 const schema = z.object({
   email: z.string().email({ message: "Invalid email" }),
@@ -46,26 +46,23 @@ const LoginScreen = () => {
     defaultValues: { email: "", password: "" },
   });
 
-  // DO NOT change logic inside this function
   const handleLogin = async () => {
     const result = await signIn(email, password);
     if ("error" in result) {
       Alert.alert("Login Failed", result.error);
       return; // stop execution if login fails-> dont redirect
     }
-
     Alert.alert("Logged in sucessfully");
     if (result.status === "pending") {
-      router.push("/changePassword");
+      router.replace("/changePassword");
       return;
     }
     if (result.role === "admin") {
-      router.push("/(admin)/dashboard");
+      router.replace("/(admin)/dashboard");
     } else {
-      router.push("/(users)/dashboard");
+      router.replace("/(users)/dashboard");
     }
   };
-
   const onValidSubmit = () => handleLogin();
 
   return (
