@@ -1,20 +1,21 @@
+import { useAuthStore } from "@/store/useAuthStore";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "expo-router";
+import { Eye, EyeOff } from "lucide-react-native";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   Alert,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
 } from "react-native";
-
-import { useAuthStore } from "@/store/useAuthStore";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "expo-router";
 import tw from "twrnc";
 import { z } from "zod";
 
@@ -52,9 +53,10 @@ const LoginScreen = () => {
       Alert.alert("Login Failed", result.error);
       return; // stop execution if login fails-> dont redirect
     }
-    Alert.alert("Logged in sucessfully");
+
+    Alert.alert("Logged in successfully");
     if (result.status === "pending") {
-      router.replace("/changePassword");
+      router.replace("/(auth)/changePassword");
       return;
     }
     if (result.role === "admin") {
@@ -67,134 +69,136 @@ const LoginScreen = () => {
 
   return (
     <View style={tw`flex-1 bg-[#F5F5F5]`}>
-      <KeyboardAvoidingView
-        style={tw`flex-1`}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-      >
-        <ScrollView
-          contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}
-          style={tw`px-6`}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+        <KeyboardAvoidingView
+          style={tw`flex-1`}
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
         >
-          <Text
-            style={tw`text-[32px] font-bold text-center text-[#1F7A4D] mb-8`}
+          <ScrollView
+            contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}
+            style={tw`px-6`}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
           >
-            Welcome
-          </Text>
+            <Text
+              style={tw`text-[32px] font-bold text-center text-[#1F7A4D] mb-8`}
+            >
+              Welcome
+            </Text>
 
-          {/* EMAIL */}
-          <Controller
-            control={control}
-            name="email"
-            render={({ field: { value, onChange } }) => (
-              <View style={tw`mb-3`}>
-                <Text
-                  style={tw`text-[14px] font-semibold text-[#6E6F71] mb-1.5`}
-                >
-                  E-mail
-                </Text>
-
-                <TextInput
-                  style={tw`h-[52px] bg-white rounded-xl px-4 text-[16px]`}
-                  placeholder="example@gmail.com"
-                  placeholderTextColor="#dcdada"
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  value={value}
-                  onChangeText={(text) => {
-                    onChange(text);
-                    setEmail(text);
-                  }}
-                />
-
-                {errors.email && (
-                  <Text style={tw`text-[#FF6B6B] text-[13px] mt-2 ml-1`}>
-                    {errors.email.message}
+            {/* EMAIL */}
+            <Controller
+              control={control}
+              name="email"
+              render={({ field: { value, onChange } }) => (
+                <View style={tw`mb-3`}>
+                  <Text
+                    style={tw`text-[14px] font-semibold text-[#6E6F71] mb-1.5`}
+                  >
+                    E-mail
                   </Text>
-                )}
-              </View>
-            )}
-          />
 
-          {/* PASSWORD */}
-          <Controller
-            control={control}
-            name="password"
-            render={({ field: { value, onChange } }) => (
-              <View style={tw`mb-2`}>
-                <Text
-                  style={tw`text-[14px] font-semibold text-[#6E6F71] mb-1.5`}
-                >
-                  Password
-                </Text>
-
-                <View
-                  style={tw`h-[52px] bg-white rounded-xl px-4 flex-row items-center`}
-                >
                   <TextInput
-                    style={tw`flex-1 text-[16px]`}
-                    placeholder="Enter your password"
+                    style={tw`h-[52px] bg-white rounded-xl px-4 text-[16px]`}
+                    placeholder="example@gmail.com"
                     placeholderTextColor="#dcdada"
-                    secureTextEntry={!showPassword}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
                     value={value}
                     onChangeText={(text) => {
                       onChange(text);
-                      setPassword(text);
+                      setEmail(text);
                     }}
                   />
 
-                  <TouchableOpacity onPress={toggleShowPassword} hitSlop={10}>
-                    <MaterialCommunityIcons
-                      name={showPassword ? "eye-off" : "eye"}
-                      size={22}
-                      color="#888"
-                    />
-                  </TouchableOpacity>
+                  {errors.email && (
+                    <Text style={tw`text-[#FF6B6B] text-[13px] mt-2 ml-1`}>
+                      {errors.email.message}
+                    </Text>
+                  )}
                 </View>
+              )}
+            />
 
-                {errors.password && (
-                  <Text style={tw`text-[#FF6B6B] text-[13px] mt-2 ml-1`}>
-                    {errors.password.message}
+            {/* PASSWORD */}
+            <Controller
+              control={control}
+              name="password"
+              render={({ field: { value, onChange } }) => (
+                <View style={tw`mb-2`}>
+                  <Text
+                    style={tw`text-[14px] font-semibold text-[#6E6F71] mb-1.5`}
+                  >
+                    Password
                   </Text>
-                )}
-              </View>
-            )}
-          />
 
-          {/* Forgot Password */}
-          <TouchableOpacity style={tw`mt-2`}>
-            <Text style={tw`text-right text-[#1F7A4D] font-semibold`}>
-              Forgot Password?
-            </Text>
-          </TouchableOpacity>
+                  <View
+                    style={tw`h-[52px] bg-white rounded-xl px-4 flex-row items-center`}
+                  >
+                    <TextInput
+                      style={tw`flex-1 text-[16px]`}
+                      placeholder="Enter your password"
+                      placeholderTextColor="#dcdada"
+                      secureTextEntry={!showPassword}
+                      value={value}
+                      onChangeText={(text) => {
+                        onChange(text);
+                        setPassword(text);
+                      }}
+                    />
 
-          {/* Login Button */}
-          <TouchableOpacity
-            style={[
-              tw`h-[52px] rounded-xl items-center justify-center mt-4 bg-[#1F7A4D]`,
-              isSubmitting ? tw`opacity-70` : tw`opacity-100`,
-              { elevation: 4 },
-            ]}
-            onPress={handleSubmit(onValidSubmit)}
-            disabled={isSubmitting}
-          >
-            <Text style={tw`text-white text-[18px] font-semibold`}>
-              {isSubmitting ? "Logging in..." : "Login"}
-            </Text>
-          </TouchableOpacity>
+                    <TouchableOpacity onPress={toggleShowPassword} hitSlop={10}>
+                      {showPassword ? (
+                        <EyeOff size={22} color="#888" />
+                      ) : (
+                        <Eye size={22} color="#888" />
+                      )}
+                    </TouchableOpacity>
+                  </View>
 
-          {/* Signup Row */}
-          <View style={tw`flex-row justify-center mt-6`}>
-            <Text style={tw`text-[14px] text-[#1D1D1D]`}>
-              Dont have an account?{" "}
-            </Text>
-            <TouchableOpacity onPress={() => router.push("/(auth)/signup")}>
-              <Text style={tw`text-[#1F7A4D] font-semibold`}>Sign up</Text>
+                  {errors.password && (
+                    <Text style={tw`text-[#FF6B6B] text-[13px] mt-2 ml-1`}>
+                      {errors.password.message}
+                    </Text>
+                  )}
+                </View>
+              )}
+            />
+
+            {/* Forgot Password */}
+            <TouchableOpacity style={tw`mt-2`}>
+              <Text style={tw`text-right text-[#1F7A4D] font-semibold`}>
+                Forgot Password?
+              </Text>
             </TouchableOpacity>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+
+            {/* Login Button */}
+            <TouchableOpacity
+              style={[
+                tw`h-[52px] rounded-xl items-center justify-center mt-4 bg-[#1F7A4D]`,
+                isSubmitting ? tw`opacity-70` : tw`opacity-100`,
+                { elevation: 4 },
+              ]}
+              onPress={handleSubmit(onValidSubmit)}
+              disabled={isSubmitting}
+            >
+              <Text style={tw`text-white text-[18px] font-semibold`}>
+                {isSubmitting ? "Logging in..." : "Login"}
+              </Text>
+            </TouchableOpacity>
+
+            {/* Signup Row */}
+            <View style={tw`flex-row justify-center mt-6`}>
+              <Text style={tw`text-[14px] text-[#1D1D1D]`}>
+                Dont have an account?{" "}
+              </Text>
+              <TouchableOpacity onPress={() => router.push("/(auth)/signup")}>
+                <Text style={tw`text-[#1F7A4D] font-semibold`}>Sign up</Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </TouchableWithoutFeedback>
     </View>
   );
 };

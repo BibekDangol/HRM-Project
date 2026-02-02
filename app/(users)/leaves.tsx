@@ -5,7 +5,7 @@ import tw from "twrnc";
 
 export default function UsersLeave() {
   return (
-    <SafeAreaView style={tw`flex-1 bg-[#F5F5F5] items-center justify-center`}>
+    <SafeAreaView style={tw`flex-1 bg-white items-center justify-center`}>
       <Text>Leaves</Text>
     </SafeAreaView>
   );

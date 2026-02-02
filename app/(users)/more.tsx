@@ -17,7 +17,7 @@ export default function UsersMoreScreen() {
     }
   };
   return (
-    <SafeAreaView>
+    <SafeAreaView style = {tw`bg-white flex-1`}>
     <Pressable
       onPress={onLogout}
       style={({ pressed }) => [tw`mt-6`, pressed && tw`opacity-80`]}

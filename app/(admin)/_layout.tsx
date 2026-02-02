@@ -1,12 +1,20 @@
 import { useAuthStore } from "@/store/useAuthStore";
-import { Ionicons } from "@expo/vector-icons";
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { PlatformPressable } from "@react-navigation/elements";
 import { useLinkBuilder } from "@react-navigation/native";
 import { Tabs, useRouter } from "expo-router";
 import * as React from "react";
 import { Alert, Pressable, Text, View } from "react-native";
 import tw from "twrnc";
+import {
+  LogOut,
+  UserCircle,
+  User,
+  LayoutDashboard,
+  Users,
+  CalendarDays,
+  MoreHorizontal,
+  type LucideIcon,
+} from "lucide-react-native";
 
 /* ---------------- Custom Tab Bar ---------------- */
 function MyTabBar({ state, descriptors, navigation }: any) {
@@ -15,16 +23,17 @@ function MyTabBar({ state, descriptors, navigation }: any) {
   const tabConfig: Record<
     string,
     {
-      icon: keyof typeof MaterialCommunityIcons.glyphMap;
+      icon: LucideIcon;
       iconSize?: number;
       pt?: number;
     }
   > = {
-    dashboard: { icon: "view-dashboard", iconSize: 26, pt: 2 },
-    "manage-users": { icon: "account-outline", iconSize: 26, pt: 2 },
-    leaves: { icon: "calendar-month-outline", iconSize: 26, pt: 2 },
-    more: { icon: "dots-horizontal", iconSize: 26, pt: 2 },
+    dashboard: { icon: LayoutDashboard, iconSize: 26, pt: 2 },
+    "manage-users": { icon: Users, iconSize: 26, pt: 2 },
+    leaves: { icon: CalendarDays, iconSize: 26, pt: 2 },
+    more: { icon: MoreHorizontal, iconSize: 26, pt: 2 },
   };
+
   const visibleRoutes = state.routes.filter((route: any) => {
     const options = descriptors[route.key]?.options;
     const isHidden = options?.href === null;
@@ -39,7 +48,7 @@ function MyTabBar({ state, descriptors, navigation }: any) {
         { height: 80, paddingHorizontal: 18, paddingTop: 8, paddingBottom: 16 },
       ]}
     >
-      {visibleRoutes.map((route: any, index: number) => {
+      {visibleRoutes.map((route: any) => {
         const isFocused = state.routes[state.index]?.key === route.key;
 
         const onPress = () => {
@@ -59,6 +68,7 @@ function MyTabBar({ state, descriptors, navigation }: any) {
         };
 
         const cfg = tabConfig[route.name];
+        const Icon = cfg.icon;
 
         return (
           <PlatformPressable
@@ -72,8 +82,7 @@ function MyTabBar({ state, descriptors, navigation }: any) {
               cfg.pt ? { paddingTop: cfg.pt } : null,
             ]}
           >
-            <MaterialCommunityIcons
-              name={cfg.icon}
+            <Icon
               size={cfg.iconSize ?? 24}
               color={isFocused ? "#1F7A4D" : "#374151"}
             />
@@ -84,27 +93,7 @@ function MyTabBar({ state, descriptors, navigation }: any) {
   );
 }
 
-// /* ---------------- Expo Router Tabs Layout ---------------- */
-// export default function AdminTabsLayout() {
-//   return (
-//     <Tabs
-//       screenOptions={{
-//         headerShown: true, // ✅ Top bar enabled
-//         headerTitleAlign: "left",
-//         headerStyle: { backgroundColor: "#F2F6FC" },
-//         headerTitleStyle: { color: "#0C0C0C", fontWeight: "800" },
-//         headerShadowVisible: false,
-//       }}
-//       tabBar={(props) => <MyTabBar {...props} />}
-
-//     >
-//       <Tabs.Screen name="dashboard" options={{ title: "Dashboard", }} />
-//       <Tabs.Screen name="manage_users" />
-//       <Tabs.Screen name="leaves" />
-//       <Tabs.Screen name="more" />
-//     </Tabs>
-//   );
-// }
+/* ---------------- Expo Router Tabs Layout ---------------- */
 export default function AdminLayout() {
   const router = useRouter();
   const signOut = useAuthStore((s) => s.signOut);
@@ -131,21 +120,7 @@ export default function AdminLayout() {
 
         headerRight: () => (
           <View style={tw`mr-4`}>
-            {/* Right icons row */}
             <View style={tw`flex-row items-center`}>
-              {/* Bell */}
-              {/* <Pressable
-                onPress={() => router.push("/(admin)/notifications")}
-                style={({ pressed }) => [pressed && tw`opacity-80`]}
-                hitSlop={10}
-              >
-                <Ionicons
-                  name="notifications-outline"
-                  size={22}
-                  color="#0C0C0C"
-                />
-              </Pressable> */}
-
               {/* Profile icon (toggles dropdown) */}
               <Pressable
                 onPress={() => setMenuOpen((v) => !v)}
@@ -155,11 +130,12 @@ export default function AdminLayout() {
                 <View
                   style={tw`w-9 h-9 rounded-full bg-white border border-[#E5E5E5] items-center justify-center`}
                 >
-                  <Ionicons name="person" size={18} color="#0C0C0C" />
+                  <User size={18} color="#0C0C0C" />
                 </View>
               </Pressable>
             </View>
-            {/*For the Drop Down*/}
+
+            {/* Dropdown */}
             {menuOpen ? (
               <View
                 style={[
@@ -167,7 +143,7 @@ export default function AdminLayout() {
                   { width: 150 },
                 ]}
               >
-                {/*For Profile*/}
+                {/* Profile */}
                 <Pressable
                   onPress={() => {
                     setMenuOpen(false);
@@ -178,14 +154,14 @@ export default function AdminLayout() {
                     pressed && tw`opacity-80`,
                   ]}
                 >
-                  <Ionicons name="person-outline" size={18} color="#0C0C0C" />
+                  <UserCircle size={18} color="#0C0C0C" />
                   <Text style={tw`ml-2 font-bold text-[#0C0C0C]`}>Profile</Text>
                 </Pressable>
 
-                {/*Divider Line*/}
-                <View style={tw`h-px bg-[#E5E5E5] my-1`}></View>
+                {/* Divider */}
+                <View style={tw`h-px bg-[#E5E5E5] my-1`} />
 
-                {/*For Logout */}
+                {/* Logout */}
                 <Pressable
                   onPress={onLogout}
                   style={({ pressed }) => [
@@ -193,7 +169,7 @@ export default function AdminLayout() {
                     pressed && tw`opacity-80`,
                   ]}
                 >
-                  <Ionicons name="log-out-outline" size={18} color="#FF4D4F" />
+                  <LogOut size={18} color="#FF4D4F" />
                   <Text style={tw`ml-2 font-bold text-[#FF4D4F]`}>Logout</Text>
                 </Pressable>
               </View>

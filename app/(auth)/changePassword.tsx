@@ -88,7 +88,7 @@ const ChangePassword = () => {
       }
       updateStatus("active");
       Alert.alert("Success", "Password updated successfully");
-      router.replace("/(users)/HomeScreen");
+      router.replace("/(users)/dashboard");
     } catch (err: any) {
       Alert.alert("Error", err.message);
     }

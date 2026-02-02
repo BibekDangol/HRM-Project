@@ -1,4 +1,3 @@
-import { Ionicons } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -16,6 +15,7 @@ import { supabase } from "@/supabase/supabaseClient";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
+import { Camera, Edit, LockKeyhole, X } from "lucide-react-native";
 
 const schema = z.object({
   orgName: z.string().trim().optional().default(""),
@@ -186,11 +186,11 @@ export default function ProfileScreen() {
     <View style={tw`flex-1 bg-white`}>
       {/* Avatar centered */}
       <View style={tw`items-center px-5 pt-9`}>
-        <View
+        <Pressable
           style={tw`w-44 h-44 rounded-full bg-[#F2F6FC] border border-[#E5E5E5] items-center justify-center`}
         >
-          <Ionicons name="camera" size={44} color="#0C0C0C" />
-        </View>
+          <Camera size={44} color="#0C0C0C" />
+        </Pressable>
 
         {/* Edit button */}
         <View style={tw`w-full mt-4 flex-row items-center justify-end`}>
@@ -201,7 +201,7 @@ export default function ProfileScreen() {
               pressed && tw`opacity-80`,
             ]}
           >
-            <Ionicons name="create-outline" size={16} color="#1F7A4D" />
+            <Edit size={16} color="#1F7A4D" />
             <Text style={tw`ml-2 font-extrabold text-[#1F7A4D]`}>Edit</Text>
           </Pressable>
         </View>
@@ -239,11 +239,11 @@ export default function ProfileScreen() {
                 Edit Profile
               </Text>
               <Pressable onPress={() => setEditOpen(false)} hitSlop={10}>
-                <Ionicons name="close" size={20} color="#0C0C0C" />
+                <X size={20} color="#0C0C0C" />
               </Pressable>
             </View>
 
-            {/* Organization */}
+            {/* Organization
             <Text style={tw`mt-4 text-[#0C0C0C] font-bold mb-2`}>
               Organization
             </Text>
@@ -265,7 +265,7 @@ export default function ProfileScreen() {
               <Text style={tw`mt-1 text-red-600 font-semibold`}>
                 {errors.orgName.message}
               </Text>
-            )}
+            )} */}
 
             {/* First Name */}
             <Text style={tw`mt-4 text-[#0C0C0C] font-bold mb-2`}>
@@ -315,11 +315,11 @@ export default function ProfileScreen() {
               </Text>
             )}
 
-            {/* Email */}
-            <Text style={tw`mt-4 text-[#0C0C0C] font-bold mb-2`}>
-              {" "}
-              <Ionicons name="lock-closed" size={18} /> Email
-            </Text>
+            <View style={tw`mt-4 mb-2 flex-row items-center`}>
+              <LockKeyhole size={16} color="#0C0C0C" />
+              <Text style={tw`ml-2 text-[#0C0C0C] font-bold`}>Email</Text>
+            </View>
+
             <Controller
               control={control}
               name="email"
@@ -334,7 +334,7 @@ export default function ProfileScreen() {
                 //   keyboardType="email-address"
                 //   style={tw`border border-[#E5E5E5] bg-[#F2F6FC] px-4 py-3 text-[#0C0C0C]`}
                 // />
-                <Text style={tw`text-base text-gray-600`}>
+                <Text style={tw`text-base text-gray-700`}>
                   {profile?.email ?? "—"}
                 </Text>
               )}
