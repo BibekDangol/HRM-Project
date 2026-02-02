@@ -1,9 +1,9 @@
+import { Text } from "@react-navigation/elements";
 import * as React from "react";
 
 import { ScrollView, View } from "react-native";
-
-import { Ionicons } from "@expo/vector-icons";
-import { Text } from "@react-navigation/elements";
+// import { useRouter } from "expo-router";
+import { Calendar, CircleCheckBig, LogOut, User } from "lucide-react-native";
 import tw from "twrnc";
 
 export default function DashboardScreen() {
@@ -30,7 +30,7 @@ export default function DashboardScreen() {
               <View
                 style={tw`w-12 h-12 rounded-full bg-blue-600 items-center justify-center`}
               >
-                <Ionicons name="people" size={28} color="white" />
+                <User size={28} color="white" />
               </View>
 
               <View style={tw`ml-3 flex-1`}>
@@ -47,7 +47,7 @@ export default function DashboardScreen() {
               <View
                 style={tw`w-12 h-12 rounded-full bg-green-600 items-center justify-center`}
               >
-                <Ionicons name="checkmark-circle" size={28} color="white" />
+                <CircleCheckBig size={28} color="white" />
               </View>
 
               <View style={tw`ml-3 flex-1`}>
@@ -67,7 +67,7 @@ export default function DashboardScreen() {
               <View
                 style={tw`w-12 h-12 rounded-full bg-orange-600 items-center justify-center`}
               >
-                <Ionicons name="log-out-outline" size={28} color="white" />
+                <LogOut size={28} color="white" />
               </View>
 
               <View style={tw`ml-3 flex-1`}>
@@ -85,7 +85,7 @@ export default function DashboardScreen() {
               <View
                 style={tw`w-12 h-12 rounded-full bg-red-600 items-center justify-center`}
               >
-                <Ionicons name="calendar" size={28} color="white" />
+                <Calendar size={28} color="white" />
               </View>
 
               <View style={tw`ml-3 flex-1`}>
