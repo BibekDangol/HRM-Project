@@ -7,7 +7,7 @@ import tw from "twrnc";
 export default function MoreScreen() {
   return (
     <View style={tw`flex-1 bg-white`}>
-      <ScrollView></ScrollView>
+      <ScrollView>View Attendance Portal</ScrollView>
     </View>
   );
 }

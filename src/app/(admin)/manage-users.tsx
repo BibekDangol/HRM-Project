@@ -18,7 +18,7 @@ import { useDebounce } from "@/src/hooks/useDebounce";
 import { useAuthStore } from "@/store/useAuthStore";
 import { Ionicons } from "@expo/vector-icons";
 import tw from "twrnc";
-import { supabase } from "../../supabase/supabaseClient";
+import { supabase } from "../../../supabase/supabaseClient";
 import EditUserModal from "./EditUserModal";
 
 export type UserProfile = {
