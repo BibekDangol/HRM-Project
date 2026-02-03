@@ -21,7 +21,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import tw from "twrnc";
 import { z } from "zod";
-import { supabase } from "../../supabase/supabaseClient";
+import { supabase } from "../../../supabase/supabaseClient";
 
 type UserProfile = {
   id: string;
@@ -299,14 +299,12 @@ const ManageUsers = () => {
                 onPress={() => {
                   setActiveTab("pending");
                 }}
-                style={tw`flex-1 py-2 rounded-md ${
-                  activeTab === "pending" ? "bg-white shadow" : ""
-                }`}
+                style={tw`flex-1 py-2 rounded-md ${activeTab === "pending" ? "bg-white shadow" : ""
+                  }`}
               >
                 <Text
-                  style={tw`text-center font-medium ${
-                    activeTab === "pending" ? "text-blue-600" : "text-gray-500"
-                  }`}
+                  style={tw`text-center font-medium ${activeTab === "pending" ? "text-blue-600" : "text-gray-500"
+                    }`}
                 >
                   Pending
                 </Text>
@@ -314,14 +312,12 @@ const ManageUsers = () => {
               {/* Active button */}
               <TouchableOpacity
                 onPress={() => setActiveTab("active")}
-                style={tw`flex-1 py-2 rounded-md ${
-                  activeTab === "active" ? "bg-white shadow" : ""
-                }`}
+                style={tw`flex-1 py-2 rounded-md ${activeTab === "active" ? "bg-white shadow" : ""
+                  }`}
               >
                 <Text
-                  style={tw`text-center font-medium ${
-                    activeTab === "active" ? "text-blue-600" : "text-gray-500"
-                  }`}
+                  style={tw`text-center font-medium ${activeTab === "active" ? "text-blue-600" : "text-gray-500"
+                    }`}
                 >
                   Active
                 </Text>

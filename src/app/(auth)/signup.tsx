@@ -2,13 +2,13 @@ import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   Alert,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
-  Keyboard,
   TouchableWithoutFeedback,
 } from "react-native";
 
@@ -16,7 +16,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
 import tw from "twrnc";
 import { z } from "zod";
-import { useAuthStore } from "../../store/useAuthStore";
+import { useAuthStore } from "../../../store/useAuthStore";
 
 /* ---------------- ZOD SCHEMA ---------------- */
 const schema = z
