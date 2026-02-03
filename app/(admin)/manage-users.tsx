@@ -4,13 +4,11 @@ import React, { useCallback, useEffect, useState } from "react";
 import {
   Alert,
   FlatList,
-  Keyboard,
   KeyboardAvoidingView,
   Platform,
   Text,
   TextInput,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   View
 } from "react-native";
 import AddUserModal, { AddUserFormData } from "./AddUserModal";
@@ -199,9 +197,7 @@ const ManageUsers = () => {
   useEffect(() => {
     fetchUsers();
   }, [fetchUsers]);
-
   const renderItem = ({ item }: { item: UserProfile }) => {
-    console.log(item);
     return (
       <View style={tw`bg-white rounded-xl shadow p-4 mb-4 flex-row items-center`}>
         <View style={tw`flex-1`}>
@@ -254,85 +250,83 @@ const ManageUsers = () => {
           style={tw`flex-1`}
           behavior={Platform.OS === "ios" ? "padding" : undefined}
         >
-          <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-            {/* my contents */}
-            <View style={{ flex: 1 }}>
-              {/* Header-> Add Button + search + Tabs */}
-              <View style={tw`p-4`}>
-                {/* //  Header */}
-                <View style={tw`flex-row items-center justify-between mb-4`}>
-                  <Text style={tw`text-2xl font-bold text-gray-900`}>
-                    {adminOrgName}
-                  </Text>
+          {/* my contents */}
+          <View style={{ flex: 1 }}>
+            {/* Header-> Add Button + search + Tabs */}
+            <View style={tw`p-4`}>
+              {/* //  Header */}
+              <View style={tw`flex-row items-center justify-between mb-4`}>
+                <Text style={tw`text-2xl font-bold text-gray-900`}>
+                  {adminOrgName}
+                </Text>
+                <TouchableOpacity
+                  style={tw`bg-[#1F7A4D] w-12 h-12 rounded-full items-center justify-center`}
+                  onPress={() => setShowAddModal(true)}
+                >
+                  <Ionicons name="add" size={26} color="white" />
+                </TouchableOpacity>
+              </View>
+              {/* // Search */}
+              <View pointerEvents="box-none"
+                style={tw`flex-row bg-white rounded-xl px-3 py-2 items-center mb-4 shadow`}
+              >
+                <Ionicons name="search" size={20} color="#94A3B8" />
+                <TextInput
+                  placeholder="Search users..."
+                  value={searchQuery}
+                  onChangeText={setSearchQuery}
+                  style={tw`flex-1 ml-2 text-base pr-4`}
+                />
+                {searchQuery.length > 0 &&
+                  <TouchableOpacity onPressIn={() => setSearchQuery('')} style={tw`p-1`}
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                    <Ionicons name="close-outline" size={24} color="#94A3B8" />
+                  </TouchableOpacity>}
+                {/* Search Result -> on main list*/}
+              </View>
+              {/* User count and pending and active list */}
+              <View style={tw`mb-3`}>
+                <View>
+                  <Text style={tw`text-gray-600`}>{activeTab === "pending" ? pendingCount : activeCount} Users</Text>
+                </View>
+                <View style={tw`flex-row bg-gray-100 rounded-lg p-2 `}>
                   <TouchableOpacity
-                    style={tw`bg-[#1F7A4D] w-12 h-12 rounded-full items-center justify-center`}
-                    onPress={() => setShowAddModal(true)}
+                    onPress={() => {
+                      setActiveTab("pending");
+                    }}
+                    style={tw`flex-1 py-2 rounded-md ${activeTab === "pending" ? "bg-white shadow" : ""
+                      }`}
                   >
-                    <Ionicons name="add" size={26} color="white" />
+                    <Text
+                      style={tw`text-center font-medium ${activeTab === "pending" ? "text-blue-600" : "text-gray-500"
+                        }`}
+                    >
+                      Pending
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => setActiveTab("active")}
+                    style={tw`flex-1 py-2 rounded-md ${activeTab === "active" ? "bg-white shadow" : ""
+                      }`}
+                  >
+                    <Text
+                      style={tw`text-center font-medium ${activeTab === "active" ? "text-blue-600" : "text-gray-500"
+                        }`}
+                    >
+                      Active
+                    </Text>
                   </TouchableOpacity>
                 </View>
-                {/* // Search */}
-                <View pointerEvents="box-none"
-                  style={tw`flex-row bg-white rounded-xl px-3 py-2 items-center mb-4 shadow`}
-                >
-                  <Ionicons name="search" size={20} color="#94A3B8" />
-                  <TextInput
-                    placeholder="Search users..."
-                    value={searchQuery}
-                    onChangeText={setSearchQuery}
-                    style={tw`flex-1 ml-2 text-base pr-4`}
-                  />
-                  {searchQuery.length > 0 &&
-                    <TouchableOpacity onPressIn={() => setSearchQuery('')} style={tw`p-1`}
-                      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-                      <Ionicons name="close-outline" size={24} color="#94A3B8" />
-                    </TouchableOpacity>}
-                  {/* Search Result -> on main list*/}
-                </View>
-                {/* User count and pending and active list */}
-                <View style={tw`mb-3`}>
-                  <View>
-                    <Text style={tw`text-gray-600`}>{activeTab === "pending" ? pendingCount : activeCount} Users</Text>
-                  </View>
-                  <View style={tw`flex-row bg-gray-100 rounded-lg p-2 `}>
-                    <TouchableOpacity
-                      onPress={() => {
-                        setActiveTab("pending");
-                      }}
-                      style={tw`flex-1 py-2 rounded-md ${activeTab === "pending" ? "bg-white shadow" : ""
-                        }`}
-                    >
-                      <Text
-                        style={tw`text-center font-medium ${activeTab === "pending" ? "text-blue-600" : "text-gray-500"
-                          }`}
-                      >
-                        Pending
-                      </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      onPress={() => setActiveTab("active")}
-                      style={tw`flex-1 py-2 rounded-md ${activeTab === "active" ? "bg-white shadow" : ""
-                        }`}
-                    >
-                      <Text
-                        style={tw`text-center font-medium ${activeTab === "active" ? "text-blue-600" : "text-gray-500"
-                          }`}
-                      >
-                        Active
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
               </View>
-              {/* Users list */}
-              <FlatList
-                data={activeTab === "pending" ? pendingUsers : activeUsers}
-                keyExtractor={(item) => item.id}
-                renderItem={renderItem}
-                style={{ flex: 1 }} // tells RN to take all available space in that container
-                contentContainerStyle={tw`p-4`} keyboardShouldPersistTaps="handled" />
             </View>
-          </TouchableWithoutFeedback>
+            {/* Users list */}
+            <FlatList
+              data={activeTab === "pending" ? pendingUsers : activeUsers}
+              keyExtractor={(item) => item.id}
+              renderItem={renderItem}
+              style={{ flex: 1 }} // tells RN to take all available space in that container
+              contentContainerStyle={tw`p-4`} keyboardShouldPersistTaps="handled" />
+          </View>
         </KeyboardAvoidingView>
       </View >
       <AddUserModal visible={showAddModal} onClose={() => setShowAddModal(false)} onSubmit={handleAddUser} isSubmitting={false} />
