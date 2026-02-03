@@ -31,7 +31,6 @@ type AuthState = {
   status:string | null,
 
   signUp: (data: SignUpData) => Promise<void>;
-  adminCreateUser: (data: AdminData) => Promise<AdminCreateUserResult>;
   signIn: (email: string, password: string) => Promise<SignInResult>;
   signOut: () => Promise<void>;
   restoreSession: () => Promise<void>;
@@ -42,7 +41,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   session: null,
   role: null,
-  loading: true,
+  loading: false,
   status:null,
   //initially null rakhdine ani pachi login function call gare pachi set garne status,role haru
 
@@ -115,35 +114,6 @@ export const useAuthStore = create<AuthState>((set) => ({
       throw err;
     }
   },
-  adminCreateUser: async (data: AdminData) => {
-    try {
-      const { data: authData, error: authError } =
-        await supabase.auth.admin.createUser({
-          email: data.email,
-          password: data.password,
-          user_metadata: { firstName: data.firstName, lastName: data.lastName },
-          email_confirm: true, //optional: auto-confirm email
-        });
-      if (authError || !authData.user)
-        throw authError || new Error("User creation failed");
-      const userId = authData.user.id;
-      //Insert profile row
-      const { error: profileError } = await supabase.from("profiles").insert({
-        id: userId,
-        email: data.email,
-        first_name: data.firstName,
-        last_name: data.lastName,
-        organization_id: data.orgId,
-        role: "user",
-      });
-      if (profileError) throw profileError;
-      return { success: true, userId };
-    } catch (err: any) {
-      console.log("Admin create user error", err);
-      throw err;
-    }
-  },
-
   signIn: async (email, password) => {
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -192,26 +162,21 @@ updateStatus: (status) => set({ status }),
       set({ user: null, session: null, role: null, loading: false });
     }
   },
-
   restoreSession: async () => {
     try {
       set({ loading: true });
-
       const { data, error } = await supabase.auth.getSession();
       if (error || !data.session) {
         set({ session: null, user: null, role: "user", loading: false });
         return;
       }
-
       const userId = data.session.user.id;
-
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", userId)
         .maybeSingle();
       if (profileError) console.log("Profile fetch failed:", profileError);
-
       set({
         session: data.session,
         user: data.session.user,
