@@ -9,16 +9,20 @@ export default function Index() {
   const { user, loading, role } = useAuthStore();
   const { restoreSession } = useAuthStore();
   useEffect(() => {
-    restoreSession();
+    const init = async () => {
+      await restoreSession();
+    }
+    init();
   }, []);
   if (loading) {
     return (
-      <View style={tw`flex-1 items-center justify-center`}><ActivityIndicator size="large" />
+      <View style={tw`flex-1 items-center justify-center`}>
+        <ActivityIndicator size="large" />
         <Text>Loading..</Text></View>
     )
   }
   if (!user || !role) {
-    return <Redirect href='/(auth)/login' />
+    return <Redirect href='/(auth)/login' />;
   }
   if (role === "admin") {
     return <Redirect href='/(admin)/dashboard' />;
