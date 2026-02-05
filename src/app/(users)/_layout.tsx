@@ -1,5 +1,5 @@
-import { useAuthStore } from "@/store/useAuthStore";
-import { supabase } from "@/supabase/supabaseClient";
+import { useAuthStore } from "@/src/store/useAuthStore";
+import { supabase } from "@/src/supabase/supabaseClient";
 import { PlatformPressable } from "@react-navigation/elements";
 import { useLinkBuilder } from "@react-navigation/native";
 import { Tabs, useRouter } from "expo-router";

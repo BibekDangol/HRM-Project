@@ -1,22 +1,23 @@
-import { loginSchema } from "@/src/schema/auth";
-import { useAuthStore } from "@/store/useAuthStore";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "expo-router";
 import { Eye, EyeOff } from "lucide-react-native";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
-    Alert,
-    Keyboard,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    TouchableWithoutFeedback,
-    View,
+  Alert,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
 } from "react-native";
+
+import { loginSchema } from "@/src/schema/auth";
+import { useAuthStore } from "@/src/store/useAuthStore";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "expo-router";
 import tw from "twrnc";
 import { z } from "zod";
 
@@ -56,7 +57,7 @@ const LoginScreen = () => {
       return;
     }
     if (result.role === "admin") {
-      router.replace("/(admin)/dashboard");
+      router.replace("/(admin)/(tabs)/dashboard");
     } else {
       router.replace("/(users)/dashboard");
     }

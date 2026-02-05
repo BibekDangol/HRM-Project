@@ -16,12 +16,12 @@ import {
   View,
 } from "react-native";
 
-import { useAuthStore } from "@/store/useAuthStore";
+import { useAuthStore } from "@/src/store/useAuthStore";
 import { Ionicons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import tw from "twrnc";
 import { z } from "zod";
-import { supabase } from "../../../supabase/supabaseClient";
+import { supabase } from "../../supabase/supabaseClient";
 
 type UserProfile = {
   id: string;

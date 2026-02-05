@@ -1,5 +1,5 @@
+import { supabase } from "@/src/supabase/supabaseClient";
 import { Alert } from "react-native";
-import { supabase } from "@/supabase/supabaseClient";
 
 export type UserSearchResult ={
   id:string,

@@ -1,6 +1,6 @@
 import * as Clipboard from "expo-clipboard";
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Alert,
   FlatList,
@@ -11,15 +11,16 @@ import {
   TouchableOpacity,
   View
 } from "react-native";
-import AddUserModal, { AddUserFormData } from "./AddUserModal";
+import AddUserModal, { AddUserFormData } from "../AddUserModal";
 
 import { apiClient } from "@/src/api/apiClient";
 import { useDebounce } from "@/src/hooks/useDebounce";
-import { useAuthStore } from "@/store/useAuthStore";
+import { useUsersStore } from "@/src/store/useAdminsStore";
+import { useAuthStore } from "@/src/store/useAuthStore";
 import { Ionicons } from "@expo/vector-icons";
 import tw from "twrnc";
-import { supabase } from "../../../supabase/supabaseClient";
-import EditUserModal from "./EditUserModal";
+import UserCard from "../../../pages/AdminUsers/components/UserCard";
+import EditUserModal from "../EditUserModal";
 
 export type UserProfile = {
   id: string;
@@ -32,85 +33,75 @@ export type UserProfile = {
   organization?: { name: string | null };
   supervisor_id: string | null;
 };
-type AdminProfile = {
-  id: string;
-  organization_id: number;
-};
-
 const ManageUsers = () => {
-  const [users, setUsers] = useState<UserProfile[]>([]);
-  const [adminOrgName, setAdminOrgName] = useState("");
+  const { users, fetchUsers, organizationName, fetchAdminProfile } = useUsersStore();
+  const { adminProfile } = useUsersStore.getState();
   const [searchQuery, setSearchQuery] = useState("");
   const [tempPassword, setTempPassword] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"pending" | "active">("pending");
-  const [activeUsers, setActiveUsers] = useState<UserProfile[]>([]);
   const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editRole, setEditRole] = useState<string>("user");
   const [editSupervisor, setEditSupervisor] = useState<string | null>(null);
-  const [pendingUsers, setPendingUsers] = useState<UserProfile[]>([]);
+  const pendingUsers = users.filter(u => u.status === "pending");
+  const activeUsers = users.filter(u => u.status === "active");
   const pendingCount = pendingUsers.length;
   const activeCount = activeUsers.length;
   const { user } = useAuthStore();
   const { session } = useAuthStore.getState();
-  const token = session?.access_token;
-  const [adminProfile, setAdminProfile] = useState<AdminProfile | null>(null);
-  const debouncedSearchQuery = useDebounce(searchQuery, 300)
-  const fetchAdminProfile = async () => {
-    if (!user) return;
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("id, organization_id")
-      .eq("id", user.id)
-      .single();
-    if (error) {
-      console.log("Admin profile fetching error", error);
-      return;
-    }
-    setAdminProfile(data);
-  };
-  const fetchUsers = useCallback(async () => {
-    if (!user?.id) return;
-    //  get admin's org id
-    if (!adminProfile?.organization_id) return;
-    //trust me i am not undefined now to ts->supabase
-    const orgId = adminProfile.organization_id;
-    let query = supabase.from("profiles").select("id, first_name, last_name, email, role, status, organization_id, organization(name), supervisor_id");
-    // if searching
-    if (debouncedSearchQuery.trim() !== "") {
-      const q = debouncedSearchQuery.trim().replace(/\s+/g, " ");
-      query = query.or(
-        `first_name.ilike.%${q}%,last_name.ilike.%${q}%,email.ilike.%${q}%`
-      ).neq("id", user.id); // exclude admin
-    } else {
-      // default org users
-      query = query.eq("organization_id", orgId).neq("id", user.id);
-    }
-    // get all users in the same org
-    const { data, error } = await query.limit(11);
-    if (error) console.log("Fetch users error:", error);
-    if (!data) {
-      setUsers([]);
-      console.log("No data returned");
-      return;
-    }
-    //filter users by their status
-    const pendingUsers = data.filter(
-      (u: UserProfile) => u.status === "pending",
-    );
-    const activeUsers = data.filter((u: UserProfile) => u.status === "active");
-    //store separately for tabs
-    setPendingUsers(pendingUsers);
-    setActiveUsers(activeUsers);
 
-    //or store all users
-    setUsers(data || []);
-    if (data && data.length > 0) {
-      setAdminOrgName(data[0].organization.name ?? "");
-    }
-  }, [adminProfile?.organization_id, user?.id, debouncedSearchQuery]);
+  const token = session?.access_token;
+  // const [adminProfile, setAdminProfile] = useState<AdminProfile | null>(null);
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
+  // const fetchAdminProfile = async () => {
+  //   if (!user) return;
+  //   const { data, error } = await supabase
+  //     .from("profiles")
+  //     .select("id, organization_id")
+  //     .eq("id", user.id)
+  //     .single();
+  //   if (error) {
+  //     console.log("Admin profile fetching error", error);
+  //     return;
+  //   }
+  //   setAdminProfile(data);
+  // };
+  // const fetchUsers = useCallback(async () => {
+  //   if (!user?.id) return;
+  //   if (!adminProfile?.organization_id) return;
+  //   const orgId = adminProfile.organization_id;
+  //   let query = supabase.from("profiles").select("id, first_name, last_name, email, role, status, organization_id, organization(name), supervisor_id");
+  //   if (debouncedSearchQuery.trim() !== "") {
+  //     const q = debouncedSearchQuery.trim().replace(/\s+/g, " ");
+  //     query = query.or(
+  //       `first_name.ilike.%${q}%,last_name.ilike.%${q}%,email.ilike.%${q}%`
+  //     ).neq("id", user.id);
+  //   } else {
+  //     query = query.eq("organization_id", orgId).neq("id", user.id);
+  //   }
+  //   const { data, error } = await query.limit(11);
+  //   if (error) console.log("Fetch users error:", error);
+  //   if (!data) {
+  //     setUsers([]);
+  //     console.log("No data returned");
+  //     return;
+  //   }
+  //   const pendingUsers = data.filter(
+  //     (u: UserProfile) => u.status === "pending",
+  //   );
+  //   const activeUsers = data.filter((u: UserProfile) => u.status === "active");
+  //   setPendingUsers(pendingUsers);
+  //   setActiveUsers(activeUsers);
+
+  //   //or store all users
+  //   setUsers(data || []);
+  //   if (data && data.length > 0) {
+  //     setAdminOrgName(data[0].organization.name ?? "");
+  //   }
+  // }, [adminProfile?.organization_id, user?.id, debouncedSearchQuery]);
   const handleAddUser = async (data: AddUserFormData) => {
+    if (!user && !adminProfile) return;
     const { session } = useAuthStore.getState();
     if (!session || !adminProfile) {
       Alert.alert("Wait", "Admin profile loading");
@@ -134,7 +125,7 @@ const ManageUsers = () => {
       if (response.data.success && response.data.tempPassword) {
         setTempPassword(response.data.tempPassword);
       }
-      fetchUsers();
+      await fetchUsers();
     } catch (err: any) {
       Alert.alert("Errors", err.message);
     }
@@ -159,14 +150,13 @@ const ManageUsers = () => {
         throw new Error(response.data.error || "Failed to delete user");
       }
       Alert.alert("Deleted", "User deleted successfully");
-      fetchUsers();
+      await fetchUsers();
     } catch (error: any) {
       console.error("Error deleting user:", error.message);
       return false;
     }
   };
   const handleSubmitEdit = async (userId: string) => {
-    if (!user) return;
     try {
       const response = await apiClient.post("/hyper-edit", {
         userId,
@@ -180,69 +170,24 @@ const ManageUsers = () => {
       Alert.alert("success", "user updated successfully");
       setShowEditModal(false);
       setEditingUser(null);
-      fetchUsers(); //to refresh list
+      await fetchUsers();
     } catch (error: any) {
       Alert.alert("Error", error.message);
     }
   }
-  const getSupervisorName = (supervisorId: string | null) => {
+  const getSupervisorName = (supervisorId?: string | null) => {
     if (!supervisorId) return "No supervisor yet";
     const supervisor = users.find(u => u.id === supervisorId);
     return supervisor ? `${supervisor.first_name ?? ""} ${supervisor.last_name ?? ""}`.trim() : "Unknown Supervisor";
   }
   const isChanged = editRole !== editingUser?.role || editSupervisor !== editingUser?.supervisor_id;
   useEffect(() => {
-    fetchAdminProfile();
-  }, []);
+    if (!user?.id) return;
+    fetchAdminProfile(user.id);
+  }, [user?.id]);
   useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
-  const renderItem = ({ item }: { item: UserProfile }) => {
-    return (
-      <View style={tw`bg-white rounded-xl shadow p-4 mb-4 flex-row items-center`}>
-        <View style={tw`flex-1`}>
-          <View style={tw`flex-row gap-4`}>
-            <Text style={tw`text-gray-900 font-semibold text-lg`}>
-              {item.first_name} {item.last_name}
-            </Text>
-            <Text
-              style={tw`${item.role === "admin" ? "bg-red-300" : "bg-slate-300"} rounded-sm px-1 text-sm`}
-            >
-              {item.role}
-            </Text>
-          </View>
-          <Text>{getSupervisorName(item.supervisor_id)}</Text>
-          <Text style={tw`text-gray-500 text-sm`}>{item.email}</Text>
-        </View>
-        <View style={tw`flex-row gap-2 `}>
-          <TouchableOpacity
-            onPress={() => handleEditUser(item)}
-            style={tw`p-2 bg-green-700 rounded-lg`}
-          >
-            <Ionicons name="create-outline" size={20} color="white" />
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() =>
-              Alert.alert(
-                "Delete User",
-                `Do you want to delete ${item.first_name}?`,
-                [
-                  { text: "Cancel", style: "cancel" },
-                  {
-                    text: "Delete",
-                    style: "destructive",
-                    onPress: () => handleDeleteUser(item.id),
-                  },
-                ]
-              )
-            }
-            style={tw`p-2 bg-red-500 rounded-lg`}
-          >
-            <Ionicons name="trash-outline" size={20} color="white" />
-          </TouchableOpacity>
-        </View>
-      </View>)
-  }
+    fetchUsers(debouncedSearchQuery);
+  }, [debouncedSearchQuery]);
   return (
     <>
       <View style={tw`flex-1 bg-white`}>
@@ -257,7 +202,7 @@ const ManageUsers = () => {
               {/* //  Header */}
               <View style={tw`flex-row items-center justify-between mb-4`}>
                 <Text style={tw`text-2xl font-bold text-gray-900`}>
-                  {adminOrgName}
+                  {organizationName}
                 </Text>
                 <TouchableOpacity
                   style={tw`bg-[#1F7A4D] w-12 h-12 rounded-full items-center justify-center`}
@@ -323,8 +268,12 @@ const ManageUsers = () => {
             <FlatList
               data={activeTab === "pending" ? pendingUsers : activeUsers}
               keyExtractor={(item) => item.id}
-              renderItem={renderItem}
-              style={{ flex: 1 }} // tells RN to take all available space in that container
+              renderItem={({ item }) => (
+                <UserCard user={item}
+                  onEdit={handleEditUser}
+                  getSupervisorName={getSupervisorName}
+                  onDelete={handleDeleteUser} />
+              )}
               contentContainerStyle={tw`p-4`} keyboardShouldPersistTaps="handled" />
           </View>
         </KeyboardAvoidingView>

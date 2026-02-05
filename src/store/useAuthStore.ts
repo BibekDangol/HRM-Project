@@ -3,7 +3,6 @@ import { Session, User } from "@supabase/supabase-js";
 import { create } from "zustand";
 import { supabase } from "../supabase/supabaseClient";
 
-// Input type for signup
 type SignUpData = {
   email: string;
   password: string;
@@ -11,32 +10,20 @@ type SignUpData = {
   lastName: string;
   organizationName: string;
 };
-type AdminData = {
-  email: string;
-  password: string;
-  firstName: string;
-  lastName: string;
-  orgId: number;
-};
-
 type SignInResult = { error: string } | { role: string; status: string | null; };
-type AdminCreateUserResult = { success: boolean; userId: string };
-//function returns {success:boolean and string userId} so we must define its return type;
-// Auth state type
 type AuthState = {
   user: User | null;
   session: Session | null;
   role: string | null; // "admin" or "user"
   loading: boolean;
   status:string | null,
-
   signUp: (data: SignUpData) => Promise<void>;
   signIn: (email: string, password: string) => Promise<SignInResult>;
   signOut: () => Promise<void>;
   restoreSession: () => Promise<void>;
   updateStatus: (status: "pending" | "active") => void; // <- helper
-};
 
+};
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   session: null,
