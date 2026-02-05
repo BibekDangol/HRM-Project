@@ -1,6 +1,6 @@
 import { ActivityIndicator, Text, View } from "react-native";
 
-import { useAuthStore } from "@/store/useAuthStore";
+import { useAuthStore } from "@/src/store/useAuthStore";
 import { Redirect } from "expo-router";
 import { useEffect } from "react";
 import tw from 'twrnc';
