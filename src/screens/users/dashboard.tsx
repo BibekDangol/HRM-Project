@@ -1,8 +1,9 @@
-import { ProfileData } from "@/src/types/profile";
-import { useAuthStore } from "@/store/useAuthStore";
-import { supabase } from "@/supabase/supabaseClient";
 import React, { useEffect, useState } from "react";
 import { Alert, Pressable, ScrollView, Text, View } from "react-native";
+
+import { useAuthStore } from "@/src/store/useAuthStore";
+import { supabase } from "@/src/supabase/supabaseClient";
+import { ProfileData } from "@/src/types/profile";
 import tw from "twrnc";
 
 export default function HomeScreen() {

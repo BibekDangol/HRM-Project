@@ -1,6 +1,5 @@
-import { useAuthStore } from "@/store/useAuthStore";
-import { supabase } from "@/supabase/supabaseClient";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { FormInput, FormOutput } from "@/src/types/user";
+import { Camera, Lock, Pencil, X } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
@@ -12,12 +11,13 @@ import {
   TextInput,
   View,
 } from "react-native";
-import tw from "twrnc";
 
 import { usersProfileSchema } from "@/src/schema/users/userprofiles.schema";
-import { FormInput, FormOutput } from "@/src/types/user";
+import { useAuthStore } from "@/src/store/useAuthStore";
+import { supabase } from "@/src/supabase/supabaseClient";
 import { ProfileData } from "@/src/types/profile";
-import { Camera, Lock, Pencil, X } from "lucide-react-native";
+import { zodResolver } from "@hookform/resolvers/zod";
+import tw from "twrnc";
 
 export default function ProfileScreen() {
   const user = useAuthStore((s) => s.user);
@@ -191,7 +191,7 @@ export default function ProfileScreen() {
           style={tw`flex-1 bg-black/40 justify-center px-4`}
         >
           <Pressable
-            onPress={() => {}}
+            onPress={() => { }}
             style={tw`bg-white border border-[#E5E5E5] p-4`}
           >
             <View style={tw`flex-row items-center justify-between`}>
