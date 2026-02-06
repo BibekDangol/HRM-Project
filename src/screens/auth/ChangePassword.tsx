@@ -14,13 +14,11 @@ import {
 import { changePasswordSchema } from "@/src/schema/auth";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { supabase } from "@/src/supabase/supabaseClient";
+import { FormData } from "@/src/types/changePassword";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
 import tw from "twrnc";
-import { z } from "zod";
-
-type FormData = z.infer<typeof changePasswordSchema>;
 
 const ChangePasswordScreen = () => {
   const router = useRouter();
@@ -223,5 +221,4 @@ const ChangePasswordScreen = () => {
     </View>
   );
 };
-
 export default ChangePasswordScreen;
