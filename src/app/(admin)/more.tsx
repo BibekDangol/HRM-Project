@@ -14,7 +14,7 @@ export default function MoreScreen() {
 
         {/* Attendance */}
         <TouchableOpacity
-          onPress={() => router.push("/(admin)/Attendance")}
+          onPress={() => router.push("/(admin)/attendance-list")}
           activeOpacity={0.8}
           style={tw`bg-white rounded-xl p-4 mb-4 flex-row items-center justify-between shadow`}
         >

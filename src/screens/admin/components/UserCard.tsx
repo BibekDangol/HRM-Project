@@ -39,34 +39,40 @@ const UserCard = ({ user, onEdit, onDelete, getSupervisorName }: Props) => {
         <Text>{getSupervisorName(user.supervisor_id)}</Text>
         <Text style={tw`text-gray-500 text-sm`}>{user.email}</Text>
       </View>
-      <View style={tw`flex-row gap-2`}>
-        <TouchableOpacity
-          onPress={() => onEdit?.(user)}
-          style={tw`p-2 bg-green-700 rounded-lg`}
-        >
-          <Ionicons name="create-outline" size={20} color="white" />
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          onPress={() =>
-            Alert.alert(
-              "Delete User",
-              `Do you want to delete ${user.first_name}?`,
-              [
-                { text: "Cancel", style: "cancel" },
-                {
-                  text: "Delete",
-                  style: "destructive",
-                  onPress: () => onDelete?.(user.id),
-                },
-              ]
-            )
-          }
-          style={tw`p-2 bg-red-500 rounded-lg`}
-        >
-          <Ionicons name="trash-outline" size={20} color="white" />
-        </TouchableOpacity>
-      </View>
+      {/* only render buttons if handlers are provided */}
+      {(onEdit || onDelete) && (
+        <View style={tw`flex-row gap-2`}>
+          {onEdit && (
+            <TouchableOpacity
+              onPress={() => onEdit?.(user)}
+              style={tw`p-2 bg-green-700 rounded-lg`}
+            >
+              <Ionicons name="create-outline" size={20} color="white" />
+            </TouchableOpacity>
+          )}
+          {onDelete && (
+            <TouchableOpacity
+              onPress={() =>
+                Alert.alert(
+                  "Delete User",
+                  `Do you want to delete ${user.first_name}?`,
+                  [
+                    { text: "Cancel", style: "cancel" },
+                    {
+                      text: "Delete",
+                      style: "destructive",
+                      onPress: () => onDelete?.(user.id),
+                    },
+                  ]
+                )
+              }
+              style={tw`p-2 bg-red-500 rounded-lg`}
+            >
+              <Ionicons name="trash-outline" size={20} color="white" />
+            </TouchableOpacity>
+          )}
+        </View>
+      )}
     </View>
   )
 }
