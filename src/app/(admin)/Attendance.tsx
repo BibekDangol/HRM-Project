@@ -1,4 +1,4 @@
-import AdminUsersScreen from '@/src/pages/AdminUsers/AdminUsersScreen'
+import AdminUsersScreen from '@/src/screens/admin/users/AdminUsersScreen'
 import React from 'react'
 
 const Attendance = () => {

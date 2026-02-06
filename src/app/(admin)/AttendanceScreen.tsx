@@ -1,10 +1,8 @@
-import AdminUserAttendanceScreen from '@/src/pages/AdminUserAttendanceScreen'
-import React from 'react'
+import AdminUserAttendanceScreen from "@/src/screens/admin/users/AdminUserAttendanceScreen";
+import React from "react";
 
 const AttendanceScreen = () => {
-  return (
-    <AdminUserAttendanceScreen />
-  )
-}
+  return <AdminUserAttendanceScreen />;
+};
 
-export default AttendanceScreen
+export default AttendanceScreen;
