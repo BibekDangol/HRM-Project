@@ -1,8 +1,17 @@
 import { Controller, useForm } from "react-hook-form";
-import { KeyboardAvoidingView, Modal, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import {
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import React from 'react';
+import React from "react";
 import tw from "twrnc";
 import { z } from "zod";
 
@@ -21,11 +30,7 @@ const addUserSchema = z.object({
 
 export type AddUserFormData = z.infer<typeof addUserSchema>;
 const AddUserModal = ({ visible, onClose, onSubmit, isSubmitting }: Props) => {
-  const {
-    control,
-    handleSubmit,
-    reset
-  } = useForm<AddUserFormData>({
+  const { control, handleSubmit, reset } = useForm<AddUserFormData>({
     resolver: zodResolver(addUserSchema),
     defaultValues: {
       first_name: "",
@@ -66,7 +71,10 @@ const AddUserModal = ({ visible, onClose, onSubmit, isSubmitting }: Props) => {
               <Controller
                 control={control}
                 name="first_name"
-                render={({ field: { value, onChange }, fieldState: { error } }) => (
+                render={({
+                  field: { value, onChange },
+                  fieldState: { error },
+                }) => (
                   <View style={tw`mb-3`}>
                     <Text
                       style={tw`text-[14px] font-semibold text-[#6E6F71] mb-1.5`}
@@ -93,7 +101,10 @@ const AddUserModal = ({ visible, onClose, onSubmit, isSubmitting }: Props) => {
               <Controller
                 control={control}
                 name="last_name"
-                render={({ field: { value, onChange }, fieldState: { error } }) => (
+                render={({
+                  field: { value, onChange },
+                  fieldState: { error },
+                }) => (
                   <View style={tw`mb-3`}>
                     <Text
                       style={tw`text-[14px] font-semibold text-[#6E6F71] mb-1.5`}
@@ -121,7 +132,10 @@ const AddUserModal = ({ visible, onClose, onSubmit, isSubmitting }: Props) => {
               <Controller
                 control={control}
                 name="email"
-                render={({ field: { value, onChange }, fieldState: { error } }) => (
+                render={({
+                  field: { value, onChange },
+                  fieldState: { error },
+                }) => (
                   <View style={tw`mb-4`}>
                     <Text
                       style={tw`text-[14px] font-semibold text-[#6E6F71] mb-1.5`}
@@ -178,7 +192,7 @@ const AddUserModal = ({ visible, onClose, onSubmit, isSubmitting }: Props) => {
         </KeyboardAvoidingView>
       </View>
     </Modal>
-  )
-}
+  );
+};
 
-export default AddUserModal
+export default AddUserModal;

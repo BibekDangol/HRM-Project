@@ -1,27 +1,25 @@
 import { formatTime, getMonthKey, getTodayDate } from "@/src/utils/getDate";
 import React, { useEffect, useState } from "react";
-import {
-  FlatList,
-  Pressable,
-  Text,
-  View
-} from "react-native";
+import { FlatList, Pressable, Text, View } from "react-native";
 
 import { supabase } from "@/src/supabase/supabaseClient";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
 import tw from "twrnc";
-import Capsule from "../components/Capsule";
-import SummaryBox from "../components/SummaryBox";
+import Capsule from "../../../components/Capsule";
+import SummaryBox from "../../../components/SummaryBox";
 
 export type Attendance = {
-  check_in_time: string | null,
-  check_out_time: string | null,
-  id: string,
-  status: string | null,
+  check_in_time: string | null;
+  check_out_time: string | null;
+  id: string;
+  status: string | null;
 };
 const AdminUserAttendanceScreen = () => {
-  const { userId, name } = useLocalSearchParams<{ userId: string, name: string }>();
+  const { userId, name } = useLocalSearchParams<{
+    userId: string;
+    name: string;
+  }>();
   const [attendance, setAttendance] = useState<Attendance[]>([]);
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
   const [expandedDayId, setExpandedDayId] = useState<string | null>(null);
@@ -30,52 +28,54 @@ const AdminUserAttendanceScreen = () => {
   const fetchAttendance = async () => {
     setAttendance([]);
     const { data, error } = await supabase
-      .from('attendance')
+      .from("attendance")
       .select("id, check_in_time, check_out_time, status")
       .eq("user_id", userId);
     if (error) {
       console.log("Admin fetching attendance", error);
       return [];
     }
-    setAttendance((data) as Attendance[]);
+    setAttendance(data as Attendance[]);
     console.log(data);
-  }
+  };
   useEffect(() => {
     if (!userId) return;
     fetchAttendance();
-  }, [userId])
+  }, [userId]);
 
   const summary = {
-    present: attendance.filter(u => u.status === "present").length,
-    leave: attendance.filter(u => u.status === "on_leave").length,
-    absent: attendance.filter(u => u.status === "absent").length,
+    present: attendance.filter((u) => u.status === "present").length,
+    leave: attendance.filter((u) => u.status === "on_leave").length,
+    absent: attendance.filter((u) => u.status === "absent").length,
   };
   // get unique months from attendance for picking months
   const months = Array.from(
     new Set(
       attendance
-        .filter(a => a.check_in_time)
-        .map(a => getMonthKey(a.check_in_time!))
-    )
+        .filter((a) => a.check_in_time)
+        .map((a) => getMonthKey(a.check_in_time!)),
+    ),
   );
   //monthdata
   const monthData = selectedMonth
     ? attendance.filter(
-      a =>
-        a.check_in_time &&
-        getMonthKey(a.check_in_time) === selectedMonth
-    )
+        (a) =>
+          a.check_in_time && getMonthKey(a.check_in_time) === selectedMonth,
+      )
     : attendance;
 
   // Group attendance by date
-  const groupedByDate = monthData.reduce((acc: Record<string, Attendance[]>, att) => {
-    if (att.check_in_time) {
-      const date = att.check_in_time.split("T")[0];
-      if (!acc[date]) acc[date] = [];
-      acc[date].push(att);
-    }
-    return acc;
-  }, {});
+  const groupedByDate = monthData.reduce(
+    (acc: Record<string, Attendance[]>, att) => {
+      if (att.check_in_time) {
+        const date = att.check_in_time.split("T")[0];
+        if (!acc[date]) acc[date] = [];
+        acc[date].push(att);
+      }
+      return acc;
+    },
+    {},
+  );
 
   const renderItem = (day: string, records: Attendance[]) => {
     const isExpanded = expandedDayId === day;
@@ -83,11 +83,9 @@ const AdminUserAttendanceScreen = () => {
       <View key={day} style={tw`bg-white rounded-xl p-4 mb-3 shadow`}>
         <Pressable onPress={() => setExpandedDayId(isExpanded ? null : day)}>
           <View style={tw`flex-row justify-between items-center`}>
-            <Text style={tw`font-semibold text-gray-900 text-lg`}>
-              {day}
-            </Text>
+            <Text style={tw`font-semibold text-gray-900 text-lg`}>{day}</Text>
             <View style={tw`flex-row`}>
-              {records.map(r => (
+              {records.map((r) => (
                 <Capsule
                   key={r.id}
                   text={r.status ?? "unknown"}
@@ -107,9 +105,10 @@ const AdminUserAttendanceScreen = () => {
         </Pressable>
         {isExpanded && (
           <View style={tw`mt-2`}>
-            {records.map(r => (
+            {records.map((r) => (
               <Text key={r.id} style={tw`text-gray-500`}>
-                {formatTime(r.check_in_time)} → {formatTime(r.check_out_time)} ({r.status})
+                {formatTime(r.check_in_time)} → {formatTime(r.check_out_time)} (
+                {r.status})
               </Text>
             ))}
           </View>
@@ -122,10 +121,10 @@ const AdminUserAttendanceScreen = () => {
       {/* Header */}
       <View style={tw`flex-row justify-between items-center mb-4`}>
         <View>
-          <Text style={tw`text-2xl font-bold text-gray-900`}>
-            {name}
+          <Text style={tw`text-2xl font-bold text-gray-900`}>{name}</Text>
+          <Text style={tw`text-gray-500`}>
+            {selectedMonth ?? getMonthKey(getTodayDate())}
           </Text>
-          <Text style={tw`text-gray-500`}>{selectedMonth ?? getMonthKey(getTodayDate())}</Text>
         </View>
         {/* calendar icon */}
         <Pressable onPress={() => setShowMonthPicker(!showMonthPicker)}>
@@ -135,7 +134,7 @@ const AdminUserAttendanceScreen = () => {
       {/* Month picker Modal */}
       {showMonthPicker && (
         <View style={tw`flex-row flex-wrap mb-4`}>
-          {months.map(month => (
+          {months.map((month) => (
             <Pressable
               key={month}
               onPress={() => {
@@ -181,4 +180,4 @@ const AdminUserAttendanceScreen = () => {
     </View>
   );
 };
-export default AdminUserAttendanceScreen
+export default AdminUserAttendanceScreen;

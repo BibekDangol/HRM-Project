@@ -57,7 +57,7 @@ const LoginScreen = () => {
       return;
     }
     if (result.role === "admin") {
-      router.replace("/(admin)/(tabs)/dashboard");
+      router.replace("/(admin)/dashboard");
     } else {
       router.replace("/(users)/dashboard");
     }

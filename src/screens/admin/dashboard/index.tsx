@@ -3,20 +3,13 @@ import * as React from "react";
 import { Calendar, CircleCheckBig, LogOut, User } from "lucide-react-native";
 import { ScrollView, Text, View } from "react-native";
 
-import { useRouter } from "expo-router";
+import StatCard from "@/src/screens/admin/components/StatCard";
 import tw from "twrnc";
-import StatCard from "../../../pages/AdminUsers/components/StatCard";
-
-// import { useRouter } from "expo-router";
-
-
 
 export default function DashboardScreen() {
-  const router = useRouter();
   return (
     <View style={tw`flex-1 bg-gray-50`}>
       <ScrollView contentContainerStyle={tw`px-4 pt-6 pb-10`}>
-
         {/* Header */}
         <View style={tw`mb-4`}>
           <Text style={tw`text-3xl font-extrabold text-gray-900`}>
@@ -57,19 +50,11 @@ export default function DashboardScreen() {
         </Text>
 
         <View style={tw`bg-white rounded-2xl p-4 shadow-sm`}>
-          <Text style={tw`text-gray-600`}>
-            • Ram marked present
-          </Text>
-          <Text style={tw`text-gray-600 mt-1`}>
-            • Shyam requested leave
-          </Text>
-          <Text style={tw`text-gray-600 mt-1`}>
-            • New user added
-          </Text>
+          <Text style={tw`text-gray-600`}>• Ram marked present</Text>
+          <Text style={tw`text-gray-600 mt-1`}>• Shyam requested leave</Text>
+          <Text style={tw`text-gray-600 mt-1`}>• New user added</Text>
         </View>
-
       </ScrollView>
     </View>
-
   );
 }
