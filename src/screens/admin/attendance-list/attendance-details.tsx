@@ -15,7 +15,7 @@ export type Attendance = {
   id: string;
   status: string | null;
 };
-const AdminUserAttendanceScreen = () => {
+const UserAttendanceDetails = () => {
   const { userId, name } = useLocalSearchParams<{
     userId: string;
     name: string;
@@ -59,9 +59,9 @@ const AdminUserAttendanceScreen = () => {
   //monthdata
   const monthData = selectedMonth
     ? attendance.filter(
-        (a) =>
-          a.check_in_time && getMonthKey(a.check_in_time) === selectedMonth,
-      )
+      (a) =>
+        a.check_in_time && getMonthKey(a.check_in_time) === selectedMonth,
+    )
     : attendance;
 
   // Group attendance by date
@@ -180,4 +180,4 @@ const AdminUserAttendanceScreen = () => {
     </View>
   );
 };
-export default AdminUserAttendanceScreen;
+export default UserAttendanceDetails;

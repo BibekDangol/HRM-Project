@@ -2,8 +2,8 @@ import { Modal, Text, TouchableOpacity, View } from 'react-native';
 
 import { Picker } from '@react-native-picker/picker';
 import React from 'react';
+import { UserProfile } from '.';
 import tw from 'twrnc';
-import { UserProfile } from "./manage-users";
 
 interface Props {
   visible: boolean;
