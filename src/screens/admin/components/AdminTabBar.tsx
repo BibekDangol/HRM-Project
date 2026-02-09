@@ -1,11 +1,11 @@
-import { PlatformPressable } from "@react-navigation/elements";
-import { View } from "react-native";
-import { adminTabs } from "../../../config/adminTabs";
-import tw from "twrnc";
-import { useLinkBuilder } from "@react-navigation/native";
+import { RelativePathString, useRouter } from "expo-router";
+import { Pressable, View } from "react-native";
 
-export default function AdminTabBar({ state, navigation }: any) {
-  const { buildHref } = useLinkBuilder();
+import tw from "twrnc";
+import { adminTabs } from "../../../config/adminTabs";
+
+export default function AdminTabBar({ state }: any) {
+  const router = useRouter();
 
   return (
     <View style={tw`flex-row border-t bg-gray-100 h-20 pt-2`}>
@@ -14,17 +14,16 @@ export default function AdminTabBar({ state, navigation }: any) {
         const Icon = tab.icon;
 
         return (
-          <PlatformPressable
+          <Pressable
             key={tab.name}
-            href={buildHref(tab.name)}
-            onPress={() => navigation.navigate(tab.name)}
+            onPress={() => router.push(`/(admin)/${tab.name}` as RelativePathString)}
             style={tw`flex-1 items-center justify-center`}
           >
             <Icon
               size={26}
               color={isFocused ? "#1F7A4D" : "#374151"}
             />
-          </PlatformPressable>
+          </Pressable>
         );
       })}
     </View>

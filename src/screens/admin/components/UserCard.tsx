@@ -1,21 +1,11 @@
 import { Alert, Text, TouchableOpacity, View } from "react-native";
 
+import Capsule from "../../../components/Capsule";
 import { Ionicons } from "@expo/vector-icons";
 import React from 'react';
+import { UserProfile } from "@/src/types/admin";
 import tw from "twrnc";
-import Capsule from "../../../components/Capsule";
 
-export type UserProfile = {
-  id: string;
-  email: string | null;
-  first_name: string | null;
-  last_name: string | null;
-  role: string;
-  organization_id: number;
-  status?: string | null;
-  organization?: { name: string | null };
-  supervisor_id: string | null;
-};
 type Props = {
   user: UserProfile;
   getSupervisorName: (id?: string | null) => string;
