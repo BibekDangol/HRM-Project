@@ -2,13 +2,13 @@ import { useAuthStore } from "@/src/store/useAuthStore";
 import { supabase } from "@/src/supabase/supabaseClient";
 import { AttendanceRow } from "@/src/types/attendance";
 import {
-    formatElapsed,
-    formatSinceTime,
-    getAttendanceStatus,
-    getErrorMessage,
-    needsCheckInCommentNepal,
-    needsCheckOutCommentNepal,
-    parseDate,
+  formatElapsed,
+  formatSinceTime,
+  getAttendanceStatus,
+  getErrorMessage,
+  needsCheckInCommentNepal,
+  needsCheckOutCommentNepal,
+  parseDate,
 } from "@/src/utils/checkinHelper";
 import { Tabs, useRouter } from "expo-router";
 import { CircleCheck, LogOut, User, UserCircle } from "lucide-react-native";
@@ -16,6 +16,33 @@ import React from "react";
 import { Alert, Modal, Pressable, Text, TextInput, View } from "react-native";
 import tw from "twrnc";
 import { MyTabBar } from "./tabBar";
+
+import * as Location from "expo-location";
+
+/* ---------------- Nepal date helper ---------------- */
+const NEPAL_OFFSET_MIN = 5 * 60 + 45;
+
+function nepalDateYYYYMMDD(now = new Date()) {
+  const nepalNow = new Date(now.getTime() + NEPAL_OFFSET_MIN * 60 * 1000);
+  return nepalNow.toISOString().slice(0, 10);
+}
+
+/* ---------------- Location helper ---------------- */
+async function getUserLocationOrThrow() {
+  const perm = await Location.requestForegroundPermissionsAsync();
+  if (perm.status !== "granted") {
+    throw new Error("Location permission not granted.");
+  }
+
+  const pos = await Location.getCurrentPositionAsync({
+    accuracy: Location.Accuracy.High,
+  });
+
+  return {
+    lat: pos.coords.latitude,
+    lng: pos.coords.longitude,
+  };
+}
 
 export default function UsersTabsLayout() {
   const router = useRouter();
@@ -32,15 +59,15 @@ export default function UsersTabsLayout() {
   const [checkedInAt, setCheckedInAt] = React.useState<Date | null>(null);
   const [now, setNow] = React.useState<number>(() => Date.now());
 
-  // comment modal state
+  // Comment modal state
   const [commentModalOpen, setCommentModalOpen] = React.useState(false);
   const [commentText, setCommentText] = React.useState("");
   const [commentMode, setCommentMode] = React.useState<
     "checkin" | "checkout" | null
   >(null);
 
+  // Prevent double-tap / slow network double action
   const checkActionLockRef = React.useRef(false);
-
   const runOnce = React.useCallback(async (fn: () => Promise<void>) => {
     if (checkActionLockRef.current) return;
     checkActionLockRef.current = true;
@@ -87,7 +114,7 @@ export default function UsersTabsLayout() {
       const { data, error } = await supabase
         .from("attendance")
         .select(
-          "id,user_id,check_in_time,check_out_time,status,check_in_comment,check_out_comment",
+          "id,user_id,date,check_in_time,check_out_time,status,check_in_comment,check_out_comment,check_in_lat,check_in_lng,check_out_lat,check_out_lng",
         )
         .eq("user_id", user.id)
         .order("check_in_time", { ascending: false })
@@ -109,12 +136,11 @@ export default function UsersTabsLayout() {
     }
   }, []);
 
-  // check if open session exists, if yes return it instead of inserting again
-  const getOpenAttendanceRow = React.useCallback(async (userId: string) => {
+  const getAnyOpenAttendanceRow = React.useCallback(async (userId: string) => {
     const { data, error } = await supabase
       .from("attendance")
       .select(
-        "id,user_id,check_in_time,check_out_time,status,check_in_comment,check_out_comment",
+        "id,user_id,date,check_in_time,check_out_time,status,check_in_comment,check_out_comment,check_in_lat,check_in_lng,check_out_lat,check_out_lng",
       )
       .eq("user_id", userId)
       .is("check_out_time", null)
@@ -126,92 +152,120 @@ export default function UsersTabsLayout() {
     return (data as AttendanceRow | null) ?? null;
   }, []);
 
-  // accept optional comment
-  const checkIn = React.useCallback(
-    async (comment?: string) => {
-      const {
-        data: { user },
-        error: userErr,
-      } = await supabase.auth.getUser();
+  const checkIn = React.useCallback(async (comment?: string) => {
+    const {
+      data: { user },
+      error: userErr,
+    } = await supabase.auth.getUser();
 
-      if (userErr) throw userErr;
-      if (!user) throw new Error("Not authenticated.");
+    if (userErr) throw userErr;
+    if (!user) throw new Error("Not authenticated.");
 
-      // If already checked in (open row exists), just use it
-      const openRow = await getOpenAttendanceRow(user.id);
-      if (openRow?.status === "incomplete") {
-        setAttendance(openRow);
-        setCheckedInAt(parseDate(openRow.check_in_time));
-        return;
-      }
+    //Get user's current GPS location (check-in)
+    const loc = await getUserLocationOrThrow();
 
-      const { data, error } = await supabase
-        .from("attendance")
-        .insert([
-          {
-            user_id: user.id,
-            check_in_time: new Date().toISOString(),
-            status: "incomplete",
-            check_in_comment: comment?.trim() || null,
-          },
-        ])
-        .select(
-          "id,user_id,check_in_time,check_out_time,status,check_in_comment,check_out_comment",
-        )
-        .single();
+    const date = nepalDateYYYYMMDD();
 
-      if (error) throw error;
+    // If already completed today, block
+    const { data: today, error: todayErr } = await supabase
+      .from("attendance")
+      .select("id,status")
+      .eq("user_id", user.id)
+      .eq("date", date)
+      .maybeSingle();
 
-      const row = data as AttendanceRow;
-      setAttendance(row);
-      setCheckedInAt(parseDate(row.check_in_time));
-    },
-    [getOpenAttendanceRow],
-  );
+    if (todayErr) throw todayErr;
 
-  //  accept optional comment
-  const checkOut = React.useCallback(
-    async (openRowId?: string, comment?: string) => {
-      const {
-        data: { user },
-        error: userErr,
-      } = await supabase.auth.getUser();
+    if (today?.status === "present") {
+      Alert.alert("Already completed", "You already checked in & out today.");
+      return;
+    }
 
-      if (userErr) throw userErr;
-      if (!user) throw new Error("Not authenticated.");
+    if (today?.status === "incomplete") {
+      Alert.alert("Already checked in", "You can't check in twice today.");
+      return;
+    }
 
-      let rowId = openRowId;
+    const { data, error } = await supabase
+      .from("attendance")
+      .upsert(
+        {
+          user_id: user.id,
+          date,
+          check_in_time: new Date().toISOString(),
+          status: "incomplete",
+          check_in_comment: comment?.trim() || null,
 
-      if (!rowId) {
-        const openRow = await getOpenAttendanceRow(user.id);
-        rowId = openRow?.id;
-      }
+          check_in_lat: loc.lat,
+          check_in_lng: loc.lng,
 
-      if (!rowId) throw new Error("No open attendance session found.");
+          // ensure open session
+          check_out_time: null,
+          check_out_comment: null,
+          check_out_lat: null,
+          check_out_lng: null,
+        },
+        { onConflict: "user_id,date" },
+      )
+      .select(
+        "id,user_id,date,check_in_time,check_out_time,status,check_in_comment,check_out_comment,check_in_lat,check_in_lng,check_out_lat,check_out_lng",
+      )
+      .single();
 
-      const { data, error } = await supabase
-        .from("attendance")
-        .update({
-          check_out_time: new Date().toISOString(),
-          status: "present",
-          check_out_comment: comment?.trim() || null,
-        })
-        .eq("id", rowId)
-        .eq("user_id", user.id)
-        .is("check_out_time", null)
-        .select(
-          "id,user_id,check_in_time,check_out_time,status,check_out_comment,check_in_comment",
-        )
-        .single();
+    if (error) throw error;
 
-      if (error) throw error;
+    const row = data as AttendanceRow;
+    setAttendance(row);
+    setCheckedInAt(parseDate(row.check_in_time));
+  }, []);
 
-      const row = data as AttendanceRow;
-      setAttendance(row);
-      setCheckedInAt(null);
-    },
-    [getOpenAttendanceRow],
-  );
+  const checkOut = React.useCallback(async (comment?: string) => {
+    const {
+      data: { user },
+      error: userErr,
+    } = await supabase.auth.getUser();
+
+    if (userErr) throw userErr;
+    if (!user) throw new Error("Not authenticated.");
+
+    // Get user's current GPS location (check-out)
+    const loc = await getUserLocationOrThrow();
+
+    const date = nepalDateYYYYMMDD();
+
+    const { data, error } = await supabase
+      .from("attendance")
+      .update({
+        check_out_time: new Date().toISOString(),
+        status: "present",
+        check_out_comment: comment?.trim() || null,
+
+        // store check-out location
+        check_out_lat: loc.lat,
+        check_out_lng: loc.lng,
+      })
+      .eq("user_id", user.id)
+      .eq("date", date)
+      .eq("status", "incomplete")
+      .select(
+        "id,user_id,date,check_in_time,check_out_time,status,check_out_comment,check_in_comment,check_in_lat,check_in_lng,check_out_lat,check_out_lng",
+      )
+      .maybeSingle();
+
+    if (error) throw error;
+
+    if (!data) {
+      Alert.alert(
+        "No open session",
+        "You haven't checked in yet (or already checked out).",
+      );
+      return;
+    }
+
+    const row = data as AttendanceRow;
+    setAttendance(row);
+    setCheckedInAt(null);
+  }, []);
 
   React.useEffect(() => {
     fetchLatestAttendance();
@@ -227,7 +281,7 @@ export default function UsersTabsLayout() {
     }
   };
 
-  //  called from modal submit (protected by runOnce)
+  // Called from modal submit (protected by runOnce)
   const submitComment = React.useCallback(() => {
     return runOnce(async () => {
       const comment = commentText.trim();
@@ -244,7 +298,7 @@ export default function UsersTabsLayout() {
         if (commentMode === "checkin") {
           await checkIn(comment);
         } else {
-          await checkOut(attendance?.id, comment);
+          await checkOut(comment);
         }
 
         setCommentModalOpen(false);
@@ -264,7 +318,6 @@ export default function UsersTabsLayout() {
     commentMode,
     checkIn,
     checkOut,
-    attendance?.id,
     fetchLatestAttendance,
   ]);
 
@@ -273,10 +326,27 @@ export default function UsersTabsLayout() {
       try {
         if (loadingAttendance) return;
 
+        const {
+          data: { user },
+          error: userErr,
+        } = await supabase.auth.getUser();
+
+        if (userErr) throw userErr;
+        if (!user) throw new Error("Not authenticated.");
+
         const nowDate = new Date();
 
-        // CHECK IN
         if (!isCheckedIn) {
+          const anyOpen = await getAnyOpenAttendanceRow(user.id);
+          if (anyOpen?.status === "incomplete") {
+            Alert.alert(
+              "Already checked in",
+              "You can't check in twice today.",
+            );
+            setCheckOpen(false);
+            return;
+          }
+
           if (needsCheckInCommentNepal(nowDate)) {
             setCommentMode("checkin");
             setCommentText("");
@@ -290,7 +360,6 @@ export default function UsersTabsLayout() {
           return;
         }
 
-        // CHECK OUT
         if (needsCheckOutCommentNepal(nowDate)) {
           setCommentMode("checkout");
           setCommentText("");
@@ -299,7 +368,7 @@ export default function UsersTabsLayout() {
         }
 
         setLoadingAttendance(true);
-        await checkOut(attendance?.id);
+        await checkOut();
         setCheckOpen(false);
       } catch (err: unknown) {
         Alert.alert("Check action failed", getErrorMessage(err));
@@ -312,10 +381,10 @@ export default function UsersTabsLayout() {
     runOnce,
     loadingAttendance,
     isCheckedIn,
-    attendance?.id,
     checkIn,
     checkOut,
     fetchLatestAttendance,
+    getAnyOpenAttendanceRow,
   ]);
 
   const isLocked = loadingAttendance || checkActionLockRef.current;
@@ -323,9 +392,30 @@ export default function UsersTabsLayout() {
   return (
     <>
       {/* Comment Modal */}
-      <Modal transparent visible={commentModalOpen} animationType="fade">
-        <View style={tw`flex-1 bg-black/40 items-center justify-center px-6`}>
-          <View style={tw`w-full bg-white rounded-2xl p-4`}>
+      <Modal
+        transparent
+        visible={commentModalOpen}
+        animationType="fade"
+        onRequestClose={() => {
+          if (isLocked) return;
+          setCommentModalOpen(false);
+          setCommentText("");
+          setCommentMode(null);
+        }}
+      >
+        <Pressable
+          style={tw`flex-1 bg-black/40 items-center justify-center px-6`}
+          onPress={() => {
+            if (isLocked) return;
+            setCommentModalOpen(false);
+            setCommentText("");
+            setCommentMode(null);
+          }}
+        >
+          <Pressable
+            style={tw`w-full bg-white rounded-2xl p-4`}
+            onPress={() => {}}
+          >
             <Text style={tw`text-lg font-bold text-black`}>
               {commentMode === "checkin" ? "Late check-in" : "Early check-out"}
             </Text>
@@ -335,7 +425,9 @@ export default function UsersTabsLayout() {
               value={commentText}
               onChangeText={setCommentText}
               placeholder="Reason..."
+              placeholderTextColor="#9CA3AF"
               multiline
+              editable={!isLocked}
               style={tw`mt-3 border border-gray-300 rounded-xl p-3 min-h-20 text-black`}
             />
 
@@ -357,10 +449,13 @@ export default function UsersTabsLayout() {
               </Pressable>
 
               <Pressable
-                disabled={isLocked}
+                disabled={isLocked || commentText.trim().length === 0}
                 onPress={submitComment}
                 style={({ pressed }) => [
-                  tw`px-4 py-2 bg-green-700 rounded-xl`,
+                  tw`px-4 py-2 rounded-xl`,
+                  isLocked || commentText.trim().length === 0
+                    ? tw`bg-green-700/50`
+                    : tw`bg-green-700`,
                   (pressed || isLocked) && tw`opacity-70`,
                 ]}
               >
@@ -369,8 +464,8 @@ export default function UsersTabsLayout() {
                 </Text>
               </Pressable>
             </View>
-          </View>
-        </View>
+          </Pressable>
+        </Pressable>
       </Modal>
 
       <Tabs
@@ -407,7 +502,7 @@ export default function UsersTabsLayout() {
                   {checkOpen ? (
                     <View
                       style={[
-                        tw`absolute right-0 top-12 bg-white border p-2 rounded-xl items-center justify-center border-[#E5E5E5] w-35`,
+                        tw`absolute right-0 top-9 bg-white border p-2 rounded-xl items-center justify-center border-[#E5E5E5] w-35`,
                       ]}
                     >
                       {isCheckedIn ? (
