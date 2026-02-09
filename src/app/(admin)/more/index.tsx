@@ -3,18 +3,17 @@ import * as React from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
 import tw from "twrnc";
+import { useRouter } from "expo-router";
 
 export default function MoreScreen() {
   const router = useRouter();
   return (
     <View style={tw`flex-1 bg-gray-100`}>
       <ScrollView contentContainerStyle={tw`p-4`}>
-
         {/* Attendance */}
         <TouchableOpacity
-          onPress={() => router.push("/(admin)/attendance-list")}
+          onPress={() => router.navigate("/more/attendance-list")}
           activeOpacity={0.8}
           style={tw`bg-white rounded-xl p-4 mb-4 flex-row items-center justify-between shadow`}
         >
@@ -57,7 +56,6 @@ export default function MoreScreen() {
 
           <Ionicons name="chevron-forward" size={22} color="#9ca3af" />
         </TouchableOpacity>
-
       </ScrollView>
     </View>
   );

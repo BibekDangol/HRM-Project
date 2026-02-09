@@ -18,9 +18,7 @@ import * as React from "react";
 import { Alert, Modal, Pressable, Text, TextInput, View } from "react-native";
 import tw from "twrnc";
 
-/* ---------------- Helpers ---------------- */
 const NEPAL_OFFSET_MIN = 5 * 60 + 45; // UTC+05:45
-
 function minutesOfDayNepal(now = new Date()) {
   const nepalNow = new Date(now.getTime() + NEPAL_OFFSET_MIN * 60 * 1000);
   return nepalNow.getUTCHours() * 60 + nepalNow.getUTCMinutes();

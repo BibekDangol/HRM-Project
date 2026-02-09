@@ -17,7 +17,7 @@ export const adminTabs = [
     icon: Users,
   },
   {
-    name: "leaves",
+    name: "leave",
     title: "Leave Requests",
     icon: CalendarDays,
   },
@@ -26,4 +26,5 @@ export const adminTabs = [
     title: "More",
     icon: MoreHorizontal,
   },
-];
+] as const;
+export type AdminTabName = (typeof adminTabs)[number]["name"];

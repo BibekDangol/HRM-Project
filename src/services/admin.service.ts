@@ -1,5 +1,5 @@
 import { supabase } from "@/src/supabase/supabaseClient";
-import { UserProfile } from "../screens/admin/components/UserCard";
+import { UserProfile } from "../types/admin";
 
 export type AdminProfile = {
   id: string;

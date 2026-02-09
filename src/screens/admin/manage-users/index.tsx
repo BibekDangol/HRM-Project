@@ -19,21 +19,11 @@ import { useDebounce } from "@/src/hooks/useDebounce";
 import UserCard from "@/src/screens/admin/components/UserCard";
 import { useUsersStore } from "@/src/store/useAdminsStore";
 import { useAuthStore } from "@/src/store/useAuthStore";
+import { UserProfile } from "@/src/types/admin";
 import { Ionicons } from "@expo/vector-icons";
 import tw from "twrnc";
 import EditUserModal from "./EditUserModal";
 
-export type UserProfile = {
-  id: string;
-  email: string | null;
-  first_name: string | null;
-  last_name: string | null;
-  role: string;
-  organization_id: number;
-  status?: string | null;
-  organization?: { name: string | null };
-  supervisor_id: string | null;
-};
 const ManageUsers = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const { users, organizationName, adminProfile, setAdminProfile, setUsers, } = useUsersStore();

@@ -1,10 +1,10 @@
 import { formatTime, getMonthKey, getTodayDate } from "@/src/utils/getDate";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { FlatList, Pressable, Text, View } from "react-native";
 
 import { supabase } from "@/src/supabase/supabaseClient";
 import { Ionicons } from "@expo/vector-icons";
-import { useLocalSearchParams } from "expo-router";
 import tw from "twrnc";
 import Capsule from "../../../components/Capsule";
 import SummaryBox from "../../../components/SummaryBox";
@@ -16,6 +16,8 @@ export type Attendance = {
   status: string | null;
 };
 const UserAttendanceDetails = () => {
+  const router = useRouter();
+  console.log(router.canGoBack());
   const { userId, name } = useLocalSearchParams<{
     userId: string;
     name: string;
@@ -36,7 +38,6 @@ const UserAttendanceDetails = () => {
       return [];
     }
     setAttendance(data as Attendance[]);
-    console.log(data);
   };
   useEffect(() => {
     if (!userId) return;
@@ -117,51 +118,52 @@ const UserAttendanceDetails = () => {
     );
   };
   return (
-    <View style={tw`flex-1 bg-gray-100 p-4`}>
-      {/* Header */}
-      <View style={tw`flex-row justify-between items-center mb-4`}>
-        <View>
-          <Text style={tw`text-2xl font-bold text-gray-900`}>{name}</Text>
-          <Text style={tw`text-gray-500`}>
-            {selectedMonth ?? getMonthKey(getTodayDate())}
-          </Text>
+    <>
+      <View style={tw`flex-1 bg-gray-100 p-4`}>
+        {/* Header */}
+        <View style={tw`flex-row justify-between items-center mb-4`}>
+          <View>
+            <Text style={tw`text-2xl font-bold text-gray-900`}>{name}</Text>
+            <Text style={tw`text-gray-500`}>
+              {selectedMonth ?? getMonthKey(getTodayDate())}
+            </Text>
+          </View>
+          {/* calendar icon */}
+          <Pressable onPress={() => setShowMonthPicker(!showMonthPicker)}>
+            <Ionicons name="calendar-outline" size={26} />
+          </Pressable>
         </View>
-        {/* calendar icon */}
-        <Pressable onPress={() => setShowMonthPicker(!showMonthPicker)}>
-          <Ionicons name="calendar-outline" size={26} />
-        </Pressable>
-      </View>
-      {/* Month picker Modal */}
-      {showMonthPicker && (
-        <View style={tw`flex-row flex-wrap mb-4`}>
-          {months.map((month) => (
-            <Pressable
-              key={month}
-              onPress={() => {
-                setSelectedMonth(month);
-                setExpandedDayId(null);
-              }}
-              style={tw`px-3 py-2 mr-2 mb-2 rounded-xl ${selectedMonth === month ? "bg-green-200" : "bg-white"}`}
-            >
-              <Text style={tw`text-gray-900`}>{month}</Text>
-            </Pressable>
-          ))}
+        {/* Month picker Modal */}
+        {showMonthPicker && (
+          <View style={tw`flex-row flex-wrap mb-4`}>
+            {months.map((month) => (
+              <Pressable
+                key={month}
+                onPress={() => {
+                  setSelectedMonth(month);
+                  setExpandedDayId(null);
+                }}
+                style={tw`px-3 py-2 mr-2 mb-2 rounded-xl ${selectedMonth === month ? "bg-green-200" : "bg-white"}`}
+              >
+                <Text style={tw`text-gray-900`}>{month}</Text>
+              </Pressable>
+            ))}
+          </View>
+        )}
+        {/* Summary */}
+        <View style={tw`flex-row justify-between mb-4`}>
+          <SummaryBox label="Present" value={summary.present} color="green" />
+          <SummaryBox label="Leave" value={summary.leave} color="yellow" />
+          <SummaryBox label="Absent" value={summary.absent} color="red" />
         </View>
-      )}
-      {/* Summary */}
-      <View style={tw`flex-row justify-between mb-4`}>
-        <SummaryBox label="Present" value={summary.present} color="green" />
-        <SummaryBox label="Leave" value={summary.leave} color="yellow" />
-        <SummaryBox label="Absent" value={summary.absent} color="red" />
-      </View>
-      {/* Attendance List */}
-      <FlatList
-        data={Object.entries(groupedByDate)}
-        keyExtractor={([day]) => day}
-        renderItem={({ item }) => renderItem(item[0], item[1])}
-      />
+        {/* Attendance List */}
+        <FlatList
+          data={Object.entries(groupedByDate)}
+          keyExtractor={([day]) => day}
+          renderItem={({ item }) => renderItem(item[0], item[1])}
+        />
 
-      {/* Default → Today
+        {/* Default → Today
       {!selectedDay && (
         <FlatList
           data={todaysAttendance}
@@ -170,14 +172,15 @@ const UserAttendanceDetails = () => {
         />
       )}
       {/* Month view */}
-      {/* {selectedDay && (
+        {/* {selectedDay && (
         <FlatList
           data={monthData}
           keyExtractor={i => i.id}
           renderItem={({ item }) => <DayAttendance item={item} />}
         />
       )} */}
-    </View>
+      </View>
+    </>
   );
 };
 export default UserAttendanceDetails;

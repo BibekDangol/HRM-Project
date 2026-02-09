@@ -1,5 +1,5 @@
-import { UserProfile } from "@/src/screens/admin/components/UserCard";
 import { create } from "zustand";
+import { UserProfile } from "../types/admin";
 
 type AdminProfile = {
   id: string;

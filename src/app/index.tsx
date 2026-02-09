@@ -1,28 +1,17 @@
 import { ActivityIndicator, Text, View } from "react-native";
 
-import { useAuthStore } from "@/src/store/useAuthStore";
 import { Redirect } from "expo-router";
-import { useEffect } from "react";
 import tw from 'twrnc';
+import { useAuthStore } from "@/src/store/useAuthStore";
 
 export default function Index() {
-  const { user, loading, role } = useAuthStore();
-  const { restoreSession } = useAuthStore();
-  useEffect(() => {
-    const init = async () => {
-      await restoreSession();
-    }
-    init();
-  }, []);
+  const { loading, role } = useAuthStore();
   if (loading) {
     return (
       <View style={tw`flex-1 items-center justify-center`}>
         <ActivityIndicator size="large" />
         <Text>Loading..</Text></View>
     )
-  }
-  if (!user || !role) {
-    return <Redirect href='/(auth)/login' />;
   }
   if (role === "admin") {
     return <Redirect href='/(admin)/dashboard' />;
