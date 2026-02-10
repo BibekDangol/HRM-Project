@@ -22,7 +22,7 @@ export default function LeaveRequests() {
   const router = useRouter();
   return (
     <View>
-      {leaves.map((leave) => (
+      {(leaves ?? []).map((leave) => (
         <Pressable
           key={leave.id}
           onPress={() => {
@@ -31,10 +31,15 @@ export default function LeaveRequests() {
                 pathname: "/(admin)/leave/approved-details",
                 params: { id: leave.id },
               });
-            } else {
-              // redirect to normal leave details screen
+            } else if (leave.status === "pending") {
               router.push({
                 pathname: "/(admin)/leave/leave-details",
+                params: { id: leave.id },
+              });
+            }
+            else {
+              router.push({
+                pathname: "/(admin)/leave/rejected-details",
                 params: { id: leave.id },
               });
             }

@@ -17,9 +17,7 @@ export default function LeaveApprovedDetailsScreen() {
     };
     loadLeave();
   }, [id]);
-
   if (!leave) return <Text style={tw`p-4`}>Loading...</Text>;
-
   return (
     <ScrollView style={tw`flex-1 bg-gray-100`}>
       <View style={tw`bg-white m-4 rounded-xl p-4 shadow`}>
@@ -43,7 +41,7 @@ export default function LeaveApprovedDetailsScreen() {
         {/* Leave Type */}
         <View style={tw`mb-4`}>
           <Text style={tw`text-gray-500 text-sm`}>Leave Type</Text>
-          <Text style={tw`text-gray-900`}>{leave.leave_type}</Text>
+          <Text style={tw`text-gray-900`}>{leave.leave_type_name}</Text>
         </View>
 
         {/* Dates */}
@@ -88,7 +86,7 @@ export default function LeaveApprovedDetailsScreen() {
 
           <Text style={tw`text-gray-500 text-sm`}>Approved On</Text>
           <Text style={tw`text-gray-900`}>
-            {leave.updated_at?.split("T")[0] || "N/A"}
+            {leave?.updated_at?.split("T")[0] || "N/A"}
           </Text>
         </View>
       </View>
