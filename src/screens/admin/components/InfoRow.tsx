@@ -2,11 +2,12 @@
 
 import { Text, View } from "react-native";
 
+import { ReactNode } from "react";
 import tw from "twrnc";
 
 interface InfoRowProps {
   label: string;
-  value: string;
+  value: string | ReactNode;
   badge?: boolean;
 }
 
