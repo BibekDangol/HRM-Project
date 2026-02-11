@@ -1,6 +1,11 @@
 import { PlatformPressable } from "@react-navigation/elements";
 import { useLinkBuilder } from "@react-navigation/native";
-import { CalendarDays, House, LucideIcon, MoreHorizontal } from "lucide-react-native";
+import {
+  CalendarDays,
+  House,
+  LucideIcon,
+  MoreHorizontal,
+} from "lucide-react-native";
 import { View } from "react-native";
 import tw from "twrnc";
 
@@ -12,10 +17,11 @@ export function MyTabBar({ state, descriptors, navigation }: any) {
     { icon: LucideIcon; iconSize?: number; pt?: number }
   > = {
     dashboard: { icon: House, iconSize: 26, pt: 2 },
-    leaves: { icon: CalendarDays, iconSize: 26, pt: 2 },
+    "leaves/index": { icon: CalendarDays, iconSize: 26, pt: 2 },
     more: { icon: MoreHorizontal, iconSize: 26, pt: 2 },
   };
 
+  // console.log("state.routes", state.routes);
   const visibleRoutes = state.routes.filter((route: any) => {
     const options = descriptors[route.key]?.options;
     const isHidden = options?.href === null;

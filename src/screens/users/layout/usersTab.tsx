@@ -10,13 +10,14 @@ import {
   needsCheckOutCommentNepal,
   parseDate,
 } from "@/src/utils/checkinHelper";
-import { Tabs, useRouter } from "expo-router";
+import { Stack, Tabs, useRouter } from "expo-router";
 import { CircleCheck, LogOut, User, UserCircle } from "lucide-react-native";
 import React from "react";
 import { Alert, Modal, Pressable, Text, TextInput, View } from "react-native";
 import tw from "twrnc";
 import { MyTabBar } from "./tabBar";
 
+import { userTabs } from "@/src/config/userTabs";
 import * as Location from "expo-location";
 
 /* ---------------- Nepal date helper ---------------- */
@@ -627,13 +628,19 @@ export default function UsersTabsLayout() {
         }}
         tabBar={(props) => <MyTabBar {...props} />}
       >
-        <Tabs.Screen name="dashboard" options={{ title: "Dashboard" }} />
-        <Tabs.Screen name="leaves" options={{ title: "Leaves" }} />
-        <Tabs.Screen name="more" options={{ title: "More" }} />
-        <Tabs.Screen
-          name="profile"
-          options={{ title: "Profile", href: null }}
-        />
+        {userTabs.map((tab) => (
+          <Tabs.Screen
+            key={tab.name}
+            name={tab.name}
+            options={{ title: tab.title }}
+          />
+        ))}
+
+        {/* <Stack.Screen
+          key={"leaves/calendar/index"}
+          name="calendar"
+          options={{ headerShown: false }}
+        /> */}
       </Tabs>
     </>
   );

@@ -1,16 +1,24 @@
 import { Stack } from "expo-router";
-import { useAuthStore } from "../store/useAuthStore";
 import { useEffect } from "react";
+import { useAuthStore } from "../store/useAuthStore";
 
 export default function Layout() {
-  const restoreSession = useAuthStore(s => s.restoreSession);
+  const restoreSession = useAuthStore((s) => s.restoreSession);
   useEffect(() => {
     const init = async () => {
       await restoreSession();
-    }
+    };
     init();
   }, []);
   return (
-    <Stack screenOptions={{ headerShown: false }} />
-  )
+    <Stack screenOptions={{ headerShown: false }}>
+      {/* <Stack.Screen
+        name="/dashboard"
+        options={{
+          headerShown: true,
+          title: "",
+        }}
+      /> */}
+    </Stack>
+  );
 }
