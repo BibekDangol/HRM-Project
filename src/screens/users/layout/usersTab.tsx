@@ -10,7 +10,7 @@ import {
   needsCheckOutCommentNepal,
   parseDate,
 } from "@/src/utils/checkinHelper";
-import { Stack, Tabs, useRouter } from "expo-router";
+import { Tabs, useRouter } from "expo-router";
 import { CircleCheck, LogOut, User, UserCircle } from "lucide-react-native";
 import React from "react";
 import { Alert, Modal, Pressable, Text, TextInput, View } from "react-native";
@@ -472,7 +472,7 @@ export default function UsersTabsLayout() {
       <Tabs
         screenOptions={{
           headerShown: true,
-          headerTitleAlign: "left",
+          headerTitleAlign: "center",
           headerStyle: { backgroundColor: "#ffffff" },
           headerShadowVisible: false,
           headerRight: () => (
@@ -503,7 +503,7 @@ export default function UsersTabsLayout() {
                   {checkOpen ? (
                     <View
                       style={[
-                        tw`absolute right-0 top-9 bg-white border p-2 rounded-xl items-center justify-center border-[#E5E5E5] w-35`,
+                        tw`absolute right-0 top-9 bg-white border p-2 rounded-xl items-center justify-center border-[#E5E5E5] w-40`,
                       ]}
                     >
                       {isCheckedIn ? (
@@ -636,11 +636,6 @@ export default function UsersTabsLayout() {
           />
         ))}
 
-        {/* <Stack.Screen
-          key={"leaves/calendar/index"}
-          name="calendar"
-          options={{ headerShown: false }}
-        /> */}
       </Tabs>
     </>
   );

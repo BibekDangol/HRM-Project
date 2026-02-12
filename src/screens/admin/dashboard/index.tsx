@@ -8,7 +8,7 @@ import tw from "twrnc";
 
 export default function DashboardScreen() {
   return (
-    <View style={tw`flex-1 bg-gray-50`}>
+    <View style={tw`flex-1 bg-white`}>
       <ScrollView contentContainerStyle={tw`px-4 pt-6 pb-10`}>
         {/* Header */}
         <View style={tw`mb-4`}>
@@ -21,7 +21,7 @@ export default function DashboardScreen() {
         </View>
 
         {/* Stats */}
-        <View style={tw`flex-row flex-wrap justify-between`}>
+        <View style={tw`flex-row flex-wrap justify-between bg`}>
           <StatCard
             title="Employees"
             value={150}
@@ -44,12 +44,11 @@ export default function DashboardScreen() {
           />
         </View>
 
-        {/* Recent Activity */}
-        <Text style={tw`mt-8 mb-3 text-lg font-bold text-gray-800`}>
-          Recent Activity
-        </Text>
+        <View style={tw`bg-gray-50 rounded-2xl p-4 shadow-sm`}>
+          <Text style={tw`mb-2 text-lg font-bold text-gray-800`}>
+            Recent Activity
+          </Text>
 
-        <View style={tw`bg-white rounded-2xl p-4 shadow-sm`}>
           <Text style={tw`text-gray-600`}>• Ram marked present</Text>
           <Text style={tw`text-gray-600 mt-1`}>• Shyam requested leave</Text>
           <Text style={tw`text-gray-600 mt-1`}>• New user added</Text>

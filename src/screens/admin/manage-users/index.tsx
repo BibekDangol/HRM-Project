@@ -161,7 +161,7 @@ const ManageUsers = () => {
             <View style={tw`p-4`}>
               {/* //  Header */}
               <View style={tw`flex-row items-center justify-between mb-4`}>
-                <Text style={tw`text-2xl font-bold text-gray-900`}>
+                <Text style={tw`text-3xl font-extrabold text-gray-900`}>
                   {organizationName}
                 </Text>
                 <TouchableOpacity
@@ -174,11 +174,12 @@ const ManageUsers = () => {
               {/* // Search */}
               <View
                 pointerEvents="box-none"
-                style={tw`flex-row bg-white rounded-xl px-3 py-2 items-center mb-4 shadow`}
+                style={tw`flex-row bg-white rounded-xl px-3 py-2 items-center mb-4 shadow border border-gray-200`}
               >
                 <Ionicons name="search" size={20} color="#94A3B8" />
                 <TextInput
                   placeholder="Search users..."
+                  placeholderTextColor= "#94A3B8"
                   value={searchQuery}
                   onChangeText={setSearchQuery}
                   style={tw`flex-1 ml-2 text-base pr-4`}

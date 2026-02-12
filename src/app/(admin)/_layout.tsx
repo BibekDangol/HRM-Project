@@ -17,35 +17,36 @@ export default function AdminLayout() {
   const pathname = usePathname();
   const menu = useAdminHeaderMenu();
   const { user, loading } = useAuthStore();
-  const { adminProfile, setAdminProfile } = useUsersStore()
+  const { adminProfile, setAdminProfile } = useUsersStore();
 
   const fetchUserProfile = useCallback(async () => {
     if (!user?.id || adminProfile) return;
     const profile = await fetchAdminProfileService(user?.id);
     setAdminProfile(profile);
-  }, [user?.id, setAdminProfile, adminProfile])
+  }, [user?.id, setAdminProfile, adminProfile]);
 
   useEffect(() => {
-    fetchUserProfile()
-  }, [fetchUserProfile, loading])
+    fetchUserProfile();
+  }, [fetchUserProfile, loading]);
 
-  const showBackButton = !adminTabs.some(tab => pathname?.includes(tab.name));
+  const showBackButton = !adminTabs.some((tab) => pathname?.includes(tab.name));
   return (
     <Tabs
       screenOptions={{
         headerShadowVisible: false,
-        headerLeft: showBackButton ? () => (
-          <Pressable style={tw`ml-4`}
-            onPress={() => router.back()}>
-            <ArrowLeft size={24} />
-          </Pressable>)
+        headerLeft: showBackButton
+          ? () => (
+              <Pressable style={tw`ml-4`} onPress={() => router.back()}>
+                <ArrowLeft size={24} />
+              </Pressable>
+            )
           : undefined,
 
         headerRight: () => (
           <View style={tw`mr-4`}>
             <Pressable onPress={menu.toggle}>
               <View
-                style={tw`w-9 h-9 rounded-full border items-center justify-center`}
+                style={tw`w-9 h-9 rounded-full bg-white border border-[#E5E5E5] items-center justify-center`}
               >
                 <User size={18} />
               </View>
@@ -60,18 +61,13 @@ export default function AdminLayout() {
       }}
       tabBar={(props) => <AdminTabBar {...props} />}
     >
-      {
-        adminTabs.filter((tab) => tab.name !== "more" && tab.name !== "leave")
-          .map((tab) => (
-            <Tabs.Screen
-              key={tab.name}
-              name={tab.name}
-              options={{ title: tab.title }}
-            />))}
-      {/* Hidden screen */}
-      <Tabs.Screen name="leave" options={{ title: "Leave", headerShown: false }} />
-      <Tabs.Screen name="more" options={{ title: "More", headerShown: false }} />
-      <Tabs.Screen name="profile" options={{ href: null, title: "Profile" }} />
-    </Tabs >
+      {adminTabs.map((tab) => (
+        <Tabs.Screen
+          key={tab.name}
+          name={tab.name}
+          options={{ title: tab.title }}
+        />
+      ))}
+    </Tabs>
   );
 }

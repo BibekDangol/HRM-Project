@@ -1,6 +1,6 @@
 import {
   CalendarDays,
-  LayoutDashboard,
+  Home,
   MoreHorizontal,
   Users,
 } from "lucide-react-native";
@@ -9,7 +9,7 @@ export const adminTabs = [
   {
     name: "dashboard",
     title: "Dashboard",
-    icon: LayoutDashboard,
+    icon: Home,
   },
   {
     name: "manage-users",

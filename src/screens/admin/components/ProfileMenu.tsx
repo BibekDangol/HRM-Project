@@ -14,34 +14,32 @@ export default function ProfileMenu({ open, onProfile, onLogout }: Props) {
 
   return (
     <View
-      style={tw`absolute right-4 top-12 bg-white w-44 rounded-xl shadow-lg border border-gray-200 overflow-hidden`}
+      style={[
+        tw`absolute right-0 top-12 bg-white border border-[#E5E5E5] p-2 rounded-xl`,
+        { width: 150 },
+      ]}
     >
       <Pressable
         onPress={onProfile}
         android_ripple={{ color: "#E5E7EB" }}
         style={({ pressed }) =>
-          tw`flex-row items-center px-4 py-3 ${pressed ? "bg-gray-100" : ""
-            }`
+          tw`flex-row items-center px-3 py-2`
         }
       >
-        <UserCircle size={18} color="#374151" />
-        <Text style={tw`ml-3 text-gray-800 font-medium`}>
-          Profile
-        </Text>
+        <UserCircle size={18} color="#0C0C0C" />
+        <Text style={tw`ml-2 font-bold text-[#0C0C0C]`}>Profile</Text>
       </Pressable>
-      <View style={tw`h-px bg-gray-200 mx-3`} />
+
+      <View style={tw`h-px bg-[#E5E5E5] my-1`} />
       <Pressable
         onPress={onLogout}
         android_ripple={{ color: "#FEE2E2" }}
         style={({ pressed }) =>
-          tw`flex-row items-center px-4 py-3 ${pressed ? "bg-red-50" : ""
-            }`
+          tw`flex-row items-center px-3 py-2`
         }
       >
-        <LogOut size={18} color="#EF4444" />
-        <Text style={tw`ml-3 text-red-500 font-medium`}>
-          Logout
-        </Text>
+        <LogOut size={20} color="#FF4D4F" />
+        <Text style={tw`ml-2 font-bold text-[#FF4D4F]`}>Logout</Text>
       </Pressable>
     </View>
   );

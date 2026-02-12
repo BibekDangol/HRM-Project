@@ -2,7 +2,7 @@ import { Modal, Text, TouchableOpacity, View } from 'react-native';
 
 import { Picker } from '@react-native-picker/picker';
 import React from 'react';
-import { UserProfile } from '.';
+import { UserProfile } from '@/src/types/admin';
 import tw from 'twrnc';
 
 interface Props {

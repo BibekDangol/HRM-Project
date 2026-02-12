@@ -12,8 +12,13 @@ export const userTabs = [
     icon: Users,
   },
   {
+    name: "profile/index",
+    title: "Profile",
+    icon: Users,
+  },
+  {
     name: "more",
-    title: "More",
+    title: "Setting",
     icon: MoreHorizontal,
   },
 ] as const;

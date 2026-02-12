@@ -1,4 +1,4 @@
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import {
   Alert,
@@ -16,14 +16,7 @@ import { z } from "zod";
 
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { supabase } from "@/src/supabase/supabaseClient";
-
-type LeaveTypeRow = { id: string; name: string };
-
-/**
- * Ensure leaves table has:
- * start_date (date), end_date (date), leave_type_id (uuid), reason (text),
- * is_half_day (bool), days_count (numeric), user_id (uuid), status (text)
- */
+import { ArrowLeft } from "lucide-react-native";
 
 const schema = z.object({
   reason: z
@@ -35,6 +28,7 @@ const schema = z.object({
 });
 
 type FormValues = z.input<typeof schema>;
+type LeaveTypeRow = { id: string; name: string };
 
 function LeaveTypeDropdown({
   value,
@@ -130,7 +124,6 @@ function DateField({
   );
 }
 
-/** -------- Date helpers (YYYY-MM-DD) -------- */
 function parseISODateOnly(dateStr: string) {
   const [y, m, d] = dateStr.split("-").map((n) => Number(n));
   if (!y || !m || !d) return null;
@@ -147,7 +140,6 @@ function diffDaysInclusive(startStr: string, endStr: string) {
   return diff + 1;
 }
 
-/** Normalize expo-router param (string | string[]) -> string */
 function firstParam(v?: string | string[]) {
   if (!v) return "";
   return Array.isArray(v) ? String(v[0] ?? "") : String(v);
@@ -156,12 +148,6 @@ function firstParam(v?: string | string[]) {
 export default function ApplyLeaveScreen() {
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
-
-  /**
-   * IMPORTANT:
-   * Your calendar MUST navigate to THIS screen with:
-   * router.replace({ pathname: "/(users)/leaves/calendar/apply", params: { startDate, endDate } })
-   */
   const params = useLocalSearchParams<{
     startDate?: string | string[];
     endDate?: string | string[];
@@ -217,9 +203,6 @@ export default function ApplyLeaveScreen() {
     return n ?? null;
   }, [localStartDate, localEndDate, isHalfDay]);
 
-  // Debug: confirm params are arriving
-  useEffect(() => {}, [params, startDate, endDate]);
-
   // Load leave types
   useEffect(() => {
     (async () => {
@@ -260,7 +243,6 @@ export default function ApplyLeaveScreen() {
   };
 
   const onInvalid = (formErrors: any) => {
-    // console.log("FORM ERRORS:", formErrors);
     Alert.alert("Form Error", "Please fill all required fields.");
   };
 
@@ -274,7 +256,15 @@ export default function ApplyLeaveScreen() {
     if (!localStartDate || !localEndDate) {
       setDateError("Start and end date are required");
       Alert.alert("Form Error", "Please pick start and end date.");
-      router.replace("/(users)/leaves/calendar");
+      router.push({
+        pathname: "/(users)/leaves/calendar",
+        params: {
+          from: "apply",
+          returnTo: "/(users)/leaves/apply",
+          startDate: localStartDate,
+          endDate: localEndDate,
+        },
+      });
       return;
     }
 
@@ -290,7 +280,15 @@ export default function ApplyLeaveScreen() {
         "Form Error",
         "Could not calculate days count. Please re-pick dates.",
       );
-      router.replace("/(users)/leaves/calendar");
+      router.push({
+        pathname: "/(users)/leaves/calendar",
+        params: {
+          from: "apply",
+          returnTo: "/(users)/leaves/apply",
+          startDate: localStartDate,
+          endDate: localEndDate,
+        },
+      });
       return;
     }
 
@@ -329,164 +327,194 @@ export default function ApplyLeaveScreen() {
   };
 
   return (
-    <View style={tw`flex-1 bg-white`}>
-      <ScrollView contentContainerStyle={tw`px-4 pt-4 pb-10`}>
-        <Text style={tw`text-xl font-bold text-slate-900`}>
-          Apply for Leave
-        </Text>
-
-        {/* Start / End date (TextInput look, opens calendar) */}
-        <View style={tw`mt-4`}>
-          <DateField
-            label="Start Date"
-            value={localStartDate}
-            onPress={() =>
-              router.push({
-                pathname: "/(users)/leaves/calendar",
-                params: { from: "apply" },
-              })
-            }
-          />
-
-          {!!dateError && (
-            <Text style={tw`mt-2 text-red-600 font-semibold`}>{dateError}</Text>
-          )}
-
-          <DateField
-            label="End Date"
-            value={localEndDate}
-            onPress={() =>
-              router.push({
-                pathname: "/(users)/leaves/calendar",
-                params: { from: "apply" },
-              })
-            }
-          />
-
-          {/* Days count preview */}
-          <View style={tw`mt-4`}>
-            <Text style={tw`text-slate-800 font-semibold`}>Days Count</Text>
-            <View
-              style={tw`mt-2 px-4 py-3 rounded-2xl border border-slate-200 bg-white`}
+    <>
+      <Stack.Screen
+        options={{
+          title: "Apply for Leave",
+          headerTitleAlign: "left",
+          headerTitle: () => null,
+          headerLeft: () => (
+            <Pressable
+              onPress={() => router.push("/(users)/leaves/calendar")}
+              hitSlop={12}
+              style={({ pressed }) => [pressed && tw`opacity-70`]}
             >
-              <Text style={tw`text-slate-900 font-semibold`}>
-                {computedDaysCount == null ? "-" : String(computedDaysCount)}
-              </Text>
-            </View>
-          </View>
-
-          {/* Half-day checkbox (ONLY when single day) */}
-          {isSingleDay && (
-            <View style={tw`mt-4`}>
-              <Text style={tw`text-slate-800 font-semibold`}>Half Day</Text>
-
-              <Controller
-                control={control}
-                name="isHalfDay"
-                render={({ field: { value, onChange } }) => (
-                  <Pressable
-                    onPress={() => onChange(!value)}
-                    style={({ pressed }) => [
-                      tw`mt-2 flex-row items-center justify-between px-4 py-3 rounded-2xl border border-slate-200 bg-white`,
-                      pressed && tw`opacity-85`,
-                    ]}
-                  >
-                    <Text style={tw`text-slate-900 font-semibold`}>
-                      {value ? "Yes (0.5 day)" : "No (1 day)"}
-                    </Text>
-
-                    <View
-                      style={tw`h-6 w-6 rounded-md border ${
-                        value
-                          ? "bg-blue-600 border-blue-600"
-                          : "bg-white border-slate-300"
-                      } items-center justify-center`}
-                    >
-                      {value ? (
-                        <Text style={tw`text-white font-bold`}>✓</Text>
-                      ) : null}
-                    </View>
-                  </Pressable>
-                )}
-              />
-            </View>
-          )}
-        </View>
-
-        {/* Leave type dropdown */}
-        <View style={tw`mt-5`}>
-          <LeaveTypeDropdown
-            value={selectedLeaveType}
-            onChange={handleLeaveTypeChange}
-            types={leaveTypes}
-            loading={loadingTypes}
-          />
-
-          {!!leaveTypeError && (
-            <Text style={tw`mt-2 text-red-600 font-semibold`}>
-              {leaveTypeError}
-            </Text>
-          )}
-        </View>
-
-        {/* Description */}
-        <View style={tw`mt-5`}>
-          <Text style={tw`text-slate-800 font-semibold`}>
-            Reason / Description
+              <ArrowLeft size={24} color="#0f172a" />
+            </Pressable>
+          ),
+        }}
+      />
+      <View style={tw`flex-1 bg-white`}>
+        <ScrollView contentContainerStyle={tw`px-4 pt-4 pb-10`}>
+          <Text style={tw`text-xl font-semibold text-gray-900`}>
+            New Leave Request
           </Text>
 
-          <Controller
-            control={control}
-            name="reason"
-            render={({ field: { value, onChange, onBlur } }) => (
-              <TextInput
-                value={value}
-                onChangeText={onChange}
-                onBlur={onBlur}
-                placeholder="Enter reason for leave..."
-                placeholderTextColor="#94a3b8"
-                multiline
-                style={tw`mt-2 px-4 py-3 rounded-2xl border border-slate-200 text-slate-900 h-32`}
-              />
+          {/* Start / End date (TextInput look, opens calendar) */}
+          <View style={tw`mt-`}>
+            <DateField
+              label="Start Date"
+              value={localStartDate}
+              onPress={() =>
+                router.push({
+                  pathname: "/(users)/leaves/calendar",
+                  params: {
+                    from: "apply",
+                    returnTo: "/(users)/leaves/apply",
+                    startDate: localStartDate,
+                    endDate: localEndDate,
+                  },
+                })
+              }
+            />
+
+            {!!dateError && (
+              <Text style={tw`mt-2 text-red-600 font-semibold`}>
+                {dateError}
+              </Text>
             )}
-          />
 
-          {!!errors.reason?.message && (
-            <Text style={tw`mt-2 text-red-600 font-semibold`}>
-              {errors.reason.message}
+            <DateField
+              label="End Date"
+              value={localEndDate}
+              onPress={() =>
+                router.push({
+                  pathname: "/(users)/leaves/calendar",
+                  params: {
+                    from: "apply",
+                    returnTo: "/(users)/leaves/apply",
+                    startDate: localStartDate,
+                    endDate: localEndDate,
+                  },
+                })
+              }
+            />
+
+            {/* Days count preview */}
+            <View style={tw`mt-4`}>
+              <Text style={tw`text-slate-800 font-semibold`}>Days Count</Text>
+              <View
+                style={tw`mt-2 px-4 py-3 rounded-2xl border border-slate-200 bg-white`}
+              >
+                <Text style={tw`text-slate-900 font-semibold`}>
+                  {computedDaysCount == null ? "-" : String(computedDaysCount)}
+                </Text>
+              </View>
+            </View>
+
+            {/* Half-day checkbox (ONLY when single day) */}
+            {isSingleDay && (
+              <View style={tw`mt-4`}>
+                <Text style={tw`text-slate-800 font-semibold`}>Half Day</Text>
+
+                <Controller
+                  control={control}
+                  name="isHalfDay"
+                  render={({ field: { value, onChange } }) => (
+                    <Pressable
+                      onPress={() => onChange(!value)}
+                      style={({ pressed }) => [
+                        tw`mt-2 flex-row items-center justify-between px-4 py-3 rounded-2xl border border-slate-200 bg-white`,
+                        pressed && tw`opacity-85`,
+                      ]}
+                    >
+                      <Text style={tw`text-slate-900 font-semibold`}>
+                        {value ? "Yes (0.5 day)" : "No (1 day)"}
+                      </Text>
+
+                      <View
+                        style={tw`h-6 w-6 rounded-md border ${
+                          value
+                            ? "bg-blue-600 border-blue-600"
+                            : "bg-white border-slate-300"
+                        } items-center justify-center`}
+                      >
+                        {value ? (
+                          <Text style={tw`text-white font-bold`}>✓</Text>
+                        ) : null}
+                      </View>
+                    </Pressable>
+                  )}
+                />
+              </View>
+            )}
+          </View>
+
+          {/* Leave type dropdown */}
+          <View style={tw`mt-5`}>
+            <LeaveTypeDropdown
+              value={selectedLeaveType}
+              onChange={handleLeaveTypeChange}
+              types={leaveTypes}
+              loading={loadingTypes}
+            />
+
+            {!!leaveTypeError && (
+              <Text style={tw`mt-2 text-red-600 font-semibold`}>
+                {leaveTypeError}
+              </Text>
+            )}
+          </View>
+
+          {/* Description */}
+          <View style={tw`mt-5`}>
+            <Text style={tw`text-slate-800 font-semibold`}>
+              Reason / Description
             </Text>
-          )}
-        </View>
 
-        {/* Buttons */}
-        <View style={tw`mt-8 flex-row`}>
-          <Pressable
-            disabled={submitting}
-            onPress={handleSubmit(onSubmit, onInvalid)}
-            style={({ pressed }) => [
-              tw`flex-1 mr-2 px-4 py-4 rounded-2xl bg-blue-600 items-center`,
-              pressed && tw`opacity-85`,
-              submitting && tw`opacity-60`,
-            ]}
-          >
-            <Text style={tw`text-white font-bold`}>
-              {submitting ? "Submitting..." : "Submit"}
-            </Text>
-          </Pressable>
+            <Controller
+              control={control}
+              name="reason"
+              render={({ field: { value, onChange, onBlur } }) => (
+                <TextInput
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  placeholder="Enter reason for leave..."
+                  placeholderTextColor="#94a3b8"
+                  multiline
+                  style={tw`mt-2 px-4 py-3 rounded-2xl border border-slate-200 text-slate-900 h-32`}
+                />
+              )}
+            />
 
-          <Pressable
-            disabled={submitting}
-            onPress={() => router.replace("/(users)/leaves/calendar")}
-            style={({ pressed }) => [
-              tw`flex-1 ml-2 px-4 py-4 rounded-2xl border border-slate-200 items-center`,
-              pressed && tw`opacity-85`,
-              submitting && tw`opacity-60`,
-            ]}
-          >
-            <Text style={tw`text-slate-900 font-bold`}>Cancel</Text>
-          </Pressable>
-        </View>
-      </ScrollView>
-    </View>
+            {!!errors.reason?.message && (
+              <Text style={tw`mt-2 text-red-600 font-semibold`}>
+                {errors.reason.message}
+              </Text>
+            )}
+          </View>
+
+          {/* Buttons */}
+          <View style={tw`mt-8 flex-row`}>
+            <Pressable
+              disabled={submitting}
+              onPress={handleSubmit(onSubmit, onInvalid)}
+              style={({ pressed }) => [
+                tw`flex-1 mr-2 px-4 py-4 rounded-2xl bg-blue-600 items-center`,
+                pressed && tw`opacity-85`,
+                submitting && tw`opacity-60`,
+              ]}
+            >
+              <Text style={tw`text-white font-bold`}>
+                {submitting ? "Submitting..." : "Submit"}
+              </Text>
+            </Pressable>
+
+            <Pressable
+              disabled={submitting}
+              onPress={() => router.replace("/(users)/leaves")}
+              style={({ pressed }) => [
+                tw`flex-1 ml-2 px-4 py-4 rounded-2xl border border-slate-200 items-center`,
+                pressed && tw`opacity-85`,
+                submitting && tw`opacity-60`,
+              ]}
+            >
+              <Text style={tw`text-slate-900 font-bold`}>Cancel</Text>
+            </Pressable>
+          </View>
+        </ScrollView>
+      </View>
+    </>
   );
 }

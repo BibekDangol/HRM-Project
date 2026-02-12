@@ -5,22 +5,22 @@ export default function LeaveLayout() {
     <Stack>
       <Stack.Screen name="index"
         options={{
-          headerShown: true,
+          headerShown: false,
           title: "Leave Requests"
         }} />
       <Stack.Screen name="leave-details"
         options={{
-          headerShown: true,
+          headerShown: false,
           title: "Leave Details"
         }} />
       <Stack.Screen name="leave-approved"
         options={{
-          headerShown: true,
+          headerShown: false,
           title: "Approval"
         }} />
       <Stack.Screen name="approved-details"
         options={{
-          headerShown: true,
+          headerShown: false,
           title: "Approval Details"
         }} />
     </Stack>
