@@ -20,7 +20,8 @@ export default function UsersMoreScreen() {
       </Text>
 
       <Text style={tw`mt-2 text-slate-500 text-center`}>
-        We’re working on this page. It’ll be available in a future update.
+        We&apos;re working on this page. It&apos;ll be available in a future
+        update.
       </Text>
 
       <Pressable

@@ -15,12 +15,11 @@ import {
 } from "@/src/utils/leaveUtils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  Stack,
   useFocusEffect,
   useLocalSearchParams,
-  useRouter,
+  useRouter
 } from "expo-router";
-import { ArrowLeft, Check } from "lucide-react-native";
+import { Check } from "lucide-react-native";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
@@ -499,7 +498,7 @@ export default function ApplyLeaveScreen() {
                 <LeaveTypeDropdown
                   value={selectedLeaveType}
                   onChange={handleLeaveTypeChange}
-                  types={leaveTypes}
+                  leaveTypes={leaveTypes}
                   loading={loadingTypes}
                   onRefresh={loadLeaveTypesWithStats}
                 />
@@ -556,7 +555,9 @@ export default function ApplyLeaveScreen() {
 
                 <Pressable
                   disabled={submitting}
-                  onPress={() => router.replace("/(users)/leaves/(tabs)/requests")}
+                  onPress={() =>
+                    router.replace("/(users)/leaves/(tabs)/requests")
+                  }
                   style={({ pressed }) => [
                     tw`flex-1 ml-2 px-4 py-4 rounded-2xl border border-slate-200 items-center`,
                     pressed && tw`opacity-85`,

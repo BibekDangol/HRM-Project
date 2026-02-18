@@ -1,4 +1,3 @@
-// app/(users)/leaves/index.tsx
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -12,8 +11,6 @@ import { supabase } from "@/src/supabase/supabaseClient";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { LeaveDetailsRow,  LeaveTypeRowIndex, LeaveTypeStats } from "@/src/types/userLeave";
 import { formatDays, getLeaveDays } from "@/src/utils/leaveUtils";
-
-
 
 export default function LeavesDetailsScreen() {
   const user = useAuthStore((s) => s.user);
