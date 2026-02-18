@@ -81,7 +81,7 @@ export default function LeaveApprovedDetailsScreen() {
 
           <Text style={tw`text-gray-500 text-sm`}>Approved By</Text>
           <Text style={tw`text-gray-900 mb-2`}>
-            {leave.approved_by_name || "N/A"}
+            {leave.action_taken_by_name || "N/A"}
           </Text>
 
           <Text style={tw`text-gray-500 text-sm`}>Approved On</Text>
