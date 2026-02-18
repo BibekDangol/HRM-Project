@@ -1,11 +1,11 @@
-import { Pressable, FlatList, Text, View } from "react-native";
+import { LeaveStatus, fetchLeaveRequests } from "@/src/services/leave.service";
+import { CalendarClock, ChevronRight } from "lucide-react-native";
+import { useEffect, useState } from "react";
+import { FlatList, Pressable, Text, View } from "react-native";
 
-import { fetchLeaveRequests } from "@/src/services/leave.service";
 import { useUsersStore } from "@/src/store/useAdminsStore";
 import { useLeaveStore } from "@/src/store/useLeaveStore";
 import { useRouter } from "expo-router";
-import { useEffect } from "react";
-import { CalendarClock, ChevronRight } from "lucide-react-native";
 import tw from "twrnc";
 
 const statusConfig: Record<string, { bg: string; text: string; dot: string }> = {
@@ -29,7 +29,12 @@ const statusConfig: Record<string, { bg: string; text: string; dot: string }> = 
 export default function LeaveRequests() {
   const { adminProfile } = useUsersStore();
   const { setLeaves, leaves } = useLeaveStore();
+  const [activeTab, setActiveTab] = useState<LeaveStatus>("pending");
+
   const router = useRouter();
+  const filteredLeaves = leaves.filter(
+    (leave) => leave.status === activeTab
+  );
 
   useEffect(() => {
     if (!adminProfile) return;
@@ -52,8 +57,35 @@ export default function LeaveRequests() {
 
   return (
     <View style={tw`flex-1 bg-white`}>
+      {/* Top Tabs */}
+      <View style={tw`flex-row mx-5 mt-4 bg-slate-100 rounded-2xl p-1`}>
+        {(["pending", "approved", "rejected"] as LeaveStatus[]).map((tab) => {
+          const isActive = activeTab === tab;
+
+          return (
+            <Pressable
+              key={tab}
+              onPress={() => setActiveTab(tab)}
+              style={[
+                tw`flex-1 py-3 rounded-xl items-center`,
+                isActive ? tw`bg-white` : null,
+              ]}
+            >
+              <Text
+                style={[
+                  tw`text-sm font-bold`,
+                  isActive ? tw`text-blue-600` : tw`text-slate-500`,
+                ]}
+              >
+                {tab.toUpperCase()}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
+
       <FlatList
-        data={leaves ?? []}
+        data={filteredLeaves}
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={tw`px-4 pt-3 pb-10`}

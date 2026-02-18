@@ -23,6 +23,11 @@ export default function LeaveLayout() {
           headerShown: false,
           title: "Approval Details"
         }} />
+      <Stack.Screen name="rejected-details"
+        options={{
+          headerShown: false,
+          title: "Rejected Details"
+        }} />
     </Stack>
   )
 }

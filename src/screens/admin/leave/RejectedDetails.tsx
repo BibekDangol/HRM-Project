@@ -35,11 +35,6 @@ const RejectedDetails = () => {
   }
   return (
     <View style={tw`flex-1 bg-white p-4`}>
-      {/* Header */}
-      <Text style={tw`text-xl font-bold mb-4`}>
-        Leave Request Details
-      </Text>
-
       {/* Status */}
       <View style={tw`mb-4`}>
         <Text style={tw`text-sm text-gray-500`}>Status</Text>

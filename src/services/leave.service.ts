@@ -18,6 +18,7 @@ export type Leave = {
   reason?: string;
   first_name: string;
   last_name: string;
+  action_taken_by: string;
 };
 
 // Fetch all leave requests for an organization
@@ -40,13 +41,22 @@ export async function fetchLeaveById(id: string): Promise<Leave> {
 }
 
 // Update leave status
-export async function updateLeaveStatus(id: string, status: LeaveStatus) {
-  const res = await apiClient.post("/fetch-leave-services", {
-    action: "updateLeaveStatus",
-    payload: { id, status },
-  });
+export async function updateLeaveStatus(
+  id: string,
+  status: LeaveStatus,
+  userId?: string,
+) {
+  try {
+    const res = await apiClient.post("/fetch-leave-services", {
+      action: "updateLeaveStatus",
+      payload: { id, status, userId },
+    });
 
-  return res;
+    if (res.data?.error) throw new Error(res.data.error);
+    return res.data;
+  } catch (err: any) {
+    throw new Error(err.message || "Failed to update leave status");
+  }
 }
 
 // Sum of leave days for a user by leave type (approved + pending)
