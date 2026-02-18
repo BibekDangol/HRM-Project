@@ -1,9 +1,8 @@
-import { Modal, Text, TouchableOpacity, View } from 'react-native';
-
-import { Picker } from '@react-native-picker/picker';
-import React from 'react';
-import { UserProfile } from '@/src/types/admin';
-import tw from 'twrnc';
+import { Modal, Pressable, ScrollView, Text, View } from "react-native";
+import { Check, ChevronDown, X } from "lucide-react-native";
+import React, { useState } from "react";
+import { UserProfile } from "@/src/types/admin";
+import tw from "twrnc";
 
 interface Props {
   visible: boolean;
@@ -17,60 +16,190 @@ interface Props {
   onSave: () => void;
   isChanged: boolean;
 }
-const EditUserModal = ({ visible, users, user, role, supervisor, setRole, setSupervisor, onClose, onSave, isChanged }: Props) => {
+
+const roles = ["user", "admin", "supervisor"];
+
+const EditUserModal = ({
+  visible,
+  users,
+  user,
+  role,
+  supervisor,
+  setRole,
+  setSupervisor,
+  onClose,
+  onSave,
+  isChanged,
+}: Props) => {
+  const [showSupervisorPicker, setShowSupervisorPicker] = useState(false);
+
   if (!visible || !user) return null;
+
+  const supervisorName = () => {
+    if (!supervisor || supervisor === user.id) return "Self";
+    const found = users.find((u) => u.id === supervisor);
+    return found
+      ? `${found.first_name ?? ""} ${found.last_name ?? ""}`.trim()
+      : "Unknown";
+  };
+
   return (
-    <Modal visible={visible} transparent animationType='slide'>
-      <View style={tw`flex-1 justify-center items-center bg-black/40`}>
-        <View style={tw`bg-white p-6 rounded-xl w-4/5`}>
-          <Text style={tw`text-xl font-bold mb-4 text-gray-900`}>Edit User</Text>
-          {/* Role Dropdown */}
-          <Text style={tw`text-gray-700 mb-2`}>Role</Text>
-          <View style={tw`border rounded-lg mb-4`}>
-            <Picker
-              selectedValue={role}
-              onValueChange={(value) => setRole(value)}
-            >
-              <Picker.Item label="User" value="user" />
-              <Picker.Item label="Admin" value="admin" />
-            </Picker>
+    <Modal visible={visible} transparent animationType="fade">
+      <View style={tw`flex-1 bg-black/50 justify-end`}>
+        <View style={tw`bg-white rounded-t-3xl px-6 pt-4 pb-10`}>
+
+          {/* Handle */}
+          <View style={tw`items-center mb-4`}>
+            <View style={tw`h-1 w-10 rounded-full bg-slate-200`} />
           </View>
-          {/* Status Dropdown */}
-          <Text style={tw`text-gray-700 mb-2`}>supervisor</Text>
-          <View style={tw`border rounded-lg mb-4`}>
-            <Picker
-              selectedValue={supervisor}
-              onValueChange={(value) => setSupervisor(value)}
-            >
-              <Picker.Item label="self" value={user.id} />
-              {users.filter(u => u.id !== user.id).map((u) => (
-                <Picker.Item key={u.id}
-                  label={`${u.first_name ?? ""} ${u.last_name ?? ""} (${u.email})`}
-                  value={u.id}
-                />
-              ))}
-            </Picker>
-          </View>
-          {/* Cancel & Save Buttons */}
-          <View style={tw`flex-row justify-between`}>
-            <TouchableOpacity
+
+          {/* Header */}
+          <View style={tw`flex-row items-center justify-between mb-6`}>
+            <View>
+              <Text style={tw`text-xl font-bold text-slate-900`}>Edit User</Text>
+              <Text style={tw`text-sm text-slate-400 mt-0.5`}>
+                {user.first_name} {user.last_name}
+              </Text>
+            </View>
+            <Pressable
               onPress={onClose}
-              style={tw`py-2 px-4 rounded-lg bg-red-400`}
+              style={({ pressed }) => [
+                tw`h-9 w-9 rounded-full bg-slate-100 items-center justify-center`,
+                pressed && tw`opacity-70`,
+              ]}
             >
-              <Text style={tw`text-gray-700`}>Cancel</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
+              <X size={18} color="#475569" />
+            </Pressable>
+          </View>
+
+          {/* Role */}
+          <Text style={tw`text-sm font-semibold text-slate-700 mb-2`}>Role</Text>
+          <View style={tw`flex-row gap-2 mb-5`}>
+            {roles.map((r) => (
+              <Pressable
+                key={r}
+                onPress={() => setRole(r)}
+                style={[
+                  tw`flex-1 py-3 rounded-xl border items-center`,
+                  role === r
+                    ? tw`bg-green-700 border-green-700`
+                    : tw`bg-white border-slate-200`,
+                ]}
+              >
+                <Text
+                  style={[
+                    tw`text-xs font-bold capitalize`,
+                    role === r ? tw`text-white` : tw`text-slate-500`,
+                  ]}
+                >
+                  {r.toUpperCase()}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+
+          {/* Supervisor */}
+          <Text style={tw`text-sm font-semibold text-slate-700 mb-2`}>
+            Supervisor
+          </Text>
+          <Pressable
+            onPress={() => setShowSupervisorPicker(!showSupervisorPicker)}
+            style={({ pressed }) => [
+              tw`flex-row items-center justify-between px-4 py-3.5 rounded-2xl border border-slate-200 bg-slate-50 mb-2`,
+              pressed && tw`opacity-80`,
+            ]}
+          >
+            <Text style={tw`text-sm font-medium text-slate-900`}>
+              {supervisorName()}
+            </Text>
+            <ChevronDown
+              size={18}
+              color="#94a3b8"
+              style={{ transform: [{ rotate: showSupervisorPicker ? "180deg" : "0deg" }] }}
+            />
+          </Pressable>
+
+          {showSupervisorPicker && (
+            <View style={tw`border border-slate-200 rounded-2xl overflow-hidden mb-5`}>
+              <ScrollView style={{ maxHeight: 180 }} showsVerticalScrollIndicator={false}>
+                {/* Self option */}
+                <Pressable
+                  onPress={() => {
+                    setSupervisor(user.id);
+                    setShowSupervisorPicker(false);
+                  }}
+                  style={({ pressed }) => [
+                    tw`flex-row items-center justify-between px-4 py-3.5 border-b border-slate-100`,
+                    pressed && tw`bg-slate-50`,
+                  ]}
+                >
+                  <Text style={tw`text-sm text-slate-900 font-medium`}>Self</Text>
+                  {supervisor === user.id && <Check size={16} color="#2563eb" />}
+                </Pressable>
+
+                {users
+                  .filter((u) => u.id !== user.id)
+                  .map((u) => (
+                    <Pressable
+                      key={u.id}
+                      onPress={() => {
+                        setSupervisor(u.id);
+                        setShowSupervisorPicker(false);
+                      }}
+                      style={({ pressed }) => [
+                        tw`flex-row items-center justify-between px-4 py-3.5 border-b border-slate-100`,
+                        pressed && tw`bg-slate-50`,
+                      ]}
+                    >
+                      <View>
+                        <Text style={tw`text-sm text-slate-900 font-medium`}>
+                          {`${u.first_name ?? ""} ${u.last_name ?? ""}`.trim()}
+                        </Text>
+                        <Text style={tw`text-xs text-slate-400`}>{u.email}</Text>
+                      </View>
+                      {supervisor === u.id && <Check size={16} color="#2563eb" />}
+                    </Pressable>
+                  ))}
+              </ScrollView>
+            </View>
+          )}
+
+          {/* Buttons */}
+          <View style={tw`flex-row gap-3 mt-2`}>
+            <Pressable
+              onPress={onClose}
+              style={({ pressed }) => [
+                tw`flex-1 py-4 rounded-2xl border border-slate-200 items-center`,
+                pressed && tw`opacity-80`,
+              ]}
+            >
+              <Text style={tw`text-slate-700 font-semibold`}>Cancel</Text>
+            </Pressable>
+
+            <Pressable
               disabled={!isChanged}
               onPress={onSave}
-              style={tw`py-2 px-4 rounded-lg   ${isChanged ? "bg-green-500" : "bg-slate-300"}`}
+              style={({ pressed }) => [
+                tw`flex-1 py-4 rounded-2xl items-center`,
+                isChanged ? tw`bg-green-700` : tw`bg-slate-200`,
+                pressed && isChanged && tw`opacity-85`,
+              ]}
             >
-              <Text style={tw`text-white`}>Save</Text>
-            </TouchableOpacity>
+              <Text
+                style={[
+                  tw`font-bold`,
+                  isChanged ? tw`text-white` : tw`text-slate-400`,
+                ]}
+              >
+                Save Changes
+              </Text>
+            </Pressable>
           </View>
+
         </View>
       </View>
     </Modal>
-  )
-}
+  );
+};
 
-export default EditUserModal
+export default EditUserModal;

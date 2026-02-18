@@ -1,29 +1,27 @@
-import { Text, View } from 'react-native';
+import { Text, View } from "react-native";
+import React from "react";
+import tw from "twrnc";
 
-import React from 'react';
-import tw from 'twrnc';
+type Colors = "red" | "green" | "yellow" | "orange";
 
-type colors = "red" | "green" | "yellow" | "orange"
-const capsuleColor: Record<colors, string> = {
-  red: 'bg-red-100 text-red-700',
-  green: 'bg-green-100 text-green-700',
-  yellow: "bg-yellow-100 text-yellow-700",
-  orange: "bg-orange-100 text-orange-700"
-}
+const capsuleConfig: Record<Colors, { bg: string; text: string }> = {
+  red: { bg: "bg-red-500", text: "text-white" },
+  green: { bg: "bg-green-500", text: "text-white" },
+  yellow: { bg: "bg-yellow-300", text: "text-orange-900" },
+  orange: { bg: "bg-orange-200", text: "text-amber-950" },
+};
 type CapsuleProps = {
   text: string | null;
-  color: keyof typeof capsuleColor
-}
-const Capsule = ({ text, color }: CapsuleProps) => {
-  return (
-    <View>
-      <Text
-        style={tw`px-4 py-1 rounded-full text-sm font-medium ${capsuleColor[color]}`}
-      >
-        {text}
-      </Text>
-    </View>
-  )
-}
+  color: Colors;
+};
 
-export default Capsule
+const Capsule = ({ text, color }: CapsuleProps) => {
+  const cfg = capsuleConfig[color];
+  return (
+    <View style={tw`px-3 py-1 rounded-full ${cfg.bg} self-start`}>
+      <Text style={tw`text-sm ${cfg.text}`}>{text}</Text>
+    </View>
+  );
+};
+
+export default Capsule;

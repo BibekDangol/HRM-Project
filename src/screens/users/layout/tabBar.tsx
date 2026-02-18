@@ -17,7 +17,7 @@ export function MyTabBar({ state, descriptors, navigation }: any) {
     { icon: LucideIcon; iconSize?: number; pt?: number }
   > = {
     dashboard: { icon: House, iconSize: 26, pt: 2 },
-    "leaves/index": { icon: CalendarDays, iconSize: 26, pt: 2 },
+    leaves: { icon: CalendarDays, iconSize: 26, pt: 2 },
     more: { icon: MoreHorizontal, iconSize: 26, pt: 2 },
   };
 

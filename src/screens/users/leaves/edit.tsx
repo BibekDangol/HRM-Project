@@ -1,4 +1,4 @@
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -13,136 +13,17 @@ import tw from "twrnc";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
-import { z } from "zod";
-
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { supabase } from "@/src/supabase/supabaseClient";
+import { ArrowLeft, Check } from "lucide-react-native";
+import { userLeaveSchema } from "@/src/schema/users/userLeaveApply.schema";
+import { FormValues, LeaveTypeRow } from "@/src/types/userLeave";
+import { DateField } from "@/src/components/userLeave/DateField";
+import { LeaveTypeDropdown } from "@/src/components/userLeave/LeaveTypeDropdown";
+import { diffDaysInclusive, firstParam } from "@/src/utils/leaveUtils";
 
-const schema = z.object({
-  reason: z
-    .string()
-    .trim()
-    .min(1, "Description is required")
-    .max(500, "Max 500 characters"),
-  isHalfDay: z.boolean().default(false),
-});
 
-type FormValues = z.input<typeof schema>;
-type LeaveTypeRow = { id: string; name: string };
-
-function firstParam(v?: string | string[]) {
-  if (!v) return "";
-  return Array.isArray(v) ? String(v[0] ?? "") : String(v);
-}
-
-function parseISODateOnly(dateStr: string) {
-  const [y, m, d] = dateStr.split("-").map((n) => Number(n));
-  if (!y || !m || !d) return null;
-  return new Date(Date.UTC(y, m - 1, d));
-}
-
-function diffDaysInclusive(startStr: string, endStr: string) {
-  const s = parseISODateOnly(startStr);
-  const e = parseISODateOnly(endStr);
-  if (!s || !e) return null;
-
-  const msPerDay = 24 * 60 * 60 * 1000;
-  const diff = Math.round((e.getTime() - s.getTime()) / msPerDay);
-  return diff + 1;
-}
-
-function DateField({
-  label,
-  value,
-  onPress,
-}: {
-  label: string;
-  value: string;
-  onPress: () => void;
-}) {
-  return (
-    <View style={tw`mt-4`}>
-      <Text style={tw`text-slate-800 font-semibold`}>{label}</Text>
-      <Pressable
-        onPress={onPress}
-        style={({ pressed }) => [
-          tw`mt-2 px-4 py-3 rounded-2xl border border-slate-200 bg-white`,
-          pressed && tw`opacity-85`,
-        ]}
-      >
-        <Text
-          style={tw`${value ? "text-slate-900" : "text-slate-400"} font-semibold`}
-        >
-          {value || `Pick ${label.toLowerCase()}`}
-        </Text>
-      </Pressable>
-    </View>
-  );
-}
-
-function LeaveTypeDropdown({
-  value,
-  onChange,
-  types,
-  loading,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-  types: LeaveTypeRow[];
-  loading: boolean;
-}) {
-  const [open, setOpen] = useState(false);
-
-  const currentLabel = useMemo(() => {
-    if (!value) return "Select Leave Type";
-    return types.find((t) => t.id === value)?.name ?? "Select Leave Type";
-  }, [value, types]);
-
-  return (
-    <View>
-      <Text style={tw`text-slate-800 font-semibold`}>Leave Type</Text>
-
-      <Pressable
-        onPress={() => !loading && setOpen((v) => !v)}
-        style={({ pressed }) => [
-          tw`mt-2 px-4 py-3 rounded-2xl border border-slate-200 bg-white`,
-          pressed && tw`opacity-85`,
-          loading && tw`opacity-60`,
-        ]}
-      >
-        <Text
-          style={tw`${value ? "text-slate-900" : "text-slate-400"} font-semibold`}
-        >
-          {loading ? "Loading leave types..." : currentLabel}
-        </Text>
-      </Pressable>
-
-      {open && !loading && (
-        <View
-          style={tw`mt-2 rounded-2xl border border-slate-200 overflow-hidden`}
-        >
-          {types.map((t) => (
-            <Pressable
-              key={t.id}
-              onPress={() => {
-                onChange(t.id);
-                setOpen(false);
-              }}
-              style={({ pressed }) => [
-                tw`px-4 py-3 bg-white border-b border-slate-100`,
-                pressed && tw`bg-slate-50`,
-              ]}
-            >
-              <Text style={tw`text-slate-900 font-semibold`}>{t.name}</Text>
-            </Pressable>
-          ))}
-        </View>
-      )}
-    </View>
-  );
-}
-
-export default function ApplyLeaveScreen() {
+export default function EditLeaveScreen() {
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
 
@@ -150,18 +31,11 @@ export default function ApplyLeaveScreen() {
     id?: string | string[];
     startDate?: string | string[];
     endDate?: string | string[];
-    fresh?: string | string[];
   }>();
 
   const leaveId = firstParam(params.id);
   const startDateParam = firstParam(params.startDate);
   const endDateParam = firstParam(params.endDate);
-
-  const isEditMode = !!leaveId;
-
-  // Where the calendar should navigate back to
-  // (keep this aligned with your expo-router file structure)
-  const returnTo = isEditMode ? "/(users)/leaves/edit" : "/(users)/leaves/apply";
 
   const [screenLoading, setScreenLoading] = useState(false);
 
@@ -170,10 +44,11 @@ export default function ApplyLeaveScreen() {
   const [dateError, setDateError] = useState("");
 
   const [leaveTypes, setLeaveTypes] = useState<LeaveTypeRow[]>([]);
+  const [selectedLeaveType, setSelectedLeaveType] = useState<number | null>(
+    null,
+  );
   const [loadingTypes, setLoadingTypes] = useState(false);
 
-  // leave type NOT in zod
-  const [selectedLeaveType, setSelectedLeaveType] = useState("");
   const [leaveTypeError, setLeaveTypeError] = useState("");
 
   const [submitting, setSubmitting] = useState(false);
@@ -186,18 +61,19 @@ export default function ApplyLeaveScreen() {
     reset,
     formState: { errors },
   } = useForm<FormValues>({
-    resolver: zodResolver(schema),
-    defaultValues: { reason: "", isHalfDay: false },
+    resolver: zodResolver(userLeaveSchema),
+    defaultValues: { reason: "", isHalfDay: false, halfSession: "morning" },
     mode: "onChange",
   });
 
   const isHalfDay = watch("isHalfDay") ?? false;
 
-  const isSingleDay = useMemo(() => {
-    return (
-      !!localStartDate && !!localEndDate && localStartDate === localEndDate
-    );
-  }, [localStartDate, localEndDate]);
+  // When half day is selected, sync end date with start date
+  useEffect(() => {
+    if (isHalfDay && localStartDate) {
+      setLocalEndDate(localStartDate);
+    }
+  }, [isHalfDay, localStartDate]);
 
   const computedDaysCount = useMemo(() => {
     if (!localStartDate || !localEndDate) return null;
@@ -209,17 +85,22 @@ export default function ApplyLeaveScreen() {
     return n ?? null;
   }, [localStartDate, localEndDate, isHalfDay]);
 
-  // Load leave types
   useEffect(() => {
     (async () => {
       try {
         setLoadingTypes(true);
         const { data, error } = await supabase
           .from("leave_types")
-          .select("id,name")
+          .select("id,name,leave_limit")
           .order("name", { ascending: true });
         if (error) throw error;
-        setLeaveTypes((data ?? []) as LeaveTypeRow[]);
+        setLeaveTypes(
+          (data ?? []).map((r) => ({
+            id: Number(r.id),
+            name: r.name ?? "",
+            leave_limit: Number(r.leave_limit ?? 0),
+          })),
+        );
       } catch (e: any) {
         Alert.alert("Error", e?.message ?? "Failed to load leave types.");
       } finally {
@@ -228,10 +109,9 @@ export default function ApplyLeaveScreen() {
     })();
   }, []);
 
-  // If edit mode: load existing leave once to prefill
   useEffect(() => {
     (async () => {
-      if (!isEditMode) return;
+      if (!leaveId) return;
       if (!user?.id) return;
 
       try {
@@ -248,7 +128,7 @@ export default function ApplyLeaveScreen() {
         if (error) throw error;
 
         if (!data || data.user_id !== user.id) {
-          Alert.alert("Not allowed", "You can’t edit this leave.");
+          Alert.alert("Not allowed", "You can't edit this leave.");
           router.back();
           return;
         }
@@ -261,10 +141,16 @@ export default function ApplyLeaveScreen() {
 
         setLocalStartDate(String(data.start_date ?? ""));
         setLocalEndDate(String(data.end_date ?? ""));
-        setSelectedLeaveType(String(data.leave_type_id ?? ""));
+        setSelectedLeaveType(Number(data.leave_type_id ?? ""));
+
+        const dayType = String(data.day_type ?? "").toUpperCase();
+        const isHalf = dayType === "MORNING" || dayType === "EVENING";
+        const session = dayType === "EVENING" ? "evening" : "morning";
+
         reset({
           reason: String(data.reason ?? ""),
-          isHalfDay: !!data.day_type,
+          isHalfDay: isHalf,
+          halfSession: session,
         });
       } catch (e: any) {
         Alert.alert("Error", e?.message ?? "Failed to load leave.");
@@ -273,41 +159,42 @@ export default function ApplyLeaveScreen() {
         setScreenLoading(false);
       }
     })();
-  }, [isEditMode, leaveId, reset, router, user?.id]);
+  }, [leaveId, reset, router, user?.id]);
 
-  // Apply route params into local state (when coming back from calendar)
+  // Update dates from calendar selection
   useEffect(() => {
     if (startDateParam) setLocalStartDate(startDateParam);
     if (endDateParam) setLocalEndDate(endDateParam);
 
     if (startDateParam && endDateParam) setDateError("");
 
+    // If multi-day selection, disable half day
     if (startDateParam && endDateParam && startDateParam !== endDateParam) {
       setValue("isHalfDay", false, { shouldValidate: true });
+      setValue("halfSession", "morning", { shouldValidate: true });
     }
   }, [startDateParam, endDateParam, setValue]);
 
-  // Reset ONLY when not editing
-  useEffect(() => {
-    if (isEditMode) return;
-
-    if (!startDateParam || !endDateParam) {
-      setLocalStartDate("");
-      setLocalEndDate("");
-      setSelectedLeaveType("");
-      setLeaveTypeError("");
-      setDateError("");
-      reset({ reason: "", isHalfDay: false });
-    }
-  }, [isEditMode, startDateParam, endDateParam, reset]);
-
-  const handleLeaveTypeChange = (id: string) => {
+  const handleLeaveTypeChange = (id: number) => {
     setSelectedLeaveType(id);
     setLeaveTypeError("");
   };
 
+  const goToCalendar = () => {
+    router.push({
+      pathname: "/(users)/leaves/calendar",
+      params: {
+        from: "edit",
+        id: leaveId || undefined,
+        returnTo: "/(users)/leaves/edit",
+        startDate: localStartDate || "",
+        endDate: isHalfDay ? localStartDate || "" : localEndDate || "",
+      },
+    });
+  };
+
   const onSubmit = async (values: FormValues) => {
-    if (!selectedLeaveType) {
+    if (selectedLeaveType == null) {
       setLeaveTypeError("Leave type is required");
       Alert.alert("Form Error", "Please select a leave type.");
       return;
@@ -316,16 +203,7 @@ export default function ApplyLeaveScreen() {
     if (!localStartDate || !localEndDate) {
       setDateError("Start and end date are required");
       Alert.alert("Form Error", "Please pick start and end date.");
-      router.push({
-        pathname: "/(users)/leaves/calendar",
-        params: {
-          from: isEditMode ? "edit" : "apply",
-          id: leaveId || undefined,
-          returnTo,
-          startDate: localStartDate,
-          endDate: localEndDate,
-        },
-      });
+      goToCalendar();
       return;
     }
 
@@ -341,16 +219,7 @@ export default function ApplyLeaveScreen() {
         "Form Error",
         "Could not calculate days count. Please re-pick dates.",
       );
-      router.push({
-        pathname: "/(users)/leaves/calendar",
-        params: {
-          from: isEditMode ? "edit" : "apply",
-          id: leaveId || undefined,
-          returnTo,
-          startDate: localStartDate,
-          endDate: localEndDate,
-        },
-      });
+      goToCalendar();
       return;
     }
 
@@ -359,49 +228,38 @@ export default function ApplyLeaveScreen() {
       return;
     }
 
-    const finalIsHalfDay =
-      localStartDate === localEndDate ? (values.isHalfDay ?? false) : false;
+    // Determine day_type based on half day selection
+    let dayType = "FULL";
+    if (isHalfDay && localStartDate === localEndDate) {
+      dayType = values.halfSession === "morning" ? "MORNING" : "EVENING";
+    }
 
     const payload = {
       leave_type_id: selectedLeaveType,
       reason: values.reason.trim(),
       start_date: localStartDate,
       end_date: localEndDate,
-      day_type: finalIsHalfDay,
+      day_type: dayType,
       days_count: daysCount,
       status: "pending",
-      action_taken_by: null, // matches your constraint
+      action_taken_by: null,
     };
 
     try {
       setSubmitting(true);
 
-      let error: any;
-
-      if (leaveId) {
-        // ✅ EDIT (update 1 row)
-        ({ error } = await supabase
-          .from("leaves")
-          .update(payload)
-          .eq("id", leaveId)
-          .eq("user_id", user.id));
-      } else {
-        // ✅ NEW (insert)
-        ({ error } = await supabase.from("leaves").insert({
-          user_id: user.id,
-          ...payload,
-        }));
-      }
+      const { error } = await supabase
+        .from("leaves")
+        .update(payload)
+        .eq("id", leaveId)
+        .eq("user_id", user.id);
 
       if (error) throw error;
 
-      Alert.alert(
-        "Success",
-        leaveId ? "Leave updated successfully." : "Leave applied successfully.",
-      );
-      router.replace("/(users)/leaves");
+      Alert.alert("Success", "Leave updated successfully.");
+      router.replace("/(users)/leaves/(tabs)/requests");
     } catch (e: any) {
-      Alert.alert("Error", e?.message ?? "Failed to submit leave.");
+      Alert.alert("Error", e?.message ?? "Failed to update leave.");
     } finally {
       setSubmitting(false);
     }
@@ -417,176 +275,244 @@ export default function ApplyLeaveScreen() {
   }
 
   return (
-    <View style={tw`flex-1 bg-white`}>
-      <ScrollView contentContainerStyle={tw`px-4 pt-4 pb-10`}>
-        <Text style={tw`text-xl font-bold text-slate-900`}>
-          {leaveId ? "Edit Leave" : "Apply for Leave"}
-        </Text>
-
-        {/* Dates */}
-        <View style={tw`mt-4`}>
-          <DateField
-            label="Start Date"
-            value={localStartDate}
-            onPress={() =>
-              router.push({
-                pathname: "/(users)/leaves/calendar",
-                params: {
-                  from: leaveId ? "edit" : "apply",
-                  id: leaveId || undefined,
-                  returnTo,
-                  startDate: localStartDate,
-                  endDate: localEndDate,
+    <>
+      {/* <Stack.Screen
+        options={{
+          title: "",
+          headerShadowVisible: false,
+          headerTitleAlign: "center",
+          headerLeft: () => (
+            <Pressable
+              onPress={() => router.replace("/(users)/leaves")}
+              hitSlop={12}
+              style={({ pressed }) => [
+                {
+                  width: 40,
+                  height: 40,
+                  borderRadius: 20,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginLeft: 8,
                 },
-              })
-            }
-          />
-
-          {!!dateError && (
-            <Text style={tw`mt-2 text-red-600 font-semibold`}>{dateError}</Text>
-          )}
-
-          <DateField
-            label="End Date"
-            value={localEndDate}
-            onPress={() =>
-              router.push({
-                pathname: "/(users)/leaves/calendar",
-                params: {
-                  from: leaveId ? "edit" : "apply",
-                  id: leaveId || undefined,
-                  returnTo,
-                  startDate: localStartDate,
-                  endDate: localEndDate,
-                },
-              })
-            }
-          />
-
-          {/* Days count */}
-          <View style={tw`mt-4`}>
-            <Text style={tw`text-slate-800 font-semibold`}>Days Count</Text>
-            <View
-              style={tw`mt-2 px-4 py-3 rounded-2xl border border-slate-200 bg-white`}
+                pressed && { opacity: 0.7 },
+              ]}
             >
-              <Text style={tw`text-slate-900 font-semibold`}>
-                {computedDaysCount == null ? "-" : String(computedDaysCount)}
-              </Text>
-            </View>
-          </View>
+              <ArrowLeft size={24} color="#0f172a" />
+            </Pressable>
+          ),
+        }}
+      /> */}
 
-          {/* Half day only when single day */}
-          {isSingleDay && (
-            <View style={tw`mt-4`}>
-              <Text style={tw`text-slate-800 font-semibold`}>Half Day</Text>
-
-              <Controller
-                control={control}
-                name="isHalfDay"
-                render={({ field: { value, onChange } }) => (
-                  <Pressable
-                    onPress={() => onChange(!value)}
-                    style={({ pressed }) => [
-                      tw`mt-2 flex-row items-center justify-between px-4 py-3 rounded-2xl border border-slate-200 bg-white`,
-                      pressed && tw`opacity-85`,
-                    ]}
-                  >
-                    <Text style={tw`text-slate-900 font-semibold`}>
-                      {value ? "Yes (0.5 day)" : "No (1 day)"}
-                    </Text>
-
-                    <View
-                      style={tw`h-6 w-6 rounded-md border ${
-                        value
-                          ? "bg-blue-600 border-blue-600"
-                          : "bg-white border-slate-300"
-                      } items-center justify-center`}
-                    >
-                      {value ? (
-                        <Text style={tw`text-white font-bold`}>✓</Text>
-                      ) : null}
-                    </View>
-                  </Pressable>
-                )}
-              />
-            </View>
-          )}
-        </View>
-
-        {/* Leave type */}
-        <View style={tw`mt-5`}>
-          <LeaveTypeDropdown
-            value={selectedLeaveType}
-            onChange={handleLeaveTypeChange}
-            types={leaveTypes}
-            loading={loadingTypes}
-          />
-
-          {!!leaveTypeError && (
-            <Text style={tw`mt-2 text-red-600 font-semibold`}>
-              {leaveTypeError}
-            </Text>
-          )}
-        </View>
-
-        {/* Description */}
-        <View style={tw`mt-5`}>
-          <Text style={tw`text-slate-800 font-semibold`}>
-            Reason / Description
+      <View style={tw`flex-1 bg-white`}>
+        <ScrollView contentContainerStyle={tw`px-4 pt-4 pb-28`}>
+          <Text style={tw`text-xl font-semibold text-gray-900 mb-4`}>
+            Edit Leave Request
           </Text>
 
-          <Controller
-            control={control}
-            name="reason"
-            render={({ field: { value, onChange, onBlur } }) => (
-              <TextInput
-                value={value}
-                onChangeText={onChange}
-                onBlur={onBlur}
-                placeholder="Enter reason for leave..."
-                placeholderTextColor="#94a3b8"
-                multiline
-                style={tw`mt-2 px-4 py-3 rounded-2xl border border-slate-200 text-slate-900 h-32`}
-              />
+          <View style={tw`gap-4`}>
+            <View style={tw`flex-row justify-between gap-3`}>
+              <View style={tw`flex-1`}>
+                <DateField
+                  label="Start Date"
+                  value={localStartDate}
+                  onPress={goToCalendar}
+                />
+              </View>
+
+              {!isHalfDay && (
+                <View style={tw`flex-1`}>
+                  <DateField
+                    label="End Date"
+                    value={localEndDate}
+                    onPress={goToCalendar}
+                  />
+                </View>
+              )}
+            </View>
+
+            {!!dateError && (
+              <Text style={tw`text-sm text-red-600 font-medium`}>
+                {dateError}
+              </Text>
             )}
-          />
+          </View>
 
-          {!!errors.reason?.message && (
-            <Text style={tw`mt-2 text-red-600 font-semibold`}>
-              {errors.reason.message}
+          <View style={tw`mt-2`}>
+            <Controller
+              control={control}
+              name="isHalfDay"
+              render={({ field: { value, onChange } }) => (
+                <Pressable
+                  onPress={() => {
+                    // If multi-day range is selected
+                    if (
+                      localStartDate &&
+                      localEndDate &&
+                      localStartDate !== localEndDate
+                    ) {
+                      setLocalEndDate(localStartDate);
+                      onChange(true);
+                      setValue("halfSession", "morning", {
+                        shouldValidate: true,
+                      });
+                      return;
+                    }
+
+                    // Toggle half day normally
+                    const next = !value;
+                    onChange(next);
+
+                    if (next) {
+                      setValue("halfSession", "morning", {
+                        shouldValidate: true,
+                      });
+                      if (localStartDate) setLocalEndDate(localStartDate);
+                    }
+                  }}
+                  style={({ pressed }) => [
+                    tw`flex-row items-center gap-3 px-4 py-3 rounded-xl`,
+                    pressed && tw`opacity-85`,
+                  ]}
+                >
+                  <View
+                    style={tw`h-6 w-6 rounded-md border ${
+                      value
+                        ? "bg-blue-600 border-blue-600"
+                        : "bg-white border-slate-300"
+                    } items-center justify-center`}
+                  >
+                    {value ? <Check color="#ffffff" size={18} /> : null}
+                  </View>
+                  <Text style={tw`text-slate-900 font-medium`}>Half Day</Text>
+                </Pressable>
+              )}
+            />
+
+            {isHalfDay && (
+              <View style={tw`mt-3`}>
+                <Text style={tw`text-slate-800 font-semibold mb-2`}>
+                  Session
+                </Text>
+
+                <Controller
+                  control={control}
+                  name="halfSession"
+                  render={({ field: { value, onChange } }) => (
+                    <View style={tw`flex-row gap-3`}>
+                      <Pressable
+                        onPress={() => onChange("morning")}
+                        style={({ pressed }) => [
+                          tw`flex-1 px-4 py-3 rounded-xl border items-center`,
+                          value === "morning"
+                            ? tw`bg-blue-600 border-blue-600`
+                            : tw`bg-white border-slate-200`,
+                          pressed && tw`opacity-85`,
+                        ]}
+                      >
+                        <Text
+                          style={tw`${value === "morning" ? "text-white" : "text-slate-900"} font-semibold`}
+                        >
+                          Morning
+                        </Text>
+                      </Pressable>
+
+                      <Pressable
+                        onPress={() => onChange("evening")}
+                        style={({ pressed }) => [
+                          tw`flex-1 px-4 py-3 rounded-xl border items-center`,
+                          value === "evening"
+                            ? tw`bg-blue-600 border-blue-600`
+                            : tw`bg-white border-slate-200`,
+                          pressed && tw`opacity-85`,
+                        ]}
+                      >
+                        <Text
+                          style={tw`${value === "evening" ? "text-white" : "text-slate-900"} font-semibold`}
+                        >
+                          Evening
+                        </Text>
+                      </Pressable>
+                    </View>
+                  )}
+                />
+              </View>
+            )}
+          </View>
+
+          <View style={tw`mt-5`}>
+            <LeaveTypeDropdown
+              value={selectedLeaveType}
+              onChange={handleLeaveTypeChange}
+              types={leaveTypes}
+              loading={loadingTypes}
+              onRefresh={async () => {}} // No refresh needed in edit
+              showStats={false} // Don't show stats in edit mode
+            />
+
+            {!!leaveTypeError && (
+              <Text style={tw`mt-2 text-red-600 font-semibold`}>
+                {leaveTypeError}
+              </Text>
+            )}
+          </View>
+
+          <View style={tw`mt-5`}>
+            <Text style={tw`text-slate-800 font-semibold`}>
+              Reason / Description
             </Text>
-          )}
-        </View>
 
-        {/* Buttons */}
-        <View style={tw`mt-8 flex-row`}>
-          <Pressable
-            disabled={submitting}
-            onPress={handleSubmit(onSubmit)}
-            style={({ pressed }) => [
-              tw`flex-1 mr-2 px-4 py-4 rounded-2xl bg-blue-600 items-center`,
-              pressed && tw`opacity-85`,
-              submitting && tw`opacity-60`,
-            ]}
-          >
-            <Text style={tw`text-white font-bold`}>
-              {submitting ? "Saving..." : leaveId ? "Save" : "Submit"}
-            </Text>
-          </Pressable>
+            <Controller
+              control={control}
+              name="reason"
+              render={({ field: { value, onChange, onBlur } }) => (
+                <TextInput
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  placeholder="Enter reason for leave..."
+                  placeholderTextColor="#94a3b8"
+                  multiline
+                  style={tw`mt-2 px-4 py-3 rounded-2xl border border-slate-200 text-slate-900`}
+                />
+              )}
+            />
 
-          <Pressable
-            disabled={submitting}
-            onPress={() => router.replace("/(users)/leaves")}
-            style={({ pressed }) => [
-              tw`flex-1 ml-2 px-4 py-4 rounded-2xl border border-slate-200 items-center`,
-              pressed && tw`opacity-85`,
-              submitting && tw`opacity-60`,
-            ]}
-          >
-            <Text style={tw`text-slate-900 font-bold`}>Cancel</Text>
-          </Pressable>
-        </View>
-      </ScrollView>
-    </View>
+            {!!errors.reason?.message && (
+              <Text style={tw`mt-2 text-red-600 font-semibold`}>
+                {errors.reason.message}
+              </Text>
+            )}
+          </View>
+
+          <View style={tw`mt-8 flex-row`}>
+            <Pressable
+              disabled={submitting}
+              onPress={handleSubmit(onSubmit)}
+              style={({ pressed }) => [
+                tw`flex-1 mr-2 px-4 py-4 rounded-2xl bg-blue-600 items-center`,
+                pressed && tw`opacity-85`,
+                submitting && tw`opacity-60`,
+              ]}
+            >
+              <Text style={tw`text-white font-bold`}>
+                {submitting ? "Saving..." : "Save Changes"}
+              </Text>
+            </Pressable>
+
+            <Pressable
+              disabled={submitting}
+              onPress={() => router.replace("/(users)/leaves/(tabs)/requests")}
+              style={({ pressed }) => [
+                tw`flex-1 ml-2 px-4 py-4 rounded-2xl border border-slate-200 items-center`,
+                pressed && tw`opacity-85`,
+                submitting && tw`opacity-60`,
+              ]}
+            >
+              <Text style={tw`text-slate-900 font-bold`}>Cancel</Text>
+            </Pressable>
+          </View>
+        </ScrollView>
+      </View>
+    </>
   );
 }

@@ -628,14 +628,10 @@ export default function UsersTabsLayout() {
         }}
         tabBar={(props) => <MyTabBar {...props} />}
       >
-        {userTabs.map((tab) => (
-          <Tabs.Screen
-            key={tab.name}
-            name={tab.name}
-            options={{ title: tab.title }}
-          />
-        ))}
-
+        <Tabs.Screen name="dashboard" options={{ title: "Dashboard" }} />
+        <Tabs.Screen name="leaves" options={{ title: "Leaves" }} />
+        <Tabs.Screen name="profile/index" options={{ title: "Profile" }} />
+        <Tabs.Screen name="more" options={{ title: "Setting" }} />
       </Tabs>
     </>
   );

@@ -7,7 +7,7 @@ export const userTabs = [
     icon: LayoutDashboard,
   },
   {
-    name: "leaves/index",
+    name: "leaves",        // ✅ was "leaves/index"
     title: "Leaves",
     icon: Users,
   },
@@ -22,4 +22,5 @@ export const userTabs = [
     icon: MoreHorizontal,
   },
 ] as const;
-export type AdminTabName = (typeof userTabs)[number]["name"];
+
+export type UserTabName = (typeof userTabs)[number]["name"];

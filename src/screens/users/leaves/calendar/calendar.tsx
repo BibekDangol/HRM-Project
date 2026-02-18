@@ -1,7 +1,6 @@
-import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-import { ArrowLeft } from "lucide-react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import { Calendar } from "react-native-calendars";
 import tw from "twrnc";
 
@@ -61,8 +60,8 @@ export default function LeaveCalendarScreen() {
     endDate?: string | string[];
   }>();
 
-  const from = firstParam(params.from); // "apply" | "edit" | ""
-  const id = firstParam(params.id); // leave id in edit mode
+  const from = firstParam(params.from);
+  const id = firstParam(params.id);
   const returnTo = firstParam(params.returnTo) || DEFAULT_RETURN_TO;
 
   const initialStart = firstParam(params.startDate);
@@ -120,11 +119,11 @@ export default function LeaveCalendarScreen() {
 
   function goBackWithDates(startDate: string, endDate: string) {
     router.replace({
+      // Change from push to replace
       pathname: returnTo as any,
       params: {
         startDate,
         endDate,
-        // ✅ keep edit mode alive
         ...(from === "edit" && id ? { id } : {}),
         from: from || undefined,
       },
@@ -153,59 +152,84 @@ export default function LeaveCalendarScreen() {
 
   return (
     <>
-      <Stack.Screen
+      {/* <Stack.Screen
         options={{
-          title: "Calendar",
-          headerTitleAlign: "left",
-          headerTitle: () => null,
+          title: "",
+          headerShadowVisible: false,
+          headerTitleAlign: "center",
           headerLeft: () => (
             <Pressable
-              onPress={() => router.push("/(users)/leaves")}
+              onPress={() => {
+                // Go back to wherever we came from
+                if (from === "apply" || from === "edit") {
+                  router.replace({
+                    pathname: returnTo as any,
+                    params: {
+                      startDate: selectedStart || initialStart || "",
+                      endDate: selectedEnd || initialEnd || "",
+                      ...(from === "edit" && id ? { id } : {}),
+                      from: from || undefined,
+                    },
+                  });
+                } else {
+                  router.push("/(users)/leaves/(tabs)/requests");
+                }
+              }}
               hitSlop={12}
-              style={({ pressed }) => [pressed && tw`opacity-70`]}
+              style={({ pressed }) => [
+                {
+                  width: 40,
+                  height: 40,
+                  borderRadius: 20,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginLeft: 8,
+                },
+                pressed && { opacity: 0.7 },
+              ]}
             >
               <ArrowLeft size={24} color="#0f172a" />
             </Pressable>
           ),
         }}
-      />
+      /> */}
 
       <View style={tw`flex-1 bg-white`}>
         {/* <Pressable
-          onPress={() => {
-            // If user already picked something, keep it when going back
-            if (selectedStart && selectedEnd) {
-              const start = isBeforeOrEqual(selectedStart, selectedEnd)
-                ? selectedStart
-                : selectedEnd;
-              const end = isBeforeOrEqual(selectedStart, selectedEnd)
-                ? selectedEnd
-                : selectedStart;
-              goBackWithDates(start, end);
-              return;
-            }
+            onPress={() => {
+              // If user already picked something, keep it when going back
+              if (selectedStart && selectedEnd) {
+                const start = isBeforeOrEqual(selectedStart, selectedEnd)
+                  ? selectedStart
+                  : selectedEnd;
+                const end = isBeforeOrEqual(selectedStart, selectedEnd)
+                  ? selectedEnd
+                  : selectedStart;
+                goBackWithDates(start, end);
+                return;
+              }
 
-            // If they didn't complete selection:
-            if (from === "apply" || from === "edit") {
-              router.replace({
-                pathname: returnTo as any,
-                params: {
-                  ...(from === "edit" && id ? { id } : {}),
-                  from: from || undefined,
-                },
-              });
-              return;
-            }
+              // If they didn't complete selection:
+              if (from === "apply" || from === "edit") {
+                router.replace({
+                  pathname: returnTo as any,
+                  params: {
+                    ...(from === "edit" && id ? { id } : {}),
+                    from: from || undefined,
+                  },
+                });
+                return;
+              }
 
-            router.replace("/(users)/leaves");
-          }}
-          style={({ pressed }) => [
-            tw`mt-6 px-4 py-4 rounded-xl border border-slate-200 items-center`,
-            pressed && tw`opacity-85`,
-          ]}
-        >
-          <Text style={tw`text-slate-900 font-bold`}>Back</Text>
-        </Pressable> */}
+              router.replace("/(users)/leaves");
+            }}
+            style={({ pressed }) => [
+              tw`mt-6 px-4 py-4 rounded-xl border border-slate-200 items-center`,
+              pressed && tw`opacity-85`,
+            ]}
+          >
+            <Text style={tw`text-slate-900 font-bold`}>Back</Text>
+          </Pressable> */}
 
         <View style={tw`px-4 pt-4 pb-2`}>
           <Text style={tw`text-xl font-bold text-slate-900`}>Select Date</Text>

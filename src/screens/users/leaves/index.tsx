@@ -1,322 +1,220 @@
-import { useRouter } from "expo-router";
-import { Eye, Plus } from "lucide-react-native";
-import React, { useCallback, useEffect, useState } from "react";
+// app/(users)/leaves/index.tsx
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   FlatList,
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
+  RefreshControl,
   Text,
   View,
 } from "react-native";
 import tw from "twrnc";
-
-import { useAuthStore } from "@/src/store/useAuthStore";
 import { supabase } from "@/src/supabase/supabaseClient";
+import { useAuthStore } from "@/src/store/useAuthStore";
+import { LeaveDetailsRow,  LeaveTypeRowIndex, LeaveTypeStats } from "@/src/types/userLeave";
+import { formatDays, getLeaveDays } from "@/src/utils/leaveUtils";
 
-interface Props {
-  visible: boolean;
-}
 
-type LeaveRow = {
-  id: string;
-  user_id: string;
-  status: "pending" | "approved" | "rejected" | string;
-  created_at: string;
-  leave_type?: { id: string; name: string } | null;
-};
 
-function formatDateShort(iso: string) {
-  const d = new Date(iso);
-  return d.toLocaleDateString([], {
-    year: "numeric",
-    month: "short",
-    day: "2-digit",
-  });
-}
-
-function statusChipStyle(status: string) {
-  const s = String(status).toLowerCase();
-  if (s === "approved") return tw`bg-green-600`;
-  if (s === "pending") return tw`bg-amber-500`;
-  if (s === "rejected") return tw`bg-red-600`;
-  return tw`bg-slate-500`;
-}
-
-export default function LeaveIndexScreen({ visible }: Props) {
-  const router = useRouter();
+export default function LeavesDetailsScreen() {
   const user = useAuthStore((s) => s.user);
+  const userId = user?.id;
 
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [rows, setRows] = useState<LeaveRow[]>([]);
-  const [selectedLeave, setSelectedLeave] = useState<LeaveRow | null>(null);
 
-  const canUse = !!user?.id;
+  const [leaveTypes, setLeaveTypes] = useState<LeaveTypeRowIndex[]>([]);
+  const [leaves, setLeaves] = useState<LeaveDetailsRow[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
+  const currentYearRange = useMemo(() => {
+    const now = new Date();
+    const y = now.getFullYear();
+    const from = `${y}-01-01`;
+    const to = `${y}-12-31`;
+    return { from, to };
+  }, []);
 
   const load = useCallback(async () => {
-    if (!user?.id) {
-      setRows([]);
-      setLoading(false);
+    if (!userId) return;
+    setError(null);
+
+    const { data: typesData, error: typesErr } = await supabase
+      .from("leave_types")
+      .select("id,name,leave_limit")
+      .order("name", { ascending: true });
+
+    if (typesErr) {
+      setError(typesErr.message);
       return;
     }
 
-    try {
-      setLoading(true);
+    const { data: leavesData, error: leavesErr } = await supabase
+      .from("leaves")
+      .select(
+        "id,user_id,leave_type_id,status,start_date,end_date,day_type,days_count",
+      )
+      .eq("user_id", userId)
+      .gte("start_date", currentYearRange.from)
+      .lte("start_date", currentYearRange.to);
 
-      const { data, error } = await supabase
-        .from("leaves")
-        .select(
-          "id,user_id,status,created_at,leave_type:leave_type_id(id,name)",
-        )
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
-
-      setRows((data ?? []) as LeaveRow[]);
-    } catch (e: any) {
-      Alert.alert("Error", e?.message ?? "Failed to load leaves.");
-      setRows([]);
-    } finally {
-      setLoading(false);
+    if (leavesErr) {
+      setError(leavesErr.message);
+      return;
     }
-  }, [user?.id]);
+
+    setLeaveTypes(typesData ?? []);
+    setLeaves(leavesData ?? []);
+  }, [userId, currentYearRange.from, currentYearRange.to]);
 
   useEffect(() => {
-    load();
+    (async () => {
+      try {
+        setLoading(true);
+        await load();
+      } finally {
+        setLoading(false);
+      }
+    })();
   }, [load]);
 
   const onRefresh = useCallback(async () => {
-    setRefreshing(true);
-    await load();
-    setRefreshing(false);
+    try {
+      setRefreshing(true);
+      await load();
+    } finally {
+      setRefreshing(false);
+    }
   }, [load]);
 
-  // ✅ Eye icon can open for ALL statuses
-  const openLeave = (item: LeaveRow) => setSelectedLeave(item);
+  const stats: LeaveTypeStats[] = useMemo(() => {
+    const byType: Record<
+      number,
+      { approved: number; pending: number; rejected: number }
+    > = {};
 
-  const isPending = selectedLeave?.status?.toLowerCase() === "pending";
+    for (const lv of leaves) {
+      if (!lv.leave_type_id) continue;
 
-  const goToEdit = () => {
-    if (!selectedLeave) return;
-    router.push({
-      pathname: "/(users)/leaves/edit",
-      params: { id: selectedLeave.id },
+      const days = getLeaveDays(lv);
+      const typeId = Number(lv.leave_type_id);
+      const bucket = (byType[typeId] ??= {
+        approved: 0,
+        pending: 0,
+        rejected: 0,
+      });
+
+      const status = String(lv.status ?? "").toLowerCase();
+      if (status === "approved") bucket.approved += days;
+      else if (status === "pending") bucket.pending += days;
+      else if (status === "rejected") bucket.rejected += days;
+    }
+
+    return leaveTypes.map((t) => {
+      const limit = t.leave_limit ?? 0;
+      const sums = byType[t.id] ?? { approved: 0, pending: 0, rejected: 0 };
+      const remaining = Math.max(0, limit - sums.approved - sums.pending);
+
+      return {
+        leaveTypeId: t.id,
+        name: t.name ?? "Unnamed",
+        limit,
+        approved: sums.approved,
+        pending: sums.pending,
+        rejected: sums.rejected,
+        remaining,
+      };
     });
-    setSelectedLeave(null);
-  };
+  }, [leaveTypes, leaves]);
 
-  // ✅ Cancel only for pending
-  const cancelLeave = async () => {
-    if (!selectedLeave || !user?.id) return;
+  if (!userId) {
+    return (
+      <View style={tw`flex-1 items-center justify-center p-4`}>
+        <Text style={tw`text-slate-600`}>
+          Please sign in to view leave details.
+        </Text>
+      </View>
+    );
+  }
 
-    if (selectedLeave.status?.toLowerCase() !== "pending") {
-      Alert.alert("Not allowed", "Only pending leaves can be cancelled.");
-      return;
-    }
-
-    try {
-      setLoading(true);
-
-      // Option A: mark as cancelled (recommended)
-      const { error } = await supabase
-        .from("leaves")
-        .update({ status: "cancelled" }) // make sure your DB accepts this value
-        .eq("id", selectedLeave.id)
-        .eq("user_id", user.id);
-
-      if (error) throw error;
-
-      Alert.alert("Cancelled", "Leave request cancelled.");
-      setSelectedLeave(null);
-      await load();
-    } catch (e: any) {
-      Alert.alert("Error", e?.message ?? "Failed to cancel leave.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  if (loading) {
+    return (
+      <View style={tw`flex-1 items-center justify-center`}>
+        <ActivityIndicator />
+        <Text style={tw`mt-2 text-slate-600`}>Loading leave details…</Text>
+      </View>
+    );
+  }
 
   return (
-    <View style={tw`flex-1`}>
-      <View style={tw`flex-1 bg-white`}>
-        <KeyboardAvoidingView
-          style={tw`flex-1`}
-          behavior={Platform.OS === "ios" ? "padding" : undefined}
-        >
-          {/* Header */}
-          <View
-            style={tw`px-4 pt-4 pb-2 flex-row items-center justify-between`}
-          >
-            <Text style={tw`text-xl font-bold text-slate-900`}>My Leaves</Text>
-
-            <Pressable
-              disabled={!canUse}
-              onPress={() => router.replace("/(users)/leaves/calendar")}
-              style={({ pressed }) => [
-                tw`h-11 w-11 rounded-full items-center justify-center bg-blue-600`,
-                pressed && tw`opacity-85`,
-                !canUse && tw`opacity-40`,
-              ]}
-            >
-              <Plus color="white" size={22} />
-            </Pressable>
-          </View>
-
-          {/* Table header */}
-          <View style={tw`px-4 pt-2 pb-2 flex-row items-center`}>
-            <Text style={tw`flex-1 text-xs font-semibold text-slate-500`}>
-              Type
-            </Text>
-            <Text
-              style={tw`w-32 text-xs font-semibold text-slate-500 text-center`}
-            >
-              Date
-            </Text>
-            <Text
-              style={tw`w-28 text-xs font-semibold text-slate-500 text-center`}
-            >
-              Status
-            </Text>
-            <Text
-              style={tw`w-20 text-xs font-semibold text-slate-500 text-center`}
-            >
-              Action
-            </Text>
-          </View>
-
-          {loading ? (
-            <View style={tw`flex-1 items-center justify-center`}>
-              <ActivityIndicator />
-              <Text style={tw`mt-2 text-slate-500`}>Loading...</Text>
-            </View>
-          ) : (
-            <FlatList
-              data={rows}
-              keyExtractor={(item) => item.id}
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              ListEmptyComponent={
-                <View style={tw`flex-1 items-center justify-center`}>
-                  <Text style={tw`text-slate-500`}>No leave requests yet.</Text>
-                </View>
-              }
-              renderItem={({ item }) => (
-                <View style={tw`px-4 py-3 border-t border-slate-100`}>
-                  <View style={tw`flex-row items-center`}>
-                    <View style={tw`flex-1 pr-3`}>
-                      <Text
-                        style={tw`text-base font-semibold text-slate-900`}
-                        numberOfLines={1}
-                      >
-                        {item.leave_type?.name ?? "Unknown type"}
-                      </Text>
-                    </View>
-
-                    <View style={tw`w-32 items-center`}>
-                      <Text style={tw`text-sm text-slate-600`}>
-                        {formatDateShort(item.created_at)}
-                      </Text>
-                    </View>
-
-                    <View style={tw`w-28 items-center`}>
-                      <View
-                        style={[
-                          tw`px-4 py-2 rounded-full`,
-                          statusChipStyle(item.status),
-                        ]}
-                      >
-                        <Text style={tw`text-white text-xs font-semibold`}>
-                          {String(item.status).toUpperCase()}
-                        </Text>
-                      </View>
-                    </View>
-
-                    <View style={tw`w-20 items-center`}>
-                      <Pressable
-                        onPress={() => openLeave(item)}
-                        style={({ pressed }) => [
-                          tw`h-10 w-10 rounded-full border border-slate-200 items-center justify-center`,
-                          pressed && tw`opacity-80`,
-                        ]}
-                      >
-                        <Eye size={18} color={"#0f172a"} />
-                      </Pressable>
-                    </View>
-                  </View>
-                </View>
-              )}
-            />
-          )}
-        </KeyboardAvoidingView>
+    <View style={tw`flex-1 bg-white`}>
+      <View style={tw`px-4 pb-2`}>
+        {/* <Text style={tw`text-xl font-semibold text-slate-900`}>
+          Leave Details
+        </Text> */}
+        {error ? (
+          <Text style={tw`mt-2 text-red-600`}>Error: {error}</Text>
+        ) : null}
       </View>
 
-      {/* Bottom Sheet */}
-      {selectedLeave && (
-        <>
-          <Pressable
-            style={tw`absolute inset-0 bg-black/40`}
-            onPress={() => setSelectedLeave(null)}
-          />
+      <FlatList
+        data={stats}
+        keyExtractor={(item) => String(item.leaveTypeId)}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+        contentContainerStyle={tw`p-4 pb-6`}
+        ItemSeparatorComponent={() => <View style={tw`h-3`} />}
+        renderItem={({ item }) => (
+          <View style={tw`rounded-2xl border border-slate-200 bg-slate-50 p-4`}>
+            <View style={tw`flex-row items-center justify-between`}>
+              <Text style={tw`text-base font-semibold text-slate-900`}>
+                {item.name}
+              </Text>
+              <Text style={tw`text-sm text-slate-600`}>
+                Remaining:{" "}
+                <Text style={tw`font-semibold`}>
+                  {formatDays(item.remaining)}
+                </Text>
+              </Text>
+            </View>
 
-          <View
-            style={tw`absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl p-6`}
-          >
-            <Text style={tw`text-2xl font-bold text-slate-900 mb-6`}>
-              Leave Details
-            </Text>
-
-            <Text style={tw`text-base mb-3`}>
-              <Text style={tw`font-semibold`}>Type: </Text>
-              {selectedLeave.leave_type?.name ?? "Unknown type"}
-            </Text>
-
-            <Text style={tw`text-base mb-3`}>
-              <Text style={tw`font-semibold`}>Date: </Text>
-              {formatDateShort(selectedLeave.created_at)}
-            </Text>
-
-            <Text style={tw`text-base mb-6`}>
-              <Text style={tw`font-semibold`}>Status: </Text>
-              {String(selectedLeave.status).toUpperCase()}
-            </Text>
-
-            {isPending ? (
-              <View style={tw`flex-row gap-3`}>
-                <Pressable
-                  onPress={() => setSelectedLeave(null)}
-                  style={({ pressed }) => [
-                    tw`flex-1 border border-red-200 py-3 rounded-xl items-center`,
-                    pressed && tw`opacity-80`,
-                  ]}
-                >
-                  <Text style={tw`text-red-600 font-semibold`}>Cancel</Text>
-                </Pressable>
-
-                <Pressable
-                  onPress={goToEdit}
-                  style={({ pressed }) => [
-                    tw`flex-1 bg-blue-600 py-3 rounded-xl items-center`,
-                    pressed && tw`opacity-85`,
-                  ]}
-                >
-                  <Text style={tw`text-white font-semibold`}>Edit</Text>
-                </Pressable>
+            <View style={tw`mt-3 flex-row justify-between`}>
+              <View>
+                <Text style={tw`text-xs text-slate-500`}>Approved</Text>
+                <Text style={tw`text-base font-semibold text-slate-900`}>
+                  {formatDays(item.approved)}
+                </Text>
               </View>
-            ) : (
-              <Pressable
-                onPress={() => setSelectedLeave(null)}
-                style={tw`bg-blue-600 py-3 rounded-xl items-center`}
-              >
-                <Text style={tw`text-white font-semibold`}>Close</Text>
-              </Pressable>
-            )}
+
+              <View>
+                <Text style={tw`text-xs text-slate-500`}>Pending</Text>
+                <Text style={tw`text-base font-semibold text-slate-900`}>
+                  {formatDays(item.pending)}
+                </Text>
+              </View>
+
+              <View>
+                <Text style={tw`text-xs text-slate-500`}>Rejected</Text>
+                <Text style={tw`text-base font-semibold text-slate-900`}>
+                  {formatDays(item.rejected)}
+                </Text>
+              </View>
+
+              <View>
+                <Text style={tw`text-xs text-slate-500`}>Limit</Text>
+                <Text style={tw`text-base font-semibold text-slate-900`}>
+                  {formatDays(item.limit)}
+                </Text>
+              </View>
+            </View>
           </View>
-        </>
-      )}
+        )}
+        ListEmptyComponent={
+          <View style={tw`items-center justify-center py-12`}>
+            <Text style={tw`text-slate-600`}>No leave types found.</Text>
+          </View>
+        }
+      />
     </View>
   );
 }
