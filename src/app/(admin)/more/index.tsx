@@ -5,6 +5,7 @@ import tw from "twrnc";
 import {
   BookUser,
   CalendarFold,
+  CalendarX,
   ChevronRight,
   Layers,
 } from "lucide-react-native";
@@ -55,6 +56,26 @@ export default function MoreScreen() {
           </View>
           <ChevronRight size={22} color="#9ca3af" />
         </TouchableOpacity>
+        {/*Holidays*/}
+        <TouchableOpacity
+          onPress={() => router.push("/(admin)/more/holidays")}
+          activeOpacity={0.8}
+          style={tw`bg-white rounded-xl p-4 mb-4 flex-row items-center justify-between shadow border border-slate-100`}
+        >
+          <View style={tw`flex-row items-center`}>
+            <View style={tw`bg-green-100 p-3 rounded-xl mr-4`}>
+              <CalendarX size={22} color="#16a34a" />
+            </View>
+            <View>
+              <Text style={tw`text-lg font-semibold text-gray-900`}>
+                Holidays
+              </Text>
+              <Text style={tw`text-gray-500 text-sm`}>Manage Holidays</Text>
+            </View>
+          </View>
+
+          <ChevronRight size={22} color="#9ca3af" />
+        </TouchableOpacity>
         {/* Others */}
         <TouchableOpacity
           // onPress={() => router.push("/(admin)/Others")}
@@ -62,8 +83,8 @@ export default function MoreScreen() {
           style={tw`bg-white rounded-xl p-4 mb-4 flex-row items-center justify-between shadow border border-slate-100`}
         >
           <View style={tw`flex-row items-center`}>
-            <View style={tw`bg-blue-100 p-3 rounded-xl mr-4`}>
-              <Layers size={22} color="#2563eb" />
+            <View style={tw`bg-green-100 p-3 rounded-xl mr-4`}>
+              <Layers size={22} color="#16a34a" />
             </View>
             <View>
               <Text style={tw`text-lg font-semibold text-gray-900`}>

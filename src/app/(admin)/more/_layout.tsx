@@ -2,12 +2,12 @@ import { Stack } from "expo-router";
 
 export default function MoreLayout() {
   return (
-    <Stack >
+    <Stack>
       <Stack.Screen
         name="index"
         options={{
           headerShown: false,
-          title: "More"
+          title: "More",
         }}
       />
       <Stack.Screen
@@ -26,7 +26,10 @@ export default function MoreLayout() {
         name="settings/leave/add-leave-type"
         options={{ headerShown: false, title: "Add Leave Type" }}
       />
+      <Stack.Screen
+        name="holidays/index"
+        options={{ headerShown: false, title: "Holiday" }}
+      />
     </Stack>
-
   );
 }

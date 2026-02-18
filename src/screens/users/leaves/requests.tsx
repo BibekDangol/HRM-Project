@@ -13,21 +13,9 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import tw from "twrnc";
-
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { supabase } from "@/src/supabase/supabaseClient";
-
-interface Props {
-  visible: boolean;
-}
-
-type LeaveRow = {
-  id: string;
-  user_id: string;
-  status: "pending" | "approved" | "rejected" | string;
-  created_at: string;
-  leave_type?: { id: string; name: string } | null;
-};
+import { LeaveRow, Props } from "@/src/types/leaveRequest";
 
 function formatDateShort(iso: string) {
   const d = new Date(iso);
