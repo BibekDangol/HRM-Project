@@ -1,7 +1,5 @@
 // components/InfoRow.tsx
-
 import { Text, View } from "react-native";
-
 import { ReactNode } from "react";
 import tw from "twrnc";
 

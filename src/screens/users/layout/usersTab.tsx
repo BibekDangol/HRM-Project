@@ -17,6 +17,7 @@ import { Alert, Modal, Pressable, Text, TextInput, View } from "react-native";
 import tw from "twrnc";
 import { MyTabBar } from "./tabBar";
 
+import { userTabs } from "@/src/config/userTabs";
 import * as Location from "expo-location";
 
 /* ---------------- Nepal date helper ---------------- */
@@ -471,7 +472,7 @@ export default function UsersTabsLayout() {
       <Tabs
         screenOptions={{
           headerShown: true,
-          headerTitleAlign: "left",
+          headerTitleAlign: "center",
           headerStyle: { backgroundColor: "#ffffff" },
           headerShadowVisible: false,
           headerRight: () => (
@@ -502,7 +503,7 @@ export default function UsersTabsLayout() {
                   {checkOpen ? (
                     <View
                       style={[
-                        tw`absolute right-0 top-9 bg-white border p-2 rounded-xl items-center justify-center border-[#E5E5E5] w-35`,
+                        tw`absolute right-0 top-9 bg-white border p-2 rounded-xl items-center justify-center border-[#E5E5E5] w-40`,
                       ]}
                     >
                       {isCheckedIn ? (
@@ -629,11 +630,8 @@ export default function UsersTabsLayout() {
       >
         <Tabs.Screen name="dashboard" options={{ title: "Dashboard" }} />
         <Tabs.Screen name="leaves" options={{ title: "Leaves" }} />
-        <Tabs.Screen name="more" options={{ title: "More" }} />
-        <Tabs.Screen
-          name="profile"
-          options={{ title: "Profile", href: null }}
-        />
+        <Tabs.Screen name="profile/index" options={{ title: "Profile" }} />
+        <Tabs.Screen name="more" options={{ title: "Setting" }} />
       </Tabs>
     </>
   );

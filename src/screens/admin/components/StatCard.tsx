@@ -17,16 +17,16 @@ export default function StatCard({
 }) {
   return (
     <View
-      style={tw`w-[48%] bg-white rounded-3xl p-4 mb-4 border border-gray-100`}
+      style={tw`w-[48%] bg-gray-50 rounded-3xl p-4 mb-4 border border-gray-200`}
     >
       {/* Top Row */}
-      <View style={tw`flex-row items-center justify-between`}>
+      <View style={tw`flex-row items-center justify-between `}>
         <Text style={tw`text-gray-500 text-sm font-medium`}>
           {title}
         </Text>
 
         <View
-          style={tw`w-8 h-8 rounded-full ${accent} items-center justify-center`}
+          style={tw`w-9 h-9 rounded-full ${accent} items-center justify-center`}
         >
           {icon}
         </View>

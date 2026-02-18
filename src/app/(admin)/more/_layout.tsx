@@ -6,25 +6,25 @@ export default function MoreLayout() {
       <Stack.Screen
         name="index"
         options={{
-          headerShown: true,
+          headerShown: false,
           title: "More"
         }}
       />
       <Stack.Screen
         name="attendance-list/index"
-        options={{ headerShown: true, title: "Users" }}
+        options={{ headerShown: false, title: "Users" }}
       />
       <Stack.Screen
         name="attendance-list/attendance-details"
-        options={{ headerShown: true, title: "Attendance Details" }}
+        options={{ headerShown: false, title: "Attendance Details" }}
       />
       <Stack.Screen
         name="settings/index"
-        options={{ headerShown: true, title: "Settings" }}
+        options={{ headerShown: false, title: "Settings" }}
       />
       <Stack.Screen
         name="settings/leave/add-leave-type"
-        options={{ headerShown: true, title: "Add Leave Type" }}
+        options={{ headerShown: false, title: "Add Leave Type" }}
       />
     </Stack>
 
