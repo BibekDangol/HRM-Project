@@ -1,23 +1,26 @@
-import { useRouter } from "expo-router";
+import { Href, useRouter } from "expo-router";
 import { CalendarCog, ChevronRight, Settings2 } from "lucide-react-native";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import tw from "twrnc";
 
 type SettingItem = {
-  icon: any;
+  id: string;
+  icon: React.ComponentType<{ size?: number; color?: string }>;
   label: string;
   description: string;
-  route: string;
+  route: Href;
 };
 
 const settingItems: SettingItem[] = [
   {
+    id: "add-leave-type",
     icon: CalendarCog,
     label: "Add Leave Types",
     description: "Create new leave categories",
     route: "/(admin)/more/settings/leave/add-leave-type",
   },
   {
+    id: "update-type-limits",
     icon: Settings2,
     label: "Update Type Limits",
     description: "Manage leave day limits",
@@ -41,9 +44,9 @@ export default function Settings() {
 
       <View style={tw`rounded-2xl border border-slate-100 overflow-hidden`}>
         {settingItems.map((item) => (
-          <View key={item.route}>
+          <View key={item.id}>
             <Pressable
-              onPress={() => router.push(item.route as any)}
+              onPress={() => router.push(item.route)}
               style={({ pressed }) => [
                 tw`flex-row items-center px-4 py-4 bg-white`,
                 pressed && tw`bg-slate-50`,

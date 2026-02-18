@@ -6,14 +6,14 @@ import tw from "twrnc";
 export function LeaveTypeDropdown({
   value,
   onChange,
-  types,
+  leaveTypes,
   loading,
   onRefresh,
   showStats = true, // Add this prop
 }: {
   value: number | null;
   onChange: (v: number) => void;
-  types: LeaveTypeRow[] | LeaveTypeWithStats[]; // Accept both types
+  leaveTypes: LeaveTypeRow[] | LeaveTypeWithStats[]; // Accept both types
   loading: boolean;
   onRefresh: () => Promise<void> | void;
   showStats?: boolean; // Optional prop to show/hide stats
@@ -22,8 +22,8 @@ export function LeaveTypeDropdown({
 
   const currentLabel = useMemo(() => {
     if (value == null) return "Select Leave Type";
-    return types.find((t) => t.id === value)?.name ?? "Select Leave Type";
-  }, [value, types]);
+    return leaveTypes.find((type) => type.id === value)?.name ?? "Select Leave Type";
+  }, [value, leaveTypes]);
 
   // Type guard to check if item has stats
   const hasStats = (item: LeaveTypeRow | LeaveTypeWithStats): item is LeaveTypeWithStats => {
@@ -59,12 +59,12 @@ export function LeaveTypeDropdown({
         <View
           style={tw`mt-2 rounded-2xl border border-slate-200 overflow-hidden`}
         >
-          {types.length === 0 ? (
+          {leaveTypes.length === 0 ? (
             <View style={tw`px-4 py-3 bg-white`}>
               <Text style={tw`text-slate-500`}>No leave types found.</Text>
             </View>
           ) : (
-            types.map((t, idx) => (
+            leaveTypes.map((t, idx) => (
               <Pressable
                 key={t.id}
                 onPress={() => {
@@ -73,7 +73,7 @@ export function LeaveTypeDropdown({
                 }}
                 style={({ pressed }) => [
                   tw`px-4 py-3 bg-white flex-row items-center justify-between`,
-                  idx !== types.length - 1 && tw`border-b border-slate-100`,
+                  idx !== leaveTypes.length - 1 && tw`border-b border-slate-100`,
                   pressed && tw`bg-slate-50`,
                 ]}
               >

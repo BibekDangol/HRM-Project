@@ -1,7 +1,7 @@
-import { Modal, Pressable, ScrollView, Text, View } from "react-native";
+import { UserProfile } from "@/src/types/admin";
 import { Check, ChevronDown, X } from "lucide-react-native";
 import React, { useState } from "react";
-import { UserProfile } from "@/src/types/admin";
+import { Modal, Pressable, ScrollView, Text, View } from "react-native";
 import tw from "twrnc";
 
 interface Props {
@@ -47,7 +47,6 @@ const EditUserModal = ({
     <Modal visible={visible} transparent animationType="fade">
       <View style={tw`flex-1 bg-black/50 justify-end`}>
         <View style={tw`bg-white rounded-t-3xl px-6 pt-4 pb-10`}>
-
           {/* Handle */}
           <View style={tw`items-center mb-4`}>
             <View style={tw`h-1 w-10 rounded-full bg-slate-200`} />
@@ -56,7 +55,9 @@ const EditUserModal = ({
           {/* Header */}
           <View style={tw`flex-row items-center justify-between mb-6`}>
             <View>
-              <Text style={tw`text-xl font-bold text-slate-900`}>Edit User</Text>
+              <Text style={tw`text-xl font-bold text-slate-900`}>
+                Edit User
+              </Text>
               <Text style={tw`text-sm text-slate-400 mt-0.5`}>
                 {user.first_name} {user.last_name}
               </Text>
@@ -73,15 +74,17 @@ const EditUserModal = ({
           </View>
 
           {/* Role */}
-          <Text style={tw`text-sm font-semibold text-slate-700 mb-2`}>Role</Text>
+          <Text style={tw`text-sm font-semibold text-slate-700 mb-2`}>
+            Role
+          </Text>
           <View style={tw`flex-row gap-2 mb-5`}>
-            {roles.map((r) => (
+            {roles.map((role) => (
               <Pressable
-                key={r}
-                onPress={() => setRole(r)}
+                key={role}
+                onPress={() => setRole(role)}
                 style={[
                   tw`flex-1 py-3 rounded-xl border items-center`,
-                  role === r
+                  role === role
                     ? tw`bg-green-700 border-green-700`
                     : tw`bg-white border-slate-200`,
                 ]}
@@ -89,10 +92,10 @@ const EditUserModal = ({
                 <Text
                   style={[
                     tw`text-xs font-bold capitalize`,
-                    role === r ? tw`text-white` : tw`text-slate-500`,
+                    role === role ? tw`text-white` : tw`text-slate-500`,
                   ]}
                 >
-                  {r.toUpperCase()}
+                  {role.toUpperCase()}
                 </Text>
               </Pressable>
             ))}
@@ -115,13 +118,22 @@ const EditUserModal = ({
             <ChevronDown
               size={18}
               color="#94a3b8"
-              style={{ transform: [{ rotate: showSupervisorPicker ? "180deg" : "0deg" }] }}
+              style={{
+                transform: [
+                  { rotate: showSupervisorPicker ? "180deg" : "0deg" },
+                ],
+              }}
             />
           </Pressable>
 
           {showSupervisorPicker && (
-            <View style={tw`border border-slate-200 rounded-2xl overflow-hidden mb-5`}>
-              <ScrollView style={{ maxHeight: 180 }} showsVerticalScrollIndicator={false}>
+            <View
+              style={tw`border border-slate-200 rounded-2xl overflow-hidden mb-5`}
+            >
+              <ScrollView
+                style={{ maxHeight: 180 }}
+                showsVerticalScrollIndicator={false}
+              >
                 {/* Self option */}
                 <Pressable
                   onPress={() => {
@@ -133,17 +145,21 @@ const EditUserModal = ({
                     pressed && tw`bg-slate-50`,
                   ]}
                 >
-                  <Text style={tw`text-sm text-slate-900 font-medium`}>Self</Text>
-                  {supervisor === user.id && <Check size={16} color="#2563eb" />}
+                  <Text style={tw`text-sm text-slate-900 font-medium`}>
+                    Self
+                  </Text>
+                  {supervisor === user.id && (
+                    <Check size={16} color="#2563eb" />
+                  )}
                 </Pressable>
 
                 {users
-                  .filter((u) => u.id !== user.id)
-                  .map((u) => (
+                  .filter((user) => user.id !== user.id)
+                  .map((user) => (
                     <Pressable
-                      key={u.id}
+                      key={user.id}
                       onPress={() => {
-                        setSupervisor(u.id);
+                        setSupervisor(user.id);
                         setShowSupervisorPicker(false);
                       }}
                       style={({ pressed }) => [
@@ -153,11 +169,15 @@ const EditUserModal = ({
                     >
                       <View>
                         <Text style={tw`text-sm text-slate-900 font-medium`}>
-                          {`${u.first_name ?? ""} ${u.last_name ?? ""}`.trim()}
+                          {`${user.first_name ?? ""} ${user.last_name ?? ""}`.trim()}
                         </Text>
-                        <Text style={tw`text-xs text-slate-400`}>{u.email}</Text>
+                        <Text style={tw`text-xs text-slate-400`}>
+                          {user.email}
+                        </Text>
                       </View>
-                      {supervisor === u.id && <Check size={16} color="#2563eb" />}
+                      {supervisor === user.id && (
+                        <Check size={16} color="#2563eb" />
+                      )}
                     </Pressable>
                   ))}
               </ScrollView>
@@ -195,7 +215,6 @@ const EditUserModal = ({
               </Text>
             </Pressable>
           </View>
-
         </View>
       </View>
     </Modal>
