@@ -1,0 +1,1 @@
+export const DEFAULT_RETURN_TO = "/(users)/leaves/calendar/apply";

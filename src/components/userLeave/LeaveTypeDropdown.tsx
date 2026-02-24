@@ -22,12 +22,16 @@ export function LeaveTypeDropdown({
 
   const currentLabel = useMemo(() => {
     if (value == null) return "Select Leave Type";
-    return leaveTypes.find((type) => type.id === value)?.name ?? "Select Leave Type";
+    return (
+      leaveTypes.find((type) => type.id === value)?.name ?? "Select Leave Type"
+    );
   }, [value, leaveTypes]);
 
   // Type guard to check if item has stats
-  const hasStats = (item: LeaveTypeRow | LeaveTypeWithStats): item is LeaveTypeWithStats => {
-    return 'approvedUsed' in item;
+  const hasStats = (
+    item: LeaveTypeRow | LeaveTypeWithStats,
+  ): item is LeaveTypeWithStats => {
+    return "approvedUsed" in item;
   };
 
   return (
@@ -73,7 +77,8 @@ export function LeaveTypeDropdown({
                 }}
                 style={({ pressed }) => [
                   tw`px-4 py-3 bg-white flex-row items-center justify-between`,
-                  idx !== leaveTypes.length - 1 && tw`border-b border-slate-100`,
+                  idx !== leaveTypes.length - 1 &&
+                    tw`border-b border-slate-100`,
                   pressed && tw`bg-slate-50`,
                 ]}
               >
