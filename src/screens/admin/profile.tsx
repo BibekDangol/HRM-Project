@@ -196,7 +196,7 @@ export default function ProfileScreen() {
           style={tw`flex-1 bg-black/40 justify-center px-4`}
         >
           <Pressable
-            onPress={() => { }}
+            onPress={() => {}}
             style={tw`bg-white border border-[#E5E5E5] p-4`}
           >
             <View style={tw`flex-row items-center justify-between`}>

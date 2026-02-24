@@ -16,8 +16,6 @@ import React from "react";
 import { Alert, Modal, Pressable, Text, TextInput, View } from "react-native";
 import tw from "twrnc";
 import { MyTabBar } from "./tabBar";
-
-import { userTabs } from "@/src/config/userTabs";
 import * as Location from "expo-location";
 
 /* ---------------- Nepal date helper ---------------- */
@@ -220,53 +218,54 @@ export default function UsersTabsLayout() {
     setCheckedInAt(parseDate(row.check_in_time));
   }, []);
 
-  const checkOut = React.useCallback(async (comment?: string) => {
-    const {
-      data: { user },
-      error: userErr,
-    } = await supabase.auth.getUser();
+  const checkOut = React.useCallback(
+    async (comment?: string) => {
+      const {
+        data: { user },
+        error: userErr,
+      } = await supabase.auth.getUser();
 
-    if (userErr) throw userErr;
-    if (!user) throw new Error("Not authenticated.");
+      if (userErr) throw userErr;
+      if (!user) throw new Error("Not authenticated.");
 
-    // Get user's current GPS location (check-out)
-    const loc = await getUserLocationOrThrow();
+      // Get user's current GPS location (check-out)
+      const loc = await getUserLocationOrThrow();
 
-    const date = nepalDateYYYYMMDD();
+      // ✅ Find the open row (could be yesterday)
+      const openRow = await getAnyOpenAttendanceRow(user.id);
 
-    const { data, error } = await supabase
-      .from("attendance")
-      .update({
-        check_out_time: new Date().toISOString(),
-        status: "present",
-        check_out_comment: comment?.trim() || null,
+      if (!openRow) {
+        Alert.alert(
+          "No open session",
+          "You haven't checked in yet (or already checked out).",
+        );
+        return;
+      }
 
-        // store check-out location
-        check_out_lat: loc.lat,
-        check_out_lng: loc.lng,
-      })
-      .eq("user_id", user.id)
-      .eq("date", date)
-      .eq("status", "incomplete")
-      .select(
-        "id,user_id,date,check_in_time,check_out_time,status,check_out_comment,check_in_comment,check_in_lat,check_in_lng,check_out_lat,check_out_lng",
-      )
-      .maybeSingle();
+      const { data, error } = await supabase
+        .from("attendance")
+        .update({
+          check_out_time: new Date().toISOString(),
+          status: "present",
+          check_out_comment: comment?.trim() || null,
+          check_out_lat: loc.lat,
+          check_out_lng: loc.lng,
+        })
+        // ✅ update by id, not by date
+        .eq("id", openRow.id)
+        .select(
+          "id,user_id,date,check_in_time,check_out_time,status,check_out_comment,check_in_comment,check_in_lat,check_in_lng,check_out_lat,check_out_lng",
+        )
+        .single();
 
-    if (error) throw error;
+      if (error) throw error;
 
-    if (!data) {
-      Alert.alert(
-        "No open session",
-        "You haven't checked in yet (or already checked out).",
-      );
-      return;
-    }
-
-    const row = data as AttendanceRow;
-    setAttendance(row);
-    setCheckedInAt(null);
-  }, []);
+      const row = data as AttendanceRow;
+      setAttendance(row);
+      setCheckedInAt(null);
+    },
+    [getAnyOpenAttendanceRow],
+  );
 
   React.useEffect(() => {
     fetchLatestAttendance();
@@ -342,7 +341,7 @@ export default function UsersTabsLayout() {
           if (anyOpen?.status === "incomplete") {
             Alert.alert(
               "Already checked in",
-              "You can't check in twice today.",
+              `You still have an open session from ${anyOpen.date}. Please check out first.`,
             );
             setCheckOpen(false);
             return;
@@ -429,7 +428,7 @@ export default function UsersTabsLayout() {
               placeholderTextColor="#9CA3AF"
               multiline
               editable={!isLocked}
-              style={tw`mt-3 border border-gray-300 rounded-xl p-3 min-h-20 text-black`}
+              style={tw`mt-3 border border-gray-300 rounded-xl p-3 m text-black`}
             />
 
             <View style={tw`flex-row justify-end mt-4`}>

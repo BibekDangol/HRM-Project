@@ -1,55 +1,15 @@
 import {
-  buildAdminMarks,
-  useCalendarStore,
-} from "@/src/screens/admin/holidays";
+  buildPeriodMarks,
+  firstParam,
+  isBeforeOrEqual,
+} from "@/src/components/Calendar/userCalendar";
+import { DEFAULT_RETURN_TO } from "@/src/constants/userCalendar";
+import { buildAdminMarks, useCalendarStore } from "@/src/utils/adminCalendar";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Text, View } from "react-native";
 import { Calendar } from "react-native-calendars";
 import tw from "twrnc";
-
-const DEFAULT_RETURN_TO = "/(users)/leaves/calendar/apply";
-
-function firstParam(v?: string | string[]) {
-  if (!v) return "";
-  return Array.isArray(v) ? String(v[0] ?? "") : String(v);
-}
-
-function parseISO(dateStr: string) {
-  const [y, m, d] = dateStr.split("-").map(Number);
-  if (!y || !m || !d) return null;
-  return new Date(Date.UTC(y, m - 1, d));
-}
-
-function isBeforeOrEqual(a: string, b: string) {
-  return a <= b;
-}
-
-function buildPeriodMarks(start: string, end: string) {
-  const marks: Record<string, any> = {};
-  const s = parseISO(start);
-  const e = parseISO(end);
-  if (!s || !e) return marks;
-
-  const cur = new Date(s.getTime());
-  while (cur.getTime() <= e.getTime()) {
-    const y = cur.getUTCFullYear();
-    const m = String(cur.getUTCMonth() + 1).padStart(2, "0");
-    const d = String(cur.getUTCDate()).padStart(2, "0");
-    const key = `${y}-${m}-${d}`;
-
-    marks[key] = {
-      startingDay: key === start,
-      endingDay: key === end,
-      color: "#2563eb",
-      textColor: "white",
-    };
-
-    cur.setUTCDate(cur.getUTCDate() + 1);
-  }
-
-  return marks;
-}
 
 export default function LeaveCalendarScreen() {
   const router = useRouter();
@@ -69,12 +29,13 @@ export default function LeaveCalendarScreen() {
   const initialStart = firstParam(params.startDate);
   const initialEnd = firstParam(params.endDate);
 
-  const [selectedStart, setSelectedStart] = useState<string>("");
-  const [selectedEnd, setSelectedEnd] = useState<string>("");
+  const [selectedStart, setSelectedStart] = useState<string>(
+    initialStart || "",
+  );
+  const [selectedEnd, setSelectedEnd] = useState<string>(initialEnd || "");
   const [year, setYear] = useState(new Date().getFullYear());
   const [month, setMonth] = useState(new Date().getMonth() + 1);
 
-  // ── Subscribe to admin store so any admin change triggers a re-render ──────
   const adminStore = useCalendarStore();
 
   useEffect(() => {
@@ -82,51 +43,40 @@ export default function LeaveCalendarScreen() {
     setSelectedEnd(initialEnd || "");
   }, [initialStart, initialEnd]);
 
-  const markedDates = useMemo(() => {
-    // Base layer: admin colour-coding (holidays, weekends, office days)
-    const adminMarks = buildAdminMarks(adminStore, year, month);
+  const adminMarks = buildAdminMarks(year, month);
 
-    // Overlay: period selection in blue (takes full priority when active)
-    if (selectedStart && selectedEnd) {
-      const start = isBeforeOrEqual(selectedStart, selectedEnd)
-        ? selectedStart
-        : selectedEnd;
-      const end = isBeforeOrEqual(selectedStart, selectedEnd)
-        ? selectedEnd
-        : selectedStart;
-      return buildPeriodMarks(start, end);
-    }
+  let markedDates: Record<string, any>;
 
-    if (selectedStart && !selectedEnd) {
-      return {
-        ...adminMarks,
-        [selectedStart]: {
-          startingDay: true,
-          endingDay: true,
-          color: "#2563eb",
-          textColor: "white",
-        },
-      };
-    }
+  if (selectedStart && selectedEnd) {
+    const start = isBeforeOrEqual(selectedStart, selectedEnd)
+      ? selectedStart
+      : selectedEnd;
+    const end = isBeforeOrEqual(selectedStart, selectedEnd)
+      ? selectedEnd
+      : selectedStart;
+    markedDates = buildPeriodMarks(start, end);
+  } else if (selectedStart && !selectedEnd) {
+    markedDates = {
+      ...adminMarks,
+      [selectedStart]: {
+        startingDay: true,
+        endingDay: true,
+        color: "#2563eb",
+        textColor: "white",
+      },
+    };
+  } else {
+    markedDates = adminMarks;
+  }
 
-    // No selection — show admin marks only
-    return adminMarks;
-  }, [selectedStart, selectedEnd, adminStore, year, month]);
-
-  // Switch markingType: "period" while selecting, "custom" otherwise so admin
-  // colour-coded backgrounds and dots are visible when no range is active.
   const markingType = selectedStart ? "period" : "custom";
 
   function goBackWithDates(startDate: string, endDate: string) {
-    router.replace({
-      pathname: returnTo as any,
-      params: {
-        startDate,
-        endDate,
-        ...(from === "edit" && id ? { id } : {}),
-        from: from || undefined,
-      },
-    });
+    const backParams: Record<string, string> = { startDate, endDate };
+    if (from === "edit" && id) backParams.id = id;
+    if (from) backParams.from = from;
+
+    router.replace({ pathname: returnTo as any, params: backParams });
   }
 
   const onDayPress = (day: { dateString: string }) => {
@@ -138,11 +88,12 @@ export default function LeaveCalendarScreen() {
       return;
     }
 
-    const start = selectedStart;
-    const end = dateStr;
-
-    const finalStart = isBeforeOrEqual(start, end) ? start : end;
-    const finalEnd = isBeforeOrEqual(start, end) ? end : start;
+    const finalStart = isBeforeOrEqual(selectedStart, dateStr)
+      ? selectedStart
+      : dateStr;
+    const finalEnd = isBeforeOrEqual(selectedStart, dateStr)
+      ? dateStr
+      : selectedStart;
 
     setSelectedStart(finalStart);
     setSelectedEnd(finalEnd);
@@ -160,7 +111,6 @@ export default function LeaveCalendarScreen() {
         </Text>
       </View>
 
-      {/* Legend — pulled from live admin colours */}
       <View style={tw`flex-row gap-4 px-4 mb-2`}>
         {(
           [
@@ -186,8 +136,6 @@ export default function LeaveCalendarScreen() {
           onMonthChange={(m) => {
             setYear(m.year);
             setMonth(m.month);
-            // Clear selection when navigating months
-            setSelectedStart("");
             setSelectedEnd("");
           }}
           markingType={markingType as any}

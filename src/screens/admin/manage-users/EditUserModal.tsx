@@ -36,12 +36,16 @@ const EditUserModal = ({
   if (!visible || !user) return null;
 
   const supervisorName = () => {
+    console.log("supervisor", supervisor);
     if (!supervisor || supervisor === user.id) return "Self";
     const found = users.find((u) => u.id === supervisor);
+    console.log("found", found);
     return found
       ? `${found.first_name ?? ""} ${found.last_name ?? ""}`.trim()
       : "Unknown";
   };
+
+  console.log("users", users[0]);
 
   return (
     <Modal visible={visible} transparent animationType="fade">
@@ -74,17 +78,14 @@ const EditUserModal = ({
           </View>
 
           {/* Role */}
-          <Text style={tw`text-sm font-semibold text-slate-700 mb-2`}>
-            Role
-          </Text>
           <View style={tw`flex-row gap-2 mb-5`}>
-            {roles.map((role) => (
+            {roles.map((roleProfile) => (
               <Pressable
-                key={role}
-                onPress={() => setRole(role)}
+                key={roleProfile}
+                onPress={() => setRole(roleProfile)}
                 style={[
                   tw`flex-1 py-3 rounded-xl border items-center`,
-                  role === role
+                  roleProfile === role
                     ? tw`bg-green-700 border-green-700`
                     : tw`bg-white border-slate-200`,
                 ]}
@@ -92,10 +93,10 @@ const EditUserModal = ({
                 <Text
                   style={[
                     tw`text-xs font-bold capitalize`,
-                    role === role ? tw`text-white` : tw`text-slate-500`,
+                    roleProfile === role ? tw`text-white` : tw`text-slate-500`,
                   ]}
                 >
-                  {role.toUpperCase()}
+                  {roleProfile.toUpperCase()}
                 </Text>
               </Pressable>
             ))}
@@ -105,6 +106,7 @@ const EditUserModal = ({
           <Text style={tw`text-sm font-semibold text-slate-700 mb-2`}>
             Supervisor
           </Text>
+
           <Pressable
             onPress={() => setShowSupervisorPicker(!showSupervisorPicker)}
             style={({ pressed }) => [
@@ -154,12 +156,12 @@ const EditUserModal = ({
                 </Pressable>
 
                 {users
-                  .filter((user) => user.id !== user.id)
-                  .map((user) => (
+                  .filter((userProfile) => userProfile.id !== user.id)
+                  .map((userProfile) => (
                     <Pressable
-                      key={user.id}
+                      key={userProfile.id}
                       onPress={() => {
-                        setSupervisor(user.id);
+                        setSupervisor(userProfile.id);
                         setShowSupervisorPicker(false);
                       }}
                       style={({ pressed }) => [
@@ -169,13 +171,13 @@ const EditUserModal = ({
                     >
                       <View>
                         <Text style={tw`text-sm text-slate-900 font-medium`}>
-                          {`${user.first_name ?? ""} ${user.last_name ?? ""}`.trim()}
+                          {`${userProfile.first_name ?? ""} ${userProfile.last_name ?? ""}`.trim()}
                         </Text>
                         <Text style={tw`text-xs text-slate-400`}>
-                          {user.email}
+                          {userProfile.email}
                         </Text>
                       </View>
-                      {supervisor === user.id && (
+                      {supervisor === userProfile.id && (
                         <Check size={16} color="#2563eb" />
                       )}
                     </Pressable>
