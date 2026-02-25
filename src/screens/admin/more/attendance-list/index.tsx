@@ -6,7 +6,7 @@ import { useUsersStore } from '@/src/store/useAdminsStore';
 import { UserProfile } from '@/src/types/admin';
 import { useRouter } from 'expo-router';
 import tw from "twrnc";
-import UserCard from '../components/UserCard';
+import UserCard from '../../components/UserCard';
 
 const AttendanceUserList = () => {
   const router = useRouter();

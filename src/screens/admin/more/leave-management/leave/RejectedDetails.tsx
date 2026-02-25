@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react'
 import { Text, View } from 'react-native'
+import { useEffect, useState } from 'react'
 
 import { fetchLeaveById } from '@/src/services/leave.service'
-import { useLocalSearchParams } from 'expo-router'
 import tw from 'twrnc'
+import { useLocalSearchParams } from 'expo-router'
 
 const RejectedDetails = () => {
   const [leave, setLeave] = useState<any>(null)
@@ -15,10 +15,6 @@ const RejectedDetails = () => {
       try {
         const result = await fetchLeaveById(id as string)
         setLeave(result)
-        console.log("Rejected screen", result)
-        if (!result) {
-          console.log("Error fetching Rejected Details", result)
-        }
       } finally {
         setLoading(false)
       }

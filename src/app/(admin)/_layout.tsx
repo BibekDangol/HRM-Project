@@ -1,7 +1,7 @@
 import { Tabs, usePathname, useRouter } from "expo-router";
 import { ArrowLeft, User } from "lucide-react-native";
 import { useCallback, useEffect } from "react";
-import { Pressable, View } from "react-native";
+import { Image, Pressable, Text, View } from "react-native";
 
 import { adminTabs } from "@/src/config/adminTabs";
 import { useAdminHeaderMenu } from "@/src/hooks/useAdminHeaderMenu";
@@ -28,7 +28,6 @@ export default function AdminLayout() {
   useEffect(() => {
     fetchUserProfile();
   }, [fetchUserProfile, loading]);
-
   const showBackButton = !adminTabs.some((tab) => pathname?.includes(tab.name));
   return (
     <Tabs
@@ -36,11 +35,23 @@ export default function AdminLayout() {
         headerShadowVisible: false,
         headerLeft: showBackButton
           ? () => (
-              <Pressable style={tw`ml-4`} onPress={() => router.back()}>
-                <ArrowLeft size={24} />
-              </Pressable>
-            )
+            <Pressable style={tw`ml-4`} onPress={() => router.back()}>
+              <ArrowLeft size={24} />
+            </Pressable>
+          )
           : undefined,
+
+        headerTitle: ({ children }) => (
+          <View style={tw`flex-row items-center gap-4`}>
+            <Image
+              style={{ width: 30, height: 30, borderRadius: 14 }}
+              source={{
+                uri: 'https://picsum.photos/200/300',
+              }}
+            />
+            <Text style={tw`font-semibold text-md`}>{adminProfile?.first_name}</Text>
+          </View>
+        ),
 
         headerRight: () => (
           <View style={tw`mr-4`}>

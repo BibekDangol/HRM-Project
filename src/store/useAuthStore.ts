@@ -10,26 +10,25 @@ type SignUpData = {
   lastName: string;
   organizationName: string;
 };
-type SignInResult = { error: string } | { role: string; status: string | null; };
+type SignInResult = { error: string } | { role: string; status: string | null };
 type AuthState = {
   user: User | null;
   session: Session | null;
   role: string | null; // "admin" or "user"
   loading: boolean;
-  status:string | null,
+  status: string | null;
   signUp: (data: SignUpData) => Promise<void>;
   signIn: (email: string, password: string) => Promise<SignInResult>;
   signOut: () => Promise<void>;
   restoreSession: () => Promise<void>;
   updateStatus: (status: "pending" | "active") => void; // <- helper
-
 };
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   session: null,
   role: null,
   loading: false,
-  status:null,
+  status: null,
   //initially null rakhdine ani pachi login function call gare pachi set garne status,role haru
 
   signUp: async ({
@@ -78,14 +77,17 @@ export const useAuthStore = create<AuthState>((set) => ({
       const userId = authData.user.id;
 
       // 4️⃣ Insert profile
-      const { data:profile, error: profileError } = await supabase.from("profiles").insert({
-        id: userId,
-        email:email,
-        first_name: firstName,
-        last_name: lastName,
-        organization_id: orgId,
-        role: "user",
-      }).select();
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .insert({
+          id: userId,
+          email: email,
+          first_name: firstName,
+          last_name: lastName,
+          organization_id: orgId,
+          role: "user",
+        })
+        .select();
       // insert and select from profile together
       if (profileError) throw profileError;
       set({
@@ -125,11 +127,11 @@ export const useAuthStore = create<AuthState>((set) => ({
         session: data.session,
         user: data.user,
         role: profileData?.role,
-        status:profileData.status,
+        status: profileData.status,
         loading: false,
       });
 
-      return { role: profileData.role, status: profileData.status};
+      return { role: profileData.role, status: profileData.status };
       // return the value of signin
       //State updates are async. You can’t rely on them immediately after calling an async function.
       //Zustand ≠ synchronous return value
@@ -139,7 +141,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       return { error: err.message };
     }
   },
-updateStatus: (status) => set({ status }),
+  updateStatus: (status) => set({ status }),
   signOut: async () => {
     try {
       await supabase.auth.signOut();

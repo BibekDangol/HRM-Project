@@ -1,346 +1,278 @@
-import { FormInput, FormOutput } from "@/src/types/admin";
-import { Camera, Edit, LockKeyhole, X } from "lucide-react-native";
+import { LockKeyhole, X } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   ActivityIndicator,
-  Alert,
+  Image,
   Modal,
   Pressable,
+  ScrollView,
   Text,
   TextInput,
   View,
 } from "react-native";
 
 import { adminProfileSchema } from "@/src/schema/admin/adminprofiles.schema";
+import { fetchAdminProfileService } from "@/src/services/admin.service";
+import { fetchImageService } from "@/src/services/image.service";
+import { useUsersStore } from "@/src/store/useAdminsStore";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { supabase } from "@/src/supabase/supabaseClient";
-import { ProfileData } from "@/src/types/profile";
 import { zodResolver } from "@hookform/resolvers/zod";
 import tw from "twrnc";
 
-export default function ProfileScreen() {
+export default function ProfilePage() {
   const user = useAuthStore((s) => s.user);
-
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  const [profile, setProfile] = useState<ProfileData | null>(null);
-
+  const { adminProfile, setAdminProfile } = useUsersStore();
+  const [loading, setLoading] = useState(true);
   const [editOpen, setEditOpen] = useState(false);
-
-  const {
-    control,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm<FormInput, any, FormOutput>({
+  const [saving, setSaving] = useState(false);
+  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
+  const [imageLoading, setImageLoading] = useState(true);
+  const { control, handleSubmit, reset, formState: { errors } } = useForm({
     resolver: zodResolver(adminProfileSchema),
-    defaultValues: {
-      orgName: "",
-      firstName: "",
-      lastName: "",
-      email: "",
-    },
+    defaultValues: { firstName: "", lastName: "", email: "" },
   });
-
-  const fetchProfile = async () => {
+  const image_path = '/ss.png';
+  const loadProfile = async () => {
     if (!user?.id) return;
-
+    setLoading(true);
     try {
-      setIsLoading(true);
-      const { data, error } = await supabase
-        .from("profiles")
-        .select(
-          "id, first_name, last_name, email, organization_id, organization(name)",
-        )
-        .eq("id", user.id)
-        .single();
-
-      if (error) throw error;
-
-      const p = data as unknown as ProfileData;
-      setProfile(p);
-
-      // keep form in sync (nice for first open)
+      const data = await fetchAdminProfileService(user.id);
+      setAdminProfile(data);
       reset({
-        firstName: p.first_name ?? "",
-        lastName: p.last_name ?? "",
-        email: p.email ?? "",
-        orgName: p.organization?.name ?? "",
+        firstName: data.first_name ?? "",
+        lastName: data.last_name ?? "",
+        email: data.email ?? "",
       });
-    } catch (e: unknown) {
-      Alert.alert(
-        "Error",
-        e instanceof Error ? e.message : "Failed to load profile.",
-      );
-    } finally {
-      setIsLoading(false);
-    }
+    } catch (e: any) {
+      console.log("Error loading profile:", e?.message);
+    } finally { setLoading(false); }
   };
 
+  useEffect(() => { loadProfile(); }, [user?.id]);
   useEffect(() => {
-    fetchProfile();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id]);
 
-  const openEdit = () => {
-    if (!profile) return;
+    const loadImage = async () => {
 
-    reset({
-      firstName: profile.first_name ?? "",
-      lastName: profile.last_name ?? "",
-      email: profile.email ?? "",
-      orgName: profile.organization?.name ?? "",
-    });
-
-    setEditOpen(true);
-  };
-
-  const onSave = async (values: FormOutput) => {
-    if (!user?.id || !profile) return;
-
+      const { data: buckets } = await supabase.storage.listBuckets();
+      console.log("Buckets:", buckets);
+      //Fetch the Profile Image signed Url
+      if (image_path) {
+        setImageLoading(true);
+        const { signedUrl, error } = await fetchImageService(image_path, 24 * 3600);
+        console.log(signedUrl)
+        if (!error) setProfileImageUrl(signedUrl);
+        else console.log("failed to fetch profile image", error);
+        setImageLoading(false);
+      }
+    }
+    loadImage();
+  }, [])
+  const onSave = async (values: any) => {
+    if (!user?.id) return;
+    setSaving(true);
     try {
-      setIsSaving(true);
-
-      // 1) Update profiles
-
-      const { error: profileErr } = await supabase
+      const { error } = await supabase
         .from("profiles")
         .update({
-          first_name: values.firstName.trim(),
-          last_name: values.lastName.trim(),
-          email: values.email.trim() || null,
+          first_name: values.firstName,
+          last_name: values.lastName,
+          email: values.email,
         })
         .eq("id", user.id);
-
-      if (profileErr) throw profileErr;
-
-      // 2) Optional: update organization name
-      if (profile.organization_id && values.orgName.trim().length > 0) {
-        const { error: orgErr } = await supabase
-          .from("organization")
-          .update({ name: values.orgName.trim() })
-          .eq("id", profile.organization_id);
-
-        if (orgErr) throw orgErr;
-      }
-
+      if (error) throw error;
       setEditOpen(false);
-      await fetchProfile();
-      Alert.alert("Saved", "Profile updated successfully.");
+      loadProfile();
     } catch (e: any) {
-      Alert.alert("Save failed", e?.message ?? "Please try again.");
-    } finally {
-      setIsSaving(false);
-    }
+      console.log("Save failed:", e?.message);
+    } finally { setSaving(false); }
   };
 
-  if (isLoading) {
+  if (loading) {
     return (
-      <View style={tw`flex-1 bg-white items-center justify-center`}>
-        <ActivityIndicator />
-        <Text style={tw`mt-3 text-gray-500 font-semibold`}>Loading…</Text>
+      <View style={tw`flex-1 bg-gray-50 items-center justify-center`}>
+        <ActivityIndicator size="large" color="#1F7A4D" />
+        <Text style={tw`mt-3 text-gray-500`}>Loading profile...</Text>
       </View>
     );
   }
 
-  const fullName =
-    `${profile?.first_name ?? ""} ${profile?.last_name ?? ""}`.trim();
+  const fullName = `${adminProfile?.first_name ?? ""} ${adminProfile?.last_name ?? ""}`.trim();
 
   return (
-    <View style={tw`flex-1 bg-white`}>
-      {/* Avatar centered */}
-      <View style={tw`items-center px-5 pt-9`}>
-        <Pressable
-          style={tw`w-44 h-44 rounded-full bg-[#F2F6FC] border border-[#E5E5E5] items-center justify-center`}
-        >
-          <Camera size={44} color="#0C0C0C" />
-        </Pressable>
+    <ScrollView style={tw`flex-1 bg-gray-100`}>
+      {/* Cover Image */}
+      <View style={tw`bg-white`}>
+        {imageLoading ? (
+          <ActivityIndicator style={tw`h-72 w-full`} size="large" color="#1F7A4D" />
+        ) : (
+          <Image
+            source={{ uri: profileImageUrl ?? 'https://picsum.photos/600/300' }}
+            style={tw`h-72 w-full`}
+            resizeMode="cover"
+          />
+        )}
+        <View style={tw`px-6 pt-4 pb-6`}>
+          <Text style={tw`text-3xl font-bold text-gray-900`}>
+            {fullName || "—"}
+          </Text>
 
-        {/* Edit button */}
-        <View style={tw`w-full mt-4 flex-row items-center justify-end`}>
-          <Pressable
-            onPress={openEdit}
-            style={({ pressed }) => [
-              tw`flex-row items-center px-3 py-2`,
-              pressed && tw`opacity-80`,
-            ]}
-          >
-            <Edit size={16} color="#1F7A4D" />
-            <Text style={tw`ml-2 font-extrabold text-[#1F7A4D]`}>Edit</Text>
+          {/* Active Status */}
+          <View style={tw`flex-row items-center mt-2`}>
+            <View style={tw`w-3 h-3 rounded-full bg-green-500 mr-2`} />
+            <Text style={tw`text-base text-gray-700`}>Active</Text>
+          </View>
+
+          <Text style={tw`text-gray-500 mt-1 text-base`}>
+            {new Date().toLocaleTimeString()} local time
+          </Text>
+
+          {/* Buttons */}
+          <View style={tw`flex-col gap-2 mt-8 space-y-3`}>
+            <Pressable
+              style={({ pressed }) => [
+                tw`bg-gray-100 py-4 rounded-xl items-center`,
+                pressed && tw`opacity-80`,
+              ]}
+            >
+              <Text style={tw`text-lg font-semibold text-gray-800`}>
+                Edit Status
+              </Text>
+            </Pressable>
+
+            <Pressable
+              onPress={() => setEditOpen(true)}
+              style={({ pressed }) => [
+                tw`bg-gray-100 py-4 rounded-xl items-center`,
+                pressed && tw`opacity-80`,
+              ]}
+            >
+              <Text style={tw`text-lg font-semibold text-gray-800`}>
+                Edit Profile
+              </Text>
+            </Pressable>
+          </View>
+        </View>
+      </View>
+
+      {/* Contact Information */}
+      <View style={tw`mt-6 bg-white px-6 py-5`}>
+        <View style={tw`flex-row justify-between items-center mb-4`}>
+          <Text style={tw`text-xl font-semibold text-gray-900`}>
+            Contact Information
+          </Text>
+          <Pressable onPress={() => setEditOpen(true)}>
+            <Text style={tw`text-blue-600 font-semibold text-lg`}>
+              Edit
+            </Text>
           </Pressable>
         </View>
 
-        {/* Organization */}
-        <Text style={tw`mt-8 text-2xl font-extrabold text-green-700`}>
-          {profile?.organization?.name ?? "—"}
-        </Text>
-        <View style={tw`w-24 h-px bg-gray-200 my-4`} />
-
-        {/* Name */}
-        <Text style={tw`text-4xl font-black text-gray-900`}>
-          {fullName || "—"}
-        </Text>
-        <View style={tw`w-24 h-px bg-gray-200 my-4`} />
+        {/* Phone */}
+        <View style={tw`flex-row items-center py-4 border-b border-gray-200`}>
+          <Text style={tw`text-gray-900 text-lg`}>
+            97875738321
+          </Text>
+        </View>
 
         {/* Email */}
-        <Text style={tw`text-xl font-semibold text-gray-500`}>
-          {profile?.email ?? "—"}
-        </Text>
+        <View style={tw`flex-row items-center py-4`}>
+          <Text style={tw`text-gray-900 text-lg`}>
+            {adminProfile?.email ?? "—"}
+          </Text>
+        </View>
       </View>
 
-      {/* ===== Edit Modal ===== */}
+      {/* Edit Modal */}
       <Modal visible={editOpen} transparent animationType="fade">
-        <Pressable
-          onPress={() => setEditOpen(false)}
-          style={tw`flex-1 bg-black/40 justify-center px-4`}
-        >
-          <Pressable
-            onPress={() => {}}
-            style={tw`bg-white border border-[#E5E5E5] p-4`}
-          >
+        <Pressable onPress={() => setEditOpen(false)} style={tw`flex-1 bg-black/40 justify-center px-4`}>
+          <Pressable onPress={() => { }} style={tw`bg-white rounded-xl p-5 shadow-md`}>
             <View style={tw`flex-row items-center justify-between`}>
-              <Text style={tw`text-lg font-extrabold text-[#0C0C0C]`}>
-                Edit Profile
-              </Text>
+              <Text style={tw`text-lg font-bold text-gray-900`}>Edit Profile</Text>
               <Pressable onPress={() => setEditOpen(false)} hitSlop={10}>
                 <X size={20} color="#0C0C0C" />
               </Pressable>
             </View>
 
-            {/* Organization
-            <Text style={tw`mt-4 text-[#0C0C0C] font-bold mb-2`}>
-              Organization
-            </Text>
-            <Controller
-              control={control}
-              name="orgName"
-              render={({ field: { value, onChange, onBlur } }) => (
-                <TextInput
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  placeholder="Organization name"
-                  placeholderTextColor="#9CA3AF"
-                  style={tw`border border-[#E5E5E5] bg-[#F2F6FC] px-4 py-3 text-[#0C0C0C]`}
-                />
-              )}
-            />
-            {!!errors.orgName?.message && (
-              <Text style={tw`mt-1 text-red-600 font-semibold`}>
-                {errors.orgName.message}
-              </Text>
-            )} */}
+            <ScrollView style={tw`mt-4`} keyboardShouldPersistTaps="handled">
+              {/* First Name */}
+              <Text style={tw`text-gray-700 font-bold mb-1 mt-3`}>First Name</Text>
+              <Controller
+                control={control}
+                name="firstName"
+                render={({ field: { value, onChange, onBlur } }) => (
+                  <TextInput
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    placeholder="First Name"
+                    placeholderTextColor="#9CA3AF"
+                    style={tw`border border-gray-300 bg-gray-100 px-4 py-3 rounded-md text-gray-900`}
+                  />
+                )}
+              />
 
-            {/* First Name */}
-            <Text style={tw`mt-4 text-[#0C0C0C] font-bold mb-2`}>
-              First Name
-            </Text>
-            <Controller
-              control={control}
-              name="firstName"
-              render={({ field: { value, onChange, onBlur } }) => (
-                <TextInput
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  placeholder="First name"
-                  placeholderTextColor="#9CA3AF"
-                  style={tw`border border-[#E5E5E5] bg-[#F2F6FC] px-4 py-3 text-[#0C0C0C]`}
-                />
-              )}
-            />
-            {!!errors.firstName?.message && (
-              <Text style={tw`mt-1 text-red-600 font-semibold`}>
-                {errors.firstName.message}
-              </Text>
-            )}
+              {/* Last Name */}
+              <Text style={tw`text-gray-700 font-bold mb-1 mt-3`}>Last Name</Text>
+              <Controller
+                control={control}
+                name="lastName"
+                render={({ field: { value, onChange, onBlur } }) => (
+                  <TextInput
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    placeholder="Last Name"
+                    placeholderTextColor="#9CA3AF"
+                    style={tw`border border-gray-300 bg-gray-100 px-4 py-3 rounded-md text-gray-900`}
+                  />
+                )}
+              />
 
-            {/* Last Name */}
-            <Text style={tw`mt-4 text-[#0C0C0C] font-bold mb-2`}>
-              Last Name
-            </Text>
-            <Controller
-              control={control}
-              name="lastName"
-              render={({ field: { value, onChange, onBlur } }) => (
-                <TextInput
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  placeholder="Last name"
-                  placeholderTextColor="#9CA3AF"
-                  style={tw`border border-[#E5E5E5] bg-[#F2F6FC] px-4 py-3 text-[#0C0C0C]`}
-                />
-              )}
-            />
-            {!!errors.lastName?.message && (
-              <Text style={tw`mt-1 text-red-600 font-semibold`}>
-                {errors.lastName.message}
-              </Text>
-            )}
+              {/* Email */}
+              <View style={tw`flex-row gap-1 text-gray-700 font-bold mb-1 mt-3 flex-row items-center`}>
+                <LockKeyhole size={16} color="#1F7A4D" />
+                <Text>Email</Text>
+              </View>
+              <Controller
+                control={control}
+                name="email"
+                render={({ field: { value, onChange, onBlur } }) => (
+                  <TextInput
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    placeholder="Email"
+                    placeholderTextColor="#9CA3AF"
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    style={tw`border border-gray-300 bg-gray-100 px-4 py-3 rounded-md text-gray-900`}
+                  />
+                )}
+              />
 
-            <View style={tw`mt-4 mb-2 flex-row items-center`}>
-              <LockKeyhole size={16} color="#0C0C0C" />
-              <Text style={tw`ml-2 text-[#0C0C0C] font-bold`}>Email</Text>
-            </View>
+              {/* Buttons */}
+              <View style={tw`flex-row gap-2 mt-6 space-x-3`}>
+                <Pressable
+                  onPress={() => setEditOpen(false)}
+                  style={({ pressed }) => [tw`flex-1 border border-gray-300 bg-white py-3 items-center rounded-md`, pressed && tw`opacity-80`]}
+                >
+                  <Text style={tw`font-bold text-gray-900`}>Cancel</Text>
+                </Pressable>
 
-            <Controller
-              control={control}
-              name="email"
-              render={({ field: { value, onChange, onBlur } }) => (
-                // <TextInput
-                //   value={value}
-                //   onChangeText={onChange}
-                //   onBlur={onBlur}
-                //   placeholder="Email"
-                //   placeholderTextColor="#9CA3AF"
-                //   autoCapitalize="none"
-                //   keyboardType="email-address"
-                //   style={tw`border border-[#E5E5E5] bg-[#F2F6FC] px-4 py-3 text-[#0C0C0C]`}
-                // />
-                <Text style={tw`text-base text-gray-700`}>
-                  {profile?.email ?? "—"}
-                </Text>
-              )}
-            />
-            {!!errors.email?.message && (
-              <Text style={tw`mt-1 text-red-600 font-semibold`}>
-                {errors.email.message}
-              </Text>
-            )}
-
-            {/* Buttons */}
-            <View style={tw`flex-row mt-5`}>
-              <Pressable
-                onPress={() => setEditOpen(false)}
-                style={({ pressed }) => [
-                  tw`flex-1 border border-[#E5E5E5] bg-white py-3 items-center`,
-                  pressed && tw`opacity-80`,
-                ]}
-              >
-                <Text style={tw`font-bold text-[#0C0C0C]`}>Cancel</Text>
-              </Pressable>
-
-              <View style={tw`w-3`} />
-
-              <Pressable
-                onPress={handleSubmit(onSave)}
-                disabled={isSaving}
-                style={({ pressed }) => [
-                  tw`flex-1 bg-[#1F7A4D] py-3 items-center`,
-                  isSaving && tw`opacity-60`,
-                  pressed && !isSaving && tw`opacity-85`,
-                ]}
-              >
-                <Text style={tw`text-white font-extrabold`}>
-                  {isSaving ? "Saving..." : "Update"}
-                </Text>
-              </Pressable>
-            </View>
+                <Pressable
+                  onPress={handleSubmit(onSave)}
+                  disabled={saving}
+                  style={({ pressed }) => [tw`flex-1 bg-green-700 py-3 items-center rounded-md`, saving && tw`opacity-60`, pressed && !saving && tw`opacity-85`]}
+                >
+                  <Text style={tw`text-white font-bold`}>{saving ? "Saving..." : "Update"}</Text>
+                </Pressable>
+              </View>
+            </ScrollView>
           </Pressable>
         </Pressable>
       </Modal>
-    </View>
+    </ScrollView>
   );
 }
