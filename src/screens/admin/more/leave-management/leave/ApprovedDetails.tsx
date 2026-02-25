@@ -1,23 +1,25 @@
-import { useEffect, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
+import { useEffect, useState } from "react";
 
+import LoadingIndicator from "@/src/components/LoadingIndicator";
 import { fetchLeaveById } from "@/src/services/leave.service";
-import { useLocalSearchParams } from "expo-router";
 import tw from "twrnc";
+import { useLocalSearchParams } from "expo-router";
 
 export default function LeaveApprovedDetailsScreen() {
   const { id } = useLocalSearchParams();
   const [leave, setLeave] = useState<any>(null);
-
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
     if (!id) return;
     const loadLeave = async () => {
       const data = await fetchLeaveById(id as string);
       setLeave(data);
+      setLoading(false);
     };
     loadLeave();
   }, [id]);
-  if (!leave) return <Text style={tw`p-4`}>Loading...</Text>;
+  if (loading) return <LoadingIndicator message="Loading..." />
   return (
     <ScrollView style={tw`flex-1 bg-gray-100`}>
       <View style={tw`bg-white m-4 rounded-xl p-4 shadow`}>
@@ -81,7 +83,7 @@ export default function LeaveApprovedDetailsScreen() {
 
           <Text style={tw`text-gray-500 text-sm`}>Approved By</Text>
           <Text style={tw`text-gray-900 mb-2`}>
-            {leave.action_taken_by_name || "N/A"}
+            {leave.action_taken_by_first_name || "N/A"}
           </Text>
 
           <Text style={tw`text-gray-500 text-sm`}>Approved On</Text>

@@ -1,23 +1,23 @@
-import { ActivityIndicator, Text, View } from "react-native";
-
+import LoadingIndicator from "../components/LoadingIndicator";
 import { Redirect } from "expo-router";
-import tw from 'twrnc';
 import { useAuthStore } from "@/src/store/useAuthStore";
 
 export default function Index() {
   const { loading, role } = useAuthStore();
+  const { user } = useAuthStore();
   if (loading) {
     return (
-      <View style={tw`flex-1 items-center justify-center`}>
-        <ActivityIndicator size="large" />
-        <Text>Loading..</Text></View>
+      <LoadingIndicator message="Loading.." />
     )
   }
-  if (role === "admin") {
+  if (user && role === "admin") {
     return <Redirect href='/(admin)/dashboard' />;
   }
-  if (role === "user") {
+  if (user && role === "user") {
     return <Redirect href='/(users)/dashboard' />
   }
-  return <Redirect href='/(auth)/login' />
+  if (!user) {
+    return <Redirect href='/(auth)/login' />
+  }
+
 }

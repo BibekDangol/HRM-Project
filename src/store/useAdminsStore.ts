@@ -1,10 +1,7 @@
 import { create } from "zustand";
+import { AdminProfile } from "../services/admin.service";
 import { UserProfile } from "../types/admin";
 
-type AdminProfile = {
-  id: string;
-  organization_id: number;
-};
 type UsersState = {
   users: UserProfile[];
   organizationName: string;

@@ -1,10 +1,6 @@
 import * as Clipboard from "expo-clipboard";
 
-import {
-  fetchAdminProfileService,
-  fetchUsersService,
-} from "@/src/services/admin.service";
-import React, { useEffect, useState } from "react";
+import AddUserModal, { AddUserFormData } from "./AddUserModal";
 import {
   Alert,
   FlatList,
@@ -15,17 +11,22 @@ import {
   TextInput,
   View,
 } from "react-native";
-import AddUserModal, { AddUserFormData } from "./AddUserModal";
-
-import { apiClient } from "@/src/api/apiClient";
-import { useDebounce } from "@/src/hooks/useDebounce";
-import UserCard from "@/src/screens/admin/components/UserCard";
-import { useUsersStore } from "@/src/store/useAdminsStore";
-import { useAuthStore } from "@/src/store/useAuthStore";
-import { UserProfile } from "@/src/types/admin";
-import tw from "twrnc";
-import EditUserModal from "./EditUserModal";
 import { Copy, Plus, Search, X } from "lucide-react-native";
+import React, { useEffect, useState } from "react";
+import {
+  fetchAdminProfileService,
+  fetchUsersService,
+} from "@/src/services/admin.service";
+
+import EditUserModal from "./EditUserModal";
+import LoadingIndicator from "@/src/components/LoadingIndicator";
+import UserCard from "../components/UserCard";
+import { UserProfile } from "@/src/types/admin";
+import { apiClient } from "@/src/api/apiClient";
+import tw from "twrnc";
+import { useAuthStore } from "@/src/store/useAuthStore";
+import { useDebounce } from "@/src/hooks/useDebounce";
+import { useUsersStore } from "@/src/store/useAdminsStore";
 
 const ManageUsers = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -38,17 +39,17 @@ const ManageUsers = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editRole, setEditRole] = useState<string>("user");
   const [editSupervisor, setEditSupervisor] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true)
 
   const pendingUsers = users.filter((u) => u.status === "pending");
   const activeUsers = users.filter((u) => u.status === "active");
   const pendingCount = pendingUsers.length;
   const activeCount = activeUsers.length;
-
   const { user } = useAuthStore();
+  const [refreshing, setRefreshing] = useState(false);
   const { session } = useAuthStore.getState();
   const token = session?.access_token;
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
-
   const handleAddUser = async (data: AddUserFormData) => {
     if (!user && !adminProfile) return;
     const { session } = useAuthStore.getState();
@@ -140,25 +141,30 @@ const ManageUsers = () => {
   const isChanged =
     editRole !== editingUser?.role ||
     editSupervisor !== editingUser?.supervisor_id;
-
-  useEffect(() => {
+  const loadAdmin = async () => {
     if (!user?.id) return;
-    const loadAdmin = async () => {
-      try {
-        const profile = await fetchAdminProfileService(user.id);
-        setAdminProfile(profile);
-        const users = await fetchUsersService(
-          profile.organization_id,
-          debouncedSearchQuery,
-        );
-        setUsers(users);
-      } catch (err) {
-        console.log("Init load error", err);
-      }
-    };
+    try {
+      setLoading(true)
+      const profile = await fetchAdminProfileService(user.id);
+      setAdminProfile(profile);
+      const users = await fetchUsersService(
+        profile.organization_id,
+        debouncedSearchQuery,
+      );
+      setUsers(users);
+      setLoading(false);
+    } catch (err) {
+      console.log("Init load error", err);
+    }
+  };
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadAdmin();
+    setRefreshing(false);
+  };
+  useEffect(() => {
     loadAdmin();
-  }, [user?.id]);
-
+  }, []); //userid
   return (
     <>
       <View style={tw`flex-1 bg-white`}>
@@ -217,7 +223,6 @@ const ManageUsers = () => {
                   </Pressable>
                 )}
               </View>
-
               {/* Tabs */}
               <View style={tw`flex-row mt-4 bg-slate-100 rounded-2xl p-1`}>
                 <Pressable
@@ -284,25 +289,30 @@ const ManageUsers = () => {
                   onDelete={handleDeleteUser}
                 />
               )}
-              contentContainerStyle={tw`px-5 pb-6`}
+              contentContainerStyle={{ flexGrow: 1 }}
               keyboardShouldPersistTaps="handled"
               ItemSeparatorComponent={() => <View style={tw`h-3`} />}
+              refreshing={refreshing}
+              onRefresh={onRefresh}
               ListEmptyComponent={
-                <View style={tw`items-center justify-center py-20`}>
-                  <View
-                    style={tw`h-16 w-16 rounded-full bg-slate-100 items-center justify-center mb-4`}
-                  >
-                    <Search size={26} color="#94a3b8" />
-                  </View>
-                  <Text style={tw`text-slate-700 font-semibold text-base`}>
-                    No users found
-                  </Text>
-                  <Text style={tw`text-slate-400 text-sm mt-1`}>
-                    {activeTab === "pending"
-                      ? "No pending users at the moment"
-                      : "No active users at the moment"}
-                  </Text>
-                </View>
+                loading ? (
+                  <LoadingIndicator message="Loading Users" />
+                ) : (
+                  <View style={tw`items-center justify-center py-20`}>
+                    <View
+                      style={tw`h-16 w-16 rounded-full bg-slate-100 items-center justify-center mb-4`}
+                    >
+                      <Search size={26} color="#94a3b8" />
+                    </View>
+                    <Text style={tw`text-slate-700 font-semibold text-base`}>
+                      No users found
+                    </Text>
+                    <Text style={tw`text-slate-400 text-sm mt-1`}>
+                      {activeTab === "pending"
+                        ? "No pending users at the moment"
+                        : "No active users at the moment"}
+                    </Text>
+                  </View>)
               }
             />
           </View>

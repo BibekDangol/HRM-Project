@@ -3,11 +3,11 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { FlatList, Pressable, Text, View } from "react-native";
 
+import Capsule from "@/src/components/Capsule";
+import SummaryBox from "@/src/components/SummaryBox";
 import { supabase } from "@/src/supabase/supabaseClient";
 import { Ionicons } from "@expo/vector-icons";
 import tw from "twrnc";
-import Capsule from "../../../components/Capsule";
-import SummaryBox from "../../../components/SummaryBox";
 
 export type Attendance = {
   check_in_time: string | null;

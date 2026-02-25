@@ -1,8 +1,9 @@
 import { LeaveStatus, fetchLeaveRequests } from "@/src/services/leave.service";
 import { CalendarClock, ChevronRight } from "lucide-react-native";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { FlatList, Pressable, Text, View } from "react-native";
 
+import LoadingIndicator from "@/src/components/LoadingIndicator";
 import { useUsersStore } from "@/src/store/useAdminsStore";
 import { useLeaveStore } from "@/src/store/useLeaveStore";
 import { useRouter } from "expo-router";
@@ -28,22 +29,35 @@ const statusConfig: Record<string, { bg: string; text: string; dot: string }> = 
 
 export default function LeaveRequests() {
   const { adminProfile } = useUsersStore();
+  const [refreshing, setRefreshing] = useState(false);
   const { setLeaves, leaves } = useLeaveStore();
   const [activeTab, setActiveTab] = useState<LeaveStatus>("pending");
-
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
   const filteredLeaves = leaves.filter(
     (leave) => leave.status === activeTab
   );
-
-  useEffect(() => {
+  const loadLeaves = useCallback(async () => {
     if (!adminProfile) return;
-    const loadLeaves = async () => {
+    try {
+      // setLoading(true); //ask this
       const data = await fetchLeaveRequests(adminProfile.organization_id);
       setLeaves(data);
-    };
-    loadLeaves();
+    } catch (error) {
+      console.log("Error loading leaves:", error);
+    } finally {
+      setLoading(false);
+    }
   }, [adminProfile, setLeaves]);
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadLeaves();
+    setRefreshing(false);
+  };
+
+  useEffect(() => {
+    loadLeaves();
+  }, [loadLeaves]);
 
   const goToDetails = (leave: any) => {
     if (leave.status === "approved") {
@@ -54,7 +68,10 @@ export default function LeaveRequests() {
       router.push({ pathname: "/(admin)/leave/rejected-details", params: { id: leave.id } });
     }
   };
-
+  if (loading)
+    return (
+      <LoadingIndicator message="Loading Leave Requests.." />
+    )
   return (
     <View style={tw`flex-1 bg-white`}>
       {/* Top Tabs */}
@@ -90,6 +107,8 @@ export default function LeaveRequests() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={tw`px-4 pt-3 pb-10`}
         ItemSeparatorComponent={() => <View style={tw`h-3`} />}
+        refreshing={refreshing}
+        onRefresh={onRefresh}
         renderItem={({ item: leave }) => {
           const cfg = statusConfig[leave.status] ?? statusConfig.pending;
 
@@ -126,7 +145,6 @@ export default function LeaveRequests() {
                   {String(leave.status).toUpperCase()}
                 </Text>
               </View>
-
               <ChevronRight size={16} color="#cbd5e1" />
             </Pressable>
           );
