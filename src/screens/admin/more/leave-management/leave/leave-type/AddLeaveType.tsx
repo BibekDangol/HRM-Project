@@ -12,7 +12,7 @@ import tw from "twrnc";
 import AddLeaveTypeModal from "./AddLeaveTypeModal";
 
 export default function LeaveTypeSettings() {
-  const { adminProfile } = useUsersStore();
+  const { userProfile } = useUsersStore();
   const {
     leaveTypes,
     setLeaveTypes,
@@ -23,40 +23,38 @@ export default function LeaveTypeSettings() {
 
   const [showModal, setShowModal] = useState(false);
   const [selectedType, setSelectedType] = useState<any>(null);
-  const [loading, setLoading] = useState(false)
-  const [refreshing, setRefreshing] = useState(false)
+  const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   const loadLeaveTypes = useCallback(async () => {
-    if (!adminProfile?.organization_id) return;
+    if (!userProfile?.organization_id) return;
     try {
       setLoading(true);
       console.log(loading);
-      const result = await fetchLeaveTypesService(
-        adminProfile.organization_id
-      );
+      const result = await fetchLeaveTypesService(userProfile.organization_id);
       setLeaveTypes(result || []);
       setLoading(false);
-      console.log(loading)
+      console.log(loading);
     } catch (err: any) {
       Alert.alert("Error", err.message);
     }
-  }, [adminProfile])
+  }, [userProfile]);
   // Load leave types
   useEffect(() => {
     loadLeaveTypes();
   }, [loadLeaveTypes]);
   const onRefresh = async () => {
-    setRefreshing(true)
+    setRefreshing(true);
     await loadLeaveTypes();
-    setRefreshing(false)
-  }
+    setRefreshing(false);
+  };
   // ADD
   const handleAddLeaveType = async (name: string, limit: number) => {
     try {
       const res = await apiClient.post("/add-leave-type", {
         name,
         leave_limit: limit,
-        organization_id: adminProfile?.organization_id,
+        organization_id: userProfile?.organization_id,
       });
 
       addLeaveType(res.data);
@@ -70,7 +68,7 @@ export default function LeaveTypeSettings() {
   const handleEditLeaveType = async (
     id: string,
     name: string,
-    limit: number
+    limit: number,
   ) => {
     try {
       const res = await apiClient.put("/edit-leave-type", {
@@ -124,45 +122,44 @@ export default function LeaveTypeSettings() {
         </TouchableOpacity>
       </View>
       {/* List */}
-      {loading ?
-        (<LoadingIndicator message="Loading Leave Types" />)
-        : (
-          <FlatList
-            data={leaveTypes}
-            keyExtractor={(item) => item.id}
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            renderItem={({ item }) => (
-              <View style={tw`p-3 border rounded mb-2 flex-row justify-between items-center`}>
-                <View>
-                  <Text style={tw`font-semibold`}>{item.name}</Text>
-                  <Text style={tw`text-gray-500`}>
-                    {item.leave_limit} days
-                  </Text>
-                </View>
-                <View style={tw`flex-row`}>
-                  <TouchableOpacity
-                    onPress={() => {
-                      setSelectedType(item);
-                      setShowModal(true);
-                    }}
-                    style={tw`bg-blue-500 px-3 py-1 rounded mr-2`}
-                  >
-                    <Text style={tw`text-white`}>Edit</Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    onPress={() => handleDelete(item.id)}
-                    style={tw`bg-red-500 px-3 py-1 rounded`}
-                  >
-                    <Text style={tw`text-white`}>Delete</Text>
-                  </TouchableOpacity>
-                </View>
+      {loading ? (
+        <LoadingIndicator message="Loading Leave Types" />
+      ) : (
+        <FlatList
+          data={leaveTypes}
+          keyExtractor={(item) => item.id}
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          renderItem={({ item }) => (
+            <View
+              style={tw`p-3 border rounded mb-2 flex-row justify-between items-center`}
+            >
+              <View>
+                <Text style={tw`font-semibold`}>{item.name}</Text>
+                <Text style={tw`text-gray-500`}>{item.leave_limit} days</Text>
               </View>
-            )
-            }
-          />
-        )}
+              <View style={tw`flex-row`}>
+                <TouchableOpacity
+                  onPress={() => {
+                    setSelectedType(item);
+                    setShowModal(true);
+                  }}
+                  style={tw`bg-blue-500 px-3 py-1 rounded mr-2`}
+                >
+                  <Text style={tw`text-white`}>Edit</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={() => handleDelete(item.id)}
+                  style={tw`bg-red-500 px-3 py-1 rounded`}
+                >
+                  <Text style={tw`text-white`}>Delete</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
+        />
+      )}
       {/* Modal */}
       <AddLeaveTypeModal
         visible={showModal}
@@ -173,10 +170,10 @@ export default function LeaveTypeSettings() {
         onSubmit={
           selectedType
             ? (name: string, limit: number) =>
-              handleEditLeaveType(selectedType.id, name, limit)
+                handleEditLeaveType(selectedType.id, name, limit)
             : handleAddLeaveType
         }
       />
-    </View >
+    </View>
   );
 }

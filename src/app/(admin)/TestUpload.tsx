@@ -3,12 +3,12 @@ import axios from "axios";
 import * as ImagePicker from "expo-image-picker";
 import React, { useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Button,
-    StyleSheet,
-    Text,
-    View,
+  ActivityIndicator,
+  Alert,
+  Button,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
 
 const apiClient = axios.create({
@@ -52,7 +52,7 @@ const TestUpload = () => {
       const fileName = `test-${Date.now()}.jpg`;
 
       // 2️⃣ Ask Edge Function for signed URL
-      const res = await apiClient.post("/s3-sign", {
+      const res = await apiClient.post("/upload-image", {
         filename: fileName,
         contentType: asset.mimeType || "image/jpeg",
       });

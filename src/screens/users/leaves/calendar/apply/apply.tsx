@@ -14,11 +14,7 @@ import {
   firstParam,
 } from "@/src/utils/leaveUtils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  useFocusEffect,
-  useLocalSearchParams,
-  useRouter
-} from "expo-router";
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { Check } from "lucide-react-native";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -429,7 +425,7 @@ export default function ApplyLeaveScreen() {
                       ]}
                     >
                       <View
-                        style={tw`h-6 w-6 rounded-md border ${
+                        style={tw`h-6 w-6 border ${
                           value
                             ? "bg-blue-600 border-blue-600"
                             : "bg-white border-slate-300"

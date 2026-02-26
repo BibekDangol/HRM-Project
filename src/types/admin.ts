@@ -9,6 +9,7 @@ export interface UserProfile {
   email: string | null;
   first_name: string | null;
   last_name: string | null;
+  avatar?: string | null;
   role: string;
   organization_id: number;
   status?: string | null;

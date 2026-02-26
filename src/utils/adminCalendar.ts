@@ -18,7 +18,7 @@ const DAY_NAME_TO_DOW: Record<string, number> = {
 };
 
 // ✅ default weekends (until backend loads)
-const DEFAULT_WEEKENDS: string[] = ["sunday", "wednesday"];
+const DEFAULT_WEEKENDS: string[] = ["sunday", "saturday"];
 
 // ---- helpers ----
 const DATE_RE = /^(\d{4})-(\d{2})-(\d{2})$/;
