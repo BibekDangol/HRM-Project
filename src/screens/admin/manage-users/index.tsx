@@ -90,7 +90,7 @@ const ManageUsers = () => {
     }
 
     try {
-      const response = await apiClient.post("/hyper-service", {
+      const response = await apiClient.post("/admin-add-user", {
         email: data.email,
         firstName: data.first_name,
         lastName: data.last_name,
@@ -123,7 +123,7 @@ const ManageUsers = () => {
   const handleSubmitEdit = async (userId: string) => {
     if (!adminProfile) return;
     try {
-      const response = await apiClient.post("/hyper-edit", {
+      const response = await apiClient.post("/admin-edit-user", {
         userId,
         role: editRole,
         supervisor_id: editSupervisor,

@@ -22,7 +22,6 @@ import { DateField } from "@/src/components/userLeave/DateField";
 import { LeaveTypeDropdown } from "@/src/components/userLeave/LeaveTypeDropdown";
 import { diffDaysInclusive, firstParam } from "@/src/utils/leaveUtils";
 
-
 export default function EditLeaveScreen() {
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
@@ -375,7 +374,7 @@ export default function EditLeaveScreen() {
                   ]}
                 >
                   <View
-                    style={tw`h-6 w-6 rounded-md border ${
+                    style={tw`h-6 w-6 border ${
                       value
                         ? "bg-blue-600 border-blue-600"
                         : "bg-white border-slate-300"
@@ -443,7 +442,7 @@ export default function EditLeaveScreen() {
             <LeaveTypeDropdown
               value={selectedLeaveType}
               onChange={handleLeaveTypeChange}
-              types={leaveTypes}
+              leaveTypes={leaveTypes}
               loading={loadingTypes}
               onRefresh={async () => {}} // No refresh needed in edit
               showStats={false} // Don't show stats in edit mode

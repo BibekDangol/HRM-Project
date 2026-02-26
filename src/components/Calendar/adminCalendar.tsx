@@ -168,7 +168,7 @@ export function StatPill({
   count,
   color,
 }: {
-  label: string;
+  label: string; 
   count: number;
   color: string;
 }) {
@@ -238,7 +238,7 @@ export function DayModal({
   return (
     <Modal
       visible={visible}
-      animationType="slide"
+      animationType="fade"
       transparent
       onRequestClose={close}
     >
@@ -340,7 +340,7 @@ export function DayModal({
                         { color: store.colors.publicHoliday },
                       ]}
                     >
-                      🎉 Add Holiday
+                      Add Holiday
                     </Text>
                   </TouchableOpacity>
 
@@ -349,7 +349,7 @@ export function DayModal({
                     style={tw`flex-1 py-3 rounded-xl items-center bg-blue-50`}
                   >
                     <Text style={tw`text-sm font-bold text-blue-600`}>
-                      📌 Add Event
+                      Add Event
                     </Text>
                   </TouchableOpacity>
                 </View>

@@ -34,15 +34,15 @@ export default function AdminLayout() {
         headerShadowVisible: false,
         headerLeft: showBackButton
           ? () => (
-            <Pressable style={tw`ml-4`} onPress={() => router.back()}>
-              <ArrowLeft size={24} />
-            </Pressable>
-          )
+              <Pressable style={tw`ml-4`} onPress={() => router.back()}>
+                <ArrowLeft size={24} />
+              </Pressable>
+            )
           : undefined,
 
         headerTitle: ({ children }) => (
           <View style={tw`flex-row items-center gap-4`}>
-            <Image
+            {/* <Image
               style={{ width: 30, height: 30, borderRadius: 14 }}
               source={{
                 uri: 'https://picsum.photos/200/300',
