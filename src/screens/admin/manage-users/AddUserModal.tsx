@@ -10,6 +10,7 @@ import {
   View,
 } from "react-native";
 
+import { UserProfile } from "@/src/types/admin";
 import { zodResolver } from "@hookform/resolvers/zod";
 import React from "react";
 import tw from "twrnc";
@@ -19,6 +20,8 @@ interface Props {
   visible: boolean;
   onClose: () => void;
   onSubmit: (data: AddUserFormData) => Promise<void>;
+  supervisors: UserProfile[];
+  currentUserId: string;
   //to let TS know onSubmit is async we use promise
   isSubmitting: boolean;
 }
@@ -26,16 +29,18 @@ const addUserSchema = z.object({
   first_name: z.string().min(1, "First name is required"),
   last_name: z.string().min(1, "Last name is required"),
   email: z.string().email("Invalid email"),
+  supervisor_id: z.string(),
 });
 
 export type AddUserFormData = z.infer<typeof addUserSchema>;
-const AddUserModal = ({ visible, onClose, onSubmit, isSubmitting }: Props) => {
+const AddUserModal = ({ visible, onClose, onSubmit, isSubmitting, supervisors, currentUserId }: Props) => {
   const { control, handleSubmit, reset } = useForm<AddUserFormData>({
     resolver: zodResolver(addUserSchema),
     defaultValues: {
       first_name: "",
       last_name: "",
       email: "",
+      supervisor_id: currentUserId,
     },
   });
   if (!visible) return null;
@@ -158,6 +163,37 @@ const AddUserModal = ({ visible, onClose, onSubmit, isSubmitting }: Props) => {
                         {error.message}
                       </Text>
                     )}
+                  </View>
+                )}
+              />
+
+              {/* Supervisor Selector */}
+              <Controller
+                control={control}
+                name="supervisor_id"
+                render={({ field: { value, onChange } }) => (
+                  <View style={tw`mb-4`}>
+                    <Text style={tw`text-sm font-semibold text-[#6E6F71] mb-1`}>
+                      Supervisor
+                    </Text>
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                      {supervisors.map((sup) => (
+                        <TouchableOpacity
+                          key={sup.id}
+                          onPress={() => onChange(sup.id)}
+                          style={[
+                            tw`px-3 py-2 rounded-full mr-2 border`,
+                            value === sup.id
+                              ? tw`border-green-600 bg-green-100`
+                              : tw`border-gray-300`,
+                          ]}
+                        >
+                          <Text style={tw`text-sm text-gray-700`}>
+                            {sup.first_name} {sup.last_name}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </ScrollView>
                   </View>
                 )}
               />

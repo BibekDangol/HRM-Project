@@ -1,3 +1,3 @@
-import UserAttendanceDetails from "@/src/screens/admin/more/attendance-list/attendance-details"
+import AdminAttendanceDetails from "@/src/screens/admin/more/attendance-list/attendance-details"
 
-export default UserAttendanceDetails
+export default AdminAttendanceDetails

@@ -1,14 +1,14 @@
 import * as React from "react";
 
+import { fetchCurrentUserProfleService, fetchUsersService } from "@/src/services/admin.service";
 import { CircleCheckBig, User } from "lucide-react-native";
-import { RefreshControl, ScrollView, Text, View } from "react-native";
-import { fetchAdminProfileService, fetchUsersService } from "@/src/services/admin.service";
 import { useEffect, useState } from "react";
+import { RefreshControl, ScrollView, Text, View } from "react-native";
 
 import StatCard from "@/src/screens/admin/components/StatCard";
-import tw from "twrnc";
 import { useAuthStore } from "@/src/store/useAuthStore";
-import { useUsersStore } from "@/src/store/useAdminsStore";
+import { useUsersStore } from "@/src/store/useUsersStore";
+import tw from "twrnc";
 
 export default function DashboardScreen() {
   const { setAdminProfile, users, setUsers } = useUsersStore();
@@ -17,7 +17,7 @@ export default function DashboardScreen() {
   const totalusers = users.length;
   const loadUsers = async () => {
     if (!user) return;
-    const profile = await fetchAdminProfileService(user.id);
+    const profile = await fetchCurrentUserProfleService(user.id);
     setAdminProfile(profile);
     const res = await fetchUsersService(profile.organization_id);
     setUsers(res);

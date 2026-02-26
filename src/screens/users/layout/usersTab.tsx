@@ -1,6 +1,9 @@
-import { useAuthStore } from "@/src/store/useAuthStore";
-import { supabase } from "@/src/supabase/supabaseClient";
-import { AttendanceRow } from "@/src/types/attendance";
+import * as Location from "expo-location";
+
+import { Alert, Modal, Pressable, Text, TextInput, View } from "react-native";
+import { CircleCheck, LogOut, User, UserCircle } from "lucide-react-native";
+import React, { useEffect } from "react";
+import { Tabs, useRouter } from "expo-router";
 import {
   formatElapsed,
   formatSinceTime,
@@ -10,13 +13,14 @@ import {
   needsCheckOutCommentNepal,
   parseDate,
 } from "@/src/utils/checkinHelper";
-import { Tabs, useRouter } from "expo-router";
-import { CircleCheck, LogOut, User, UserCircle } from "lucide-react-native";
-import React from "react";
-import { Alert, Modal, Pressable, Text, TextInput, View } from "react-native";
-import tw from "twrnc";
+
+import { AttendanceRow } from "@/src/types/attendance";
 import { MyTabBar } from "./tabBar";
-import * as Location from "expo-location";
+import { fetchCurrentUserProfleService } from "@/src/services/currentuser.service";
+import { supabase } from "@/src/supabase/supabaseClient";
+import tw from "twrnc";
+import { useAuthStore } from "@/src/store/useAuthStore";
+import { useUsersStore } from "@/src/store/useUsersStore";
 
 /* ---------------- Nepal date helper ---------------- */
 const NEPAL_OFFSET_MIN = 5 * 60 + 45;
@@ -42,6 +46,7 @@ async function getUserLocationOrThrow() {
     lng: pos.coords.longitude,
   };
 }
+
 
 export default function UsersTabsLayout() {
   const router = useRouter();
@@ -92,6 +97,23 @@ export default function UsersTabsLayout() {
     setCheckOpen(false);
   }, []);
 
+  const { setUserProfile } = useUsersStore();
+
+  useEffect(() => {
+    const loadCurrentUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) return;
+
+      const profile = await fetchCurrentUserProfleService(user.id);
+
+      setUserProfile(profile);
+    };
+
+    loadCurrentUser();
+  }, []);
   /* ---------------- Supabase attendance logic ---------------- */
 
   const fetchLatestAttendance = React.useCallback(async () => {
@@ -414,7 +436,7 @@ export default function UsersTabsLayout() {
         >
           <Pressable
             style={tw`w-full bg-white rounded-2xl p-4`}
-            onPress={() => {}}
+            onPress={() => { }}
           >
             <Text style={tw`text-lg font-bold text-black`}>
               {commentMode === "checkin" ? "Late check-in" : "Early check-out"}

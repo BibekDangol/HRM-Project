@@ -11,9 +11,9 @@ import {
   View,
 } from "react-native";
 
+import { apiClient } from "@/src/api/apiClient";
 import { changePasswordSchema } from "@/src/schema/auth";
 import { useAuthStore } from "@/src/store/useAuthStore";
-import { supabase } from "@/src/supabase/supabaseClient";
 import { FormData } from "@/src/types/changePassword";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -42,46 +42,41 @@ const ChangePasswordScreen = () => {
   });
 
   const onSubmit = async (data: FormData) => {
+    if (!user?.id || !user.email) {
+      Alert.alert("User not found");
+      return;
+    }
+
     try {
-      if (!user || !user.email || !user.id) {
-        Alert.alert("User not found");
-        return;
-      }
-
-      const { error: authError } = await supabase.auth.signInWithPassword({
-        email: user.email,
-        password: data.oldPassword,
+      // Call edge function via apiClient
+      const { data: result } = await apiClient.post("/change-password", {
+        userId: user.id,
+        oldPassword: data.oldPassword,
+        newPassword: data.newPassword,
       });
 
-      if (authError) {
-        Alert.alert("Error", "Old password is incorrect");
+      if (!result.success) {
+        Alert.alert("Error", result.error || "Failed to change password");
         return;
       }
-      const { error: updateError } = await supabase.auth.updateUser({
-        password: data.newPassword,
-      });
 
-      if (updateError) {
-        Alert.alert("Error", updateError.message);
-        return;
-      }
-      const { error: profileError } = await supabase
-        .from("profiles")
-        .update({ status: "active" })
-        .eq("id", user.id);
+      // Clear local session/auth
+      useAuthStore.getState().signOut(); // Make sure you have a logout action that clears session
 
-      if (profileError) {
-        Alert.alert("Error", profileError.message);
-        return;
-      }
-      updateStatus("active");
-      Alert.alert("Success", "Password updated successfully");
-      router.replace("/(users)/dashboard");
+      Alert.alert(
+        "Success",
+        "Password updated successfully. Please login again.",
+        [
+          {
+            text: "OK",
+            onPress: () => router.replace("/login"), // redirect to login screen
+          },
+        ]
+      );
     } catch (err: any) {
-      Alert.alert("Error", err.message);
+      Alert.alert("Error", err.response?.data?.error || err.message || "Something went wrong");
     }
   };
-
   return (
     <View style={tw`flex-1 bg-[#F5F5F5]`}>
       <KeyboardAvoidingView
@@ -98,112 +93,55 @@ const ChangePasswordScreen = () => {
           >
             Change Password
           </Text>
-          <Controller
-            control={control}
-            name="oldPassword"
-            render={({ field: { value, onChange } }) => (
-              <View style={tw`mb-3`}>
-                <Text style={tw`text-[14px] font-semibold text-[#6E6F71] mb-1`}>
-                  Old Password
-                </Text>
 
-                <View
-                  style={tw`h-[52px] bg-white rounded-xl px-4 flex-row items-center`}
-                >
-                  <TextInput
-                    style={tw`flex-1 text-[16px]`}
-                    secureTextEntry={!showOld}
-                    value={value}
-                    onChangeText={onChange}
-                  />
-                  <TouchableOpacity onPress={() => setShowOld(!showOld)}>
-                    <MaterialCommunityIcons
-                      name={showOld ? "eye-off" : "eye"}
-                      size={22}
-                      color="#888"
-                    />
-                  </TouchableOpacity>
-                </View>
+          {["oldPassword", "newPassword", "confirmPassword"].map((field) => {
+            const showToggle =
+              field === "oldPassword" ? showOld : field === "newPassword" ? showNew : showConfirm;
+            const setShowToggle =
+              field === "oldPassword" ? setShowOld : field === "newPassword" ? setShowNew : setShowConfirm;
+            const label =
+              field === "oldPassword"
+                ? "Old Password"
+                : field === "newPassword"
+                  ? "New Password"
+                  : "Confirm Password";
 
-                {errors.oldPassword && (
-                  <Text style={tw`text-[#FF6B6B] text-[13px] mt-1`}>
-                    {errors.oldPassword.message}
-                  </Text>
+            return (
+              <Controller
+                key={field}
+                control={control}
+                name={field as keyof FormData}
+                render={({ field: { value, onChange } }) => (
+                  <View style={tw`mb-3`}>
+                    <Text style={tw`text-[14px] font-semibold text-[#6E6F71] mb-1`}>
+                      {label}
+                    </Text>
+                    <View style={tw`h-[52px] bg-white rounded-xl px-4 flex-row items-center`}>
+                      <TextInput
+                        style={tw`flex-1 text-[16px]`}
+                        secureTextEntry={!showToggle}
+                        value={value}
+                        onChangeText={onChange}
+                      />
+                      <TouchableOpacity onPress={() => setShowToggle(!showToggle)}>
+                        <MaterialCommunityIcons
+                          name={showToggle ? "eye-off" : "eye"}
+                          size={22}
+                          color="#888"
+                        />
+                      </TouchableOpacity>
+                    </View>
+                    {errors[field as keyof FormData] && (
+                      <Text style={tw`text-[#FF6B6B] text-[13px] mt-1`}>
+                        {errors[field as keyof FormData]?.message}
+                      </Text>
+                    )}
+                  </View>
                 )}
-              </View>
-            )}
-          />
-          <Controller
-            control={control}
-            name="newPassword"
-            render={({ field: { value, onChange } }) => (
-              <View style={tw`mb-3`}>
-                <Text style={tw`text-[14px] font-semibold text-[#6E6F71] mb-1`}>
-                  New Password
-                </Text>
+              />
+            );
+          })}
 
-                <View
-                  style={tw`h-[52px] bg-white rounded-xl px-4 flex-row items-center`}
-                >
-                  <TextInput
-                    style={tw`flex-1 text-[16px]`}
-                    secureTextEntry={!showNew}
-                    value={value}
-                    onChangeText={onChange}
-                  />
-                  <TouchableOpacity onPress={() => setShowNew(!showNew)}>
-                    <MaterialCommunityIcons
-                      name={showNew ? "eye-off" : "eye"}
-                      size={22}
-                      color="#888"
-                    />
-                  </TouchableOpacity>
-                </View>
-
-                {errors.newPassword && (
-                  <Text style={tw`text-[#FF6B6B] text-[13px] mt-1`}>
-                    {errors.newPassword.message}
-                  </Text>
-                )}
-              </View>
-            )}
-          />
-          <Controller
-            control={control}
-            name="confirmPassword"
-            render={({ field: { value, onChange } }) => (
-              <View style={tw`mb-4`}>
-                <Text style={tw`text-[14px] font-semibold text-[#6E6F71] mb-1`}>
-                  Confirm Password
-                </Text>
-                <View
-                  style={tw`h-[52px] bg-white rounded-xl px-4 flex-row items-center`}
-                >
-                  <TextInput
-                    style={tw`flex-1 text-[16px]`}
-                    secureTextEntry={!showConfirm}
-                    value={value}
-                    onChangeText={onChange}
-                  />
-                  <TouchableOpacity
-                    onPress={() => setShowConfirm(!showConfirm)}
-                  >
-                    <MaterialCommunityIcons
-                      name={showConfirm ? "eye-off" : "eye"}
-                      size={22}
-                      color="#888"
-                    />
-                  </TouchableOpacity>
-                </View>
-
-                {errors.confirmPassword && (
-                  <Text style={tw`text-[#FF6B6B] text-[13px] mt-1`}>
-                    {errors.confirmPassword.message}
-                  </Text>
-                )}
-              </View>
-            )}
-          />
           <TouchableOpacity
             style={[
               tw`h-[52px] rounded-xl items-center justify-center bg-[#1F7A4D]`,
@@ -221,4 +159,5 @@ const ChangePasswordScreen = () => {
     </View>
   );
 };
+
 export default ChangePasswordScreen;

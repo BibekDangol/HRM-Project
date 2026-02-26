@@ -1,13 +1,13 @@
-import { LeaveStatus, fetchLeaveRequests } from "@/src/services/leave.service";
 import { CalendarClock, ChevronRight } from "lucide-react-native";
-import { useCallback, useEffect, useState } from "react";
 import { FlatList, Pressable, Text, View } from "react-native";
+import { LeaveStatus, fetchLeaveRequests } from "@/src/services/leave.service";
+import { useCallback, useEffect, useState } from "react";
 
 import LoadingIndicator from "@/src/components/LoadingIndicator";
-import { useUsersStore } from "@/src/store/useAdminsStore";
+import tw from "twrnc";
 import { useLeaveStore } from "@/src/store/useLeaveStore";
 import { useRouter } from "expo-router";
-import tw from "twrnc";
+import { useUsersStore } from "@/src/store/useUsersStore";
 
 const statusConfig: Record<string, { bg: string; text: string; dot: string }> = {
   pending: {
@@ -28,7 +28,7 @@ const statusConfig: Record<string, { bg: string; text: string; dot: string }> = 
 };
 
 export default function LeaveRequests() {
-  const { adminProfile } = useUsersStore();
+  const { userProfile } = useUsersStore();
   const [refreshing, setRefreshing] = useState(false);
   const { setLeaves, leaves } = useLeaveStore();
   const [activeTab, setActiveTab] = useState<LeaveStatus>("pending");
@@ -38,17 +38,16 @@ export default function LeaveRequests() {
     (leave) => leave.status === activeTab
   );
   const loadLeaves = useCallback(async () => {
-    if (!adminProfile) return;
+    if (!userProfile) return;
     try {
-      // setLoading(true); //ask this
-      const data = await fetchLeaveRequests(adminProfile.organization_id);
+      const data = await fetchLeaveRequests(userProfile.organization_id);
       setLeaves(data);
     } catch (error) {
       console.log("Error loading leaves:", error);
     } finally {
       setLoading(false);
     }
-  }, [adminProfile, setLeaves]);
+  }, [userProfile, setLeaves]);
   const onRefresh = async () => {
     setRefreshing(true);
     await loadLeaves();
