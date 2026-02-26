@@ -7,9 +7,9 @@ import { adminTabs } from "@/src/config/adminTabs";
 import { useAdminHeaderMenu } from "@/src/hooks/useAdminHeaderMenu";
 import AdminTabBar from "@/src/screens/admin/components/AdminTabBar";
 import ProfileMenu from "@/src/screens/admin/components/ProfileMenu";
-import { fetchAdminProfileService } from "@/src/services/admin.service";
-import { useUsersStore } from "@/src/store/useAdminsStore";
+import { fetchCurrentUserProfleService } from "@/src/services/currentuser.service";
 import { useAuthStore } from "@/src/store/useAuthStore";
+import { useUsersStore } from "@/src/store/useUsersStore";
 import tw from "twrnc";
 
 export default function AdminLayout() {
@@ -17,14 +17,13 @@ export default function AdminLayout() {
   const pathname = usePathname();
   const menu = useAdminHeaderMenu();
   const { user, loading } = useAuthStore();
-  const { adminProfile, setAdminProfile } = useUsersStore();
+  const { userProfile, setUserProfile } = useUsersStore();
 
   const fetchUserProfile = useCallback(async () => {
-    if (!user?.id || adminProfile) return;
-    const profile = await fetchAdminProfileService(user?.id);
-    setAdminProfile(profile);
-  }, [user?.id, setAdminProfile, adminProfile]);
-
+    if (!user?.id || userProfile) return;
+    const profile = await fetchCurrentUserProfleService(user?.id);
+    setUserProfile(profile);
+  }, [user?.id, setUserProfile, userProfile]);
   useEffect(() => {
     fetchUserProfile();
   }, [fetchUserProfile, loading]);
@@ -49,7 +48,7 @@ export default function AdminLayout() {
                 uri: 'https://picsum.photos/200/300',
               }}
             />
-            <Text style={tw`font-semibold text-md`}>{adminProfile?.first_name}</Text>
+            <Text style={tw`font-semibold text-md`}>{userProfile?.first_name}</Text>
           </View>
         ),
 

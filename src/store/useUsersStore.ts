@@ -1,20 +1,20 @@
 import { create } from "zustand";
-import { AdminProfile } from "../services/admin.service";
+import { userProfile } from "../services/currentuser.service";
 import { UserProfile } from "../types/admin";
 
 type UsersState = {
   users: UserProfile[];
   organizationName: string;
-  setAdminProfile: (profile: AdminProfile) => void;
+  setUserProfile: (profile: userProfile) => void;
   setUsers: (users: UserProfile[]) => void;
-  adminProfile: AdminProfile | null;
+  userProfile: userProfile | null;
 };
 
 export const useUsersStore = create<UsersState>((set) => ({
   users: [],
   organizationName: "",
-  adminProfile: null,
-  setAdminProfile: (profile) => set({ adminProfile: profile }),
+  userProfile: null,
+  setUserProfile: (profile) => set({ userProfile: profile }),
 
   setUsers: (users) =>
     set({

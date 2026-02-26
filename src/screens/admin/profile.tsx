@@ -1,5 +1,5 @@
-import AWS from "aws-sdk";
 import * as ImagePicker from "expo-image-picker";
+
 import React, { useState } from "react";
 import {
   ActivityIndicator,
@@ -9,6 +9,8 @@ import {
   StyleSheet,
   View,
 } from "react-native";
+
+import AWS from "aws-sdk";
 
 const MINIO_ENDPOINT = process.env.EXPO_PUBLIC_MINIO_ENDPOINT;
 const MINIO_PORT = process.env.EXPO_PUBLIC_MINIO_PORT;
@@ -31,16 +33,16 @@ export default function UploadScreen() {
 
   const handleUpload = async () => {
     try {
-      const permission =
-        await ImagePicker.requestMediaLibraryPermissionsAsync();
+      // const permission =
+      //   await ImagePicker.requestMediaLibraryPermissionsAsync();
 
-      if (!permission.granted) {
-        Alert.alert("Permission required");
-        return;
-      }
+      // if (!permission.granted) {
+      //   Alert.alert("Permission required");
+      //   return;
+      // }
 
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: 'images',
         quality: 1,
       });
 

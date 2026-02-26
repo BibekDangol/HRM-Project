@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { FlatList, Pressable, Text, TextInput, View } from 'react-native';
 
 import { fetchUsersService } from '@/src/services/admin.service';
-import { useUsersStore } from '@/src/store/useAdminsStore';
+import { useUsersStore } from '@/src/store/useUsersStore';
 import { UserProfile } from '@/src/types/admin';
 import { useRouter } from 'expo-router';
 import tw from "twrnc";

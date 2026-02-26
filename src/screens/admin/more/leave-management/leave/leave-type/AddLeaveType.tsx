@@ -6,8 +6,8 @@ import { Alert, FlatList, Text, TouchableOpacity, View } from "react-native";
 import { apiClient } from "@/src/api/apiClient";
 import LoadingIndicator from "@/src/components/LoadingIndicator";
 import { fetchLeaveTypesService } from "@/src/services/leave.type.service";
-import { useUsersStore } from "@/src/store/useAdminsStore";
 import { useLeaveTypeStore } from "@/src/store/useLeaveTypeStore";
+import { useUsersStore } from "@/src/store/useUsersStore";
 import tw from "twrnc";
 import AddLeaveTypeModal from "./AddLeaveTypeModal";
 

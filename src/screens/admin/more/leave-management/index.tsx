@@ -1,5 +1,5 @@
-import { CalendarCog, ChevronRight } from "lucide-react-native";
 import { Href, useRouter } from "expo-router";
+import { CalendarCog, ChevronRight } from "lucide-react-native";
 import { Pressable, ScrollView, Text, View } from "react-native";
 
 import tw from "twrnc";
