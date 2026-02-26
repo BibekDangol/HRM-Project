@@ -42,13 +42,15 @@ export default function AdminLayout() {
 
         headerTitle: ({ children }) => (
           <View style={tw`flex-row items-center gap-4`}>
-            {/* <Image
+            <Image
               style={{ width: 30, height: 30, borderRadius: 14 }}
               source={{
-                uri: 'https://picsum.photos/200/300',
+                uri: "https://picsum.photos/200/300",
               }}
             />
-            <Text style={tw`font-semibold text-md`}>{userProfile?.first_name}</Text>
+            <Text style={tw`font-semibold text-md`}>
+              {userProfile?.first_name}
+            </Text>
           </View>
         ),
 
