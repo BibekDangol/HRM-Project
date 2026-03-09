@@ -4,12 +4,11 @@ import tw from "twrnc";
 
 export interface MonthItem {
   key: string;
-  endKey?: string; // ← added for range support
+  endKey?: string; 
   label: string;
   color: string;
   tag: string;
 }
-
 interface Props {
   items: MonthItem[];
 }

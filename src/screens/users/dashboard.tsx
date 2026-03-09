@@ -23,6 +23,7 @@ import {
   MONTHS,
   normalize,
 } from "@/src/utils/userDashboard";
+import { HolidaysEventsSection } from "@/src/components/HolidaysEventsSection";
 
 export default function HomeScreen() {
   const user = useAuthStore((s) => s.user);
@@ -47,6 +48,28 @@ export default function HomeScreen() {
     late: 0,
     incomplete: 0,
   });
+
+  type CalendarItem = {
+    id: string;
+    title: string;
+    type: "holiday" | "event";
+    color: string;
+    start_date: string;
+    end_date: string | null;
+  };
+  const [calendarItems, setCalendarItems] = useState<CalendarItem[]>([]);
+  const [calendarLoading, setCalendarLoading] = useState(false);
+
+  type ActivityRecord = {
+    id: string;
+    date: string;
+    status: string;
+    check_in_time: string | null;
+    check_out_time: string | null;
+    check_in_comment: string | null;
+  };
+  const [activityLog, setActivityLog] = useState<ActivityRecord[]>([]);
+  const [activityLoading, setActivityLoading] = useState(false);
 
   const monthTitle = useMemo(
     () => MONTHS[selectedMonthIndex],
@@ -161,18 +184,90 @@ export default function HomeScreen() {
     [user?.id],
   );
 
+  const fetchCalendarItems = useCallback(
+    async (year: number, monthIndex: number, orgId: string | number) => {
+      const monthStr = String(monthIndex + 1).padStart(2, "0");
+      const monthStart = `${year}-${monthStr}-01`;
+      const monthEnd = `${year}-${monthStr}-${String(new Date(year, monthIndex + 1, 0).getDate()).padStart(2, "0")}`;
+      setCalendarLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from("admin_calendar")
+          .select("id, title, type, color, start_date, end_date")
+          .eq("organization_id", orgId)
+          .lte("start_date", monthEnd)
+          .or(`end_date.gte.${monthStart},end_date.is.null`)
+          .order("start_date", { ascending: true });
+        if (error) throw error;
+        setCalendarItems((data ?? []) as CalendarItem[]);
+      } catch (e: unknown) {
+        console.log(
+          "Calendar fetch error:",
+          e instanceof Error ? e.message : e,
+        );
+      } finally {
+        setCalendarLoading(false);
+      }
+    },
+    [],
+  );
+
+  const fetchActivityLog = useCallback(async () => {
+    if (!user?.id) return;
+    setActivityLoading(true);
+    try {
+      // Last 7 days from today
+      const today = new Date();
+      const sevenDaysAgo = new Date(today);
+      sevenDaysAgo.setDate(today.getDate() - 6);
+      const fmt = (d: Date) =>
+        `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
+      const { data, error } = await supabase
+        .from("attendance")
+        .select(
+          "id, date, status, check_in_time, check_out_time, check_in_comment",
+        )
+        .eq("user_id", user.id)
+        .gte("date", fmt(sevenDaysAgo))
+        .lte("date", fmt(today))
+        .order("date", { ascending: false });
+
+      if (error) throw error;
+      setActivityLog((data ?? []) as ActivityRecord[]);
+    } catch (e: unknown) {
+      console.log("Activity log error:", e instanceof Error ? e.message : e);
+    } finally {
+      setActivityLoading(false);
+    }
+  }, [user?.id]);
+
   const refetchAll = useCallback(async () => {
     if (!user?.id) return;
-    await Promise.all([
+    const tasks: Promise<any>[] = [
       fetchProfile(),
       fetchMonthlyAttendanceStats(selectedYear, selectedMonthIndex),
-    ]);
+      fetchActivityLog(),
+    ];
+    if (profile?.organization_id) {
+      tasks.push(
+        fetchCalendarItems(
+          selectedYear,
+          selectedMonthIndex,
+          profile.organization_id,
+        ),
+      );
+    }
+    await Promise.all(tasks);
   }, [
     user?.id,
     fetchProfile,
     fetchMonthlyAttendanceStats,
+    fetchCalendarItems,
+    fetchActivityLog,
     selectedYear,
     selectedMonthIndex,
+    profile?.organization_id,
   ]);
 
   const onRefresh = async () => {
@@ -198,6 +293,24 @@ export default function HomeScreen() {
     if (!user?.id) return;
     fetchMonthlyAttendanceStats(selectedYear, selectedMonthIndex);
   }, [user?.id, selectedYear, selectedMonthIndex, fetchMonthlyAttendanceStats]);
+
+  useEffect(() => {
+    if (!profile?.organization_id) return;
+    fetchCalendarItems(
+      selectedYear,
+      selectedMonthIndex,
+      profile.organization_id,
+    );
+  }, [
+    profile?.organization_id,
+    selectedYear,
+    selectedMonthIndex,
+    fetchCalendarItems,
+  ]);
+
+  useEffect(() => {
+    fetchActivityLog();
+  }, [fetchActivityLog]);
 
   const canIncYear = selectedYear < MAX_YEAR;
   const canDecYear = selectedYear > MIN_YEAR;
@@ -271,6 +384,158 @@ export default function HomeScreen() {
             <Text style={tw`text-gray-700 mt-1 font-semibold`}>Late in</Text>
           </View>
         </View>
+      </View>
+      <HolidaysEventsSection
+        calendarItems={calendarItems}
+        calendarLoading={calendarLoading}
+        monthTitle={monthTitle}
+        selectedYear={selectedYear}
+      />
+
+      {/* Activity Log */}
+      <View style={tw`mt-5`}>
+        <View style={tw`flex-row items-center justify-between mb-3`}>
+          <Text
+            style={tw`text-xs font-bold text-gray-400 uppercase tracking-widest`}
+          >
+            Activity Log
+          </Text>
+          <Text style={tw`text-xs text-gray-400 font-medium`}>Last 7 days</Text>
+        </View>
+
+        {activityLoading ? (
+          <View style={tw`bg-gray-50 rounded-2xl px-4 py-8 items-center`}>
+            <Text style={tw`text-gray-400 text-sm`}>Loading…</Text>
+          </View>
+        ) : activityLog.length === 0 ? (
+          <View style={tw`bg-gray-50 rounded-2xl px-4 py-8 items-center`}>
+            {/* <Text style={tw`text-2xl mb-2`}>🗂️</Text> */}
+            <Text style={tw`text-gray-600 font-semibold text-sm`}>
+              No recent activity
+            </Text>
+            <Text style={tw`text-gray-400 text-xs mt-1`}>
+              No records found for the last 7 days
+            </Text>
+          </View>
+        ) : (
+          <View style={tw`bg-white rounded-2xl shadow-sm overflow-hidden`}>
+            {activityLog.map((record, i) => {
+              const s = normalize(record.status);
+              const isPresent = s === "present";
+              const isLate = normalize(record.check_in_comment ?? "") !== "";
+              const isAbsent = s === "absent";
+              const isIncomplete = s === "incomplete";
+
+              const statusLabel = isLate
+                ? "Late"
+                : isPresent
+                  ? "Present"
+                  : isAbsent
+                    ? "Absent"
+                    : isIncomplete
+                      ? "Incomplete"
+                      : s;
+              const statusColor = isAbsent
+                ? "#dc2626"
+                : isLate
+                  ? "#d97706"
+                  : isIncomplete
+                    ? "#7c3aed"
+                    : "#16a34a";
+              const statusBg = isAbsent
+                ? "#fee2e2"
+                : isLate
+                  ? "#fef3c7"
+                  : isIncomplete
+                    ? "#ede9fe"
+                    : "#dcfce7";
+              const statusIcon = isAbsent
+                ? "✕"
+                : isLate
+                  ? "⏰"
+                  : isIncomplete
+                    ? "…"
+                    : "✓";
+
+              const fmtTime = (t: string | null) => {
+                if (!t) return "—";
+                const date = new Date(t);
+                return date.toLocaleTimeString("en-US", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: true,
+                });
+              };
+
+              const fmtDate = (d: string) => {
+                const date = new Date(d + "T00:00:00");
+                return date.toLocaleDateString("en-US", {
+                  weekday: "short",
+                  day: "numeric",
+                  month: "short",
+                });
+              };
+
+              return (
+                <View
+                  key={record.id}
+                  style={[
+                    tw`flex-row items-center px-4 py-3.5`,
+                    i < activityLog.length - 1 && tw`border-b border-slate-50`,
+                  ]}
+                >
+                  {/* Icon */}
+                  <View
+                    style={[
+                      tw`w-9 h-9 rounded-2xl items-center justify-center mr-3`,
+                      { backgroundColor: statusBg },
+                    ]}
+                  >
+                    <Text
+                      style={[tw`text-sm font-bold`, { color: statusColor }]}
+                    >
+                      {statusIcon}
+                    </Text>
+                  </View>
+
+                  {/* Date + times */}
+                  <View style={tw`flex-1`}>
+                    <Text style={tw`text-sm font-bold text-gray-800`}>
+                      {fmtDate(record.date)}
+                    </Text>
+                    {record.check_in_comment ? (
+                      <Text
+                        style={tw`text-xs text-gray-400 mt-0.5`}
+                        numberOfLines={1}
+                      >
+                        &ldquo;{record.check_in_comment}&rdquo;
+                      </Text>
+                    ) : (
+                      <Text style={tw`text-xs text-gray-400 mt-0.5`}>
+                        In: {fmtTime(record.check_in_time)} · Out:{" "}
+                        {fmtTime(record.check_out_time)}
+                      </Text>
+                    )}
+                  </View>
+
+                  {/* Status pill */}
+                  <View
+                    style={[
+                      tw`px-2.5 py-1 rounded-full`,
+                      { backgroundColor: statusBg },
+                    ]}
+                  >
+                    <Text
+                      style={[tw`text-xs font-bold`, { color: statusColor }]}
+                    >
+                      {statusLabel}
+                    </Text>
+                  </View>
+                </View>
+              );
+            })}
+          </View>
+        )}
       </View>
 
       {/* Month Picker Modal */}

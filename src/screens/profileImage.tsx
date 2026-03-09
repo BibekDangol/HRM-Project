@@ -48,7 +48,7 @@ export default function UploadAvatar({
         .promise();
 
       onUploadComplete?.(uploadResponse.Location);
-      Alert.alert("Success 🎉", "Image uploaded successfully!");
+      Alert.alert("Success", "Image uploaded successfully!");
     } catch (error: any) {
       console.log("Upload Error:", error);
       Alert.alert("Error", error.message || "Upload failed");

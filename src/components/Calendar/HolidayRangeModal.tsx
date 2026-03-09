@@ -1,5 +1,3 @@
-// components/Calendar/HolidayRangeModal.tsx
-
 import React, { useState } from "react";
 import {
   KeyboardAvoidingView,
@@ -7,7 +5,6 @@ import {
   Platform,
   Pressable,
   TextInput,
-  TouchableOpacity,
   View,
   Text,
 } from "react-native";
@@ -36,9 +33,16 @@ export function HolidayRangeModal({
   const [eventColor, setEventColor] = useState("#3B82F6");
 
   const isSingleDay = startDate === endDate;
-  const dateLabel = isSingleDay
-    ? startDate
-    : `${startDate} → ${endDate}`;
+  const dateLabel = isSingleDay ? startDate : `${startDate} → ${endDate}`;
+
+  // ── Past-date guard ──────────────────────────────────────────────
+  const isPastDate = (() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // strip time so today itself is allowed
+    const selected = new Date(startDate);
+    selected.setHours(0, 0, 0, 0);
+    return selected < today;
+  })();
 
   const reset = () => {
     setStep("choose");
@@ -59,24 +63,33 @@ export function HolidayRangeModal({
       onConfirm("event", label.trim(), eventColor);
     }
     reset();
+    onClose(); // ✅ actually close the modal after confirming
   };
 
   return (
     <Modal
       visible={visible}
       transparent
-      animationType="slide"
+      animationType="fade"
       onRequestClose={handleClose}
+      statusBarTranslucent
     >
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 24}
       >
-        <Pressable style={tw`flex-1 bg-black/40`} onPress={handleClose} />
+        <Pressable
+          style={tw`flex-1 bg-black/40`}
+          onPress={handleClose}
+          android_ripple={null}
+        />
 
         <View style={tw`bg-white rounded-t-3xl px-6 pt-4 pb-10`}>
           {/* Handle bar */}
-          <View style={tw`w-10 h-1 bg-slate-300 rounded-full self-center mb-5`} />
+          <View
+            style={tw`w-10 h-1 bg-slate-300 rounded-full self-center mb-5`}
+          />
 
           {/* Date label */}
           <Text style={tw`text-xs font-semibold text-slate-400 mb-1`}>
@@ -91,29 +104,54 @@ export function HolidayRangeModal({
               </Text>
 
               <View style={tw`flex-row gap-3`}>
-                <TouchableOpacity
-                  onPress={() => setStep("holiday")}
-                  style={tw`flex-1 py-5 rounded-2xl bg-red-50 items-center gap-1`}
+                {/* ── Holiday button (disabled for past dates) ── */}
+                <Pressable
+                  onPress={() => !isPastDate && setStep("holiday")}
+                  style={({ pressed }) =>
+                    tw`flex-1 py-3 rounded-2xl bg-red-50 items-center${
+                      isPastDate ? " opacity-40" : pressed ? " opacity-70" : ""
+                    }`
+                  }
+                  android_ripple={
+                    isPastDate ? null : { color: "#fca5a5", borderless: false }
+                  }
                 >
-                  <Text style={tw`text-2xl`}>🎉</Text>
-                  <Text style={tw`text-sm font-bold text-red-500`}>Holiday</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  onPress={() => setStep("event")}
-                  style={tw`flex-1 py-5 rounded-2xl bg-blue-50 items-center gap-1`}
+                  <Text style={tw`text-sm font-bold text-red-500`}>
+                    Holiday
+                  </Text>
+                </Pressable>
+                <Pressable
+                  onPress={() => !isPastDate && setStep("event")}
+                  style={({ pressed }) =>
+                    tw`flex-1 py-3 rounded-2xl bg-blue-50 items-center${
+                      isPastDate ? " opacity-40" : pressed ? " opacity-70" : ""
+                    }`
+                  }
+                  android_ripple={
+                    isPastDate ? null : { color: "#bfdbfe", borderless: false }
+                  }
                 >
-                  <Text style={tw`text-2xl`}>📌</Text>
                   <Text style={tw`text-sm font-bold text-blue-500`}>Event</Text>
-                </TouchableOpacity>
+                </Pressable>
               </View>
 
-              <TouchableOpacity
+              {isPastDate && (
+                <Text style={tw`text-xs text-gray-700 mt-2 text-center`}>
+                  Holidays and Events cannot be added to past dates.
+                </Text>
+              )}
+
+              <Pressable
                 onPress={handleClose}
-                style={tw`mt-4 py-3 rounded-xl items-center bg-slate-100`}
+                style={({ pressed }) =>
+                  tw`mt-4 py-3 rounded-xl items-center bg-slate-100${pressed ? " opacity-70" : ""}`
+                }
+                android_ripple={{ color: "#e2e8f0", borderless: false }}
               >
-                <Text style={tw`text-sm font-semibold text-slate-500`}>Cancel</Text>
-              </TouchableOpacity>
+                <Text style={tw`text-sm font-semibold text-slate-500`}>
+                  Cancel
+                </Text>
+              </Pressable>
             </>
           )}
 
@@ -126,32 +164,40 @@ export function HolidayRangeModal({
 
               <TextInput
                 autoFocus
-                style={tw`border border-slate-200 rounded-xl px-4 py-3 text-slate-800 mb-5`}
+                style={[
+                  tw`border border-slate-200 rounded-xl px-4 py-3 text-slate-800 mb-5`,
+                  Platform.OS === "android" && { paddingVertical: 10 },
+                ]}
                 placeholder="e.g. Dashain, New Year's Day"
                 placeholderTextColor="#94a3b8"
                 value={label}
                 onChangeText={setLabel}
                 returnKeyType="done"
                 onSubmitEditing={handleConfirm}
+                underlineColorAndroid="transparent"
               />
 
               <View style={tw`flex-row gap-3`}>
-                <TouchableOpacity
+                <Pressable
                   onPress={() => setStep("choose")}
-                  style={tw`flex-1 py-3 rounded-xl border border-slate-200 items-center`}
+                  style={({ pressed }) =>
+                    tw`flex-1 py-3 rounded-xl border border-slate-200 items-center${pressed ? " opacity-70" : ""}`
+                  }
+                  android_ripple={{ color: "#e2e8f0", borderless: false }}
                 >
                   <Text style={tw`text-slate-600 font-medium`}>Back</Text>
-                </TouchableOpacity>
+                </Pressable>
 
-                <TouchableOpacity
+                <Pressable
                   onPress={handleConfirm}
-                  style={[
-                    tw`flex-1 py-3 rounded-xl items-center`,
+                  style={({ pressed }) => [
+                    tw`flex-1 py-3 rounded-xl items-center${pressed ? " opacity-70" : ""}`,
                     { backgroundColor: label.trim() ? "#EF4444" : "#fca5a5" },
                   ]}
+                  android_ripple={{ color: "#ffffff40", borderless: false }}
                 >
                   <Text style={tw`text-white font-semibold`}>Add Holiday</Text>
-                </TouchableOpacity>
+                </Pressable>
               </View>
             </>
           )}
@@ -165,51 +211,67 @@ export function HolidayRangeModal({
 
               <TextInput
                 autoFocus
-                style={tw`border border-slate-200 rounded-xl px-4 py-3 text-slate-800 mb-4`}
+                style={[
+                  tw`border border-slate-200 rounded-xl px-4 py-3 text-slate-800 mb-4`,
+                  Platform.OS === "android" && { paddingVertical: 10 },
+                ]}
                 placeholder="e.g. Team Outing, Training"
                 placeholderTextColor="#94a3b8"
                 value={label}
                 onChangeText={setLabel}
                 returnKeyType="done"
                 onSubmitEditing={handleConfirm}
+                underlineColorAndroid="transparent"
               />
 
-              <Text style={tw`text-xs font-bold text-slate-400 uppercase tracking-wider mb-2`}>
-                Colour
+              <Text
+                style={tw`text-xs font-bold text-slate-400 uppercase tracking-wider mb-2`}
+              >
+                Color
               </Text>
               <View style={tw`flex-row flex-wrap gap-2 mb-5`}>
                 {COLOR_PRESETS.map((c) => (
-                  <TouchableOpacity
+                  <Pressable
                     key={c}
                     onPress={() => setEventColor(c)}
-                    style={[
-                      tw`w-8 h-8 rounded-full border-2`,
+                    style={({ pressed }) => [
+                      tw`w-8 h-8 rounded-full border-2${pressed ? " opacity-70" : ""}`,
                       {
                         backgroundColor: c,
-                        borderColor: eventColor === c ? "#0f172a" : "transparent",
+                        borderColor:
+                          eventColor === c ? "#0f172a" : "transparent",
                       },
                     ]}
+                    android_ripple={{ color: "#00000020", borderless: true }}
                   />
                 ))}
               </View>
 
               <View style={tw`flex-row gap-3`}>
-                <TouchableOpacity
+                <Pressable
                   onPress={() => setStep("choose")}
-                  style={tw`flex-1 py-3 rounded-xl border border-slate-200 items-center`}
+                  style={({ pressed }) =>
+                    tw`flex-1 py-3 rounded-xl border border-slate-200 items-center${pressed ? " opacity-70" : ""}`
+                  }
+                  android_ripple={{ color: "#e2e8f0", borderless: false }}
                 >
                   <Text style={tw`text-slate-600 font-medium`}>Back</Text>
-                </TouchableOpacity>
+                </Pressable>
 
-                <TouchableOpacity
+                <Pressable
                   onPress={handleConfirm}
-                  style={[
-                    tw`flex-1 py-3 rounded-xl items-center`,
-                    { backgroundColor: label.trim() ? eventColor : eventColor + "80" },
+                  style={({ pressed }) => [
+                    tw`flex-1 py-3 rounded-xl items-center${pressed ? " opacity-70" : ""}`,
+                    {
+                      backgroundColor: label.trim()
+                        ? eventColor
+                        : eventColor + "80",
+                    },
                   ]}
+                  android_ripple={{ color: "#ffffff40", borderless: false }}
                 >
                   <Text style={tw`text-white font-semibold`}>Add Event</Text>
-                </TouchableOpacity>
+                </Pressable>
               </View>
             </>
           )}

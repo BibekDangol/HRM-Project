@@ -17,7 +17,7 @@ export function CalendarHeader({ onSettingsPress }: Props) {
         onPress={onSettingsPress}
         hitSlop={10}
         style={({ pressed }) => [
-          tw`items-center justify-center`,
+          tw`items-start justify-start`,
           pressed && tw`opacity-70`,
         ]}
       >
