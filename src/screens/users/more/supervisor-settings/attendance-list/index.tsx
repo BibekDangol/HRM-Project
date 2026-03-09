@@ -15,8 +15,6 @@ const AttendanceUserList = () => {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const getSupervisorName = () => "You";
-
   const loadUsers = useCallback(async () => {
     if (!userProfile?.id || !userProfile?.organization_id) return;
     try {
@@ -71,7 +69,7 @@ const AttendanceUserList = () => {
               })
             }
           >
-            <UserCard user={item} getSupervisorName={getSupervisorName} />
+            <UserCard user={item} />
           </Pressable>
         )}
       />

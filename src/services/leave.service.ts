@@ -72,3 +72,10 @@ export async function sumUserLeaveDaysByType(
   // Edge function should return: { total: number }
   return res.data?.total ?? 0;
 }
+export async function fetchLeaveBySupervisor(orgId: number , supervisorId:string){
+const res = await apiClient.post("/fetch-supervisor-leaves", {
+  action: "fetchSupervisorLeaves",
+  payload: { orgId: orgId, supervisorId: supervisorId},
+});
+return res.data?.leaves ?? [];
+}
