@@ -7,7 +7,6 @@ import tw from "twrnc";
 
 export default function SupervisorSettings() {
   const router = useRouter();
-
   return (
     <View style={tw`flex-1 bg-white`}>
       <ScrollView contentContainerStyle={tw`p-4`}>
@@ -32,9 +31,8 @@ export default function SupervisorSettings() {
           </View>
           <ChevronRight size={22} color="#9ca3af" />
         </TouchableOpacity>
-
         <TouchableOpacity
-          onPress={() => router.push("/(users)/more/supervisor-settings/leave-management")}
+          onPress={() => router.push("/(users)/more/supervisor-settings/leave")}
           activeOpacity={0.8}
           style={tw`bg-white rounded-xl p-4 mb-4 flex-row items-center justify-between shadow border border-slate-100`}
         >

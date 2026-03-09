@@ -61,7 +61,7 @@ const AttendanceView: React.FC<Props> = ({ userId, name }) => {
             {records.map((r) => (
               <Text key={r.id} style={tw`text-gray-500`}>
                 {formatTime(r.check_in_time)} →{" "}
-                {formatTime(r.check_out_time)} ({r.status})
+                {formatTime(r.check_out_time)}
               </Text>
             ))}
           </View>

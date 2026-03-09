@@ -6,7 +6,13 @@ export default function MoreLayout() {
       <Stack.Screen
         name="index"
         options={{ headerShown: false, }}
-      ></Stack.Screen>
+      />
+      <Stack.Screen
+        name="supervisor-settings"
+        options={{
+          title: "supervisor settings",
+          headerShown: false,
+        }} />
     </Stack>
   );
 }
