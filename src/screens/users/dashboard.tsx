@@ -329,7 +329,7 @@ export default function HomeScreen() {
       <View style={tw`mb-6`}>
         <Text style={tw`text-3xl font-bold text-gray-700`}>
           Welcome to{" "}
-          <Text style={tw`text-3xl font-extrabold text-green-700`}>
+          <Text style={tw`text-3xl font-extrabold text-[#F7A44B]]`}>
             {profile?.organization?.name ?? "—"}
           </Text>
         </Text>
@@ -341,7 +341,7 @@ export default function HomeScreen() {
       </View>
 
       {/* Attendance for this Month */}
-      <View style={tw`bg-gray-50 p-4`}>
+      <View style={tw`bg-white p-2`}>
         <View style={tw`flex-row items-center justify-between mb-4`}>
           <View>
             <Text style={tw`text-lg font-bold text-gray-800`}>
@@ -353,7 +353,7 @@ export default function HomeScreen() {
           <Pressable
             onPress={() => setMonthModalOpen(true)}
             style={({ pressed }) => [
-              tw`bg-purple-100 px-4 py-3 rounded-full border border-purple-200`,
+              tw` px-4 py-3 rounded-full `,
               pressed && { opacity: 0.85 },
             ]}
           >
@@ -393,14 +393,14 @@ export default function HomeScreen() {
       />
 
       {/* Activity Log */}
-      <View style={tw`mt-5`}>
+      <View style={tw`mt-5 p-2`}>
         <View style={tw`flex-row items-center justify-between mb-3`}>
           <Text
-            style={tw`text-xs font-bold text-gray-400 uppercase tracking-widest`}
+            style={tw`text-lg font-bold text-gray-800`}
           >
             Activity Log
           </Text>
-          <Text style={tw`text-xs text-gray-400 font-medium`}>Last 7 days</Text>
+          <Text style={tw`text-xs text-gray-400 `}>Last 7 days</Text>
         </View>
 
         {activityLoading ? (
@@ -410,7 +410,7 @@ export default function HomeScreen() {
         ) : activityLog.length === 0 ? (
           <View style={tw`bg-gray-50 rounded-2xl px-4 py-8 items-center`}>
             {/* <Text style={tw`text-2xl mb-2`}>🗂️</Text> */}
-            <Text style={tw`text-gray-600 font-semibold text-sm`}>
+            <Text style={tw`text-gray-600 text-sm`}>
               No recent activity
             </Text>
             <Text style={tw`text-gray-400 text-xs mt-1`}>
@@ -449,13 +449,13 @@ export default function HomeScreen() {
                   : isIncomplete
                     ? "#ede9fe"
                     : "#dcfce7";
-              const statusIcon = isAbsent
-                ? "✕"
-                : isLate
-                  ? "⏰"
-                  : isIncomplete
-                    ? "…"
-                    : "✓";
+              // const statusIcon = isAbsent
+              //   ? "✕"
+              //   : isLate
+              //     ? "⏰"
+              //     : isIncomplete
+              //       ? "…"
+              //       : "✓";
 
               const fmtTime = (t: string | null) => {
                 if (!t) return "—";
@@ -485,22 +485,21 @@ export default function HomeScreen() {
                   ]}
                 >
                   {/* Icon */}
-                  <View
+                  {/* <View
                     style={[
                       tw`w-9 h-9 rounded-2xl items-center justify-center mr-3`,
                       { backgroundColor: statusBg },
                     ]}
                   >
-                    <Text
+                    {/* <Text
                       style={[tw`text-sm font-bold`, { color: statusColor }]}
                     >
                       {statusIcon}
-                    </Text>
-                  </View>
-
+                    </Text> */}
+                  {/* </View> */}
                   {/* Date + times */}
                   <View style={tw`flex-1`}>
-                    <Text style={tw`text-sm font-bold text-gray-800`}>
+                    <Text style={tw`text-sm text-gray-800`}>
                       {fmtDate(record.date)}
                     </Text>
                     {record.check_in_comment ? (
