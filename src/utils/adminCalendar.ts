@@ -64,6 +64,41 @@ let _state: CalendarState = JSON.parse(JSON.stringify(DEFAULT_STATE));
 const _listeners = new Set<() => void>();
 const _notify = () => _listeners.forEach((fn) => fn());
 
+// ✅ Defined before calendarStore so the delegation in calendarStore.getMonthStats works
+export function getMonthStats(year: number, month: number) {
+  const { days } = _state;
+  const totalDays = new Date(year, month, 0).getDate();
+
+  let publicHolidays = 0;
+  let weekends = 0;
+  let officeDays = 0;
+  let totalEvents = 0;
+
+  for (let d = 1; d <= totalDays; d++) {
+    const key = `${year}-${String(month).padStart(2, "0")}-${
+      String(d).padStart(2, "0")
+    }`;
+    const cfg = days[key];
+
+    // Inline getDayType — calendarStore isn't defined yet at this point
+    let type: "publicHoliday" | "weekend" | "officeDay";
+    if (cfg?.type === "publicHoliday") type = "publicHoliday";
+    else if (cfg?.type === "officeDay") type = "officeDay";
+    else {
+      const dow = parseLocalYMD(key).getDay();
+      type = _weekendDows.includes(dow) ? "weekend" : "officeDay";
+    }
+
+    if (type === "publicHoliday") publicHolidays++;
+    else if (type === "weekend") weekends++;
+    else officeDays++;
+
+    totalEvents += days[key]?.events?.length ?? 0;
+  }
+
+  return { totalDays, publicHolidays, weekends, officeDays, totalEvents };
+}
+
 export const calendarStore = {
   subscribe(fn: () => void): () => void {
     _listeners.add(fn);
@@ -179,20 +214,27 @@ export const calendarStore = {
     };
     _notify();
   },
-
+  getMonthStats(year: number, month: number) {
+    return getMonthStats(year, month); // ✅ single source of truth
+  },
   reset() {
     _state = JSON.parse(JSON.stringify(DEFAULT_STATE));
     _weekendDows = weekendArrayToDows(DEFAULT_WEEKENDS);
     _notify();
   },
 };
-
 export function useCalendarStore(): CalendarState {
   const [s, setS] = useState<CalendarState>(calendarStore.getState());
-  useEffect(
-    () => calendarStore.subscribe(() => setS(calendarStore.getState())),
-    [],
-  );
+  useEffect(() => {
+    const unsubscribe = calendarStore.subscribe(() => {
+      setS(calendarStore.getState());
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
   return s;
 }
 
@@ -205,27 +247,27 @@ export function buildAdminMarks(
   const total = new Date(year, month, 0).getDate();
 
   for (let d = 1; d <= total; d++) {
-    const key = `${year}-${String(month).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+    const key = `${year}-${String(month).padStart(2, "0")}-${
+      String(d).padStart(2, "0")
+    }`;
     const type = calendarStore.getDayType(key);
     const cfg = days[key];
 
     const customStyles = {
       container: {
-        backgroundColor:
-          type === "publicHoliday"
-            ? colors.publicHoliday + "30"
-            : type === "weekend"
-              ? colors.weekend + "30"
-              : undefined,
+        backgroundColor: type === "publicHoliday"
+          ? colors.publicHoliday + "30"
+          : type === "weekend"
+          ? colors.weekend + "30"
+          : undefined,
         borderRadius: 8,
       },
       text: {
-        color:
-          type === "publicHoliday"
-            ? colors.publicHoliday
-            : type === "weekend"
-              ? colors.weekend
-              : colors.officeDay,
+        color: type === "publicHoliday"
+          ? colors.publicHoliday
+          : type === "weekend"
+          ? colors.weekend
+          : colors.officeDay,
         fontWeight: type !== "officeDay" ? ("700" as const) : ("500" as const),
       },
     };

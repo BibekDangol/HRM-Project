@@ -47,7 +47,6 @@ async function getUserLocationOrThrow() {
   };
 }
 
-
 export default function UsersTabsLayout() {
   const router = useRouter();
   const signOut = useAuthStore((s) => s.signOut);
@@ -436,7 +435,7 @@ export default function UsersTabsLayout() {
         >
           <Pressable
             style={tw`w-full bg-white rounded-2xl p-4`}
-            onPress={() => { }}
+            onPress={() => {}}
           >
             <Text style={tw`text-lg font-bold text-black`}>
               {commentMode === "checkin" ? "Late check-in" : "Early check-out"}
