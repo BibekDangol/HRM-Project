@@ -8,12 +8,11 @@ import Capsule from "../../../components/Capsule";
 
 type Props = {
   user: UserProfile;
-  getSupervisorName: (id?: string | null) => string;
   onEdit?: (user: UserProfile) => void;
   onDelete?: (id: string) => void;
 };
 
-const UserCard = ({ user, onEdit, onDelete, getSupervisorName }: Props) => {
+const UserCard = ({ user, onEdit, onDelete }: Props) => {
   return (
     <View style={tw`flex-row justify-between bg-white border border-slate-100 rounded-2xl px-4 py-4`}>
       <View style={tw`flex-col gap-1`}>
@@ -28,9 +27,6 @@ const UserCard = ({ user, onEdit, onDelete, getSupervisorName }: Props) => {
           />
         </View>
         <View style={tw`mr-4 gap-0.5`}>
-          <Text style={tw`text-sm text-slate-500`}>
-            {getSupervisorName(user.supervisor_id)}
-          </Text>
           <Text style={tw`text-sm text-slate-400`} numberOfLines={1}>
             {user.email}
           </Text>

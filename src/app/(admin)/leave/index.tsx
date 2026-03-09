@@ -1,3 +1,3 @@
-import LeaveRequests from "@/src/screens/admin/more/leave-management/leave";
+import LeaveRequests from "@/src/screens/admin/more/leave";
 
 export default LeaveRequests

@@ -1,9 +1,5 @@
 import * as Location from "expo-location";
 
-import { Alert, Modal, Pressable, Text, TextInput, View } from "react-native";
-import { CircleCheck, LogOut, User, UserCircle } from "lucide-react-native";
-import React, { useEffect } from "react";
-import { Tabs, useRouter } from "expo-router";
 import {
   formatElapsed,
   formatSinceTime,
@@ -13,14 +9,18 @@ import {
   needsCheckOutCommentNepal,
   parseDate,
 } from "@/src/utils/checkinHelper";
+import { Tabs, useRouter } from "expo-router";
+import { CircleCheck, LogOut, User, UserCircle } from "lucide-react-native";
+import React, { useEffect } from "react";
+import { Alert, Modal, Pressable, Text, TextInput, View } from "react-native";
 
-import { AttendanceRow } from "@/src/types/attendance";
-import { MyTabBar } from "./tabBar";
 import { fetchCurrentUserProfleService } from "@/src/services/currentuser.service";
-import { supabase } from "@/src/supabase/supabaseClient";
-import tw from "twrnc";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { useUsersStore } from "@/src/store/useUsersStore";
+import { supabase } from "@/src/supabase/supabaseClient";
+import { AttendanceRow } from "@/src/types/attendance";
+import tw from "twrnc";
+import { MyTabBar } from "./tabBar";
 
 /* ---------------- Nepal date helper ---------------- */
 const NEPAL_OFFSET_MIN = 5 * 60 + 45;
@@ -651,7 +651,7 @@ export default function UsersTabsLayout() {
         <Tabs.Screen name="dashboard" options={{ title: "Dashboard" }} />
         <Tabs.Screen name="leaves" options={{ title: "Leaves" }} />
         <Tabs.Screen name="profile/index" options={{ title: "Profile" }} />
-        <Tabs.Screen name="more" options={{ title: "Setting" }} />
+        <Tabs.Screen name="more" options={{ title: "Settings" }} />
       </Tabs>
     </>
   );
