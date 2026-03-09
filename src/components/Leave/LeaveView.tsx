@@ -160,41 +160,42 @@ export default function LeaveView({
                 >
                   <CalendarClock size={20} color="#475569" />
                 </View>
-
-                {/* Info */}
-                <View style={tw`flex-1`}>
-                  <Text
-                    style={tw`text-sm font-semibold text-slate-900`}
-                  >
-                    {leave.first_name} {leave.last_name ?? ""}
-                  </Text>
-
-                  <Text
-                    style={tw`text-xs text-slate-400 mt-0.5`}
-                  >
-                    {leave.start_date}
-                    {leave.end_date &&
-                      leave.end_date !== leave.start_date
-                      ? ` → ${leave.end_date}`
-                      : ""}
-                  </Text>
-                </View>
-
-                {/* Status Badge */}
-                <View
-                  style={tw`flex-row items-center ${cfg.bg} px-3 py-1.5 rounded-xl mr-3`}
+              </View>
+              {/* Info */}
+              <View style={tw`flex-1`}>
+                <Text
+                  style={tw`text-sm font-semibold text-slate-900`}
                 >
-                  <View
-                    style={tw`h-1.5 w-1.5 rounded-full ${cfg.dot} mr-1.5`}
-                  />
-                  <Text
-                    style={tw`text-xs font-bold ${cfg.text}`}
-                  >
-                    {String(leave.status).toUpperCase()}
-                  </Text>
-                </View>
+                  {leave.first_name} {leave.last_name ?? ""}
+                </Text>
 
-                <ChevronRight size={16} color="#cbd5e1" />
+                <Text
+                  style={tw`text-xs text-slate-400 mt-0.5`}
+                >
+                  {leave.start_date}
+                  {leave.end_date &&
+                    leave.end_date !== leave.start_date
+                    ? ` → ${leave.end_date}`
+                    : ""}
+                </Text>
+              </View>
+
+              {/* Status Badge */}
+              <View
+                style={tw`flex-row items-center ${cfg.bg} px-3 py-1.5 rounded-xl mr-3`}
+              >
+                <View
+                  style={tw`h-1.5 w-1.5 rounded-full ${cfg.dot} mr-1.5`}
+                />
+                <Text
+                  style={tw`text-xs font-bold ${cfg.text}`}
+                >
+                  {String(leave.status).toUpperCase()}
+                </Text>
+              </View>
+
+              <ChevronRight size={16} color="#cbd5e1" />
+
             </Pressable>
           );
         }}
