@@ -279,7 +279,7 @@ export default function SignupScreen() {
                   loading && tw`opacity-70`,
                 ]}
               >
-                <Text style={tw`${TW.textPrimary} text-lg font-semibold`}>
+                <Text style={tw`${TW.textButton} text-lg font-semibold`}>
                   {loading ? "Creating..." : "Create Organization"}
                 </Text>
               </TouchableOpacity>
