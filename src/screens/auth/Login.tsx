@@ -1,6 +1,3 @@
-import { Eye, EyeOff } from "lucide-react-native";
-import React, { useState } from "react";
-import { Controller, useForm } from "react-hook-form";
 import {
   Alert,
   Keyboard,
@@ -13,15 +10,18 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
+import { Controller, useForm } from "react-hook-form";
+import { Eye, EyeOff } from "lucide-react-native";
+import React, { useState } from "react";
 
 import Logo from "@/src/components/Logo";
-import { loginSchema } from "@/src/schema/auth";
-import { useAuthStore } from "@/src/store/useAuthStore";
 import { TW } from "@/theme/twStyles";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "expo-router";
+import { loginSchema } from "@/src/schema/auth";
 import tw from "twrnc";
+import { useAuthStore } from "@/src/store/useAuthStore";
+import { useRouter } from "expo-router";
 import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 type FormData = z.infer<typeof loginSchema>;
 
@@ -116,7 +116,7 @@ const LoginScreen = () => {
                     />
 
                     {errors.email && (
-                      <Text style={tw`text-[#FF6B6B] text-[13px] mt-1 ml-1 min-h-[18px]`}>
+                      <Text style={tw`text-[#FF6B6B] text-[13px] mt-1 ml-1`}>
                         {errors.email.message}
                       </Text>
                     )}
@@ -160,7 +160,7 @@ const LoginScreen = () => {
                     </View>
 
                     {errors.password && (
-                      <Text style={tw`text-[#FF6B6B] text-[13px] mt-1 ml-1 min-h-[18px]`}>
+                      <Text style={tw`text-[#FF6B6B] text-[13px] mt-1 ml-1 ] `}>
                         {errors.password.message}
                       </Text>
                     )}

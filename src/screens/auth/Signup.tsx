@@ -118,7 +118,7 @@ export default function SignupScreen() {
                       placeholderTextColor="#dcdada"
                     />
                     {errors.firstName && (
-                      <Text style={tw`text-[#FF6B6B] text-[13px] mt-1 ml-1 min-h-[18px]`}>
+                      <Text style={tw`text-[#FF6B6B] text-[13px] mt-1 ml-1`}>
                         {errors.firstName.message}
                       </Text>
                     )}
@@ -146,7 +146,7 @@ export default function SignupScreen() {
                       placeholderTextColor="#dcdada"
                     />
                     {errors.lastName && (
-                      <Text style={tw`text-[#FF6B6B] text-[13px] mt-1 ml-1 min-h-[18px]`}>
+                      <Text style={tw`text-[#FF6B6B] text-[13px] mt-1 ml-1 `}>
                         {errors.lastName.message}
                       </Text>
                     )}
@@ -174,7 +174,7 @@ export default function SignupScreen() {
                       placeholderTextColor="#dcdada"
                     />
                     {errors.organizationName && (
-                      <Text style={tw`text-[#FF6B6B] text-[13px] mt-1 ml-1 min-h-[18px]`}>
+                      <Text style={tw`text-[#FF6B6B] text-[13px] mt-1 ml-1 `}>
                         {errors.organizationName.message}
                       </Text>
                     )}
@@ -204,7 +204,7 @@ export default function SignupScreen() {
                       placeholderTextColor="#dcdada"
                     />
                     {errors.email && (
-                      <Text style={tw`text-[#FF6B6B] text-[13px] mt-1 ml-1 min-h-[18px]`}>
+                      <Text style={tw`text-[#FF6B6B] text-[13px] mt-1 ml-1 `}>
                         {errors.email.message}
                       </Text>
                     )}
@@ -233,7 +233,7 @@ export default function SignupScreen() {
                       placeholderTextColor="#dcdada"
                     />
                     {errors.password && (
-                      <Text style={tw`text-[#FF6B6B] text-[13px] mt-1 ml-1 min-h-[18px]`}>
+                      <Text style={tw`text-[#FF6B6B] text-[13px] mt-1 ml-1 `}>
                         {errors.password.message}
                       </Text>
                     )}
@@ -262,7 +262,7 @@ export default function SignupScreen() {
                       placeholderTextColor="#dcdada"
                     />
                     {errors.confirmPassword && (
-                      <Text style={tw`text-[#FF6B6B] text-[13px] mt-1 ml-1 min-h-[18px]`}>
+                      <Text style={tw`text-[#FF6B6B] text-[13px] mt-1 ml-1 `}>
                         {errors.confirmPassword.message}
                       </Text>
                     )}
