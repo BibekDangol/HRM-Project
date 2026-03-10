@@ -28,15 +28,9 @@ import { useAuthStore } from "@/src/store/useAuthStore";
 import { useUsersStore } from "@/src/store/useUsersStore";
 import { supabase } from "@/src/supabase/supabaseClient";
 import { AttendanceRow } from "@/src/types/attendance";
+import { TW } from "@/theme/twStyles";
 import tw from "twrnc";
 import { MyTabBar } from "./tabBar";
-
-/* ─── Constants ─────────────────────────────────────────── */
-const PRIMARY = "#008080";
-const DANGER = "#EF4444";
-const SUCCESS = "#16A34A";
-const TEXT_DARK = "#1F2937";
-const BORDER = "#E5E7EB";
 
 /* ─── Nepal date helper ──────────────────────────────────── */
 const NEPAL_OFFSET_MIN = 5 * 60 + 45;
@@ -414,26 +408,28 @@ export default function UsersTabsLayout() {
             <Pressable
               style={[
                 tw`rounded-t-3xl px-5 pt-4 pb-10`,
-                { backgroundColor: "#ffffff" },
+                { backgroundColor: TW.bgPrimary },
               ]}
               onPress={() => {}}
             >
-              {/* Handle */}
+              {/* Handle — TW.bgSecondary teal */}
               <View style={tw`items-center mb-5`}>
                 <View
                   style={[
                     tw`h-1 w-10 rounded-full`,
-                    { backgroundColor: PRIMARY },
+                    { backgroundColor: TW.bgPrimary },
                   ]}
                 />
               </View>
 
-              <Text style={[tw`text-xl font-bold mb-1`, { color: TEXT_DARK }]}>
+              <Text
+                style={[tw`text-xl font-bold mb-1`, { color: TW.bgSecondary }]}
+              >
                 {commentMode === "checkin"
                   ? "Late Check-in"
                   : "Early Check-out"}
               </Text>
-              <Text style={[tw`text-sm mb-5`, { color: "#6B7280" }]}>
+              <Text style={[tw`text-sm mb-5`, { color: TW.textSecondary }]}>
                 Please provide a reason to continue.
               </Text>
 
@@ -448,16 +444,17 @@ export default function UsersTabsLayout() {
                   tw`rounded-2xl p-4 text-sm`,
                   {
                     backgroundColor: "#F3F4F6",
-                    color: TEXT_DARK,
+                    color: TW.bgSecondary,
                     minHeight: 100,
                     textAlignVertical: "top",
                     borderWidth: 1,
-                    borderColor: BORDER,
+                    borderColor: TW.BORDER,
                   },
                 ]}
               />
 
               <View style={tw`flex-row gap-3 mt-4`}>
+                {/* Cancel — neutral */}
                 <Pressable
                   disabled={isLocked}
                   onPress={() => {
@@ -467,15 +464,21 @@ export default function UsersTabsLayout() {
                     setCommentMode(null);
                   }}
                   style={({ pressed }) => [
-                    tw`flex-1 py-4 rounded-2xl items-center`,
-                    { backgroundColor: "#F3F4F6", opacity: pressed ? 0.7 : 1 },
+                    tw`flex-1 py-4 rounded-2xl items-center border`,
+                    {
+                      backgroundColor: "transparent",
+                      opacity: pressed ? 0.7 : 1,
+                    },
                   ]}
                 >
-                  <Text style={[tw`font-bold text-sm`, { color: TEXT_DARK }]}>
+                  <Text
+                    style={[tw`font-bold text-sm`, { color: TW.bgSecondary }]}
+                  >
                     Cancel
                   </Text>
                 </Pressable>
 
+                {/* Submit — TW.textTertiary orange */}
                 <Pressable
                   disabled={isLocked || commentText.trim().length === 0}
                   onPress={submitComment}
@@ -484,13 +487,13 @@ export default function UsersTabsLayout() {
                     {
                       backgroundColor:
                         isLocked || commentText.trim().length === 0
-                          ? "#FFC10750"
-                          : "#FFC107",
+                          ? `${TW.textTertiary}80`
+                          : TW.textTertiary,
                       opacity: pressed ? 0.85 : 1,
                     },
                   ]}
                 >
-                  <Text style={[tw`font-bold text-sm`, { color: TEXT_DARK }]}>
+                  <Text style={[tw`font-bold text-sm`, { color: "#ffffff" }]}>
                     {isLocked ? "..." : "Submit"}
                   </Text>
                 </Pressable>
@@ -505,16 +508,20 @@ export default function UsersTabsLayout() {
         screenOptions={{
           headerShown: true,
           headerTitleAlign: "center",
-          headerStyle: { backgroundColor: PRIMARY },
+          headerStyle: { backgroundColor: TW.bgSecondary }, // TW.bgSecondary deep teal
           headerTitleStyle: {
             color: "#ffffff",
             fontWeight: "bold" as const,
             fontSize: 16,
+            paddingBottom: 8,
           },
           headerShadowVisible: false,
           headerRight: () => (
             <View
-              style={[tw`flex-row items-center gap-3`, { marginRight: 16 }]}
+              style={[
+                tw`flex-row items-center gap-3`,
+                { marginRight: 16, marginBottom: 8 },
+              ]}
             >
               {/* ── Check in/out dot ── */}
               <View style={{ position: "relative" }}>
@@ -534,7 +541,6 @@ export default function UsersTabsLayout() {
                   ]}
                   hitSlop={10}
                 >
-                  {/* bright dot — green when in, light red when out */}
                   <View
                     style={[
                       tw`h-3 w-3 rounded-full`,
@@ -544,76 +550,115 @@ export default function UsersTabsLayout() {
                 </Pressable>
 
                 {checkOpen && (
+                  // ── Outer: shadow only, no overflow hidden ──
                   <View
                     style={{
                       position: "absolute",
                       right: 0,
                       top: 46,
                       width: 180,
-                      backgroundColor: "#ffffff",
                       borderRadius: 16,
-                      borderWidth: 1,
-                      borderColor: BORDER,
+                      // iOS shadow
                       shadowColor: "#000",
-                      shadowOffset: { width: 0, height: 6 },
-                      shadowOpacity: 0.1,
-                      shadowRadius: 14,
+                      shadowOffset: { width: 0, height: 4 },
+                      shadowOpacity: 0.12,
+                      shadowRadius: 12,
+                      // Android shadow
                       elevation: 8,
-                      overflow: "hidden",
+                      backgroundColor: "#ffffff", // required for elevation to work
                     }}
                   >
-                    {isCheckedIn ? (
-                      <View style={tw`p-4 items-center`}>
-                        <Text
-                          style={[
-                            tw`text-xs font-medium`,
-                            { color: "#6B7280" },
-                          ]}
+                    {/* ── Inner: clips border radius, no shadow ── */}
+                    <View
+                      style={{
+                        borderRadius: 16,
+                        borderWidth: 1,
+                        borderColor: TW.BORDER,
+                        overflow: "hidden", // safe here — shadow is on parent
+                        backgroundColor: "#ffffff",
+                      }}
+                    >
+                      {isCheckedIn ? (
+                        <View
+                          style={{
+                            padding: 16,
+                            alignItems: "center",
+                          }}
                         >
-                          Since{" "}
-                          {checkedInAt ? formatSinceTime(checkedInAt) : "--"}
-                        </Text>
-                        <Text
-                          style={[
-                            tw`text-3xl font-extrabold mt-1 mb-3`,
-                            { color: TEXT_DARK },
-                          ]}
-                        >
-                          {formatElapsed(elapsedMs)}
-                        </Text>
+                          <Text
+                            style={{
+                              fontSize: 11,
+                              fontWeight: "500",
+                              color: TW.textPrimary,
+                            }}
+                          >
+                            Since{" "}
+                            {checkedInAt ? formatSinceTime(checkedInAt) : "--"}
+                          </Text>
+
+                          <Text
+                            style={{
+                              fontSize: 30,
+                              fontWeight: "800",
+                              color: TW.textPrimary,
+                              marginTop: 4,
+                              marginBottom: 12,
+                              letterSpacing: -0.5,
+                            }}
+                          >
+                            {formatElapsed(elapsedMs)}
+                          </Text>
+
+                          <Pressable
+                            onPress={onToggleCheck}
+                            disabled={isLocked}
+                            style={({ pressed }) => ({
+                              width: "100%",
+                              paddingVertical: 12,
+                              borderRadius: 12,
+                              alignItems: "center",
+                              backgroundColor: TW.DANGER,
+                              opacity: isLocked ? 0.6 : pressed ? 0.85 : 1,
+                            })}
+                          >
+                            <Text
+                              style={{
+                                color: "#ffffff",
+                                fontWeight: "700",
+                                fontSize: 13,
+                              }}
+                            >
+                              {isLocked ? "..." : "Check Out"}
+                            </Text>
+                          </Pressable>
+                        </View>
+                      ) : (
                         <Pressable
                           onPress={onToggleCheck}
                           disabled={isLocked}
-                          style={({ pressed }) => [
-                            tw`w-full py-3 rounded-xl items-center`,
-                            {
-                              backgroundColor: DANGER,
-                              opacity: isLocked ? 0.6 : pressed ? 0.85 : 1,
-                            },
-                          ]}
+                          style={({ pressed }) => ({
+                            flexDirection: "row",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: 6,
+                            paddingHorizontal: 16,
+                            paddingVertical: 16,
+                            opacity: isLocked ? 0.6 : pressed ? 0.85 : 1,
+                          })}
                         >
-                          <Text style={tw`text-white font-bold text-sm`}>
-                            {isLocked ? "..." : "Check Out"}
+                          <CircleCheck size={18} color={TW.SUCCESS} />
+                          <Text
+                            style={{
+                              fontWeight: "700",
+                              fontSize: 13,
+                              color: TW.SUCCESS,
+                            }}
+                          >
+                            {isLocked ? "..." : "Check In"}
                           </Text>
                         </Pressable>
-                      </View>
-                    ) : (
-                      <Pressable
-                        onPress={onToggleCheck}
-                        disabled={isLocked}
-                        style={({ pressed }) => [
-                          tw`flex-row items-center justify-center gap-2 px-4 py-4`,
-                          { opacity: isLocked ? 0.6 : pressed ? 0.85 : 1 },
-                        ]}
-                      >
-                        <CircleCheck size={18} color={SUCCESS} />
-                        <Text
-                          style={[tw`font-bold text-sm`, { color: SUCCESS }]}
-                        >
-                          {isLocked ? "..." : "Check In"}
-                        </Text>
-                      </Pressable>
-                    )}
+                      )}
+                    </View>
                   </View>
                 )}
               </View>
@@ -650,7 +695,7 @@ export default function UsersTabsLayout() {
                       backgroundColor: "#ffffff",
                       borderRadius: 16,
                       borderWidth: 1,
-                      borderColor: BORDER,
+                      borderColor: TW.BORDER,
                       shadowColor: "#000",
                       shadowOffset: { width: 0, height: 6 },
                       shadowOpacity: 0.1,
@@ -671,11 +716,11 @@ export default function UsersTabsLayout() {
                         (pressed || isLocked) && { opacity: 0.7 },
                       ]}
                     >
-                      <UserCircle size={17} color={TEXT_DARK} />
+                      <UserCircle size={17} color={TW.bgSecondary} />
                       <Text
                         style={[
                           tw`font-semibold text-sm`,
-                          { color: TEXT_DARK },
+                          { color: TW.bgSecondary },
                         ]}
                       >
                         Profile
@@ -685,7 +730,7 @@ export default function UsersTabsLayout() {
                     <View
                       style={{
                         height: 1,
-                        backgroundColor: BORDER,
+                        backgroundColor: TW.BORDER,
                         marginHorizontal: 12,
                       }}
                     />
@@ -698,9 +743,12 @@ export default function UsersTabsLayout() {
                         (pressed || isLocked) && { opacity: 0.7 },
                       ]}
                     >
-                      <LogOut size={17} color={DANGER} />
+                      <LogOut size={17} color={TW.DANGER} />
                       <Text
-                        style={[tw`font-semibold text-sm`, { color: DANGER }]}
+                        style={[
+                          tw`font-semibold text-sm`,
+                          { color: TW.DANGER },
+                        ]}
                       >
                         Logout
                       </Text>
