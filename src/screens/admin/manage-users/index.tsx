@@ -65,7 +65,6 @@ const ManageUsers = () => {
       );
       setUsers(fetchedUsers);
     } catch (err) {
-      console.error("Failed to load admin:", err);
     } finally {
       setLoading(false);
     }
@@ -158,7 +157,6 @@ const ManageUsers = () => {
       const updatedUsers = await fetchUsersService(userProfile.organization_id);
       setUsers(updatedUsers);
     } catch (err: any) {
-      console.error("Delete user error:", err.message);
     }
   };
 

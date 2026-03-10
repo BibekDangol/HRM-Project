@@ -36,16 +36,12 @@ const EditUserModal = ({
   if (!visible || !user) return null;
 
   const supervisorName = () => {
-    // console.log("supervisor", supervisor);
     if (!supervisor || supervisor === user.id) return "Self";
     const found = users.find((u) => u.id === supervisor);
-    // console.log("found", found);
     return found
       ? `${found.first_name ?? ""} ${found.last_name ?? ""}`.trim()
       : "Unknown";
   };
-
-  // console.log("users", users[0]);
 
   return (
     <Modal visible={visible} transparent animationType="fade">

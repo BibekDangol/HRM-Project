@@ -86,7 +86,6 @@ export function DayModal({
     ]);
 
     if (error) {
-      console.error("Supabase insert error:", error.message);
       return;
     }
 
@@ -110,7 +109,6 @@ export function DayModal({
     ]);
 
     if (error) {
-      console.error("Supabase insert error:", error.message);
       return;
     }
 

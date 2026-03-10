@@ -34,16 +34,14 @@ export const HolidaysEventsSection = ({
   };
 
   return (
-    <View style={tw`mt-5`}>
+    <View style={tw`mt-5 p-2`}>
       {/* Header */}
-      <View style={tw`flex-row items-center justify-between mb-3`}>
-        <Text
-          style={tw`text-xs font-bold text-gray-400 uppercase tracking-widest`}
-        >
+      <View style={tw`flex-row items-center justify-between mb-4`}>
+        <Text style={tw`text-lg font-bold text-gray-800`}>
           Holidays & Events
         </Text>
 
-        <Text style={tw`text-xs text-gray-400 font-medium`}>
+        <Text style={tw`text-xs text-gray-400`}>
           {monthTitle} {selectedYear}
         </Text>
       </View>
@@ -56,11 +54,9 @@ export const HolidaysEventsSection = ({
       ) : calendarItems.length === 0 ? (
         /* Empty State */
         <View style={tw`bg-gray-50 rounded-2xl px-4 py-8 items-center`}>
-          <Text style={tw`text-2xl mb-2`}>📅</Text>
+          {/* <Text style={tw`text-2xl mb-2`}>📅</Text> */}
 
-          <Text style={tw`text-gray-600 font-semibold text-sm`}>
-            No holidays or events
-          </Text>
+          <Text style={tw`text-gray-600 text-sm`}>No holidays or events</Text>
 
           <Text style={tw`text-gray-400 text-xs mt-1`}>
             Nothing scheduled for {monthTitle}
@@ -83,24 +79,21 @@ export const HolidaysEventsSection = ({
               <View
                 key={item.id}
                 style={[
-                  tw`flex-row items-center px-4 py-3.5`,
-                  i < calendarItems.length - 1 && tw`border-b border-slate-50`,
+                  tw`flex-row items-center px-3 py-3.5`,
+                  i < calendarItems.length - 1 && tw`border-b border-slate-100`,
                 ]}
               >
                 {/* Color Indicator */}
-                <View
+                {/* <View
                   style={[
                     tw`w-1 self-stretch rounded-full mr-3`,
                     { backgroundColor: item.color },
                   ]}
-                />
+                /> */}
 
                 {/* Title + Date */}
                 <View style={tw`flex-1`}>
-                  <Text
-                    style={tw`text-sm font-bold text-gray-800`}
-                    numberOfLines={1}
-                  >
+                  <Text style={tw`text-sm  text-gray-800`} numberOfLines={1}>
                     {item.title}
                   </Text>
 
@@ -111,10 +104,7 @@ export const HolidaysEventsSection = ({
 
                 {/* Tag */}
                 <View
-                  style={[
-                    tw`px-2.5 py-1 rounded-full`,
-                    { backgroundColor: item.color + "18" },
-                  ]}
+
                 >
                   <Text style={[tw`text-xs font-bold`, { color: item.color }]}>
                     {isHoliday ? "Holiday" : "Event"}

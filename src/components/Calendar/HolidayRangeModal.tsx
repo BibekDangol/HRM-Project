@@ -63,7 +63,7 @@ export function HolidayRangeModal({
       onConfirm("event", label.trim(), eventColor);
     }
     reset();
-    onClose(); // ✅ actually close the modal after confirming
+    onClose();
   };
 
   return (

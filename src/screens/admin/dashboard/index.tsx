@@ -50,7 +50,6 @@ export default function DashboardScreen() {
         await fetchCalendarItems(profile.organization_id);
       }
     } catch (err) {
-      console.log("Error loading users/profile:", err);
       Alert.alert("Error", "Failed to load users or profile.");
     }
   };
@@ -83,7 +82,6 @@ export default function DashboardScreen() {
       if (error) throw error;
       setCalendarItems((data ?? []) as CalendarItem[]);
     } catch (err) {
-      console.log("Calendar fetch error:", err);
       Alert.alert("Error", "Failed to load calendar items.");
     } finally {
       setCalendarLoading(false);

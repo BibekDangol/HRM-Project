@@ -83,7 +83,6 @@ export default function HomeScreen() {
 
   const fetchProfile = useCallback(async () => {
     if (!user?.id) return;
-
     try {
       setProfileLoading(true);
       const { data, error } = await supabase
@@ -93,7 +92,6 @@ export default function HomeScreen() {
         )
         .eq("id", user.id)
         .single();
-
       if (error) throw error;
       setProfile(data as ProfileData);
     } catch (e: unknown) {
@@ -109,7 +107,6 @@ export default function HomeScreen() {
   const fetchMonthlyAttendanceStats = useCallback(
     async (year: number, monthIndex: number) => {
       if (!user?.id) return;
-
       setStatsLoading(true);
       try {
         const { startDate, endDateExclusive } = getNepalMonthDateRangeYYYYMMDD(
@@ -117,7 +114,6 @@ export default function HomeScreen() {
           monthIndex,
         );
 
-        // Prefer querying by attendance.date (YYYY-MM-DD)
         const tryDate = await supabase
           .from("attendance")
           .select("status, check_in_comment, date")
@@ -139,14 +135,11 @@ export default function HomeScreen() {
           const late = rows.filter(
             (r) => normalize(r.check_in_comment) !== "",
           ).length;
-
           setStats({ present, absent, late, incomplete });
           return;
         }
 
-        // Fallback: query by created_at within month range (UTC ISO)
         const { startISO, endISO } = getNepalMonthRangeUTCISO(year, monthIndex);
-
         const tryCreatedAt = await supabase
           .from("attendance")
           .select("status, check_in_comment, created_at")
@@ -169,7 +162,6 @@ export default function HomeScreen() {
         const late = rows.filter(
           (r) => normalize(r.check_in_comment) !== "",
         ).length;
-
         setStats({ present, absent, late, incomplete });
       } catch (e: unknown) {
         Alert.alert(
@@ -188,7 +180,9 @@ export default function HomeScreen() {
     async (year: number, monthIndex: number, orgId: string | number) => {
       const monthStr = String(monthIndex + 1).padStart(2, "0");
       const monthStart = `${year}-${monthStr}-01`;
-      const monthEnd = `${year}-${monthStr}-${String(new Date(year, monthIndex + 1, 0).getDate()).padStart(2, "0")}`;
+      const monthEnd = `${year}-${monthStr}-${String(
+        new Date(year, monthIndex + 1, 0).getDate(),
+      ).padStart(2, "0")}`;
       setCalendarLoading(true);
       try {
         const { data, error } = await supabase
@@ -216,7 +210,6 @@ export default function HomeScreen() {
     if (!user?.id) return;
     setActivityLoading(true);
     try {
-      // Last 7 days from today
       const today = new Date();
       const sevenDaysAgo = new Date(today);
       sevenDaysAgo.setDate(today.getDate() - 6);
@@ -329,11 +322,10 @@ export default function HomeScreen() {
       <View style={tw`mb-6`}>
         <Text style={tw`text-3xl font-bold text-gray-700`}>
           Welcome to{" "}
-          <Text style={tw`text-3xl font-extrabold text-green-700`}>
+          <Text style={tw`text-3xl font-extrabold text-[#008080]`}>
             {profile?.organization?.name ?? "—"}
           </Text>
         </Text>
-
         <Text style={tw`text-xl text-gray-600 mt-1`}>
           Greetings,{" "}
           <Text style={tw`text-gray-600 text-xl`}>{fullName || "—"}</Text>
@@ -341,7 +333,7 @@ export default function HomeScreen() {
       </View>
 
       {/* Attendance for this Month */}
-      <View style={tw`bg-gray-50 p-4`}>
+      <View style={tw`bg-white p-2`}>
         <View style={tw`flex-row items-center justify-between mb-4`}>
           <View>
             <Text style={tw`text-lg font-bold text-gray-800`}>
@@ -353,7 +345,7 @@ export default function HomeScreen() {
           <Pressable
             onPress={() => setMonthModalOpen(true)}
             style={({ pressed }) => [
-              tw`bg-purple-100 px-4 py-3 rounded-full border border-purple-200`,
+              tw`px-4 py-3 rounded-full`,
               pressed && { opacity: 0.85 },
             ]}
           >
@@ -363,28 +355,48 @@ export default function HomeScreen() {
 
         {/* Stats Row */}
         <View style={tw`flex-row gap-3`}>
-          <View style={tw`flex-1 rounded-xl p-4 bg-green-100 items-center`}>
-            <Text style={tw`text-3xl font-extrabold text-green-600`}>
-              {statsLoading ? "…" : stats.present}
-            </Text>
-            <Text style={tw`text-gray-700 mt-1 font-semibold`}>Present</Text>
-          </View>
-
-          <View style={tw`flex-1 rounded-xl p-4 bg-red-100 items-center`}>
-            <Text style={tw`text-3xl font-extrabold text-red-500`}>
-              {statsLoading ? "…" : stats.absent}
-            </Text>
-            <Text style={tw`text-gray-700 mt-1 font-semibold`}>Absents</Text>
-          </View>
-
-          <View style={tw`flex-1 rounded-xl p-4 bg-yellow-100 items-center`}>
-            <Text style={tw`text-3xl font-extrabold text-yellow-600`}>
-              {statsLoading ? "…" : stats.late}
-            </Text>
-            <Text style={tw`text-gray-700 mt-1 font-semibold`}>Late in</Text>
-          </View>
+          {[
+            {
+              label: "Present",
+              value: stats.present,
+              color: "#008080",
+              bg: "#E6F4F4",
+            },
+            {
+              label: "Absents",
+              value: stats.absent,
+              color: "#EF4444",
+              bg: "#FEE2E2",
+            },
+            {
+              label: "Late in",
+              value: stats.late,
+              color: "#FFC107",
+              bg: "#FFFBEB",
+            },
+          ].map((item) => (
+            <View
+              key={item.label}
+              style={[
+                tw`flex-1 rounded-2xl px-3 py-4 items-center gap-1`,
+                { backgroundColor: item.bg },
+              ]}
+            >
+              <Text
+                style={[tw`text-4xl font-extrabold`, { color: item.color }]}
+              >
+                {statsLoading ? "—" : item.value}
+              </Text>
+              <Text style={[tw`text-xs font-semibold`, { color: "#6B7280" }]}>
+                {item.label}
+              </Text>
+            </View>
+          ))}
         </View>
       </View>
+
+      {/* Calendar */}
+
       <HolidaysEventsSection
         calendarItems={calendarItems}
         calendarLoading={calendarLoading}
@@ -393,14 +405,10 @@ export default function HomeScreen() {
       />
 
       {/* Activity Log */}
-      <View style={tw`mt-5`}>
+      <View style={tw`mt-5 p-2`}>
         <View style={tw`flex-row items-center justify-between mb-3`}>
-          <Text
-            style={tw`text-xs font-bold text-gray-400 uppercase tracking-widest`}
-          >
-            Activity Log
-          </Text>
-          <Text style={tw`text-xs text-gray-400 font-medium`}>Last 7 days</Text>
+          <Text style={tw`text-lg font-bold text-gray-800`}>Activity Log</Text>
+          <Text style={tw`text-xs text-gray-400`}>Last 7 days</Text>
         </View>
 
         {activityLoading ? (
@@ -409,10 +417,7 @@ export default function HomeScreen() {
           </View>
         ) : activityLog.length === 0 ? (
           <View style={tw`bg-gray-50 rounded-2xl px-4 py-8 items-center`}>
-            {/* <Text style={tw`text-2xl mb-2`}>🗂️</Text> */}
-            <Text style={tw`text-gray-600 font-semibold text-sm`}>
-              No recent activity
-            </Text>
+            <Text style={tw`text-gray-600 text-sm`}>No recent activity</Text>
             <Text style={tw`text-gray-400 text-xs mt-1`}>
               No records found for the last 7 days
             </Text>
@@ -449,13 +454,6 @@ export default function HomeScreen() {
                   : isIncomplete
                     ? "#ede9fe"
                     : "#dcfce7";
-              const statusIcon = isAbsent
-                ? "✕"
-                : isLate
-                  ? "⏰"
-                  : isIncomplete
-                    ? "…"
-                    : "✓";
 
               const fmtTime = (t: string | null) => {
                 if (!t) return "—";
@@ -484,23 +482,8 @@ export default function HomeScreen() {
                     i < activityLog.length - 1 && tw`border-b border-slate-50`,
                   ]}
                 >
-                  {/* Icon */}
-                  <View
-                    style={[
-                      tw`w-9 h-9 rounded-2xl items-center justify-center mr-3`,
-                      { backgroundColor: statusBg },
-                    ]}
-                  >
-                    <Text
-                      style={[tw`text-sm font-bold`, { color: statusColor }]}
-                    >
-                      {statusIcon}
-                    </Text>
-                  </View>
-
-                  {/* Date + times */}
                   <View style={tw`flex-1`}>
-                    <Text style={tw`text-sm font-bold text-gray-800`}>
+                    <Text style={tw`text-sm text-gray-800`}>
                       {fmtDate(record.date)}
                     </Text>
                     {record.check_in_comment ? (
@@ -518,7 +501,6 @@ export default function HomeScreen() {
                     )}
                   </View>
 
-                  {/* Status pill */}
                   <View
                     style={[
                       tw`px-2.5 py-1 rounded-full`,
@@ -542,78 +524,151 @@ export default function HomeScreen() {
       <Modal
         visible={monthModalOpen}
         transparent
-        animationType="fade"
+        animationType="slide"
         onRequestClose={() => setMonthModalOpen(false)}
       >
         <Pressable
-          style={tw`flex-1 bg-black/40 justify-end`}
+          style={tw`flex-1 bg-black/50 justify-end`}
           onPress={() => setMonthModalOpen(false)}
         >
-          <Pressable style={tw`bg-white rounded-t-3xl p-4`} onPress={() => {}}>
-            <View style={tw`flex-row items-center justify-between mb-4`}>
+          <Pressable
+            style={[
+              tw`rounded-t-3xl px-5 pt-3 pb-8`,
+              { backgroundColor: "#ffffff" },
+            ]}
+            onPress={() => {}}
+          >
+            {/* Handle */}
+            <View style={tw`items-center mb-4`}>
+              <View
+                style={[
+                  tw`h-1 w-10 rounded-full`,
+                  { backgroundColor: "#008080" },
+                ]}
+              />
+            </View>
+
+            {/* Year stepper */}
+            <View style={tw`flex-row items-center justify-center gap-5 mb-5`}>
               <Pressable
                 disabled={!canDecYear}
                 onPress={() =>
                   setSelectedYear((y) => Math.max(MIN_YEAR, y - 1))
                 }
                 style={({ pressed }) => [
-                  tw`px-4 py-2 rounded-full border border-gray-200`,
-                  (!canDecYear || pressed) && { opacity: 0.6 },
+                  tw`h-9 w-9 rounded-full items-center justify-center border`,
+                  { borderColor: "#e2e8f0", backgroundColor: "#fff" },
+                  (!canDecYear || pressed) && { opacity: 0.4 },
                 ]}
               >
-                <Text style={tw`font-semibold text-gray-800`}>- Year</Text>
+                <Text style={[tw`font-bold text-base`, { color: "#1F2937" }]}>
+                  ‹
+                </Text>
               </Pressable>
 
-              <Text style={tw`text-lg font-bold text-gray-800`}>
-                {selectedYear}
-              </Text>
-
-              <Pressable
-                disabled={!canIncYear}
-                onPress={() =>
-                  setSelectedYear((y) => Math.min(MAX_YEAR, y + 1))
-                }
-                style={({ pressed }) => [
-                  tw`px-4 py-2 rounded-full border border-gray-200`,
-                  (!canIncYear || pressed) && { opacity: 0.6 },
+              <Text
+                style={[
+                  tw`text-lg font-bold w-16 text-center`,
+                  { color: "#1F2937" },
                 ]}
               >
-                <Text style={tw`font-semibold text-gray-800`}>+ Year</Text>
+                {selectedYear}
+              </Text>
+              <Pressable
+                disabled={!canIncYear}
+                onPress={() => {
+                  const newYear = Math.min(MAX_YEAR, selectedYear + 1);
+                  setSelectedYear(newYear);
+                  const now = new Date();
+                  if (
+                    newYear === now.getFullYear() &&
+                    selectedMonthIndex > now.getMonth()
+                  ) {
+                    setSelectedMonthIndex(now.getMonth());
+                  }
+                }}
+                style={({ pressed }) => [
+                  tw`h-9 w-9 rounded-full items-center justify-center border`,
+                  { borderColor: "#e2e8f0", backgroundColor: "#fff" },
+                  (!canIncYear || pressed) && { opacity: 0.4 },
+                ]}
+              >
+                <Text style={[tw`font-bold text-base`, { color: "#1F2937" }]}>
+                  ›
+                </Text>
               </Pressable>
             </View>
 
-            <View style={tw`flex-row flex-wrap justify-between`}>
+            {/* 3-col Month grid */}
+            <View style={tw`flex-row flex-wrap gap-2 mb-5`}>
               {MONTHS.map((m, idx) => {
-                const active = idx === selectedMonthIndex;
+                const now = new Date();
+                const currentYear = now.getFullYear();
+                const currentMonth = now.getMonth();
+
+                const isFuture =
+                  selectedYear === currentYear && idx > currentMonth;
+
+                // ✅ isActive can never be true for a future month
+                const isActive = idx === selectedMonthIndex && !isFuture;
+
+                const isCurrent =
+                  idx === currentMonth && selectedYear === currentYear;
+
                 return (
                   <Pressable
                     key={m}
+                    disabled={isFuture}
                     onPress={() => {
                       setSelectedMonthIndex(idx);
                       setMonthModalOpen(false);
                     }}
                     style={({ pressed }) => [
-                      tw`w-[48%] mb-3 px-4 py-3 rounded-2xl border`,
-                      active
-                        ? tw`bg-purple-100 border-purple-200`
-                        : tw`bg-white border-gray-200`,
-                      pressed && { opacity: 0.85 },
+                      tw`py-3 rounded-2xl items-center justify-center`,
+                      { width: "31%" },
+                      isActive
+                        ? { backgroundColor: "#008080" }
+                        : isCurrent
+                          ? {
+                              backgroundColor: "#FFFBEB",
+                              borderWidth: 1.5,
+                              borderColor: "#FFC107",
+                            }
+                          : isFuture
+                            ? { backgroundColor: "#F9FAFB" }
+                            : { backgroundColor: "#F3F4F6" },
+                      pressed && !isFuture && { opacity: 0.8 },
                     ]}
                   >
-                    <Text style={tw`text-gray-800 font-semibold`}>{m}</Text>
+                    <Text
+                      style={[
+                        tw`text-sm font-semibold text-center`,
+                        isActive
+                          ? { color: "#ffffff" }
+                          : isFuture
+                            ? { color: "#CBD5E1" }
+                            : { color: "#1F2937" },
+                      ]}
+                    >
+                      {m}
+                    </Text>
                   </Pressable>
                 );
               })}
             </View>
 
+            {/* Done */}
             <Pressable
               onPress={() => setMonthModalOpen(false)}
               style={({ pressed }) => [
-                tw`mt-2 px-4 py-3 rounded-2xl bg-gray-100 items-center`,
+                tw`py-4 rounded-full items-center`,
+                { backgroundColor: "#FFC107" },
                 pressed && { opacity: 0.85 },
               ]}
             >
-              <Text style={tw`font-semibold text-gray-800`}>Close</Text>
+              <Text style={[tw`font-bold text-base`, { color: "#1F2937" }]}>
+                Done
+              </Text>
             </Pressable>
           </Pressable>
         </Pressable>

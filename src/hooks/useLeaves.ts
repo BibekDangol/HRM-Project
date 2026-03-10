@@ -1,4 +1,8 @@
-import { Leave, LeaveStatus, fetchLeaveRequests } from "@/src/services/leave.service";
+import {
+  fetchLeaveRequests,
+  Leave,
+  LeaveStatus,
+} from "@/src/services/leave.service";
 import { useCallback, useEffect, useState } from "react";
 
 import { useUsersStore } from "@/src/store/useUsersStore";
@@ -16,7 +20,6 @@ export function useLeaves() {
       const data = await fetchLeaveRequests(userProfile.organization_id);
       setLeaves(data);
     } catch (err) {
-      console.log("Error fetching leaves:", err);
     } finally {
       setLoading(false);
     }
@@ -34,6 +37,5 @@ export function useLeaves() {
 
   const filteredByStatus = (status: LeaveStatus) =>
     leaves.filter((l) => l.status === status);
-console.log("leaves from useleaves hook>>",leaves, filteredByStatus);
   return { leaves, loading, refreshing, onRefresh, filteredByStatus };
 }

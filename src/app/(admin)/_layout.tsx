@@ -1,7 +1,7 @@
 import { Tabs, usePathname, useRouter } from "expo-router";
 import { ArrowLeft, User } from "lucide-react-native";
 import { useCallback, useEffect } from "react";
-import { Image, Pressable, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 
 import { adminTabs } from "@/src/config/adminTabs";
 import { useAdminHeaderMenu } from "@/src/hooks/useAdminHeaderMenu";
@@ -10,7 +10,8 @@ import ProfileMenu from "@/src/screens/admin/components/ProfileMenu";
 import { fetchCurrentUserProfleService } from "@/src/services/currentuser.service";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { useUsersStore } from "@/src/store/useUsersStore";
-import tw from "twrnc";
+
+const PRIMARY = "#008080";
 
 export default function AdminLayout() {
   const router = useRouter();
@@ -24,48 +25,91 @@ export default function AdminLayout() {
     const profile = await fetchCurrentUserProfleService(user?.id);
     setUserProfile(profile);
   }, [user?.id, setUserProfile, userProfile]);
+
   useEffect(() => {
     fetchUserProfile();
   }, [fetchUserProfile, loading]);
+
+  // true when we're on a non-tab route like profile
   const showBackButton = !adminTabs.some((tab) => pathname?.includes(tab.name));
+
   return (
     <Tabs
       screenOptions={{
+        headerShown: true,
         headerShadowVisible: false,
+        headerStyle: { backgroundColor: PRIMARY },
+        headerTitleAlign: "center",
+
+        // 👇 re-evaluated on every render because AdminLayout re-renders on pathname change
         headerLeft: showBackButton
           ? () => (
-              <Pressable style={tw`ml-4`} onPress={() => router.back()}>
-                <ArrowLeft size={24} />
+              <Pressable
+                onPress={() => router.back()}
+                style={{
+                  marginLeft: 16,
+                  height: 36,
+                  width: 36,
+                  borderRadius: 12,
+                  backgroundColor: "rgba(255,255,255,0.2)",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <ArrowLeft size={20} color="#ffffff" />
               </Pressable>
             )
-          : undefined,
+          : () => null, // 👈 always a function — avoids stale cached value
 
-        headerTitle: ({ children }) => (
-          <View style={tw`flex-row items-center gap-4`}>
-            <Image
-              style={{ width: 30, height: 30, borderRadius: 14 }}
-              source={{
-                uri: "https://picsum.photos/200/300",
+        headerTitle: () => (
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+            <View
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: 12,
+                backgroundColor: "rgba(255,255,255,0.2)",
+                alignItems: "center",
+                justifyContent: "center",
               }}
-            />
-            <Text style={tw`font-semibold text-md`}>
-              {userProfile?.first_name}
+            >
+              <Text
+                style={{ color: "#ffffff", fontSize: 13, fontWeight: "700" }}
+              >
+                {userProfile?.first_name?.charAt(0)?.toUpperCase() ?? "A"}
+              </Text>
+            </View>
+            <Text style={{ color: "#ffffff", fontSize: 16, fontWeight: "700" }}>
+              {userProfile?.first_name ?? "Admin"}
             </Text>
           </View>
         ),
 
         headerRight: () => (
-          <View style={tw`mr-4`}>
-            <Pressable onPress={menu.toggle}>
-              <View
-                style={tw`w-9 h-9 rounded-full bg-white border border-[#E5E5E5] items-center justify-center`}
-              >
-                <User size={18} />
-              </View>
+          <View style={{ marginRight: 16, position: "relative" }}>
+            <Pressable
+              onPress={menu.toggle}
+              style={({ pressed }) => ({
+                height: 36,
+                width: 36,
+                borderRadius: 18,
+                backgroundColor: "rgba(255,255,255,0.15)",
+                borderWidth: 2,
+                borderColor: "rgba(255,255,255,0.5)",
+                alignItems: "center",
+                justifyContent: "center",
+                opacity: pressed ? 0.75 : 1,
+              })}
+            >
+              <User size={17} color="#ffffff" />
             </Pressable>
+
             <ProfileMenu
               open={menu.open}
-              onProfile={() => router.push("/(admin)/profile")}
+              onProfile={() => {
+                menu.close?.();
+                router.push("/(admin)/profile");
+              }}
               onLogout={menu.logout}
             />
           </View>

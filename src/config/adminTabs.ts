@@ -1,30 +1,25 @@
-import {
-  CalendarDays,
-  Home,
-  MoreHorizontal,
-  Users,
-} from "lucide-react-native";
+import { CalendarDays, Home, Menu, Users } from "lucide-react-native";
 
 export const adminTabs = [
   {
     name: "dashboard",
-    title: "Dashboard",
+    title: "Home",
     icon: Home,
   },
   {
     name: "manage-users",
-    title: "Manage Users",
+    title: "Users",
     icon: Users,
   },
   {
     name: "leave",
-    title: "Leave Requests",
+    title: "Leaves",
     icon: CalendarDays,
   },
   {
     name: "more",
     title: "More",
-    icon: MoreHorizontal,
+    icon: Menu,
   },
 ] as const;
 export type AdminTabName = (typeof adminTabs)[number]["name"];
