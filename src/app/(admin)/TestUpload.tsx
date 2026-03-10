@@ -78,7 +78,6 @@ const TestUpload = () => {
 
       Alert.alert("Success", "File uploaded successfully 🎉");
     } catch (error: any) {
-      console.log(error);
       Alert.alert("Error", error.message || "Something went wrong");
     } finally {
       setLoading(false);

@@ -25,7 +25,6 @@ const AttendanceUserList = () => {
       );
       setUsers(usersData);
     } catch (err) {
-      console.error("Error loading users:", err);
     }
   }, [userProfile?.id, userProfile?.organization_id, search]);
 

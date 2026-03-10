@@ -10,9 +10,10 @@ type Props = {
   user: UserProfile;
   onEdit?: (user: UserProfile) => void;
   onDelete?: (id: string) => void;
+  getSupervisorName: (supervisorId?: string | null) => string; 
 };
 
-const UserCard = ({ user, onEdit, onDelete }: Props) => {
+const UserCard = ({ user, onEdit, onDelete, getSupervisorName  }: Props) => {
   return (
     <View style={tw`flex-row justify-between bg-white border border-slate-100 rounded-2xl px-4 py-4`}>
       <View style={tw`flex-col gap-1`}>

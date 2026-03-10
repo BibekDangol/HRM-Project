@@ -2,16 +2,18 @@ import { PlatformPressable } from "@react-navigation/elements";
 import { useLinkBuilder } from "@react-navigation/native";
 import { CalendarDays, House, LucideIcon, Menu } from "lucide-react-native";
 import React, { useEffect, useRef } from "react";
-import { Animated, Dimensions, Platform, Text, View } from "react-native";
+import { Animated, Platform, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-/* ─── Theme ─────────────────────────────────────────────── */
-const ACTIVE_COLOR = "#1b4a5a";
+const ACTIVE_COLOR = "#008080";
 const INACTIVE_COLOR = "#9CA3AF";
-const PILL_H = 56; // taller to fit icon + label stacked
+const PILL_H = 56;
 const H_PADDING = 16;
+const TRAY_PADDING = 4;
+const PILL_RADIUS = 16;
+const ICON_SIZE = 22;
+const TAB_W = 100;
 
-/* ─── Tab config ─────────────────────────────────────────── */
 type TabCfg = { icon: LucideIcon; label: string };
 
 const tabConfig: Record<string, TabCfg> = {
@@ -20,7 +22,6 @@ const tabConfig: Record<string, TabCfg> = {
   more: { icon: Menu, label: "More" },
 };
 
-/* ─── Component ──────────────────────────────────────────── */
 export function MyTabBar({ state, descriptors, navigation }: any) {
   const { buildHref } = useLinkBuilder();
   const insets = useSafeAreaInsets();
@@ -31,26 +32,30 @@ export function MyTabBar({ state, descriptors, navigation }: any) {
   });
 
   const tabCount = visibleRoutes.length;
-  const screenW = Dimensions.get("window").width;
-  const innerW = screenW - H_PADDING * 2;
-  const tabW = innerW / tabCount;
+  const trayW = tabCount * TAB_W + TRAY_PADDING * 2;
 
-  /* ── Pill position animation ── */
+  // -1 when active route is not in tabConfig (e.g. profile page)
   const focusedIdx = visibleRoutes.findIndex(
     (r: any) => r.key === state.routes[state.index]?.key,
   );
 
-  const pillX = useRef(new Animated.Value(focusedIdx * tabW)).current;
+  // Only animate when we have a valid tab — freeze pill otherwise
+  const pillTarget = focusedIdx >= 0 ? focusedIdx * TAB_W : null;
+
+  const pillX = useRef(
+    new Animated.Value(focusedIdx >= 0 ? focusedIdx * TAB_W : 0),
+  ).current;
 
   useEffect(() => {
+    if (pillTarget === null) return; // frozen when on non-tab route
     Animated.spring(pillX, {
-      toValue: focusedIdx * tabW,
+      toValue: pillTarget,
       useNativeDriver: true,
       damping: 18,
       stiffness: 200,
       mass: 0.8,
     }).start();
-  }, [focusedIdx, tabW]);
+  }, [pillTarget]);
 
   const bottomPad = Math.max(insets.bottom, 8);
 
@@ -81,45 +86,48 @@ export function MyTabBar({ state, descriptors, navigation }: any) {
         paddingHorizontal: H_PADDING,
         paddingTop: 8,
         paddingBottom: bottomPad,
+        alignItems: "center",
       }}
     >
-      {/* ── Pill tray ── */}
       <View
         style={[
           {
             flexDirection: "row",
             backgroundColor: "#F3F4F6",
             borderRadius: 20,
-            padding: 4,
+            padding: TRAY_PADDING,
             position: "relative",
-            height: PILL_H + 8,
+            height: PILL_H + TRAY_PADDING * 2,
+            width: trayW,
           },
           trayShadow,
         ]}
       >
-        {/* Sliding white pill */}
+        {/* Sliding pill */}
         <Animated.View
           style={[
             {
               position: "absolute",
-              top: 4,
-              left: 4,
-              width: tabW - 8,
+              top: TRAY_PADDING,
+              left: TRAY_PADDING,
+              width: TAB_W - TRAY_PADDING * 2,
               height: PILL_H,
               backgroundColor: "#FFFFFF",
-              borderRadius: 16,
+              borderRadius: PILL_RADIUS,
               transform: [{ translateX: pillX }],
             },
             pillShadow,
           ]}
         />
 
-        {/* Tabs */}
         {visibleRoutes.map((route: any) => {
-          const isFocused = state.routes[state.index]?.key === route.key;
+          // No tab is "active" when on a non-tab route like profile
+          const isFocused =
+            focusedIdx >= 0 && state.routes[state.index]?.key === route.key;
 
           const cfg = tabConfig[route.name];
           const Icon = cfg.icon;
+          const color = isFocused ? ACTIVE_COLOR : INACTIVE_COLOR;
 
           const onPress = () => {
             const event = navigation.emit({
@@ -136,8 +144,6 @@ export function MyTabBar({ state, descriptors, navigation }: any) {
             navigation.emit({ type: "tabLongPress", target: route.key });
           };
 
-          const color = isFocused ? ACTIVE_COLOR : INACTIVE_COLOR;
-
           return (
             <PlatformPressable
               key={route.key}
@@ -148,17 +154,17 @@ export function MyTabBar({ state, descriptors, navigation }: any) {
               onPress={onPress}
               onLongPress={onLongPress}
               style={{
-                flex: 1,
+                width: TAB_W,
                 alignItems: "center",
                 justifyContent: "center",
-                flexDirection: "column", // ← stacked layout
+                flexDirection: "column",
                 gap: 3,
                 zIndex: 1,
                 height: PILL_H,
               }}
             >
               <Icon
-                size={20}
+                size={ICON_SIZE}
                 color={color}
                 strokeWidth={isFocused ? 2.2 : 1.8}
               />
@@ -180,3 +186,4 @@ export function MyTabBar({ state, descriptors, navigation }: any) {
     </View>
   );
 }
+ 

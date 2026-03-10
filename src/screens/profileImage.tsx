@@ -50,7 +50,6 @@ export default function UploadAvatar({
       onUploadComplete?.(uploadResponse.Location);
       Alert.alert("Success", "Image uploaded successfully!");
     } catch (error: any) {
-      console.log("Upload Error:", error);
       Alert.alert("Error", error.message || "Upload failed");
     } finally {
       setLoading(false);
