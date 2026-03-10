@@ -410,7 +410,7 @@ export default function UsersTabsLayout() {
                 tw`rounded-t-3xl px-5 pt-4 pb-10`,
                 { backgroundColor: TW.bgPrimary },
               ]}
-              onPress={() => {}}
+              onPress={() => { }}
             >
               {/* Handle — TW.bgSecondary teal */}
               <View style={tw`items-center mb-5`}>
@@ -535,7 +535,6 @@ export default function UsersTabsLayout() {
                   style={({ pressed }) => [
                     tw`h-8 w-8 rounded-full items-center justify-center`,
                     {
-                      backgroundColor: "rgba(255,255,255,0.2)",
                       opacity: pressed || isLocked ? 0.7 : 1,
                     },
                   ]}

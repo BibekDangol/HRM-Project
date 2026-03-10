@@ -1,3 +1,6 @@
+import { Eye, EyeOff } from "lucide-react-native";
+import React, { useState } from "react";
+import { Controller, useForm } from "react-hook-form";
 import {
   Alert,
   Keyboard,
@@ -10,18 +13,15 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
-import { Controller, useForm } from "react-hook-form";
-import { Eye, EyeOff } from "lucide-react-native";
-import React, { useState } from "react";
 
 import Logo from "@/src/components/Logo";
-import { TW } from "@/theme/twStyles";
 import { loginSchema } from "@/src/schema/auth";
-import tw from "twrnc";
 import { useAuthStore } from "@/src/store/useAuthStore";
-import { useRouter } from "expo-router";
-import { z } from "zod";
+import { TW } from "@/theme/twStyles";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "expo-router";
+import tw from "twrnc";
+import { z } from "zod";
 
 type FormData = z.infer<typeof loginSchema>;
 
@@ -81,9 +81,9 @@ const LoginScreen = () => {
           >
             <Logo />
 
-            <View style={tw`text-center items-center flex flex-col gap-1 mt-4`}>
+            <View style={tw`text-center items-center flex flex-col gap-1`}>
               <Text style={tw`font-bold text-3xl ${TW.textPrimary}`}>
-                TechHaus HRM
+                TechHaus
               </Text>
               <Text style={tw`text-lg ${TW.textSecondary}`}>
                 Streamlining your workforce management
@@ -180,12 +180,12 @@ const LoginScreen = () => {
                 style={[
                   tw`py-4 px-2 rounded-xl items-center justify-center ${TW.bgAction}`,
                   isSubmitting ? tw`opacity-90` : tw`opacity-100`,
-                  { elevation: 1 },
+
                 ]}
                 onPress={handleSubmit(onValidSubmit)}
                 disabled={isSubmitting}
               >
-                <Text style={tw`text-lg font-semibold ${TW.textPrimary}`}>
+                <Text style={tw`text-lg font-semibold ${TW.textButton}`}>
                   {isSubmitting ? "Logging in..." : "Login"}
                 </Text>
               </TouchableOpacity>
