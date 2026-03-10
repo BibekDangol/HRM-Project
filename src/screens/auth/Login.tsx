@@ -14,8 +14,10 @@ import {
   View,
 } from "react-native";
 
+import Logo from "@/src/components/Logo";
 import { loginSchema } from "@/src/schema/auth";
 import { useAuthStore } from "@/src/store/useAuthStore";
+import { TW } from "@/theme/twStyles";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
 import tw from "twrnc";
@@ -65,133 +67,139 @@ const LoginScreen = () => {
   const onValidSubmit = () => handleLogin();
 
   return (
-    <View style={tw`flex-1 bg-[#F5F5F5]`}>
+    <View style={tw`flex-1 ${TW.bgPrimary} justify-center`}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
         <KeyboardAvoidingView
-          style={tw`flex-1`}
+          style={tw``}
           behavior={Platform.OS === "ios" ? "padding" : undefined}
         >
           <ScrollView
-            contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}
-            style={tw`px-6`}
+            contentContainerStyle={tw`flex-grow justify-center`}
+            style={tw`mx-8`}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
           >
-            <Text
-              style={tw`text-[32px] font-bold text-center text-[#1F7A4D] mb-8`}
-            >
-              Welcome
-            </Text>
+            <Logo />
 
-            {/* EMAIL */}
-            <Controller
-              control={control}
-              name="email"
-              render={({ field: { value, onChange } }) => (
-                <View style={tw`mb-3`}>
-                  <Text
-                    style={tw`text-[14px] font-semibold text-[#6E6F71] mb-1.5`}
-                  >
-                    E-mail
-                  </Text>
+            <View style={tw`text-center items-center flex flex-col gap-1 mt-4`}>
+              <Text style={tw`font-bold text-3xl ${TW.textPrimary}`}>
+                TechHaus HRM
+              </Text>
+              <Text style={tw`text-lg ${TW.textSecondary}`}>
+                Streamlining your workforce management
+              </Text>
+            </View>
 
-                  <TextInput
-                    style={tw`h-[52px] bg-white rounded-xl px-4 text-[16px]`}
-                    placeholder="example@gmail.com"
-                    placeholderTextColor="#dcdada"
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                    value={value}
-                    onChangeText={(text) => {
-                      onChange(text);
-                      setEmail(text);
-                    }}
-                  />
-
-                  {errors.email && (
-                    <Text style={tw`text-[#FF6B6B] text-[13px] mt-2 ml-1`}>
-                      {errors.email.message}
+            <View style={tw`flex flex-col gap-8 mt-8 w-full`}>
+              {/* EMAIL */}
+              <Controller
+                control={control}
+                name="email"
+                render={({ field: { value, onChange } }) => (
+                  <View style={tw`mb-3`}>
+                    <Text
+                      style={tw`${TW.textSecondary} font-semibold mb-2`}
+                    >
+                      E-mail
                     </Text>
-                  )}
-                </View>
-              )}
-            />
 
-            {/* PASSWORD */}
-            <Controller
-              control={control}
-              name="password"
-              render={({ field: { value, onChange } }) => (
-                <View style={tw`mb-2`}>
-                  <Text
-                    style={tw`text-[14px] font-semibold text-[#6E6F71] mb-1.5`}
-                  >
-                    Password
-                  </Text>
-
-                  <View
-                    style={tw`h-[52px] bg-white rounded-xl px-4 flex-row items-center`}
-                  >
                     <TextInput
-                      style={tw`flex-1 text-[16px]`}
-                      placeholder="Enter your password"
+                      style={tw`py-5 px-2 ${TW.bgButton} rounded-lg`}
+                      placeholder="example@gmail.com"
                       placeholderTextColor="#dcdada"
-                      secureTextEntry={!showPassword}
+                      keyboardType="email-address"
+                      autoCapitalize="none"
                       value={value}
                       onChangeText={(text) => {
                         onChange(text);
-                        setPassword(text);
+                        setEmail(text);
                       }}
                     />
 
-                    <TouchableOpacity onPress={toggleShowPassword} hitSlop={10}>
-                      {showPassword ? (
-                        <EyeOff size={22} color="#888" />
-                      ) : (
-                        <Eye size={22} color="#888" />
-                      )}
-                    </TouchableOpacity>
+                    {errors.email && (
+                      <Text style={tw`text-[#FF6B6B] text-[13px] mt-2 ml-1`}>
+                        {errors.email.message}
+                      </Text>
+                    )}
                   </View>
-
-                  {errors.password && (
-                    <Text style={tw`text-[#FF6B6B] text-[13px] mt-2 ml-1`}>
-                      {errors.password.message}
+                )}
+              />
+              {/* PASSWORD */}
+              <Controller
+                control={control}
+                name="password"
+                render={({ field: { value, onChange } }) => (
+                  <View style={tw``}>
+                    <Text
+                      style={tw`${TW.textSecondary} font-semibold mb-2`}
+                    >
+                      Password
                     </Text>
-                  )}
-                </View>
-              )}
-            />
 
+                    <View
+                      style={tw`${TW.bgButton} rounded-lg flex-row items-center`}
+                    >
+                      <TextInput
+                        style={tw`flex-1 py-5 px-2`}
+                        placeholder="Enter your password"
+                        placeholderTextColor="#dcdada"
+                        secureTextEntry={!showPassword}
+                        value={value}
+                        onChangeText={(text) => {
+                          onChange(text);
+                          setPassword(text);
+                        }}
+                      />
+
+                      <TouchableOpacity onPress={toggleShowPassword} hitSlop={10} style={tw`pr-2`}>
+                        {showPassword ? (
+                          <EyeOff size={22} color="#888" />
+                        ) : (
+                          <Eye size={22} color="#888" />
+                        )}
+                      </TouchableOpacity>
+                    </View>
+
+                    {errors.password && (
+                      <Text style={tw`text-[#FF6B6B] text-[13px] mt-2 ml-1`}>
+                        {errors.password.message}
+                      </Text>
+                    )}
+                  </View>
+                )}
+              />
+            </View>
             {/* Forgot Password */}
             <TouchableOpacity style={tw`mt-2`}>
-              <Text style={tw`text-right text-[#1F7A4D] font-semibold`}>
+              <Text style={tw`text-right ${TW.textPrimary} font-semibold`}>
                 Forgot Password?
               </Text>
             </TouchableOpacity>
-
-            {/* Login Button */}
-            <TouchableOpacity
-              style={[
-                tw`h-[52px] rounded-xl items-center justify-center mt-4 bg-[#1F7A4D]`,
-                isSubmitting ? tw`opacity-70` : tw`opacity-100`,
-                { elevation: 4 },
-              ]}
-              onPress={handleSubmit(onValidSubmit)}
-              disabled={isSubmitting}
-            >
-              <Text style={tw`text-white text-[18px] font-semibold`}>
-                {isSubmitting ? "Logging in..." : "Login"}
-              </Text>
-            </TouchableOpacity>
-
-            {/* Signup Row */}
-            <View style={tw`flex-row justify-center mt-6`}>
-              <Text style={tw`text-[14px] text-[#1D1D1D]`}>
-                Dont have an account?{" "}
-              </Text>
-              <TouchableOpacity onPress={() => router.push("/(auth)/signup")}>
-                <Text style={tw`text-[#1F7A4D] font-semibold`}>Sign up</Text>
+            <View style={tw`flex-col justify-between gap-8 mt-8 w-full`}>
+              {/* Login Button */}
+              <TouchableOpacity
+                style={[
+                  tw`py-4 px-2 rounded-xl items-center justify-center ${TW.bgAction}`,
+                  isSubmitting ? tw`opacity-90` : tw`opacity-100`,
+                  { elevation: 1 },
+                ]}
+                onPress={handleSubmit(onValidSubmit)}
+                disabled={isSubmitting}
+              >
+                <Text style={tw`text-lg font-semibold ${TW.textPrimary}`}>
+                  {isSubmitting ? "Logging in..." : "Login"}
+                </Text>
               </TouchableOpacity>
+
+              {/* Signup Row */}
+              <View style={tw`flex-row gap-2 justify-center`}>
+                <Text style={tw`text-sm ${TW.textPrimary}`}>
+                  Dont have an account?
+                </Text>
+                <TouchableOpacity onPress={() => router.push("/(auth)/signup")}>
+                  <Text style={tw`${TW.textPrimary} font-semibold`}>Sign up</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </ScrollView>
         </KeyboardAvoidingView>

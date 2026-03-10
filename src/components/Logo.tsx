@@ -1,21 +1,24 @@
-import { Text, View } from "react-native";
+import { Image, View } from "react-native";
 
 import React from "react";
-import { TW } from "@/theme/twStyles";
 import tw from "twrnc";
 
-const Logo = ({ size = 60 }) => {
+const Logo = () => {
   return (
     <View style={tw`items-center justify-center mb-2`}>
       <View
         style={[
-          tw`${TW.bgAction}/80 items-center justify-center rounded-lg`,
-          { width: size, height: size },
+          tw`items-center justify-center rounded-lg`,
+
         ]}
       >
-        <Text style={tw`text-white text-lg font-bold`}>
-          TH
-        </Text>
+        <View style={tw`w-24 h-24 mb-8`}>
+          <Image
+            source={require('../assets/images/icon.png')} // local asset
+            style={tw`w-full h-full rounded-xl`}             // use numbers for Image
+            resizeMode="cover"                          // scale image fully
+          />
+        </View>
       </View>
     </View>
   );
