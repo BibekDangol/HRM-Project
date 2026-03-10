@@ -74,7 +74,7 @@ const LoginScreen = () => {
           behavior={Platform.OS === "ios" ? "padding" : undefined}
         >
           <ScrollView
-            contentContainerStyle={tw`flex-grow justify-center`}
+            contentContainerStyle={tw`flex-grow justify-start`}
             style={tw`mx-8`}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
@@ -90,7 +90,7 @@ const LoginScreen = () => {
               </Text>
             </View>
 
-            <View style={tw`flex flex-col gap-8 mt-8 w-full`}>
+            <View style={tw`flex flex-col gap-4 mt-8 w-full`}>
               {/* EMAIL */}
               <Controller
                 control={control}
@@ -102,7 +102,6 @@ const LoginScreen = () => {
                     >
                       E-mail
                     </Text>
-
                     <TextInput
                       style={tw`py-5 px-2 ${TW.bgButton} rounded-lg`}
                       placeholder="example@gmail.com"
@@ -117,7 +116,7 @@ const LoginScreen = () => {
                     />
 
                     {errors.email && (
-                      <Text style={tw`text-[#FF6B6B] text-[13px] mt-2 ml-1`}>
+                      <Text style={tw`text-[#FF6B6B] text-[13px] mt-1 ml-1 min-h-[18px]`}>
                         {errors.email.message}
                       </Text>
                     )}
@@ -161,7 +160,7 @@ const LoginScreen = () => {
                     </View>
 
                     {errors.password && (
-                      <Text style={tw`text-[#FF6B6B] text-[13px] mt-2 ml-1`}>
+                      <Text style={tw`text-[#FF6B6B] text-[13px] mt-1 ml-1 min-h-[18px]`}>
                         {errors.password.message}
                       </Text>
                     )}
@@ -197,7 +196,7 @@ const LoginScreen = () => {
                   Dont have an account?
                 </Text>
                 <TouchableOpacity onPress={() => router.push("/(auth)/signup")}>
-                  <Text style={tw`${TW.textPrimary} font-semibold`}>Sign up</Text>
+                  <Text style={tw`${TW.textPrimary} font-semibold  underline`}>Sign up</Text>
                 </TouchableOpacity>
               </View>
             </View>

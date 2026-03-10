@@ -81,13 +81,13 @@ export default function SignupScreen() {
           style={tw`flex-1`}
         >
           <ScrollView
-            contentContainerStyle={tw`flex-grow justify-center`}
-            style={tw`mx-8 mt-8`}
+            contentContainerStyle={tw`flex-grow justify-start`}
+            style={tw`mx-8 my-8`}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
           >
             {/* TITLE */}
-            <View style={tw`items-center mb-8`}>
+            <View style={tw`items-center mb-8 mt-12`}>
               <Text style={tw`font-bold text-3xl ${TW.textPrimary}`}>
                 Create Organization
               </Text>
@@ -118,7 +118,7 @@ export default function SignupScreen() {
                       placeholderTextColor="#dcdada"
                     />
                     {errors.firstName && (
-                      <Text style={tw`text-[#FF6B6B] text-[13px] mt-1 ml-1`}>
+                      <Text style={tw`text-[#FF6B6B] text-[13px] mt-1 ml-1 min-h-[18px]`}>
                         {errors.firstName.message}
                       </Text>
                     )}
@@ -146,7 +146,7 @@ export default function SignupScreen() {
                       placeholderTextColor="#dcdada"
                     />
                     {errors.lastName && (
-                      <Text style={tw`text-[#FF6B6B] text-[13px] mt-1 ml-1`}>
+                      <Text style={tw`text-[#FF6B6B] text-[13px] mt-1 ml-1 min-h-[18px]`}>
                         {errors.lastName.message}
                       </Text>
                     )}
@@ -174,7 +174,7 @@ export default function SignupScreen() {
                       placeholderTextColor="#dcdada"
                     />
                     {errors.organizationName && (
-                      <Text style={tw`text-[#FF6B6B] text-[13px] mt-1 ml-1`}>
+                      <Text style={tw`text-[#FF6B6B] text-[13px] mt-1 ml-1 min-h-[18px]`}>
                         {errors.organizationName.message}
                       </Text>
                     )}
@@ -204,7 +204,7 @@ export default function SignupScreen() {
                       placeholderTextColor="#dcdada"
                     />
                     {errors.email && (
-                      <Text style={tw`text-[#FF6B6B] text-[13px] mt-1 ml-1`}>
+                      <Text style={tw`text-[#FF6B6B] text-[13px] mt-1 ml-1 min-h-[18px]`}>
                         {errors.email.message}
                       </Text>
                     )}
@@ -233,7 +233,7 @@ export default function SignupScreen() {
                       placeholderTextColor="#dcdada"
                     />
                     {errors.password && (
-                      <Text style={tw`text-[#FF6B6B] text-[13px] mt-1 ml-1`}>
+                      <Text style={tw`text-[#FF6B6B] text-[13px] mt-1 ml-1 min-h-[18px]`}>
                         {errors.password.message}
                       </Text>
                     )}
@@ -262,7 +262,7 @@ export default function SignupScreen() {
                       placeholderTextColor="#dcdada"
                     />
                     {errors.confirmPassword && (
-                      <Text style={tw`text-[#FF6B6B] text-[13px] mt-1 ml-1`}>
+                      <Text style={tw`text-[#FF6B6B] text-[13px] mt-1 ml-1 min-h-[18px]`}>
                         {errors.confirmPassword.message}
                       </Text>
                     )}
