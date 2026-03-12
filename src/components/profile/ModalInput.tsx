@@ -1,6 +1,6 @@
+import { TW } from "@/theme/twStyles";
 import React from "react";
 import { Text, TextInput, View } from "react-native";
-import { TW } from "@/theme/twStyles";
 
 type Props = {
   label: string;
@@ -25,7 +25,7 @@ export default function ModalInput({
         style={{
           fontSize: 11,
           fontWeight: "700",
-          color: TW.textSecondary,
+          color: "#6B7280",
           letterSpacing: 0.8,
           textTransform: "uppercase",
           marginBottom: 7,
@@ -43,13 +43,13 @@ export default function ModalInput({
         style={{
           backgroundColor: error ? "#FEF2F2" : TW.BORDER,
           borderWidth: 1,
-          borderColor: error ? TW.DANGER : TW.BORDER,
+          borderColor: error ? "#6B7280" : "#6B7280",
           borderRadius: 12,
           paddingHorizontal: 14,
           paddingVertical: 13,
           fontSize: 15,
           fontWeight: "500",
-          color: TW.bgSecondary,
+          color: TW.textPrimary,
         }}
       />
 

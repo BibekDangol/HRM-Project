@@ -1,4 +1,9 @@
+import { ProfileData } from "@/src/types/profile.types";
+import { FormInput, FormOutput } from "@/src/types/user";
+import { TW } from "@/theme/twStyles";
+import { Lock, X } from "lucide-react-native";
 import React from "react";
+import { Control, Controller, FieldErrors } from "react-hook-form";
 import {
   KeyboardAvoidingView,
   Modal,
@@ -7,12 +12,7 @@ import {
   Text,
   View,
 } from "react-native";
-import { Controller, Control, FieldErrors } from "react-hook-form";
-import { Lock, X } from "lucide-react-native";
-import { TW } from "@/theme/twStyles";
 import ModalInput from "./ModalInput";
-import { FormInput, FormOutput } from "@/src/types/user";
-import { ProfileData } from "@/src/types/profile.types";
 
 type Props = {
   visible: boolean;
@@ -139,7 +139,7 @@ export default function EditProfileModal({
               style={{
                 fontSize: 11,
                 fontWeight: "700",
-                color: TW.textSecondary,
+                color: "#6B7280",
                 letterSpacing: 0.8,
                 textTransform: "uppercase",
                 marginBottom: 7,
@@ -155,16 +155,20 @@ export default function EditProfileModal({
                 gap: 9,
                 backgroundColor: TW.BORDER,
                 borderWidth: 1,
-                borderColor: TW.BORDER,
+                borderColor: "#6B7280",
                 borderRadius: 12,
                 paddingHorizontal: 14,
                 paddingVertical: 13,
                 marginBottom: 24,
               }}
             >
-              <Lock size={13} color={TW.faint} strokeWidth={1.8} />
+              <Lock size={13} color={TW.bgSecondary} strokeWidth={1.8} />
               <Text
-                style={{ fontSize: 15, fontWeight: "500", color: TW.faint }}
+                style={{
+                  fontSize: 15,
+                  fontWeight: "500",
+                  color: TW.textPrimary,
+                }}
               >
                 {profile?.email ?? "—"}
               </Text>
