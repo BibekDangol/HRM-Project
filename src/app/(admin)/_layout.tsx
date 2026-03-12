@@ -1,7 +1,8 @@
 import { Tabs, usePathname, useRouter } from "expo-router";
 import { ArrowLeft, User } from "lucide-react-native";
 import { useCallback, useEffect } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, Text, View, useWindowDimensions } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { adminTabs } from "@/src/config/adminTabs";
 import { useAdminHeaderMenu } from "@/src/hooks/useAdminHeaderMenu";
@@ -20,6 +21,26 @@ export default function AdminLayout() {
   const { user, loading } = useAuthStore();
   const { userProfile, setUserProfile } = useUsersStore();
 
+  // ── Responsive hooks ─────────────────────────────────────────────
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
+
+  const isSmallDevice = screenWidth < 360;
+  const isTablet = screenWidth >= 768;
+  const isLandscape = screenWidth > screenHeight;
+
+  // Scale values based on device type
+  const headerHeight = isTablet ? 64 : isLandscape ? 48 : 56;
+  const avatarSize = isTablet ? 38 : isSmallDevice ? 28 : 32;
+  const avatarRadius = isTablet ? 14 : 12;
+  const iconSize = isTablet ? 20 : isSmallDevice ? 15 : 17;
+  const titleFontSize = isTablet ? 18 : isSmallDevice ? 14 : 16;
+  const avatarFontSize = isTablet ? 15 : isSmallDevice ? 11 : 13;
+  const buttonSize = isTablet ? 42 : isSmallDevice ? 32 : 36;
+  const backIconSize = isTablet ? 24 : isSmallDevice ? 18 : 20;
+  const sideMargin = isTablet ? 20 : 16;
+  // ─────────────────────────────────────────────────────────────────
+
   const fetchUserProfile = useCallback(async () => {
     if (!user?.id || userProfile) return;
     const profile = await fetchCurrentUserProfleService(user?.id);
@@ -30,7 +51,6 @@ export default function AdminLayout() {
     fetchUserProfile();
   }, [fetchUserProfile, loading]);
 
-  // true when we're on a non-tab route like profile
   const showBackButton = !adminTabs.some((tab) => pathname?.includes(tab.name));
 
   return (
@@ -38,70 +58,101 @@ export default function AdminLayout() {
       screenOptions={{
         headerShown: true,
         headerShadowVisible: false,
-        headerStyle: { backgroundColor: PRIMARY },
+        headerStyle: {
+          backgroundColor: PRIMARY,
+          height: headerHeight + insets.top, // respect status bar on all devices
+        },
         headerTitleAlign: "center",
 
-        // 👇 re-evaluated on every render because AdminLayout re-renders on pathname change
         headerLeft: showBackButton
           ? () => (
               <Pressable
                 onPress={() => router.back()}
                 style={{
-                  marginLeft: 16,
-                  height: 36,
-                  width: 36,
-                  borderRadius: 12,
+                  marginLeft: sideMargin,
+                  height: buttonSize,
+                  width: buttonSize,
+                  borderRadius: avatarRadius,
                   backgroundColor: "rgba(255,255,255,0.2)",
                   alignItems: "center",
                   justifyContent: "center",
                 }}
               >
-                <ArrowLeft size={20} color="#ffffff" />
+                <ArrowLeft size={backIconSize} color="#ffffff" />
               </Pressable>
             )
-          : () => null, // 👈 always a function — avoids stale cached value
+          : () => null,
 
         headerTitle: () => (
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: isSmallDevice ? 6 : 10,
+              // Cap width so it doesn't overflow on small screens
+              maxWidth: screenWidth - sideMargin * 2 - buttonSize * 2 - 24,
+            }}
+          >
+            {/* Avatar circle */}
             <View
               style={{
-                width: 32,
-                height: 32,
-                borderRadius: 12,
+                width: avatarSize,
+                height: avatarSize,
+                borderRadius: avatarRadius,
                 backgroundColor: "rgba(255,255,255,0.2)",
                 alignItems: "center",
                 justifyContent: "center",
+                flexShrink: 0,
               }}
             >
               <Text
-                style={{ color: "#ffffff", fontSize: 13, fontWeight: "700" }}
+                style={{
+                  color: "#ffffff",
+                  fontSize: avatarFontSize,
+                  fontWeight: "700",
+                }}
               >
                 {userProfile?.first_name?.charAt(0)?.toUpperCase() ?? "A"}
               </Text>
             </View>
-            <Text style={{ color: "#ffffff", fontSize: 16, fontWeight: "700" }}>
+
+            {/* Name — truncates gracefully on small screens */}
+            <Text
+              numberOfLines={1}
+              style={{
+                color: "#ffffff",
+                fontSize: titleFontSize,
+                fontWeight: "700",
+                flexShrink: 1,
+              }}
+            >
               {userProfile?.first_name ?? "Admin"}
             </Text>
           </View>
         ),
 
         headerRight: () => (
-          <View style={{ marginRight: 16, position: "relative" }}>
+          <View
+            style={{
+              marginRight: sideMargin,
+              position: "relative",
+            }}
+          >
             <Pressable
               onPress={menu.toggle}
               style={({ pressed }) => ({
-                height: 36,
-                width: 36,
-                borderRadius: 18,
+                height: buttonSize,
+                width: buttonSize,
+                borderRadius: buttonSize / 2,
                 backgroundColor: "rgba(255,255,255,0.15)",
-                borderWidth: 2,
+                borderWidth: isTablet ? 2.5 : 2,
                 borderColor: "rgba(255,255,255,0.5)",
                 alignItems: "center",
                 justifyContent: "center",
                 opacity: pressed ? 0.75 : 1,
               })}
             >
-              <User size={17} color="#ffffff" />
+              <User size={iconSize} color="#ffffff" />
             </Pressable>
 
             <ProfileMenu

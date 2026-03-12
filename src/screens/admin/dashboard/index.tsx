@@ -1,21 +1,22 @@
+import { CircleCheckBig, User } from "lucide-react-native";
 import * as React from "react";
 import { useEffect, useState } from "react";
-import { RefreshControl, ScrollView, Text, View, Alert } from "react-native";
+import { Alert, RefreshControl, ScrollView, Text, View } from "react-native";
 import tw from "twrnc";
-import { CircleCheckBig, User } from "lucide-react-native";
 
-import StatCard from "@/src/screens/admin/components/StatCard";
-import { useAuthStore } from "@/src/store/useAuthStore";
-import { useUsersStore } from "@/src/store/useUsersStore";
-import { fetchUsersService } from "@/src/services/admin.service";
-import { fetchCurrentUserProfleService } from "@/src/services/currentuser.service";
 import {
   CalendarItem,
   HolidaysEventsSection,
 } from "@/src/components/HolidaysEventsSection";
+import StatCard from "@/src/screens/admin/components/StatCard";
+import { fetchUsersService } from "@/src/services/admin.service";
+import { fetchCurrentUserProfleService } from "@/src/services/currentuser.service";
+import { useAuthStore } from "@/src/store/useAuthStore";
+import { useUsersStore } from "@/src/store/useUsersStore";
 
 import { supabase } from "@/src/supabase/supabaseClient";
 import { MONTHS } from "@/src/utils/userDashboard";
+import { router } from "expo-router";
 
 export default function DashboardScreen() {
   const { setUserProfile, users, setUsers } = useUsersStore();
@@ -128,6 +129,7 @@ export default function DashboardScreen() {
           calendarLoading={calendarLoading}
           monthTitle={monthTitle}
           selectedYear={selectedYear}
+          onViewAll={() => router.push("/(admin)/holidays")}
         />
       </ScrollView>
     </View>
