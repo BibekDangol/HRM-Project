@@ -56,6 +56,7 @@ export default function AdminLayout() {
       screenOptions={{
         headerShown: true,
         headerShadowVisible: false,
+        headerTitleAlign: "left",
         headerStyle: {
           backgroundColor: TW.bgSecondary,
           borderBottomLeftRadius: 30,
