@@ -44,6 +44,7 @@ export type LeaveDetailsRow = {
   end_date: string;
   days_count: number | null;
   day_type: string | null;
+  created_at: string | null;
 };
 
 // Aggregated stats by leave type

@@ -6,4 +6,5 @@ export interface ProfileData {
   avatar?: string | null;
   organization_id: number | null;
   organization?: { name: string | null } | null;
+  role: string | null;
 }

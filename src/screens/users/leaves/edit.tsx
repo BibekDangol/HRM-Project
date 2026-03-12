@@ -1,4 +1,4 @@
-import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -11,16 +11,16 @@ import {
 } from "react-native";
 import tw from "twrnc";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Controller, useForm } from "react-hook-form";
-import { useAuthStore } from "@/src/store/useAuthStore";
-import { supabase } from "@/src/supabase/supabaseClient";
-import { ArrowLeft, Check } from "lucide-react-native";
-import { userLeaveSchema } from "@/src/schema/users/userLeaveApply.schema";
-import { FormValues, LeaveTypeRow } from "@/src/types/userLeave";
 import { DateField } from "@/src/components/userLeave/DateField";
 import { LeaveTypeDropdown } from "@/src/components/userLeave/LeaveTypeDropdown";
+import { userLeaveSchema } from "@/src/schema/users/userLeaveApply.schema";
+import { useAuthStore } from "@/src/store/useAuthStore";
+import { supabase } from "@/src/supabase/supabaseClient";
+import { FormValues, LeaveTypeRow } from "@/src/types/userLeave";
 import { diffDaysInclusive, firstParam } from "@/src/utils/leaveUtils";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Check } from "lucide-react-native";
+import { Controller, useForm } from "react-hook-form";
 
 export default function EditLeaveScreen() {
   const router = useRouter();
@@ -275,33 +275,6 @@ export default function EditLeaveScreen() {
 
   return (
     <>
-      {/* <Stack.Screen
-        options={{
-          title: "",
-          headerShadowVisible: false,
-          headerTitleAlign: "center",
-          headerLeft: () => (
-            <Pressable
-              onPress={() => router.replace("/(users)/leaves")}
-              hitSlop={12}
-              style={({ pressed }) => [
-                {
-                  width: 40,
-                  height: 40,
-                  borderRadius: 20,
-                  alignItems: "center",
-                  justifyContent: "center",
-                  marginLeft: 8,
-                },
-                pressed && { opacity: 0.7 },
-              ]}
-            >
-              <ArrowLeft size={24} color="#0f172a" />
-            </Pressable>
-          ),
-        }}
-      /> */}
-
       <View style={tw`flex-1 bg-white`}>
         <ScrollView contentContainerStyle={tw`px-4 pt-4 pb-28`}>
           <Text style={tw`text-xl font-semibold text-gray-900 mb-4`}>
@@ -500,7 +473,7 @@ export default function EditLeaveScreen() {
 
             <Pressable
               disabled={submitting}
-              onPress={() => router.replace("/(users)/leaves/(tabs)/requests")}
+              onPress={() => router.replace("/(users)/leaves/(tabs)")}
               style={({ pressed }) => [
                 tw`flex-1 ml-2 px-4 py-4 rounded-2xl border border-slate-200 items-center`,
                 pressed && tw`opacity-85`,

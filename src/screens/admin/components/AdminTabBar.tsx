@@ -7,41 +7,74 @@ import {
   Pressable,
   Text,
   View,
+  useWindowDimensions,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { adminTabs } from "../../../config/adminTabs";
 
 const ACTIVE_COLOR = "#008080";
 const INACTIVE_COLOR = "#9CA3AF";
-const PILL_H = 56;
-const H_PADDING = 16;
 const TRAY_PADDING = 4;
 const PILL_RADIUS = 16;
-const ICON_SIZE = 22;
-const TAB_W = 100; // fixed per tab
+const H_PADDING = 16;
 
 export default function AdminTabBar({ state }: any) {
   const router = useRouter();
   const pathname = usePathname();
   const insets = useSafeAreaInsets();
 
-  const tabCount = adminTabs.length;
-  const trayW = tabCount * TAB_W + TRAY_PADDING * 2;
+  // ── Responsive values ────────────────────────────────────────────
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
+  const isSmallDevice = screenWidth < 360;
+  const isTablet = screenWidth >= 768;
+  const isLandscape = screenWidth > screenHeight;
 
-  const focusedIdx = state.index;
-  const pillX = useRef(new Animated.Value(focusedIdx * TAB_W)).current;
+  const PILL_H = isTablet ? 60 : isSmallDevice || isLandscape ? 48 : 54;
+  const ICON_SIZE = isTablet ? 26 : isSmallDevice ? 19 : 22;
+  const FONT_SIZE = isTablet ? 13 : isSmallDevice ? 10 : 11;
+
+  const maxTrayW = isTablet ? 520 : screenWidth;
+  const sideInsets =
+    Math.max(H_PADDING, insets.left) + Math.max(H_PADDING, insets.right);
+  const availableW = Math.min(maxTrayW, screenWidth) - sideInsets;
+  const tabCount = adminTabs.length;
+  const TAB_W = Math.floor((availableW - TRAY_PADDING * 2) / tabCount);
+  const trayW = TAB_W * tabCount + TRAY_PADDING * 2;
+  // ─────────────────────────────────────────────────────────────────
+
+  // ── Fix: determine active tab index safely ────────────────────────
+  // state.index can point to a non-tab route (e.g. profile screen),
+  // which causes the pill to fly off to the right.
+  const activeRouteName = state.routes[state.index]?.name;
+  const activeTabIdx = adminTabs.findIndex(
+    (tab) => tab.name === activeRouteName,
+  );
+  // -1 when on a non-tab route like profile
+
+  // Remember the last valid tab index so we can freeze the pill there
+  const lastValidIdx = useRef(activeTabIdx >= 0 ? activeTabIdx : 0);
+  if (activeTabIdx >= 0) {
+    lastValidIdx.current = activeTabIdx;
+  }
+
+  // Pill target: use live index when on a tab, freeze at last tab when not
+  const pillTarget =
+    activeTabIdx >= 0 ? activeTabIdx * TAB_W : lastValidIdx.current * TAB_W; // ← frozen, no fly-off
+  // ─────────────────────────────────────────────────────────────────
+
+  const pillX = useRef(new Animated.Value(pillTarget)).current;
 
   useEffect(() => {
     Animated.spring(pillX, {
-      toValue: focusedIdx * TAB_W,
+      toValue: pillTarget,
       useNativeDriver: true,
       damping: 18,
       stiffness: 200,
       mass: 0.8,
     }).start();
-  }, [focusedIdx]);
+  }, [pillTarget]);
 
-  const bottomPad = insets.bottom > 0 ? insets.bottom : 16;
+  const bottomPad = Math.max(insets.bottom, isLandscape ? 4 : 8);
 
   const trayShadow =
     Platform.OS === "ios"
@@ -67,10 +100,11 @@ export default function AdminTabBar({ state }: any) {
     <View
       style={{
         backgroundColor: "#FFFFFF",
-        paddingHorizontal: H_PADDING,
-        paddingTop: 8,
+        paddingTop: isLandscape ? 4 : 8,
         paddingBottom: bottomPad,
-        alignItems: "center", // 👈 center the tray
+        paddingLeft: Math.max(H_PADDING, insets.left),
+        paddingRight: Math.max(H_PADDING, insets.right),
+        alignItems: "center",
       }}
     >
       <View
@@ -82,7 +116,7 @@ export default function AdminTabBar({ state }: any) {
             padding: TRAY_PADDING,
             position: "relative",
             height: PILL_H + TRAY_PADDING * 2,
-            width: trayW, // 👈 exact fit
+            width: trayW,
           },
           trayShadow,
         ]}
@@ -105,7 +139,8 @@ export default function AdminTabBar({ state }: any) {
         />
 
         {adminTabs.map((tab, index) => {
-          const isFocused = state.index === index;
+          // Tab is only "active" when we're actually on a tab route
+          const isFocused = activeTabIdx >= 0 && activeTabIdx === index;
           const Icon = tab.icon as LucideIcon;
           const targetPath = `/(admin)/${tab.name}`;
           const isCurrentlyOnPath =
@@ -123,21 +158,25 @@ export default function AdminTabBar({ state }: any) {
               key={tab.name}
               onPress={handlePress}
               style={{
-                width: TAB_W, // 👈 fixed width
+                width: TAB_W,
                 alignItems: "center",
                 justifyContent: "center",
                 flexDirection: "column",
-                gap: 3,
+                gap: isSmallDevice ? 2 : 3,
                 zIndex: 1,
                 height: PILL_H,
               }}
             >
-              <Icon size={ICON_SIZE} color={color} strokeWidth={isFocused ? 2.2 : 1.8} />
+              <Icon
+                size={ICON_SIZE}
+                color={color}
+                strokeWidth={isFocused ? 2.2 : 1.8}
+              />
               <Text
                 numberOfLines={1}
                 style={{
                   color,
-                  fontSize: 11,
+                  fontSize: FONT_SIZE,
                   fontWeight: Platform.OS === "ios" ? "600" : "bold",
                   letterSpacing: 0.2,
                 }}

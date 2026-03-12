@@ -1,3 +1,3 @@
-import ProfileScreen from "@/src/screens/admin/profile";
+import ProfileScreen from "@/src/screens/profile/profile";
 
 export default ProfileScreen;

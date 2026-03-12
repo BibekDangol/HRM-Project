@@ -9,11 +9,10 @@ import {
   View,
 } from "react-native";
 
+import { HolidaysEventsSection } from "@/src/components/HolidaysEventsSection";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { supabase } from "@/src/supabase/supabaseClient";
-import { ProfileData } from "@/src/types/profile";
-import { CalendarDays } from "lucide-react-native";
-import tw from "twrnc";
+import { ProfileData } from "@/src/types/profile.types";
 import { AttendanceRow } from "@/src/types/user";
 import {
   getNepalMonthDateRangeYYYYMMDD,
@@ -23,7 +22,9 @@ import {
   MONTHS,
   normalize,
 } from "@/src/utils/userDashboard";
-import { HolidaysEventsSection } from "@/src/components/HolidaysEventsSection";
+import { router } from "expo-router";
+import { CalendarDays } from "lucide-react-native";
+import tw from "twrnc";
 
 export default function HomeScreen() {
   const user = useAuthStore((s) => s.user);
@@ -318,20 +319,6 @@ export default function HomeScreen() {
         />
       }
     >
-      {/* Header */}
-      <View style={tw`mb-6`}>
-        <Text style={tw`text-3xl font-bold text-gray-700`}>
-          Welcome to{" "}
-          <Text style={tw`text-3xl font-extrabold text-[#008080]`}>
-            {profile?.organization?.name ?? "—"}
-          </Text>
-        </Text>
-        <Text style={tw`text-xl text-gray-600 mt-1`}>
-          Greetings,{" "}
-          <Text style={tw`text-gray-600 text-xl`}>{fullName || "—"}</Text>
-        </Text>
-      </View>
-
       {/* Attendance for this Month */}
       <View style={tw`bg-white p-2`}>
         <View style={tw`flex-row items-center justify-between mb-4`}>
@@ -396,18 +383,20 @@ export default function HomeScreen() {
       </View>
 
       {/* Calendar */}
-
       <HolidaysEventsSection
         calendarItems={calendarItems}
         calendarLoading={calendarLoading}
         monthTitle={monthTitle}
         selectedYear={selectedYear}
+        onViewAll={() => router.push("/(users)/holidays")}
       />
 
       {/* Activity Log */}
       <View style={tw`mt-5 p-2`}>
         <View style={tw`flex-row items-center justify-between mb-3`}>
-          <Text style={tw`text-lg font-bold text-gray-800`}>Activity Log</Text>
+          <Text style={tw`text-lg font-bold text-gray-800`}>
+            Recent Activity
+          </Text>
           <Text style={tw`text-xs text-gray-400`}>Last 7 days</Text>
         </View>
 
@@ -609,7 +598,6 @@ export default function HomeScreen() {
                 const isFuture =
                   selectedYear === currentYear && idx > currentMonth;
 
-                // ✅ isActive can never be true for a future month
                 const isActive = idx === selectedMonthIndex && !isFuture;
 
                 const isCurrent =

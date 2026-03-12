@@ -2,17 +2,20 @@ import { PlatformPressable } from "@react-navigation/elements";
 import { useLinkBuilder } from "@react-navigation/native";
 import { CalendarDays, House, LucideIcon, Menu } from "lucide-react-native";
 import React, { useEffect, useRef } from "react";
-import { Animated, Platform, Text, View } from "react-native";
+import {
+  Animated,
+  Platform,
+  Text,
+  View,
+  useWindowDimensions,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const ACTIVE_COLOR = "#008080";
 const INACTIVE_COLOR = "#9CA3AF";
-const PILL_H = 56;
 const H_PADDING = 16;
 const TRAY_PADDING = 4;
 const PILL_RADIUS = 16;
-const ICON_SIZE = 22;
-const TAB_W = 100;
 
 type TabCfg = { icon: LucideIcon; label: string };
 
@@ -25,6 +28,23 @@ const tabConfig: Record<string, TabCfg> = {
 export function MyTabBar({ state, descriptors, navigation }: any) {
   const { buildHref } = useLinkBuilder();
   const insets = useSafeAreaInsets();
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
+
+  // ── Responsive values ────────────────────────────────────────────
+  const isSmallDevice = screenWidth < 360;
+  const isTablet = screenWidth >= 768;
+  const isLandscape = screenWidth > screenHeight;
+
+  // Pill height shrinks slightly on small phones or landscape
+  const PILL_H = isTablet ? 60 : isSmallDevice || isLandscape ? 48 : 54;
+
+  // Icon & font scale
+  const ICON_SIZE = isTablet ? 26 : isSmallDevice ? 20 : 22;
+  const FONT_SIZE = isTablet ? 13 : isSmallDevice ? 10 : 11;
+
+  // Tray fills screen width with side padding, capped on tablets/wide screens
+  const maxTrayW = isTablet ? 480 : screenWidth;
+  const availableW = Math.min(maxTrayW, screenWidth) - H_PADDING * 2;
 
   const visibleRoutes = state.routes.filter((route: any) => {
     const options = descriptors[route.key]?.options;
@@ -32,14 +52,15 @@ export function MyTabBar({ state, descriptors, navigation }: any) {
   });
 
   const tabCount = visibleRoutes.length;
-  const trayW = tabCount * TAB_W + TRAY_PADDING * 2;
 
-  // -1 when active route is not in tabConfig (e.g. profile page)
+  // TAB_W is now derived from available space instead of being fixed
+  const TAB_W = Math.floor((availableW - TRAY_PADDING * 2) / tabCount);
+  const trayW = TAB_W * tabCount + TRAY_PADDING * 2;
+
   const focusedIdx = visibleRoutes.findIndex(
     (r: any) => r.key === state.routes[state.index]?.key,
   );
 
-  // Only animate when we have a valid tab — freeze pill otherwise
   const pillTarget = focusedIdx >= 0 ? focusedIdx * TAB_W : null;
 
   const pillX = useRef(
@@ -47,7 +68,7 @@ export function MyTabBar({ state, descriptors, navigation }: any) {
   ).current;
 
   useEffect(() => {
-    if (pillTarget === null) return; // frozen when on non-tab route
+    if (pillTarget === null) return;
     Animated.spring(pillX, {
       toValue: pillTarget,
       useNativeDriver: true,
@@ -57,7 +78,8 @@ export function MyTabBar({ state, descriptors, navigation }: any) {
     }).start();
   }, [pillTarget]);
 
-  const bottomPad = Math.max(insets.bottom, 8);
+  // Bottom padding respects home indicator / gesture bar
+  const bottomPad = Math.max(insets.bottom, isLandscape ? 4 : 8);
 
   const trayShadow =
     Platform.OS === "ios"
@@ -84,9 +106,12 @@ export function MyTabBar({ state, descriptors, navigation }: any) {
       style={{
         backgroundColor: "#FFFFFF",
         paddingHorizontal: H_PADDING,
-        paddingTop: 8,
+        paddingTop: isLandscape ? 4 : 8,
         paddingBottom: bottomPad,
         alignItems: "center",
+        // Extend background under gesture/home bar
+        paddingLeft: Math.max(H_PADDING, insets.left),
+        paddingRight: Math.max(H_PADDING, insets.right),
       }}
     >
       <View
@@ -121,7 +146,6 @@ export function MyTabBar({ state, descriptors, navigation }: any) {
         />
 
         {visibleRoutes.map((route: any) => {
-          // No tab is "active" when on a non-tab route like profile
           const isFocused =
             focusedIdx >= 0 && state.routes[state.index]?.key === route.key;
 
@@ -158,7 +182,7 @@ export function MyTabBar({ state, descriptors, navigation }: any) {
                 alignItems: "center",
                 justifyContent: "center",
                 flexDirection: "column",
-                gap: 3,
+                gap: isSmallDevice ? 2 : 3,
                 zIndex: 1,
                 height: PILL_H,
               }}
@@ -172,7 +196,7 @@ export function MyTabBar({ state, descriptors, navigation }: any) {
                 numberOfLines={1}
                 style={{
                   color,
-                  fontSize: 11,
+                  fontSize: FONT_SIZE,
                   fontWeight: Platform.OS === "ios" ? "600" : "bold",
                   letterSpacing: 0.2,
                 }}
@@ -186,4 +210,3 @@ export function MyTabBar({ state, descriptors, navigation }: any) {
     </View>
   );
 }
- 
