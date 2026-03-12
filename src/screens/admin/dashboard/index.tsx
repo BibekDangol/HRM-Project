@@ -1,24 +1,27 @@
-import { CircleCheckBig, User } from "lucide-react-native";
 import * as React from "react";
-import { useEffect, useState } from "react";
-import { Alert, RefreshControl, ScrollView, Text, View } from "react-native";
-import tw from "twrnc";
 
 import {
   CalendarItem,
   HolidaysEventsSection,
 } from "@/src/components/HolidaysEventsSection";
+import { CircleCheckBig, User } from "lucide-react-native";
+import { useEffect, useState } from "react";
+import { Alert, RefreshControl, ScrollView, Text, View } from "react-native";
+
 import StatCard from "@/src/screens/admin/components/StatCard";
 import { fetchUsersService } from "@/src/services/admin.service";
 import { fetchCurrentUserProfleService } from "@/src/services/currentuser.service";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { useUsersStore } from "@/src/store/useUsersStore";
-
 import { supabase } from "@/src/supabase/supabaseClient";
 import { MONTHS } from "@/src/utils/userDashboard";
-import { router } from "expo-router";
+import { TW } from "@/theme/twStyles";
+import { useRouter } from "expo-router";
+import tw from "twrnc";
+import QuickAction from "../components/QuickAction";
 
 export default function DashboardScreen() {
+  const router = useRouter();
   const { setUserProfile, users, setUsers } = useUsersStore();
   const { user } = useAuthStore();
   const [refreshing, setRefreshing] = useState(false);
@@ -107,30 +110,32 @@ export default function DashboardScreen() {
           />
         }
       >
-        <Text style={tw`mb-2 font-bold text-xl`}>Dashboard</Text>
-
         {/* Stats Cards */}
-        <View style={tw`flex-row flex-wrap justify-between mb-4`}>
-          <StatCard
-            title="Total Employees"
-            value={totalusers}
-            icon={<User size={24} color="white" />}
-          />
-          <StatCard
-            title="Total Projects"
-            value={1}
-            icon={<CircleCheckBig size={24} color="white" />}
+        <Text style={tw`font-semibold ${TW.textPrimary} py-2 text-lg`}>High-Level Metrics</Text>
+        <View style={tw`flex-col gap-4`}>
+          <View style={tw`flex-row flex-wrap justify-between`}>
+            <StatCard
+              title="Total Employees"
+              value={totalusers}
+              icon={<User size={24} color="white" />}
+            />
+            <StatCard
+              title="Total Projects"
+              value={1}
+              icon={<CircleCheckBig size={24} color="white" />}
+            />
+          </View>
+          <QuickAction />
+          {/* Holidays & Events Section */}
+          <HolidaysEventsSection
+            calendarItems={calendarItems}
+            calendarLoading={calendarLoading}
+            monthTitle={monthTitle}
+            selectedYear={selectedYear}
+            onViewAll={() => router.push("/(admin)/holidays")}
           />
         </View>
 
-        {/* Holidays & Events Section */}
-        <HolidaysEventsSection
-          calendarItems={calendarItems}
-          calendarLoading={calendarLoading}
-          monthTitle={monthTitle}
-          selectedYear={selectedYear}
-          onViewAll={() => router.push("/(admin)/holidays")}
-        />
       </ScrollView>
     </View>
   );

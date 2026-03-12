@@ -1,6 +1,5 @@
 import * as Clipboard from "expo-clipboard";
 
-import { fetchUsersService } from "@/src/services/admin.service";
 import { Copy, Plus, Search, X } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
 import {
@@ -18,10 +17,11 @@ import AddUserModal, { AddUserFormData } from "./AddUserModal";
 import { apiClient } from "@/src/api/apiClient";
 import LoadingIndicator from "@/src/components/LoadingIndicator";
 import { useDebounce } from "@/src/hooks/useDebounce";
+import { fetchUsersService } from "@/src/services/admin.service";
 import { fetchCurrentUserProfleService } from "@/src/services/currentuser.service";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { useUsersStore } from "@/src/store/useUsersStore";
-import { UserProfile } from "@/src/types/admin";
+import { TW } from "@/theme/twStyles";
 import tw from "twrnc";
 import UserCard from "../components/UserCard";
 import EditUserModal from "./EditUserModal";
@@ -29,7 +29,6 @@ import EditUserModal from "./EditUserModal";
 const ManageUsers = () => {
   const { user, session } = useAuthStore();
   const token = session?.access_token;
-
   const { users, organizationName, userProfile, setUserProfile, setUsers } =
     useUsersStore();
 
@@ -37,7 +36,7 @@ const ManageUsers = () => {
   const [debouncedSearchQuery] = useDebounce(searchQuery, 300);
   const [activeTab, setActiveTab] = useState<"pending" | "active">("pending");
   const [tempPassword, setTempPassword] = useState<string | null>(null);
-  const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
+  const [editingUser, setEditingUser] = useState<any | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editRole, setEditRole] = useState<string>("user");
@@ -51,7 +50,6 @@ const ManageUsers = () => {
   const pendingCount = pendingUsers.length;
   const activeCount = activeUsers.length;
 
-  // Load admin profile and users
   const loadAdmin = async () => {
     if (!user?.id) return;
     try {
@@ -61,7 +59,7 @@ const ManageUsers = () => {
 
       const fetchedUsers = await fetchUsersService(
         profile.organization_id,
-        debouncedSearchQuery,
+        debouncedSearchQuery
       );
       setUsers(fetchedUsers);
     } catch (err) {
@@ -72,7 +70,7 @@ const ManageUsers = () => {
 
   useEffect(() => {
     loadAdmin();
-  }, []);
+  }, [debouncedSearchQuery]);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -80,7 +78,6 @@ const ManageUsers = () => {
     setRefreshing(false);
   };
 
-  // Add user handler
   const handleAddUser = async (data: AddUserFormData) => {
     if (!token || !userProfile) {
       Alert.alert("Error", "Admin profile or session not ready");
@@ -111,8 +108,7 @@ const ManageUsers = () => {
     }
   };
 
-  // Edit user
-  const handleEditUser = (user: UserProfile) => {
+  const handleEditUser = (user: any) => {
     setEditingUser(user);
     setEditRole(user.role);
     setEditSupervisor(user.supervisor_id);
@@ -144,10 +140,8 @@ const ManageUsers = () => {
     }
   };
 
-  // Delete user
   const handleDeleteUser = async (id?: string) => {
     if (!id || !userProfile || !token) return;
-
     try {
       const response = await apiClient.post("/hyper-api", { userId: id });
       if (!response.data.success)
@@ -156,11 +150,9 @@ const ManageUsers = () => {
       Alert.alert("Deleted", "User deleted successfully");
       const updatedUsers = await fetchUsersService(userProfile.organization_id);
       setUsers(updatedUsers);
-    } catch (err: any) {
-    }
+    } catch (err: any) { }
   };
 
-  // Get supervisor name
   const getSupervisorName = (supervisorId?: string | null) => {
     if (!supervisorId) return "No supervisor yet";
     const supervisor = users.find((u) => u.id === supervisorId);
@@ -175,46 +167,25 @@ const ManageUsers = () => {
 
   return (
     <>
-      <View style={tw`flex-1 bg-white`}>
+      <View style={tw`flex-1 ${TW.bgPrimary}`}>
         <KeyboardAvoidingView
           style={tw`flex-1`}
           behavior={Platform.OS === "ios" ? "padding" : undefined}
         >
-          <View style={tw`flex-1`}>
-            {/* Header */}
-            <View style={tw`px-5 pt-5 pb-3`}>
-              <View style={tw`flex-row items-center justify-between mb-5`}>
-                <View>
-                  <Text style={tw`text-2xl font-bold text-slate-900`}>
-                    {organizationName}
-                  </Text>
-                  <Text style={tw`text-sm text-slate-400 mt-0.5`}>
-                    Manage your team members
-                  </Text>
-                </View>
-                <Pressable
-                  onPress={() => setShowAddModal(true)}
-                  style={({ pressed }) => [
-                    tw`h-11 w-11 rounded-2xl bg-green-700 items-center justify-center`,
-                    pressed && tw`opacity-85`,
-                  ]}
-                >
-                  <Plus size={22} color="white" strokeWidth={2.5} />
-                </Pressable>
-              </View>
-
+          <View style={tw`flex-1 mx-4 mt-8`}>
+            <View style={tw`flex-col gap-4 mb-4`}>
               {/* Search */}
               <View
-                style={tw`flex-row bg-slate-50 rounded-2xl px-4 items-center border border-slate-100`}
+                style={tw`flex-row ${TW.bgButton} rounded-3xl px-4 py-2 items-center border ${TW.BORDER} justify-between`}
               >
-                <Search size={18} color="#94a3b8" />
+                <Search size={18} color={TW.bgSecondary.replace("text-", "#")} />
                 <TextInput
                   placeholder="Search users..."
-                  placeholderTextColor="#94a3b8"
+                  placeholderTextColor={TW.textSecondary.replace("text-", "#")}
                   value={searchQuery}
                   onChangeText={setSearchQuery}
                   style={[
-                    tw`flex-1 ml-3 text-sm text-slate-900`,
+                    tw`flex-1 ml-3 text-sm ${TW.textPrimary}`,
                     {
                       paddingVertical: Platform.OS === "ios" ? 14 : 10,
                       paddingHorizontal: 0,
@@ -227,63 +198,70 @@ const ManageUsers = () => {
                     hitSlop={10}
                     style={({ pressed }) => pressed && tw`opacity-70`}
                   >
-                    <X size={18} color="#94a3b8" />
+                    <X
+                      size={18}
+                      color={TW.textSecondary.replace("text-", "#")}
+                    />
                   </Pressable>
                 )}
+                <Pressable
+                  onPress={() => setShowAddModal(true)}
+                  style={({ pressed }) => [
+                    tw`h-11 w-11 rounded-2xl ${TW.bgSecondary} items-center justify-center`,
+                    pressed && tw`opacity-85`,
+                  ]}
+                >
+                  <Plus size={22} color="white" strokeWidth={2.5} />
+                </Pressable>
               </View>
-
               {/* Tabs */}
-              <View style={tw`flex-row mt-4 bg-slate-100 rounded-2xl p-1`}>
+              <View style={tw`flex-row rounded-2xl p-1`}>
                 <Pressable
                   onPress={() => setActiveTab("pending")}
                   style={[
                     tw`flex-1 py-2.5 rounded-xl items-center`,
-                    activeTab === "pending" && tw`bg-white`,
+                    activeTab === "pending" && tw`${TW.bgAction}`,
                   ]}
                 >
                   <Text
                     style={[
                       tw`text-sm font-semibold`,
                       activeTab === "pending"
-                        ? tw`text-slate-900`
-                        : tw`text-slate-400`,
+                        ? tw`${TW.textButton}`
+                        : { color: TW.textPrimary }, // raw hex
                     ]}
                   >
                     Pending{" "}
                     {pendingCount > 0 && (
-                      <Text style={tw`text-blue-600`}> ({pendingCount})</Text>
+                      <Text style={{ color: TW.textTertiary }}>({pendingCount})</Text>
                     )}
                   </Text>
                 </Pressable>
+
                 <Pressable
                   onPress={() => setActiveTab("active")}
                   style={[
                     tw`flex-1 py-2.5 rounded-xl items-center`,
-                    activeTab === "active" && tw`bg-white`,
+                    activeTab === "active" && tw`${TW.bgAction}`,
                   ]}
                 >
                   <Text
                     style={[
                       tw`text-sm font-semibold`,
                       activeTab === "active"
-                        ? tw`text-slate-900`
-                        : tw`text-slate-400`,
+                        ? tw`${TW.textButton}`
+                        : { color: TW.textPrimary },
                     ]}
                   >
                     Active{" "}
                     {activeCount > 0 && (
-                      <Text style={tw`text-blue-600`}> ({activeCount})</Text>
+                      <Text style={{ color: TW.textTertiary }}>({activeCount})</Text>
                     )}
                   </Text>
                 </Pressable>
               </View>
-
-              <Text style={tw`text-xs text-slate-400 mt-3`}>
-                {activeTab === "pending" ? pendingCount : activeCount} users
-                found
-              </Text>
+              <Text style={tw`text - xs ${TW.textSecondary}`}> {activeTab === "pending" ? pendingCount : activeCount} users found </Text>
             </View>
-
             {/* Users List */}
             <FlatList
               data={activeTab === "pending" ? pendingUsers : activeUsers}
@@ -296,7 +274,7 @@ const ManageUsers = () => {
                   getSupervisorName={getSupervisorName}
                 />
               )}
-              contentContainerStyle={{ flexGrow: 1 }}
+              contentContainerStyle={{ flexGrow: 1, paddingBottom: 20 }}
               keyboardShouldPersistTaps="handled"
               ItemSeparatorComponent={() => <View style={tw`h-3`} />}
               refreshing={refreshing}
@@ -307,14 +285,14 @@ const ManageUsers = () => {
                 ) : (
                   <View style={tw`items-center justify-center py-20`}>
                     <View
-                      style={tw`h-16 w-16 rounded-full bg-slate-100 items-center justify-center mb-4`}
+                      style={tw`h-16 w-16 rounded-full ${TW.bgCards} items-center justify-center mb-4`}
                     >
-                      <Search size={26} color="#94a3b8" />
+                      <Search size={26} color={TW.textSecondary.replace("text-", "#")} />
                     </View>
-                    <Text style={tw`text-slate-700 font-semibold text-base`}>
+                    <Text style={tw`text-base font-semibold ${TW.textPrimary}`}>
                       No users found
                     </Text>
-                    <Text style={tw`text-slate-400 text-sm mt-1`}>
+                    <Text style={tw`text-sm mt-1 ${TW.textSecondary}`}>
                       {activeTab === "pending"
                         ? "No pending users at the moment"
                         : "No active users at the moment"}
@@ -357,22 +335,22 @@ const ManageUsers = () => {
             <View style={tw`items-center mb-5`}>
               <View style={tw`h-1 w-10 rounded-full bg-slate-200`} />
             </View>
-            <Text style={tw`text-xl font-bold text-slate-900 mb-1`}>
+            <Text style={tw`text-xl font-bold ${TW.textPrimary} mb-1`}>
               User Created
             </Text>
-            <Text style={tw`text-sm text-slate-400 mb-5`}>
-              Save this temporary password — it won&apos;t be shown again.
+            <Text style={tw`text-sm ${TW.textSecondary} mb-5`}>
+              Save this temporary password — it won’t be shown again.
             </Text>
 
             <View
-              style={tw`bg-slate-50 border border-slate-200 rounded-2xl px-4 py-4 mb-5`}
+              style={tw`bg-slate-50 border ${TW.BORDER} rounded-2xl px-4 py-4 mb-5`}
             >
-              <Text style={tw`text-xs text-slate-400 mb-1`}>
+              <Text style={tw`text-xs ${TW.textSecondary} mb-1`}>
                 Temporary Password
               </Text>
               <Text
                 selectable
-                style={tw`text-lg font-bold text-slate-900 tracking-widest`}
+                style={tw`text-lg font-bold ${TW.textPrimary} tracking-widest`}
               >
                 {tempPassword}
               </Text>
@@ -381,10 +359,13 @@ const ManageUsers = () => {
             <Pressable
               onPress={async () => {
                 await Clipboard.setStringAsync(tempPassword);
-                Alert.alert("Copied", "Temporary password copied to clipboard");
+                Alert.alert(
+                  "Copied",
+                  "Temporary password copied to clipboard"
+                );
               }}
               style={({ pressed }) => [
-                tw`flex-row items-center justify-center bg-blue-600 py-4 rounded-2xl mb-3`,
+                tw`flex-row items-center justify-center ${TW.bgSecondary} py-4 rounded-2xl mb-3`,
                 pressed && tw`opacity-85`,
               ]}
             >
@@ -395,11 +376,11 @@ const ManageUsers = () => {
             <Pressable
               onPress={() => setTempPassword(null)}
               style={({ pressed }) => [
-                tw`py-4 rounded-2xl border border-slate-200 items-center`,
+                tw`py-4 rounded-2xl border ${TW.BORDER} items-center`,
                 pressed && tw`opacity-80`,
               ]}
             >
-              <Text style={tw`text-slate-700 font-semibold`}>Done</Text>
+              <Text style={tw`font-semibold ${TW.textPrimary}`}>Done</Text>
             </Pressable>
           </View>
         </View>

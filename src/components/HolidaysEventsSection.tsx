@@ -6,9 +6,10 @@ import {
   Pressable,
   ScrollView,
   Text,
-  useWindowDimensions,
   View,
+  useWindowDimensions,
 } from "react-native";
+
 import { ChevronRight } from "lucide-react-native";
 import tw from "twrnc";
 
