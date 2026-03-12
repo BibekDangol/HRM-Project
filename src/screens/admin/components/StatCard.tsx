@@ -2,13 +2,14 @@
 
 import { Text, View } from "react-native";
 
+import { TW } from "@/theme/twStyles";
 import tw from "twrnc";
 
 export default function StatCard({
   title,
   value,
   icon,
-  accent = "bg-green-600",
+  accent = TW.bgAction,
 }: {
   title: string;
   value: number | string;
@@ -17,11 +18,11 @@ export default function StatCard({
 }) {
   return (
     <View
-      style={tw`w-[48%] bg-gray-50 rounded-3xl p-4 mb-4 border border-gray-200`}
+      style={tw`w-full ${TW.bgButton} ${TW.BORDER} border rounded-3xl p-4 mb-4`}
     >
       {/* Top Row */}
-      <View style={tw`flex-row items-center justify-between `}>
-        <Text style={tw`text-gray-500 text-sm font-medium`}>
+      <View style={tw`flex-row items-center gap-4 justify-between`}>
+        <Text style={tw`${TW.textSecondary} text-sm font-medium`}>
           {title}
         </Text>
 
@@ -34,13 +35,13 @@ export default function StatCard({
 
       {/* Value */}
       <Text
-        style={tw`mt-3 text-3xl font-extrabold text-gray-900`}
+        style={tw`mt-3 text-3xl font-extrabold ${TW.textPrimary}`}
       >
         {value}
       </Text>
 
-      {/* Subtext (optional but classy) */}
-      <Text style={tw`text-xs text-gray-400 mt-1`}>
+      {/* Subtext */}
+      <Text style={tw`${TW.textSecondary} text-xs mt-1`}>
         Updated today
       </Text>
     </View>
