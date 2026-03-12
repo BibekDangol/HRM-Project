@@ -11,9 +11,9 @@ export const TW = {
   textSecondary: "text-[#3F6B78]",// muted teal text
   textTertiary: "text-[#5C8A96]",
 
-  approved: "bg-green-100 text-green-800", // success green
-  pending: "bg-yellow-100 text-yellow-800", // warning yellow
-  rejected: "bg-red-100 text-red-800", // error red
+  bgApproved: "bg-green-100 text-green-800", // success green
+  bgPending: "bg-yellow-100 text-yellow-800", // warning yellow
+  bgRejected: "bg-red-100 text-red-800", // error red
 
   DANGER: "text-[#EF4444]",       // strong red
   SUCCESS: "text-[#16A34A]",      // strong green

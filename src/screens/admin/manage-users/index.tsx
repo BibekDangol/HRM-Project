@@ -204,15 +204,6 @@ const ManageUsers = () => {
                     />
                   </Pressable>
                 )}
-                <Pressable
-                  onPress={() => setShowAddModal(true)}
-                  style={({ pressed }) => [
-                    tw`h-11 w-11 rounded-2xl ${TW.bgSecondary} items-center justify-center`,
-                    pressed && tw`opacity-85`,
-                  ]}
-                >
-                  <Plus size={22} color="white" strokeWidth={2.5} />
-                </Pressable>
               </View>
               {/* Tabs */}
               <View style={tw`flex-row rounded-2xl p-1`}>
@@ -304,7 +295,15 @@ const ManageUsers = () => {
           </View>
         </KeyboardAvoidingView>
       </View>
-
+      <Pressable
+        onPress={() => setShowAddModal(true)}
+        style={({ pressed }) => [
+          tw`h-12 w-12 rounded-full ${TW.bgAction} items-center justify-center  self-end  absolute bottom-4 right-4`,
+          pressed && tw`opacity-85`,
+        ]}
+      >
+        <Plus size={22} color="white" strokeWidth={2.5} />
+      </Pressable>
       {/* Modals */}
       <AddUserModal
         visible={showAddModal}
@@ -314,7 +313,6 @@ const ManageUsers = () => {
         supervisors={users}
         currentUserId={user?.id ?? ""}
       />
-
       <EditUserModal
         visible={showEditModal}
         user={editingUser}
@@ -327,7 +325,6 @@ const ManageUsers = () => {
         onSave={() => editingUser && handleSubmitEdit(editingUser.id)}
         isChanged={isChanged}
       />
-
       {/* Temp Password Modal */}
       {tempPassword && (
         <View style={tw`absolute inset-0 bg-black/50 items-center justify-end`}>
