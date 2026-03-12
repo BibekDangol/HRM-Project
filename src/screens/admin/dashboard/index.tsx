@@ -1,11 +1,10 @@
-import { CircleCheckBig, User } from "lucide-react-native";
 import * as React from "react";
 
 import {
   CalendarItem,
   HolidaysEventsSection,
 } from "@/src/components/HolidaysEventsSection";
-
+import { CircleCheckBig, User } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { Alert, RefreshControl, ScrollView, Text, View } from "react-native";
 
@@ -17,10 +16,12 @@ import { useUsersStore } from "@/src/store/useUsersStore";
 import { supabase } from "@/src/supabase/supabaseClient";
 import { MONTHS } from "@/src/utils/userDashboard";
 import { TW } from "@/theme/twStyles";
+import { useRouter } from "expo-router";
 import tw from "twrnc";
 import QuickAction from "../components/QuickAction";
 
 export default function DashboardScreen() {
+  const router = useRouter();
   const { setUserProfile, users, setUsers } = useUsersStore();
   const { user } = useAuthStore();
   const [refreshing, setRefreshing] = useState(false);
@@ -131,6 +132,7 @@ export default function DashboardScreen() {
             calendarLoading={calendarLoading}
             monthTitle={monthTitle}
             selectedYear={selectedYear}
+            onViewAll={() => router.push("/(admin)/holidays")}
           />
         </View>
 
