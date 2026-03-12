@@ -7,55 +7,44 @@ import { LeaveStatus } from "@/src/services/leave.service";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { useLeaveStore } from "@/src/store/useLeaveStore";
 import { useUsersStore } from "@/src/store/useUsersStore";
+import { TW } from "@/theme/twStyles";
 import { useRouter } from "expo-router";
 import tw from "twrnc";
 
-const statusConfig: Record<string, { bg: string; text: string; dot: string }> =
-  {
-    pending: {
-      bg: "bg-amber-50",
-      text: "text-amber-600",
-      dot: "bg-amber-400",
-    },
-    approved: {
-      bg: "bg-emerald-50",
-      text: "text-emerald-600",
-      dot: "bg-emerald-400",
-    },
-    rejected: {
-      bg: "bg-red-50",
-      text: "text-red-500",
-      dot: "bg-red-400",
-    },
-  };
+const statusConfig:
+  Record<string, { bg: string; text: string; dot: string }> =
+{
+  pending: { bg: "bg-amber-50", text: "text-amber-600", dot: "bg-amber-400", },
+  approved: { bg: "bg-emerald-50", text: "text-emerald-600", dot: "bg-emerald-400", },
+  rejected: { bg: "bg-red-50", text: "text-red-500", dot: "bg-red-400", },
+};
+
+
 type Props = {
   approvedPath: string;
   pendingPath: string;
   rejectedPath: string;
   fetchLeaves: (orgId: number, userId?: string) => Promise<any[]>;
 };
-export default function LeaveView({
-  approvedPath,
-  pendingPath,
-  rejectedPath,
-  fetchLeaves,
-}: Props) {
+
+export default function LeaveView({ approvedPath, pendingPath, rejectedPath, fetchLeaves }: Props) {
   const router = useRouter();
   const { userProfile } = useUsersStore();
-  const { setLeaves, leaves } = useLeaveStore();
+  const { leaves, setLeaves } = useLeaveStore();
   const { user } = useAuthStore();
   const [activeTab, setActiveTab] = useState<LeaveStatus>("pending");
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
   const filteredLeaves = leaves.filter((leave) => leave.status === activeTab);
+
   const loadLeaves = useCallback(async () => {
     if (!userProfile || !user) return;
-
     try {
+      setLoading(true);
       const data = await fetchLeaves(userProfile.organization_id, user.id);
       setLeaves(data);
-    } catch (error) {
+    } catch {
     } finally {
       setLoading(false);
     }
@@ -70,46 +59,28 @@ export default function LeaveView({
     await loadLeaves();
     setRefreshing(false);
   };
-  const goToDetails = (leave: any) => {
-    let pathname = "";
 
-    if (leave.status === "approved") {
-      pathname = approvedPath;
-    } else if (leave.status === "pending") {
-      pathname = pendingPath;
-    } else {
-      pathname = rejectedPath;
-    }
+  const goToDetails = (leave: any) => { let pathname = ""; if (leave.status === "approved") { pathname = approvedPath; } else if (leave.status === "pending") { pathname = pendingPath; } else { pathname = rejectedPath; } router.push({ pathname: pathname as any, params: { id: leave.id }, }); };
 
-    router.push({
-      pathname: pathname as any,
-      params: { id: leave.id },
-    });
-  };
-
-  if (loading) return <LoadingIndicator message="Loading Leave Requests.." />;
+  if (loading) return <LoadingIndicator message="Loading leave requests..." />;
 
   return (
-    <View style={tw`flex-1 bg-white`}>
+    <View style={tw`flex-1 ${TW.bgPrimary}`}>
       {/* Tabs */}
-      <View style={tw`flex-row mx-5 mt-4 bg-slate-100 rounded-2xl p-1`}>
+      <View style={tw`flex-row mx-4 mt-4 rounded-2xl p-1 bg-slate-100`}>
         {(["pending", "approved", "rejected"] as LeaveStatus[]).map((tab) => {
           const isActive = activeTab === tab;
           return (
             <Pressable
               key={tab}
               onPress={() => setActiveTab(tab)}
-              style={[
+              style={({ pressed }) => [
                 tw`flex-1 py-3 rounded-xl items-center`,
-                isActive ? tw`bg-white` : null,
+                isActive ? tw`${TW.bgAction}` : null,
+                pressed && !isActive && tw`opacity-70`,
               ]}
             >
-              <Text
-                style={[
-                  tw`text-sm font-bold`,
-                  isActive ? tw`text-blue-600` : tw`text-slate-500`,
-                ]}
-              >
+              <Text style={tw`text-sm font-bold ${isActive ? TW.textButton : TW.textPrimary}`}>
                 {tab.toUpperCase()}
               </Text>
             </Pressable>
@@ -117,7 +88,7 @@ export default function LeaveView({
         })}
       </View>
 
-      {/* List */}
+      {/* Leave List */}
       <FlatList
         data={filteredLeaves}
         keyExtractor={(item) => item.id.toString()}
@@ -133,41 +104,31 @@ export default function LeaveView({
             <Pressable
               onPress={() => goToDetails(leave)}
               style={({ pressed }) => [
-                tw`flex-row items-center bg-white border border-slate-100 rounded-2xl px-4 py-4`,
+                tw`flex-row items-center bg-white border ${TW.BORDER} rounded-2xl px-4 py-4`,
                 pressed && tw`bg-slate-50`,
               ]}
             >
               {/* Icon */}
-              <View
-                style={tw`h-11 w-11 rounded-xl bg-slate-100 items-center justify-center mr-4`}
-              >
-                <View
-                  style={tw`h-11 w-11 rounded-xl bg-slate-100 items-center justify-center mr-4`}
-                >
-                  <CalendarClock size={20} color="#475569" />
-                </View>
+              <View style={tw`h-12 w-12 rounded-xl bg-slate-100 items-center justify-center mr-4`}>
+                <CalendarClock size={20} color="#475569" />
               </View>
+
               {/* Info */}
               <View style={tw`flex-1`}>
-                <Text style={tw`text-sm font-semibold text-slate-900`}>
+                <Text style={tw`text-sm font-semibold ${TW.textPrimary}`}>
                   {leave.first_name} {leave.last_name ?? ""}
                 </Text>
-
-                <Text style={tw`text-xs text-slate-400 mt-0.5`}>
+                <Text style={tw`text-xs ${TW.textSecondary} mt-0.5`}>
                   {leave.start_date}
-                  {leave.end_date && leave.end_date !== leave.start_date
-                    ? ` → ${leave.end_date}`
-                    : ""}
+                  {leave.end_date && leave.end_date !== leave.start_date ? ` → ${leave.end_date}` : ""}
                 </Text>
               </View>
 
               {/* Status Badge */}
-              <View
-                style={tw`flex-row items-center ${cfg.bg} px-3 py-1.5 rounded-xl mr-3`}
-              >
-                <View style={tw`h-1.5 w-1.5 rounded-full ${cfg.dot} mr-1.5`} />
-                <Text style={tw`text-xs font-bold ${cfg.text}`}>
-                  {String(leave.status).toUpperCase()}
+              <View style={tw`flex-row items-center px-3 py-1.5 rounded-xl mr-3`} className={`${cfg.bg}`}>
+                <View style={tw`h-1.5 w-1.5 rounded-full mr-1.5`} className={`${cfg.dot}`} />
+                <Text style={tw`text-xs font-bold`} className={`${cfg.text}`}>
+                  {leave.status.toUpperCase()}
                 </Text>
               </View>
 
@@ -177,17 +138,11 @@ export default function LeaveView({
         }}
         ListEmptyComponent={
           <View style={tw`items-center justify-center py-20`}>
-            <View
-              style={tw`h-16 w-16 rounded-full bg-slate-100 items-center justify-center mb-4`}
-            >
+            <View style={tw`h-16 w-16 rounded-full ${TW.bgCards} items-center justify-center mb-4`}>
               <CalendarClock size={28} color="#94a3b8" />
             </View>
-            <Text style={tw`text-slate-700 font-semibold text-base`}>
-              No leave requests
-            </Text>
-            <Text style={tw`text-slate-400 text-sm mt-1`}>
-              All leave requests will appear here
-            </Text>
+            <Text style={tw`text-base font-semibold ${TW.textPrimary}`}>No leave requests</Text>
+            <Text style={tw`text-sm mt-1 ${TW.textSecondary}`}>All leave requests will appear here</Text>
           </View>
         }
       />
