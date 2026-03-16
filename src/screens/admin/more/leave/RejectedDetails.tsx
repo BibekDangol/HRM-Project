@@ -1,9 +1,9 @@
-import { Text, View } from 'react-native'
 import { useEffect, useState } from 'react'
+import { Text, View } from 'react-native'
 
 import { fetchLeaveById } from '@/src/services/leave.service'
-import tw from 'twrnc'
 import { useLocalSearchParams } from 'expo-router'
+import tw from 'twrnc'
 
 const RejectedDetails = () => {
   const [leave, setLeave] = useState<any>(null)
@@ -30,10 +30,9 @@ const RejectedDetails = () => {
     return <Text style={tw`p-4 text-red-500`}>Leave not found</Text>
   }
   return (
-    <View style={tw`flex-1 bg-white p-4`}>
+    <View style={tw`flex-1 p-4`}>
       {/* Status */}
       <View style={tw`mb-4`}>
-        <Text style={tw`text-sm text-gray-500`}>Status</Text>
         <Text style={tw`text-lg font-semibold text-red-600`}>
           Rejected
         </Text>

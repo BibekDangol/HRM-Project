@@ -46,7 +46,7 @@ const AttendanceUserList = () => {
         </View>
         {/* Users List */}
         <FlatList
-          contentContainerStyle={tw`px-4 pb-6`}
+          contentContainerStyle={tw`px-4 pb-6 flex gap-4`}
           data={filteredUsers}
           keyExtractor={(item) => item.id}
           ListEmptyComponent={

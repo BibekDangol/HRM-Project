@@ -48,13 +48,13 @@ const LoginScreen = () => {
 
   const handleLogin = async () => {
     const result = await signIn(email, password);
+    console.log(result);
     if ("error" in result) {
       Alert.alert("Login Failed", result.error);
       return; // stop execution if login fails-> dont redirect
     }
-
     Alert.alert("Logged in successfully");
-    if (result.status === "pending") {
+    if (result.role === "user" && result.status === "pending") {
       router.replace("/(auth)/changePassword");
       return;
     }

@@ -98,7 +98,7 @@ export default function DashboardScreen() {
   }, []);
 
   return (
-    <View style={tw`flex-1 bg-white`}>
+    <View style={tw`flex-1`}>
       <ScrollView
         contentContainerStyle={tw`px-4 pt-6 pb-10`}
         refreshControl={

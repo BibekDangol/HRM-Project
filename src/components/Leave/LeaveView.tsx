@@ -14,7 +14,7 @@ import tw from "twrnc";
 const statusConfig:
   Record<string, { bg: string; text: string; dot: string }> =
 {
-  pending: { bg: "bg-amber-50", text: "text-amber-600", dot: "bg-amber-400", },
+  pending: { bg: "bg-red-50", text: "text-amber-600", dot: "bg-amber-400", },
   approved: { bg: "bg-emerald-50", text: "text-emerald-600", dot: "bg-emerald-400", },
   rejected: { bg: "bg-red-50", text: "text-red-500", dot: "bg-red-400", },
 };
@@ -125,9 +125,9 @@ export default function LeaveView({ approvedPath, pendingPath, rejectedPath, fet
               </View>
 
               {/* Status Badge */}
-              <View style={tw`flex-row items-center px-3 py-1.5 rounded-xl mr-3`} className={`${cfg.bg}`}>
-                <View style={tw`h-1.5 w-1.5 rounded-full mr-1.5`} className={`${cfg.dot}`} />
-                <Text style={tw`text-xs font-bold`} className={`${cfg.text}`}>
+              <View style={tw`flex-row items-center px-3 py-1.5 rounded-xl mr-3 ${cfg.bg}`}>
+                <View style={tw`h-1.5 w-1.5 rounded-full mr-1.5 ${cfg.dot}`} />
+                <Text style={tw`text-xs font-bold ${cfg.text}`}>
                   {leave.status.toUpperCase()}
                 </Text>
               </View>
