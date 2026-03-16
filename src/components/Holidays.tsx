@@ -73,7 +73,9 @@ const CalendarRow = ({ item }: { item: CalendarItem }) => {
           width: 56,
           height: 56,
           borderRadius: 14,
-          backgroundColor: "#F1F5F9",
+          backgroundColor: "#ffffff",
+          borderColor: "#94A3B8",
+          borderWidth: 1,
           alignItems: "center",
           justifyContent: "center",
           marginRight: 14,
@@ -216,6 +218,7 @@ export default function HolidaysEventsScreen() {
           paddingHorizontal: 16,
           paddingTop: 16,
           paddingBottom: insets.bottom + 24,
+          backgroundColor: "white",
         }}
         refreshControl={
           <RefreshControl

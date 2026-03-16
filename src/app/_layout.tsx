@@ -2,16 +2,18 @@ import { Stack } from "expo-router";
 import { useEffect } from "react";
 import { useAuthStore } from "../store/useAuthStore";
 import { supabase } from "../supabase/supabaseClient";
+import { useAuthStore } from "../store/useAuthStore";
+import { useEffect } from "react";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 export default function Layout() {
   const restoreSession = useAuthStore((s) => s.restoreSession);
 
   useEffect(() => {
     const init = async () => {
-      // 1️⃣ Restore persisted session on app start
+      // Restore persisted session
       await restoreSession();
 
-      // 2️⃣ Listen to future auth changes
       const { data: listener } = supabase.auth.onAuthStateChange(
         async (_event, session) => {
           if (session) {
@@ -22,17 +24,20 @@ export default function Layout() {
               user: null,
               role: "user",
               loading: false,
-            })
+            });
           }
-        }
+        },
       );
 
-      // 3️⃣ Cleanup listener on unmount
       return () => listener.subscription.unsubscribe();
     };
 
     init();
   }, []);
 
-  return <Stack screenOptions={{ headerShown: false }} />;
+  return (
+    <SafeAreaProvider>
+      <Stack screenOptions={{ headerShown: false }} />
+    </SafeAreaProvider>
+  );
 }

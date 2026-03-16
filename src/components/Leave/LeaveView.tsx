@@ -10,15 +10,18 @@ import { useUsersStore } from "@/src/store/useUsersStore";
 import { TW } from "@/theme/twStyles";
 import { useRouter } from "expo-router";
 import tw from "twrnc";
+import { BackButton } from "../BackButton";
 
-const statusConfig:
-  Record<string, { bg: string; text: string; dot: string }> =
-{
-  pending: { bg: "bg-red-50", text: "text-amber-600", dot: "bg-amber-400", },
-  approved: { bg: "bg-emerald-50", text: "text-emerald-600", dot: "bg-emerald-400", },
-  rejected: { bg: "bg-red-50", text: "text-red-500", dot: "bg-red-400", },
-};
-
+const statusConfig: Record<string, { bg: string; text: string; dot: string }> =
+  {
+    pending: { bg: "bg-red-50", text: "text-amber-600", dot: "bg-amber-400" },
+    approved: {
+      bg: "bg-emerald-50",
+      text: "text-emerald-600",
+      dot: "bg-emerald-400",
+    },
+    rejected: { bg: "bg-red-50", text: "text-red-500", dot: "bg-red-400" },
+  };
 
 type Props = {
   approvedPath: string;
@@ -77,12 +80,15 @@ export default function LeaveView({
     router.push({ pathname: pathname as any, params: { id: leave.id } });
   };
 
-  if (loading) return <LoadingIndicator message="Loading leave requests..." />;
+  if (loading) return <LoadingIndicator />;
 
   return (
-    <View style={tw`flex-1 ${TW.bgPrimary}`}>
+    <View style={tw`flex-1 bg-white`}>
       {/* Tabs */}
-      <View style={tw`flex-row mx-4 mt-4 rounded-2xl p-1 bg-slate-100`}>
+      <View style={tw`px-4 pt-3`}>
+        <BackButton />
+      </View>
+      <View style={tw`flex-row mx-2 mt-2 rounded-2xl p-1 bg-slate-100`}>
         {(["pending", "approved", "rejected"] as LeaveStatus[]).map((tab) => {
           const isActive = activeTab === tab;
           return (
@@ -146,7 +152,9 @@ export default function LeaveView({
               </View>
 
               {/* Status Badge */}
-              <View style={tw`flex-row items-center px-3 py-1.5 rounded-xl mr-3 ${cfg.bg}`}>
+              <View
+                style={tw`flex-row items-center px-3 py-1.5 rounded-xl mr-3 ${cfg.bg}`}
+              >
                 <View style={tw`h-1.5 w-1.5 rounded-full mr-1.5 ${cfg.dot}`} />
                 <Text style={tw`text-xs font-bold ${cfg.text}`}>
                   {leave.status.toUpperCase()}
