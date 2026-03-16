@@ -1,7 +1,7 @@
 import { Stack } from "expo-router";
-import { supabase } from "../supabase/supabaseClient";
-import { useAuthStore } from "../store/useAuthStore";
 import { useEffect } from "react";
+import { useAuthStore } from "../store/useAuthStore";
+import { supabase } from "../supabase/supabaseClient";
 
 export default function Layout() {
   const restoreSession = useAuthStore((s) => s.restoreSession);
