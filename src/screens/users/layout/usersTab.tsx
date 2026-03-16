@@ -1,5 +1,5 @@
 import * as Location from "expo-location";
-import React, { useEffect } from "react";
+
 import {
   Alert,
   KeyboardAvoidingView,
@@ -10,9 +10,9 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { Tabs, useRouter, usePathname } from "expo-router";
 import { CircleCheck, User } from "lucide-react-native";
-
+import React, { useEffect } from "react";
+import { Tabs, usePathname, useRouter } from "expo-router";
 import {
   formatElapsed,
   formatSinceTime,
@@ -22,16 +22,18 @@ import {
   needsCheckOutCommentNepal,
   parseDate,
 } from "@/src/utils/checkinHelper";
-import { fetchCurrentUserProfleService } from "@/src/services/currentuser.service";
-import { useAuthStore } from "@/src/store/useAuthStore";
-import { useUsersStore } from "@/src/store/useUsersStore";
-import { supabase } from "@/src/supabase/supabaseClient";
+
 import { AttendanceRow } from "@/src/types/attendance";
-import { TW } from "@/theme/twStyles";
-import tw from "twrnc";
 import { MyTabBar } from "./tabBar";
 import ProfileMenu from "../../admin/components/ProfileMenu";
+import { TW } from "@/theme/twStyles";
+import { fetchCurrentUserProfleService } from "@/src/services/currentuser.service";
+import { supabase } from "@/src/supabase/supabaseClient";
+import tw from "twrnc";
 import { useAdminHeaderMenu } from "@/src/hooks/useAdminHeaderMenu";
+import { useAttendanceNotifications } from "@/src/hooks/useAttendanceNotifications";
+import { useAuthStore } from "@/src/store/useAuthStore";
+import { useUsersStore } from "@/src/store/useUsersStore";
 
 /* ─── Nepal date helper ──────────────────────────────────── */
 const NEPAL_OFFSET_MIN = 5 * 60 + 45;
@@ -54,6 +56,7 @@ async function getUserLocationOrThrow() {
 }
 
 export default function UsersTabsLayout() {
+  useAttendanceNotifications();
   const router = useRouter();
   const pathname = usePathname();
   const signOut = useAuthStore((s) => s.signOut);
@@ -421,7 +424,7 @@ export default function UsersTabsLayout() {
                 tw`rounded-t-3xl px-5 pt-4 pb-10`,
                 { backgroundColor: TW.bgPrimary },
               ]}
-              onPress={() => {}}
+              onPress={() => { }}
             >
               <View style={tw`items-center mb-5`}>
                 <View
@@ -459,7 +462,6 @@ export default function UsersTabsLayout() {
                   },
                 ]}
               />
-
               <View style={tw`flex-row gap-3 mt-4`}>
                 <Pressable
                   disabled={isLocked}
