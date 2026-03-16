@@ -5,11 +5,12 @@ import { TW } from "@/theme/twStyles";
 
 import { Mail, User } from "lucide-react-native";
 import { useProfile } from "@/src/hooks/useProfile";
-import ProfileActions from "@/src/components/profile/ProfileActions";
+import ProfileActions from "@/src/components/profile/EditProfile";
 import Section from "@/src/components/profile/Section";
 import InfoRow from "@/src/components/profile/InfoRow";
 import EditProfileModal from "@/src/components/profile/EditProfileModal";
 import ProfileHero from "@/src/components/profile/ProfileHero";
+import LoadingIndicator from "@/src/components/LoadingIndicator";
 
 export default function ProfileScreen() {
   const user = useAuthStore((s) => s.user);
@@ -23,9 +24,7 @@ export default function ProfileScreen() {
     setEditOpen,
     control,
     handleSubmit,
-    reset,
     errors,
-    fetchProfile,
     openEdit,
     onSave,
     onAvatarUpload,
@@ -42,35 +41,25 @@ export default function ProfileScreen() {
           justifyContent: "center",
         }}
       >
-        <ActivityIndicator color={TW.bgSecondary} size="small" />
-        <Text
-          style={{
-            marginTop: 10,
-            fontSize: 13,
-            color: TW.faint,
-            fontWeight: "500",
-          }}
-        >
-          Loading…
-        </Text>
+        <LoadingIndicator />
       </View>
     );
   }
 
   const fullName =
     `${profile?.first_name ?? ""} ${profile?.last_name ?? ""}`.trim();
-  const role = profile?.role;
+  // const role = profile?.role;
 
   return (
     <>
       <ScrollView
-        style={{ flex: 1, backgroundColor: TW.bg }}
+        style={{ flex: 1, backgroundColor: "#ffffff" }}
         contentContainerStyle={{ paddingBottom: 48 }}
         showsVerticalScrollIndicator={false}
       >
         <ProfileHero
           fullName={fullName}
-          role={role}
+          // role={role}
           organizationName={profile?.organization?.name ?? ""}
           avatarUrl={avatarUrl}
           onAvatarUpload={onAvatarUpload}

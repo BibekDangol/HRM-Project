@@ -15,7 +15,7 @@ export const TW = {
   bgPending: "bg-yellow-100 text-yellow-800", // warning yellow
   bgRejected: "bg-red-100 text-red-800", // error red
 
-  DANGER: "text-[#EF4444]",       // strong red
+  DANGER: "#EF4444",       // strong red
   SUCCESS: "text-[#16A34A]",      // strong green
   BORDER: "border-[#EEF2F4]"      // light gray border
 };

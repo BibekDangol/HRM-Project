@@ -1,8 +1,8 @@
+import { TODAY } from "@/src/constants/adminCalendar";
+import { calendarStore, useCalendarStore } from "@/src/utils/adminCalendar";
 import React from "react";
 import { Pressable, Text, View } from "react-native";
 import tw from "twrnc";
-import { calendarStore, useCalendarStore } from "@/src/utils/adminCalendar";
-import { TODAY } from "@/src/constants/adminCalendar";
 
 interface Props {
   date?: {
@@ -31,8 +31,8 @@ export function DayCell({ date, state, marking, onPress }: Props) {
     type === "publicHoliday"
       ? store.colors.publicHoliday
       : type === "weekend"
-      ? store.colors.weekend
-      : store.colors.officeDay;
+        ? store.colors.weekend
+        : store.colors.officeDay;
 
   const cfg = store.days[dateString];
   const hasHoliday = !!cfg?.holidayLabel;
@@ -73,7 +73,7 @@ export function DayCell({ date, state, marking, onPress }: Props) {
         <View
           style={[
             tw`absolute top-1 left-0 right-0 h-8`,
-            { backgroundColor: rangeColor + "30" },
+            { backgroundColor: rangeColor + "100" }, // ← semi-transparent strip
           ]}
         />
       )}
@@ -86,7 +86,7 @@ export function DayCell({ date, state, marking, onPress }: Props) {
             {
               left: isRangeStart ? "50%" : 0,
               right: isRangeEnd ? "50%" : 0,
-              backgroundColor: rangeColor + "30",
+              backgroundColor: rangeColor + "100", // ← same semi-transparent
             },
           ]}
         />
@@ -101,8 +101,8 @@ export function DayCell({ date, state, marking, onPress }: Props) {
             isToday &&
               !isRangeSelected && {
                 borderWidth: 2,
-                borderColor: "#6366F1",
-                backgroundColor: "transparent",
+                borderColor: "#FFB300",
+                // backgroundColor: "transparent",
               },
 
             // Range fill
@@ -132,14 +132,14 @@ export function DayCell({ date, state, marking, onPress }: Props) {
               {
                 fontWeight: type !== "officeDay" ? "700" : "500",
                 color: isDisabled
-                  ? "#d1d5db"
+                  ? "#7a7a7a"
                   : isRangeSelected || hasEvent
-                  ? "white"
-                  : isToday
-                  ? "#6366F1"
-                  : type !== "officeDay"
-                  ? dayColor
-                  : "#0f172a",
+                    ? "white"
+                    : isToday
+                      ? "#F59E0B"
+                      : type !== "officeDay"
+                        ? dayColor
+                        : "#ffffff",
               },
             ]}
           >

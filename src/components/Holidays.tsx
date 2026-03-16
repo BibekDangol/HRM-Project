@@ -1,3 +1,6 @@
+import { useUsersStore } from "@/src/store/useUsersStore";
+import { supabase } from "@/src/supabase/supabaseClient";
+import { Filter } from "lucide-react-native";
 import React, { useCallback, useEffect, useState } from "react";
 import {
   Modal,
@@ -8,10 +11,8 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Filter } from "lucide-react-native";
 import tw from "twrnc";
-import { supabase } from "@/src/supabase/supabaseClient";
-import { useUsersStore } from "@/src/store/useUsersStore";
+import { BackButton } from "./BackButton";
 
 type FilterType = "all" | "holiday" | "event";
 
@@ -48,7 +49,6 @@ const formatDay = (d: string) => {
   };
 };
 
-// ── Single row ────────────────────────────────────────────────
 const CalendarRow = ({ item }: { item: CalendarItem }) => {
   const { day, month, weekday } = formatDay(item.start_date);
 
@@ -68,7 +68,6 @@ const CalendarRow = ({ item }: { item: CalendarItem }) => {
         elevation: 2,
       }}
     >
-      {/* Date box */}
       <View
         style={{
           width: 56,
@@ -106,7 +105,6 @@ const CalendarRow = ({ item }: { item: CalendarItem }) => {
         </Text>
       </View>
 
-      {/* Info */}
       <View style={{ flex: 1 }}>
         <Text
           style={{ color: "#1B4A5A", fontSize: 15, fontWeight: "700" }}
@@ -119,7 +117,6 @@ const CalendarRow = ({ item }: { item: CalendarItem }) => {
         </Text>
       </View>
 
-      {/* Type pill */}
       <View
         style={{
           backgroundColor: "#F1F5F9",
@@ -133,7 +130,7 @@ const CalendarRow = ({ item }: { item: CalendarItem }) => {
           style={{
             fontSize: 11,
             fontWeight: "600",
-            color: item.type === "holiday" ? "#EF4444" : "#3B82F6", // ← only here
+            color: item.type === "holiday" ? "#EF4444" : "#3B82F6",
           }}
         >
           {item.type === "holiday" ? "Holiday" : "Event"}
@@ -143,7 +140,6 @@ const CalendarRow = ({ item }: { item: CalendarItem }) => {
   );
 };
 
-// ── Empty state ───────────────────────────────────────────────
 const EmptyState = ({ label }: { label: string }) => (
   <View
     style={{
@@ -157,7 +153,6 @@ const EmptyState = ({ label }: { label: string }) => (
   </View>
 );
 
-// ── Main screen ───────────────────────────────────────────────
 export default function HolidaysEventsScreen() {
   const insets = useSafeAreaInsets();
   const { userProfile } = useUsersStore();
@@ -238,7 +233,22 @@ export default function HolidaysEventsScreen() {
             marginBottom: 16,
           }}
         >
-          <Text style={{ color: "#64748B", fontSize: 13 }}>
+          {/* Back button */}
+          <BackButton
+            color="#64748B"
+            backgroundColor="#F1F5F9"
+            style={{ marginLeft: 0 }}
+          />
+
+          {/* Count label (centered) */}
+          <Text
+            style={{
+              color: "#64748B",
+              fontSize: 13,
+              flex: 1,
+              textAlign: "center",
+            }}
+          >
             <Text style={{ color: "#0F172A", fontWeight: "700" }}>
               {filtered.length}
             </Text>
@@ -250,7 +260,7 @@ export default function HolidaysEventsScreen() {
                 : "events"}
           </Text>
 
-          {/* Filter icon only */}
+          {/* Filter icon */}
           <Pressable
             onPress={() => setFilterModalOpen(true)}
             style={({ pressed }) => ({
@@ -303,7 +313,6 @@ export default function HolidaysEventsScreen() {
               paddingBottom: insets.bottom + 24,
             }}
           >
-            {/* Handle */}
             <View style={{ alignItems: "center", marginBottom: 20 }}>
               <View
                 style={{
@@ -357,7 +366,6 @@ export default function HolidaysEventsScreen() {
                     {opt.label}
                   </Text>
 
-                  {/* Checkmark */}
                   {isActive && (
                     <View
                       style={{

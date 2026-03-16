@@ -204,7 +204,7 @@ export default function LeavesScreen() {
   }
 
   return (
-    <View style={tw`flex-1 bg-[#F8FAFC]`}>
+    <View style={tw`flex-1 bg-white`}>
       <FlatList
         data={filteredLeaves}
         keyExtractor={(item) => item.id}
@@ -218,27 +218,22 @@ export default function LeavesScreen() {
         contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 100 }}
         // ── Header: balance + tabs ────────────────────────────
         ListHeaderComponent={
-          <View>
-            {error && (
-              <Text style={tw`text-red-500 text-xs mt-2 mb-1`}>
-                Error: {error}
+          <View style={tw`items-center justify-between mb-4`}>
+            <View>
+              {/* Balance label */}
+              <Text
+                style={{
+                  color: "#94A3B8",
+                  fontSize: 11,
+                  fontWeight: "700",
+                  letterSpacing: 1.2,
+                  marginTop: 20,
+                  marginBottom: 12,
+                }}
+              >
+                LEAVE BALANCE
               </Text>
-            )}
-
-            {/* Balance label */}
-            <Text
-              style={{
-                color: "#94A3B8",
-                fontSize: 11,
-                fontWeight: "700",
-                letterSpacing: 1.2,
-                marginTop: 20,
-                marginBottom: 12,
-              }}
-            >
-              LEAVE BALANCE
-            </Text>
-
+            </View>
             {/* Balance cards */}
             <FlatList
               data={stats}
@@ -251,6 +246,8 @@ export default function LeavesScreen() {
                   style={{
                     backgroundColor: "#FFFFFF",
                     borderRadius: 16,
+                    borderColor: "#E2E8F0",
+                    borderWidth: 1,
                     paddingVertical: 18,
                     paddingHorizontal: 20,
                     minWidth: 100,
@@ -287,40 +284,42 @@ export default function LeavesScreen() {
             />
 
             {/* Filter tabs */}
-            <View
-              style={{
-                flexDirection: "row",
-                marginTop: 24,
-                marginBottom: 16,
-                borderBottomWidth: 1,
-                borderBottomColor: "#E2E8F0",
-              }}
-            >
-              {TABS.map((tab) => {
-                const isActive = activeTab === tab.key;
-                return (
-                  <Pressable
-                    key={tab.key}
-                    onPress={() => setActiveTab(tab.key)}
-                    style={{
-                      marginRight: 24,
-                      paddingBottom: 12,
-                      borderBottomWidth: isActive ? 2 : 0,
-                      borderBottomColor: PRIMARY,
-                    }}
-                  >
-                    <Text
+            <View style={tw`w-full`}>
+              <View
+                style={{
+                  flexDirection: "row",
+                  marginTop: 24,
+                  marginBottom: 16,
+                  borderBottomWidth: 1,
+                  borderBottomColor: "#E2E8F0",
+                }}
+              >
+                {TABS.map((tab) => {
+                  const isActive = activeTab === tab.key;
+                  return (
+                    <Pressable
+                      key={tab.key}
+                      onPress={() => setActiveTab(tab.key)}
                       style={{
-                        fontSize: 14,
-                        fontWeight: isActive ? "700" : "500",
-                        color: isActive ? "#0F172A" : "#94A3B8",
+                        marginRight: 24,
+                        paddingBottom: 12,
+                        borderBottomWidth: isActive ? 2 : 0,
+                        borderBottomColor: PRIMARY,
                       }}
                     >
-                      {tab.label}
-                    </Text>
-                  </Pressable>
-                );
-              })}
+                      <Text
+                        style={{
+                          fontSize: 14,
+                          fontWeight: isActive ? "700" : "500",
+                          color: isActive ? "#0F172A" : "#94A3B8",
+                        }}
+                      >
+                        {tab.label}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
             </View>
           </View>
         }
@@ -472,7 +471,7 @@ export default function LeavesScreen() {
 
       {/* ── FAB ── */}
       <Pressable
-        onPress={() => router.push("/(users)/leaves/calendar/apply")}
+        onPress={() => router.push("/(users)/leaves/calendar")}
         style={({ pressed }) => ({
           position: "absolute",
           bottom: 24,

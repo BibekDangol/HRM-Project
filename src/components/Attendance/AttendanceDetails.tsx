@@ -8,6 +8,7 @@ import { TW } from "@/theme/twStyles";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import tw from "twrnc";
+import { BackButton } from "../BackButton";
 
 type Props = {
   userId: string;

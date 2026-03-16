@@ -1,3 +1,3 @@
-import LeaveCalendarScreen from "@/src/screens/users/leaves/calendar/calendar";
+import ApplyLeaveScreen from "./apply";
 
-export default LeaveCalendarScreen;
+export default ApplyLeaveScreen;

@@ -14,7 +14,7 @@ export default function Section({ title, children }: Props) {
         style={{
           fontSize: 11,
           fontWeight: "700",
-          color: TW.faint,
+          color: "#",
           letterSpacing: 0.9,
           textTransform: "uppercase",
           marginBottom: 8,
@@ -30,7 +30,7 @@ export default function Section({ title, children }: Props) {
             borderRadius: 16,
             backgroundColor: TW.bgPrimary,
             borderWidth: 1,
-            borderColor: TW.BORDER,
+            borderColor: "#fff",
           },
           Platform.OS === "ios"
             ? {

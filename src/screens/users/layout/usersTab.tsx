@@ -1,16 +1,4 @@
 import * as Location from "expo-location";
-
-import {
-  formatElapsed,
-  formatSinceTime,
-  getAttendanceStatus,
-  getErrorMessage,
-  needsCheckInCommentNepal,
-  needsCheckOutCommentNepal,
-  parseDate,
-} from "@/src/utils/checkinHelper";
-import { Tabs, useRouter } from "expo-router";
-import { CircleCheck, LogOut, User, UserCircle } from "lucide-react-native";
 import React, { useEffect } from "react";
 import {
   Alert,
@@ -22,7 +10,18 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { Tabs, useRouter, usePathname } from "expo-router";
+import { CircleCheck, User } from "lucide-react-native";
 
+import {
+  formatElapsed,
+  formatSinceTime,
+  getAttendanceStatus,
+  getErrorMessage,
+  needsCheckInCommentNepal,
+  needsCheckOutCommentNepal,
+  parseDate,
+} from "@/src/utils/checkinHelper";
 import { fetchCurrentUserProfleService } from "@/src/services/currentuser.service";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { useUsersStore } from "@/src/store/useUsersStore";
@@ -31,6 +30,8 @@ import { AttendanceRow } from "@/src/types/attendance";
 import { TW } from "@/theme/twStyles";
 import tw from "twrnc";
 import { MyTabBar } from "./tabBar";
+import ProfileMenu from "../../admin/components/ProfileMenu";
+import { useAdminHeaderMenu } from "@/src/hooks/useAdminHeaderMenu";
 
 /* ─── Nepal date helper ──────────────────────────────────── */
 const NEPAL_OFFSET_MIN = 5 * 60 + 45;
@@ -54,26 +55,24 @@ async function getUserLocationOrThrow() {
 
 export default function UsersTabsLayout() {
   const router = useRouter();
+  const pathname = usePathname();
   const signOut = useAuthStore((s) => s.signOut);
 
-  const [menuOpen, setMenuOpen] = React.useState(false);
   const [checkOpen, setCheckOpen] = React.useState(false);
+  const menu = useAdminHeaderMenu();
 
   const [loadingAttendance, setLoadingAttendance] = React.useState(false);
-  const [attendance, setAttendance] = React.useState<AttendanceRow | null>(
-    null,
-  );
+  const [attendance, setAttendance] = React.useState<AttendanceRow | null>(null);
 
   const [checkedInAt, setCheckedInAt] = React.useState<Date | null>(null);
   const [now, setNow] = React.useState<number>(() => Date.now());
 
   const [commentModalOpen, setCommentModalOpen] = React.useState(false);
   const [commentText, setCommentText] = React.useState("");
-  const [commentMode, setCommentMode] = React.useState<
-    "checkin" | "checkout" | null
-  >(null);
+  const [commentMode, setCommentMode] = React.useState<"checkin" | "checkout" | null>(null);
 
   const checkActionLockRef = React.useRef(false);
+
   const runOnce = React.useCallback(async (fn: () => Promise<void>) => {
     if (checkActionLockRef.current) return;
     checkActionLockRef.current = true;
@@ -95,9 +94,9 @@ export default function UsersTabsLayout() {
   }, [checkedInAt]);
 
   const closeAllMenus = React.useCallback(() => {
-    setMenuOpen(false);
     setCheckOpen(false);
-  }, []);
+    menu.close?.();
+  }, [menu]);
 
   const { setUserProfile } = useUsersStore();
 
@@ -106,12 +105,14 @@ export default function UsersTabsLayout() {
       const {
         data: { user },
       } = await supabase.auth.getUser();
+
       if (!user) return;
       const profile = await fetchCurrentUserProfleService(user.id);
       setUserProfile(profile);
     };
+
     loadCurrentUser();
-  }, []);
+  }, [setUserProfile]);
 
   /* ─── Attendance logic ───────────────────────────────────── */
   const fetchLatestAttendance = React.useCallback(async () => {
@@ -121,7 +122,9 @@ export default function UsersTabsLayout() {
         data: { user },
         error: userErr,
       } = await supabase.auth.getUser();
+
       if (userErr) throw userErr;
+
       if (!user) {
         setAttendance(null);
         setCheckedInAt(null);
@@ -131,7 +134,7 @@ export default function UsersTabsLayout() {
       const { data, error } = await supabase
         .from("attendance")
         .select(
-          "id,user_id,date,check_in_time,check_out_time,status,check_in_comment,check_out_comment,check_in_lat,check_in_lng,check_out_lat,check_out_lng",
+          "id,user_id,date,check_in_time,check_out_time,status,check_in_comment,check_out_comment,check_in_lat,check_in_lng,check_out_lat,check_out_lng"
         )
         .eq("user_id", user.id)
         .order("check_in_time", { ascending: false })
@@ -139,8 +142,10 @@ export default function UsersTabsLayout() {
         .maybeSingle();
 
       if (error) throw error;
+
       const row = (data as AttendanceRow | null) ?? null;
       setAttendance(row);
+
       const inAt = parseDate(row?.check_in_time);
       if (row?.status === "incomplete" && inAt) setCheckedInAt(inAt);
       else setCheckedInAt(null);
@@ -155,13 +160,14 @@ export default function UsersTabsLayout() {
     const { data, error } = await supabase
       .from("attendance")
       .select(
-        "id,user_id,date,check_in_time,check_out_time,status,check_in_comment,check_out_comment,check_in_lat,check_in_lng,check_out_lat,check_out_lng",
+        "id,user_id,date,check_in_time,check_out_time,status,check_in_comment,check_out_comment,check_in_lat,check_in_lng,check_out_lat,check_out_lng"
       )
       .eq("user_id", userId)
       .is("check_out_time", null)
       .order("check_in_time", { ascending: false })
       .limit(1)
       .maybeSingle();
+
     if (error) throw error;
     return (data as AttendanceRow | null) ?? null;
   }, []);
@@ -171,6 +177,7 @@ export default function UsersTabsLayout() {
       data: { user },
       error: userErr,
     } = await supabase.auth.getUser();
+
     if (userErr) throw userErr;
     if (!user) throw new Error("Not authenticated.");
 
@@ -185,10 +192,12 @@ export default function UsersTabsLayout() {
       .maybeSingle();
 
     if (todayErr) throw todayErr;
+
     if (today?.status === "present") {
       Alert.alert("Already completed", "You already checked in & out today.");
       return;
     }
+
     if (today?.status === "incomplete") {
       Alert.alert("Already checked in", "You can't check in twice today.");
       return;
@@ -210,14 +219,15 @@ export default function UsersTabsLayout() {
           check_out_lat: null,
           check_out_lng: null,
         },
-        { onConflict: "user_id,date" },
+        { onConflict: "user_id,date" }
       )
       .select(
-        "id,user_id,date,check_in_time,check_out_time,status,check_in_comment,check_out_comment,check_in_lat,check_in_lng,check_out_lat,check_out_lng",
+        "id,user_id,date,check_in_time,check_out_time,status,check_in_comment,check_out_comment,check_in_lat,check_in_lng,check_out_lat,check_out_lng"
       )
       .single();
 
     if (error) throw error;
+
     const row = data as AttendanceRow;
     setAttendance(row);
     setCheckedInAt(parseDate(row.check_in_time));
@@ -229,6 +239,7 @@ export default function UsersTabsLayout() {
         data: { user },
         error: userErr,
       } = await supabase.auth.getUser();
+
       if (userErr) throw userErr;
       if (!user) throw new Error("Not authenticated.");
 
@@ -238,7 +249,7 @@ export default function UsersTabsLayout() {
       if (!openRow) {
         Alert.alert(
           "No open session",
-          "You haven't checked in yet (or already checked out).",
+          "You haven't checked in yet (or already checked out)."
         );
         return;
       }
@@ -254,16 +265,17 @@ export default function UsersTabsLayout() {
         })
         .eq("id", openRow.id)
         .select(
-          "id,user_id,date,check_in_time,check_out_time,status,check_out_comment,check_in_comment,check_in_lat,check_in_lng,check_out_lat,check_out_lng",
+          "id,user_id,date,check_in_time,check_out_time,status,check_out_comment,check_in_comment,check_in_lat,check_in_lng,check_out_lat,check_out_lng"
         )
         .single();
 
       if (error) throw error;
+
       const row = data as AttendanceRow;
       setAttendance(row);
       setCheckedInAt(null);
     },
-    [getAnyOpenAttendanceRow],
+    [getAnyOpenAttendanceRow]
   );
 
   React.useEffect(() => {
@@ -284,6 +296,7 @@ export default function UsersTabsLayout() {
     return runOnce(async () => {
       const comment = commentText.trim();
       if (!commentMode) return;
+
       if (!comment) {
         Alert.alert("Comment required", "Please enter a comment.");
         return;
@@ -291,6 +304,7 @@ export default function UsersTabsLayout() {
 
       try {
         setLoadingAttendance(true);
+
         if (commentMode === "checkin") await checkIn(comment);
         else await checkOut(comment);
 
@@ -305,14 +319,7 @@ export default function UsersTabsLayout() {
         setLoadingAttendance(false);
       }
     });
-  }, [
-    runOnce,
-    commentText,
-    commentMode,
-    checkIn,
-    checkOut,
-    fetchLatestAttendance,
-  ]);
+  }, [runOnce, commentText, commentMode, checkIn, checkOut, fetchLatestAttendance]);
 
   const onToggleCheck = React.useCallback(() => {
     return runOnce(async () => {
@@ -323,6 +330,7 @@ export default function UsersTabsLayout() {
           data: { user },
           error: userErr,
         } = await supabase.auth.getUser();
+
         if (userErr) throw userErr;
         if (!user) throw new Error("Not authenticated.");
 
@@ -330,20 +338,23 @@ export default function UsersTabsLayout() {
 
         if (!isCheckedIn) {
           const anyOpen = await getAnyOpenAttendanceRow(user.id);
+
           if (anyOpen?.status === "incomplete") {
             Alert.alert(
               "Already checked in",
-              `You still have an open session from ${anyOpen.date}. Please check out first.`,
+              `You still have an open session from ${anyOpen.date}. Please check out first.`
             );
             setCheckOpen(false);
             return;
           }
+
           if (needsCheckInCommentNepal(nowDate)) {
             setCommentMode("checkin");
             setCommentText("");
             setCommentModalOpen(true);
             return;
           }
+
           setLoadingAttendance(true);
           await checkIn();
           setCheckOpen(false);
@@ -356,6 +367,7 @@ export default function UsersTabsLayout() {
           setCommentModalOpen(true);
           return;
         }
+
         setLoadingAttendance(true);
         await checkOut();
         setCheckOpen(false);
@@ -380,7 +392,6 @@ export default function UsersTabsLayout() {
 
   return (
     <>
-      {/* ─── Comment Modal ─────────────────────────────────── */}
       <Modal
         transparent
         visible={commentModalOpen}
@@ -410,9 +421,8 @@ export default function UsersTabsLayout() {
                 tw`rounded-t-3xl px-5 pt-4 pb-10`,
                 { backgroundColor: TW.bgPrimary },
               ]}
-              onPress={() => { }}
+              onPress={() => {}}
             >
-              {/* Handle — TW.bgSecondary teal */}
               <View style={tw`items-center mb-5`}>
                 <View
                   style={[
@@ -422,13 +432,10 @@ export default function UsersTabsLayout() {
                 />
               </View>
 
-              <Text
-                style={[tw`text-xl font-bold mb-1`, { color: TW.bgSecondary }]}
-              >
-                {commentMode === "checkin"
-                  ? "Late Check-in"
-                  : "Early Check-out"}
+              <Text style={[tw`text-xl font-bold mb-1`, { color: TW.bgSecondary }]}>
+                {commentMode === "checkin" ? "Late Check-in" : "Early Check-out"}
               </Text>
+
               <Text style={[tw`text-sm mb-5`, { color: TW.textSecondary }]}>
                 Please provide a reason to continue.
               </Text>
@@ -454,7 +461,6 @@ export default function UsersTabsLayout() {
               />
 
               <View style={tw`flex-row gap-3 mt-4`}>
-                {/* Cancel — neutral */}
                 <Pressable
                   disabled={isLocked}
                   onPress={() => {
@@ -471,14 +477,11 @@ export default function UsersTabsLayout() {
                     },
                   ]}
                 >
-                  <Text
-                    style={[tw`font-bold text-sm`, { color: TW.bgSecondary }]}
-                  >
+                  <Text style={[tw`font-bold text-sm`, { color: TW.bgSecondary }]}>
                     Cancel
                   </Text>
                 </Pressable>
 
-                {/* Submit — TW.textTertiary orange */}
                 <Pressable
                   disabled={isLocked || commentText.trim().length === 0}
                   onPress={submitComment}
@@ -503,19 +506,29 @@ export default function UsersTabsLayout() {
         </Pressable>
       </Modal>
 
-      {/* ─── Tabs ─────────────────────────────────────────── */}
       <Tabs
         screenOptions={{
           headerShown: true,
           headerTitleAlign: "center",
-          headerStyle: { backgroundColor: TW.bgSecondary }, // TW.bgSecondary deep teal
+          sceneStyle: {
+            backgroundColor: pathname?.includes("/profile")
+              ? TW.bgSecondary
+              : "#ffffff",
+          },
+          headerStyle: {
+            backgroundColor: TW.bgSecondary,
+            borderBottomLeftRadius: 30,
+            borderBottomRightRadius: 30,
+            height: 100,
+          },
           headerTitleStyle: {
             color: "#ffffff",
-            fontWeight: "bold" as const,
+            fontWeight: "bold",
             fontSize: 16,
             paddingBottom: 8,
           },
           headerShadowVisible: false,
+
           headerRight: () => (
             <View
               style={[
@@ -523,20 +536,18 @@ export default function UsersTabsLayout() {
                 { marginRight: 16, marginBottom: 8 },
               ]}
             >
-              {/* ── Check in/out dot ── */}
+              {/* Check in/out */}
               <View style={{ position: "relative" }}>
                 <Pressable
                   disabled={isLocked}
                   onPress={() => {
                     if (isLocked) return;
-                    setMenuOpen(false);
+                    menu.close?.();
                     setCheckOpen((v) => !v);
                   }}
                   style={({ pressed }) => [
                     tw`h-8 w-8 rounded-full items-center justify-center`,
-                    {
-                      opacity: pressed || isLocked ? 0.7 : 1,
-                    },
+                    { opacity: pressed || isLocked ? 0.7 : 1 },
                   ]}
                   hitSlop={10}
                 >
@@ -549,7 +560,6 @@ export default function UsersTabsLayout() {
                 </Pressable>
 
                 {checkOpen && (
-                  // ── Outer: shadow only, no overflow hidden ──
                   <View
                     style={{
                       position: "absolute",
@@ -557,23 +567,20 @@ export default function UsersTabsLayout() {
                       top: 46,
                       width: 180,
                       borderRadius: 16,
-                      // iOS shadow
                       shadowColor: "#000",
                       shadowOffset: { width: 0, height: 4 },
                       shadowOpacity: 0.12,
                       shadowRadius: 12,
-                      // Android shadow
                       elevation: 8,
-                      backgroundColor: "#ffffff", // required for elevation to work
+                      backgroundColor: "#ffffff",
                     }}
                   >
-                    {/* ── Inner: clips border radius, no shadow ── */}
                     <View
                       style={{
                         borderRadius: 16,
                         borderWidth: 1,
                         borderColor: TW.BORDER,
-                        overflow: "hidden", // safe here — shadow is on parent
+                        overflow: "hidden",
                         backgroundColor: "#ffffff",
                       }}
                     >
@@ -591,8 +598,7 @@ export default function UsersTabsLayout() {
                               color: TW.textPrimary,
                             }}
                           >
-                            Since{" "}
-                            {checkedInAt ? formatSinceTime(checkedInAt) : "--"}
+                            Since {checkedInAt ? formatSinceTime(checkedInAt) : "--"}
                           </Text>
 
                           <Text
@@ -662,98 +668,39 @@ export default function UsersTabsLayout() {
                 )}
               </View>
 
-              {/* ── Profile button ── */}
-              <View style={{ position: "relative" }}>
+              {/* Profile button + ProfileMenu */}
+              <View style={{ marginRight: 0, position: "relative" }}>
                 <Pressable
                   disabled={isLocked}
                   onPress={() => {
                     if (isLocked) return;
                     setCheckOpen(false);
-                    setMenuOpen((v) => !v);
+                    menu.toggle();
                   }}
-                  style={({ pressed }) => [
-                    tw`h-9 w-9 rounded-full items-center justify-center border-2`,
-                    {
-                      borderColor: "rgba(255,255,255,0.5)",
-                      backgroundColor: "rgba(255,255,255,0.15)",
-                      opacity: pressed || isLocked ? 0.75 : 1,
-                    },
-                  ]}
+                  style={({ pressed }) => ({
+                    height: 36,
+                    width: 36,
+                    borderRadius: 18,
+                    backgroundColor: "rgba(255,255,255,0.15)",
+                    borderWidth: 2,
+                    borderColor: "rgba(255,255,255,0.5)",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    opacity: pressed || isLocked ? 0.75 : 1,
+                  })}
                   hitSlop={10}
                 >
                   <User size={17} color="#ffffff" />
                 </Pressable>
 
-                {menuOpen && (
-                  <View
-                    style={{
-                      position: "absolute",
-                      right: 0,
-                      top: 48,
-                      width: 164,
-                      backgroundColor: "#ffffff",
-                      borderRadius: 16,
-                      borderWidth: 1,
-                      borderColor: TW.BORDER,
-                      shadowColor: "#000",
-                      shadowOffset: { width: 0, height: 6 },
-                      shadowOpacity: 0.1,
-                      shadowRadius: 14,
-                      elevation: 8,
-                      overflow: "hidden",
-                    }}
-                  >
-                    <Pressable
-                      disabled={isLocked}
-                      onPress={() => {
-                        if (isLocked) return;
-                        setMenuOpen(false);
-                        router.push("/(users)/profile");
-                      }}
-                      style={({ pressed }) => [
-                        tw`flex-row items-center gap-3 px-4 py-3.5`,
-                        (pressed || isLocked) && { opacity: 0.7 },
-                      ]}
-                    >
-                      <UserCircle size={17} color={TW.bgSecondary} />
-                      <Text
-                        style={[
-                          tw`font-semibold text-sm`,
-                          { color: TW.bgSecondary },
-                        ]}
-                      >
-                        Profile
-                      </Text>
-                    </Pressable>
-
-                    <View
-                      style={{
-                        height: 1,
-                        backgroundColor: TW.BORDER,
-                        marginHorizontal: 12,
-                      }}
-                    />
-
-                    <Pressable
-                      disabled={isLocked}
-                      onPress={onLogout}
-                      style={({ pressed }) => [
-                        tw`flex-row items-center gap-3 px-4 py-3.5`,
-                        (pressed || isLocked) && { opacity: 0.7 },
-                      ]}
-                    >
-                      <LogOut size={17} color={TW.DANGER} />
-                      <Text
-                        style={[
-                          tw`font-semibold text-sm`,
-                          { color: TW.DANGER },
-                        ]}
-                      >
-                        Logout
-                      </Text>
-                    </Pressable>
-                  </View>
-                )}
+                <ProfileMenu
+                  open={menu.open}
+                  onProfile={() => {
+                    menu.close?.();
+                    router.push("/(users)/profile");
+                  }}
+                  onLogout={onLogout}
+                />
               </View>
             </View>
           ),

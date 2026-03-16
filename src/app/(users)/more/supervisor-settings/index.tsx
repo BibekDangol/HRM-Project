@@ -1,3 +1,3 @@
-import SupervisorSettings from "@/src/screens/users/more/supervisor-settings";
+import SupervisorSettings from "@/src/screens/users/more";
 
-export default SupervisorSettings
+export default SupervisorSettings;

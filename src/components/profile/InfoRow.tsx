@@ -28,10 +28,10 @@ export default function InfoRow({
         alignItems: "center",
         paddingHorizontal: 16,
         paddingVertical: 13,
-        backgroundColor: TW.bgPrimary,
+        backgroundColor: "#ffffff",
         opacity: pressed && onPress && !locked ? 0.6 : 1,
-        borderBottomWidth: isLast ? 0 : 1,
-        borderBottomColor: TW.BORDER,
+        borderBottomWidth: isLast ? 0 : 0.5,
+        borderBottomColor: "#E5E7EB", 
       })}
     >
       <View
@@ -53,7 +53,7 @@ export default function InfoRow({
           style={{
             fontSize: 11,
             fontWeight: "600",
-            color: TW.faint,
+            color: "#D3D3D3 ",
             letterSpacing: 0.3,
             marginBottom: 2,
           }}
@@ -64,7 +64,7 @@ export default function InfoRow({
           style={{
             fontSize: 14,
             fontWeight: "500",
-            color: locked ? TW.faint : TW.bgSecondary,
+            color: locked ? "#D3D3D3 " : TW.bgSecondary,
             letterSpacing: 0.1,
           }}
           numberOfLines={1}
@@ -74,9 +74,9 @@ export default function InfoRow({
       </View>
 
       {locked ? (
-        <Lock size={13} color={TW.faint} strokeWidth={1.6} />
+        <Lock size={13} color={"#6B7280"} strokeWidth={1.6} />
       ) : onPress ? (
-        <ChevronRight size={15} color={TW.faint} strokeWidth={1.6} />
+        <ChevronRight size={15} color={"#6B7280"} strokeWidth={1.6} />
       ) : null}
     </Pressable>
   );
