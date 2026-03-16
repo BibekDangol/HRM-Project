@@ -1,7 +1,7 @@
-import React from "react";
-import { Platform, Pressable, Text } from "react-native";
-import { Pencil } from "lucide-react-native";
 import { TW } from "@/theme/twStyles";
+import { Pencil } from "lucide-react-native";
+import React from "react";
+import { Platform, Pressable } from "react-native";
 
 type Props = {
   onEdit: () => void;
@@ -13,12 +13,12 @@ export default function ProfileActions({ onEdit }: Props) {
       onPress={onEdit}
       style={({ pressed }) => ({
         flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "center",
+        alignSelf: "flex-end",
+        justifyContent: "flex-end",
         gap: 8,
-        backgroundColor: TW.textTertiary,
-        borderRadius: 14,
-        paddingVertical: 14,
+        backgroundColor: "#FFB300",
+        borderRadius: 24,
+        padding: 14, // background only around icon
         marginBottom: 24,
         opacity: pressed ? 0.82 : 1,
         ...Platform.select({
@@ -32,17 +32,7 @@ export default function ProfileActions({ onEdit }: Props) {
         }),
       })}
     >
-      <Pencil size={15} color="#fff" strokeWidth={2} />
-      <Text
-        style={{
-          color: "#fff",
-          fontWeight: "700",
-          fontSize: 15,
-          letterSpacing: 0.2,
-        }}
-      >
-        Edit Profile
-      </Text>
+      <Pencil size={18} color="#fff" strokeWidth={2} />
     </Pressable>
   );
 }

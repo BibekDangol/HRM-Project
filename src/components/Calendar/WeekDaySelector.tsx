@@ -8,7 +8,7 @@ export function WeekdaySelector() {
   const offColor = store.colors.weekend;
   const selectedCount = DAY_OPTIONS.filter(
     (day) => store.weekendRules[day.key],
-  ).length;
+  ).length; 
 
   return (
     <View style={tw`px-4 py-4`}>

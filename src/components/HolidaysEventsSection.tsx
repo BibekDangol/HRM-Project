@@ -12,6 +12,7 @@ import {
 
 import { ChevronRight } from "lucide-react-native";
 import tw from "twrnc";
+import { TW } from "@/theme/twStyles";
 
 export type CalendarItem = {
   id: string;
@@ -146,11 +147,11 @@ export const HolidaysEventsSection = ({
             paddingHorizontal: 2,
           })}
         >
-          <Text style={{ color: FIXED_COLOR, fontSize: 13, fontWeight: "600" }}>
+          <Text style={{ color: TW.bgSecondary, fontSize: 13, fontWeight: "600",  }}>
             View All
             {hasMore ? ` (${calendarItems.length})` : ""}
           </Text>
-          <ChevronRight size={14} color={FIXED_COLOR} strokeWidth={2.5} />
+          <ChevronRight size={14} color={TW.bgSecondary} strokeWidth={2.5} />
         </Pressable>
       </View>
 
@@ -196,7 +197,6 @@ export const HolidaysEventsSection = ({
               const isCurrentCard = index === currentIndex;
 
               return (
-                // ← View instead of Pressable, no onPress
                 <View
                   key={item.id}
                   style={{

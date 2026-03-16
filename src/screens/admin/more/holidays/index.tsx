@@ -1,6 +1,5 @@
 import React, { useCallback, useMemo, useState } from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
-import { Calendar } from "react-native-calendars";
 import { SafeAreaView } from "react-native-safe-area-context";
 import tw from "twrnc";
 
@@ -11,13 +10,12 @@ import {
   useCalendarStore,
 } from "@/src/utils/adminCalendar";
 
-import { SettingsModal } from "@/src/components/Calendar/adminCalendar";
+// import { SettingsModal } from "@/src/components/Calendar/SettingsModal";
 import { CalendarHeader } from "@/src/components/Calendar/CalendarHeader";
-import { CalendarLegend } from "@/src/components/Calendar/CalendarLegend";
 import { DayCell } from "@/src/components/Calendar/DayCell";
 import { HolidayRangeModal } from "@/src/components/Calendar/HolidayRangeModal";
-import { MonthEventList } from "@/src/components/Calendar/MonthEventList";
-import { MonthStats } from "@/src/components/Calendar/MonthStats";
+import { SharedCalendar } from "@/src/components/SharedCalendar";
+import { TW } from "@/theme/twStyles";
 
 interface Props {
   currentUserId: string;
@@ -97,58 +95,58 @@ export default function AdminCalendarScreen({
     return base;
   }, [year, month, rangeStart, rangeEnd, store.colors.publicHoliday]);
 
-  const monthItems = useMemo(() => {
-    const prefix = `${year}-${String(month).padStart(2, "0")}`;
-    const dayCfgs = Object.entries(store.days)
-      .filter(([k]) => k.startsWith(prefix))
-      .sort(([a], [b]) => a.localeCompare(b));
+  // const monthItems = useMemo(() => {
+  //   const prefix = `${year}-${String(month).padStart(2, "0")}`;
+  //   const dayCfgs = Object.entries(store.days)
+  //     .filter(([k]) => k.startsWith(prefix))
+  //     .sort(([a], [b]) => a.localeCompare(b));
 
-    const result: any[] = [];
+  //   const result: any[] = [];
 
-    // Holidays
-    const holidayMap: Record<string, { start: string; end: string }> = {};
-    for (const [key, cfg] of dayCfgs) {
-      if (!cfg.holidayLabel) continue;
-      const label = cfg.holidayLabel;
-      if (!holidayMap[label]) holidayMap[label] = { start: key, end: key };
-      else holidayMap[label].end = key;
-    }
-    for (const [label, { start, end }] of Object.entries(holidayMap)) {
-      result.push({
-        key: start,
-        endKey: start === end ? undefined : end,
-        label,
-        color: store.colors.publicHoliday,
-        tag: "Holiday",
-      });
-    }
+  //   // Holidays
+  //   const holidayMap: Record<string, { start: string; end: string }> = {};
+  //   for (const [key, cfg] of dayCfgs) {
+  //     if (!cfg.holidayLabel) continue;
+  //     const label = cfg.holidayLabel;
+  //     if (!holidayMap[label]) holidayMap[label] = { start: key, end: key };
+  //     else holidayMap[label].end = key;
+  //   }
+  //   for (const [label, { start, end }] of Object.entries(holidayMap)) {
+  //     result.push({
+  //       key: start,
+  //       endKey: start === end ? undefined : end,
+  //       label,
+  //       color: store.colors.publicHoliday,
+  //       tag: "Holiday",
+  //     });
+  //   }
 
-    // Events
-    const eventMap: Record<
-      string,
-      { start: string; end: string; color: string }
-    > = {};
-    for (const [key, cfg] of dayCfgs) {
-      for (const ev of cfg.events ?? []) {
-        const mapKey = `${ev.label}__${ev.color}`;
-        if (!eventMap[mapKey])
-          eventMap[mapKey] = { start: key, end: key, color: ev.color };
-        else eventMap[mapKey].end = key;
-      }
-    }
-    for (const [mapKey, { start, end, color }] of Object.entries(eventMap)) {
-      const label = mapKey.split("__")[0];
-      result.push({
-        key: start,
-        endKey: start === end ? undefined : end,
-        label,
-        color,
-        tag: "Event",
-      });
-    }
+  //   // Events
+  //   const eventMap: Record<
+  //     string,
+  //     { start: string; end: string; color: string }
+  //   > = {};
+  //   for (const [key, cfg] of dayCfgs) {
+  //     for (const ev of cfg.events ?? []) {
+  //       const mapKey = `${ev.label}__${ev.color}`;
+  //       if (!eventMap[mapKey])
+  //         eventMap[mapKey] = { start: key, end: key, color: ev.color };
+  //       else eventMap[mapKey].end = key;
+  //     }
+  //   }
+  //   for (const [mapKey, { start, end, color }] of Object.entries(eventMap)) {
+  //     const label = mapKey.split("__")[0];
+  //     result.push({
+  //       key: start,
+  //       endKey: start === end ? undefined : end,
+  //       label,
+  //       color,
+  //       tag: "Event",
+  //     });
+  //   }
 
-    return result.sort((a, b) => a.key.localeCompare(b.key));
-  }, [store, year, month]);
+  //   return result.sort((a, b) => a.key.localeCompare(b.key));
+  // }, [store, year, month]);
 
   // ── Save range to Supabase ─────────────────────
   const handleRangeConfirm = async (
@@ -157,7 +155,7 @@ export default function AdminCalendarScreen({
     color?: string,
   ) => {
     if (!rangeStart) return;
-    const start = rangeStart; // ✅ capture before clearRange() nullifies state
+    const start = rangeStart;
     const end = rangeEnd ?? rangeStart;
 
     let cursor = new Date(start + "T00:00:00");
@@ -172,7 +170,7 @@ export default function AdminCalendarScreen({
       cursor.setDate(cursor.getDate() + 1);
     }
 
-    clearRange(); // ✅ close modal and reset range
+    clearRange();
 
     // Save to Supabase in background
     try {
@@ -229,58 +227,54 @@ export default function AdminCalendarScreen({
     >
       <CalendarHeader onSettingsPress={() => setShowSettings(true)} />
       <ScrollView showsVerticalScrollIndicator={false}>
-        <CalendarLegend />
-
-        <View
-          style={tw`mx-4 rounded-2xl overflow-hidden shadow-sm bg-white mb-4`}
-        >
-          <Calendar
-            current={`${year}-${String(month).padStart(2, "0")}-01`}
-            onMonthChange={(m) => {
-              setYear(m.year);
-              setMonth(m.month);
-            }}
-            dayComponent={({ date, state, marking }) => {
-              if (!date) return null;
-              return (
-                <DayCell
-                  date={date}
-                  state={state}
-                  marking={marking}
-                  onPress={() => handleDayPress(date.dateString)}
-                />
-              );
-            }}
-            markedDates={markedDates}
-            markingType="period"
-            enableSwipeMonths
-            theme={{
-              backgroundColor: "white",
-              calendarBackground: "white",
-              textSectionTitleColor: "#64748b",
-              monthTextColor: "#0f172a",
-              arrowColor: "#6366F1",
-              textMonthFontWeight: "700",
-              textDayHeaderFontSize: 12,
-            }}
-          />
-        </View>
+        <SharedCalendar
+          year={year}
+          month={month}
+          markedDates={markedDates}
+          markingType="period"
+          onDayPress={(day) => handleDayPress(day.dateString)}
+          onMonthChange={(m: { year: number; month: number }) => {
+            setYear(m.year);
+            setMonth(m.month);
+          }}
+          dayComponent={({ date, state, marking }: any) => {
+            if (!date) return null;
+            return (
+              <DayCell
+                date={date}
+                state={state}
+                marking={marking}
+                onPress={() => handleDayPress(date.dateString)}
+              />
+            );
+          }}
+          showLegend={true}
+        />
 
         {rangeStart && !rangeEnd && (
           <View
-            style={tw`mx-4 mb-2 px-4 py-2 bg-indigo-50 rounded-xl flex-row items-center justify-between`}
+            style={{
+              marginHorizontal: 16,
+              marginBottom: 8,
+              paddingHorizontal: 16,
+              paddingVertical: 10,
+              backgroundColor: "rgba(27,74,90,0.08)",
+              borderRadius: 12,
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
           >
-            <Text style={tw`text-indigo-600 text-sm font-medium`}>
+            <Text
+              style={{ color: TW.bgSecondary, fontSize: 13, fontWeight: "500" }}
+            >
               Start: {rangeStart} — tap an end date
             </Text>
             <TouchableOpacity onPress={clearRange}>
-              <Text style={tw`text-red-400 text-sm`}>Cancel</Text>
+              <Text style={{ color: "#EF4444", fontSize: 13 }}>Cancel</Text>
             </TouchableOpacity>
           </View>
         )}
-
-        {/* <MonthStats year={year} month={month} />
-        <MonthEventList items={monthItems} /> */}
       </ScrollView>
 
       <HolidayRangeModal
@@ -291,10 +285,10 @@ export default function AdminCalendarScreen({
         onConfirm={handleRangeConfirm}
       />
 
-      <SettingsModal
+      {/* <SettingsModal
         visible={showSettings}
         onClose={() => setShowSettings(false)}
-      />
+      /> */}
     </SafeAreaView>
   );
 }

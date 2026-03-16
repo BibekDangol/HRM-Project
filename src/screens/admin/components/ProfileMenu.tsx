@@ -15,7 +15,7 @@ export default function ProfileMenu({ open, onProfile, onLogout }: Props) {
   return (
     <View
       style={[
-        tw`absolute right-0 top-12 bg-white border border-[#E5E5E5] p-2 rounded-xl`,
+        tw` right-0 top-12 bg-white border border-[#E5E5E5] p-2 rounded-xl`,
         { width: 150 },
       ]}
     >

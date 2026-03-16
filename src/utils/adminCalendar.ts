@@ -17,7 +17,6 @@ const DAY_NAME_TO_DOW: Record<string, number> = {
   saturday: 6,
 };
 
-// ✅ default weekends (until backend loads)
 const DEFAULT_WEEKENDS: string[] = ["sunday", "saturday"];
 
 // ---- helpers ----
@@ -45,7 +44,7 @@ let _weekendDows: number[] = weekendArrayToDows(DEFAULT_WEEKENDS); // [0,3]
 const DEFAULT_STATE: CalendarState = {
   colors: {
     publicHoliday: "#EF4444",
-    weekend: "#808080",
+    weekend: "#EF4444",
     officeDay: "#0f172a",
   },
   weekendRules: {

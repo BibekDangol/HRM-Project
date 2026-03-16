@@ -12,6 +12,7 @@ import { useAuthStore } from "@/src/store/useAuthStore";
 import { useUsersStore } from "@/src/store/useUsersStore";
 import { TW } from "@/theme/twStyles";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useDimension } from "@/src/hooks/useDimension";
 
 export default function AdminLayout() {
   const router = useRouter();
@@ -20,23 +21,16 @@ export default function AdminLayout() {
   const { user, loading } = useAuthStore();
   const { userProfile, setUserProfile } = useUsersStore();
 
-  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
+  const {
+    width: screenWidth,
+    height: screenHeight,
+    isTablet,
+    isSmallPhone,
+  } = useDimension();
+
   const insets = useSafeAreaInsets();
-
-  const isSmallDevice = screenWidth < 360;
-  const isTablet = screenWidth >= 768;
   const isLandscape = screenWidth > screenHeight;
-
-  const headerHeight = isTablet ? 64 : isLandscape ? 48 : 56;
-  const avatarSize = isTablet ? 38 : isSmallDevice ? 28 : 32;
-  const avatarRadius = isTablet ? 14 : 12;
-  const iconSize = isTablet ? 20 : isSmallDevice ? 15 : 17;
-  const titleFontSize = isTablet ? 18 : isSmallDevice ? 14 : 16;
-  const avatarFontSize = isTablet ? 15 : isSmallDevice ? 11 : 13;
-  const buttonSize = isTablet ? 42 : isSmallDevice ? 32 : 36;
-  const backIconSize = isTablet ? 24 : isSmallDevice ? 18 : 20;
-  const sideMargin = isTablet ? 20 : 16;
-
+  const buttonSize = isTablet ? 42 : isSmallPhone ? 32 : 36;
   const fetchUserProfile = useCallback(async () => {
     if (!user?.id || userProfile) return;
     const profile = await fetchCurrentUserProfleService(user?.id);
@@ -47,9 +41,7 @@ export default function AdminLayout() {
     fetchUserProfile();
   }, [fetchUserProfile, loading]);
 
-  const showBackButton = !adminTabs.some((tab) =>
-    pathname?.includes(tab.name)
-  );
+  const showBackButton = !adminTabs.some((tab) => pathname?.includes(tab.name));
 
   return (
     <Tabs
@@ -57,6 +49,16 @@ export default function AdminLayout() {
         headerShown: true,
         headerShadowVisible: false,
         headerTitleAlign: "left",
+
+        sceneStyle: {
+          backgroundColor: pathname?.includes("/profile")
+            ? TW.bgSecondary
+            : "#ffffff",
+        },
+
+        tabBarStyle: {
+          backgroundColor: "#ffffff",
+        },
         headerStyle: {
           backgroundColor: TW.bgSecondary,
           borderBottomLeftRadius: 30,
@@ -66,21 +68,21 @@ export default function AdminLayout() {
 
         headerLeft: showBackButton
           ? () => (
-            <Pressable
-              onPress={() => router.back()}
-              style={{
-                marginLeft: 16,
-                height: 36,
-                width: 36,
-                borderRadius: 12,
-                backgroundColor: "rgba(255,255,255,0.2)",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <ArrowLeft size={20} color="#ffffff" />
-            </Pressable>
-          )
+              <Pressable
+                onPress={() => router.back()}
+                style={{
+                  marginLeft: 16,
+                  height: 36,
+                  width: 36,
+                  borderRadius: 12,
+                  backgroundColor: "rgba(255,255,255,0.2)",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <ArrowLeft size={20} color="#ffffff" />
+              </Pressable>
+            )
           : () => null,
 
         headerTitle: () => (

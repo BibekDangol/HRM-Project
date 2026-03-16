@@ -1,9 +1,9 @@
-import React from "react";
-import { Alert, Pressable, Text, View } from "react-native";
 import { Building2, Trash2 } from "lucide-react-native";
+import React from "react";
+import { Pressable, Text, View } from "react-native";
 
-import { TW } from "@/theme/twStyles";
 import UploadAvatar from "@/src/screens/profileImage";
+import { TW } from "@/theme/twStyles";
 
 type Props = {
   fullName: string;

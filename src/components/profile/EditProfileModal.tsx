@@ -50,7 +50,7 @@ export default function EditProfileModal({
           <Pressable
             onPress={() => {}}
             style={{
-              backgroundColor: TW.bgPrimary,
+              backgroundColor: "#ffffff",
               borderTopLeftRadius: 26,
               borderTopRightRadius: 26,
               paddingHorizontal: 20,
@@ -180,7 +180,7 @@ export default function EditProfileModal({
                 style={({ pressed }) => ({
                   flex: 1,
                   borderWidth: 1.5,
-                  borderColor: TW.BORDER,
+                  borderColor: "#6B7280",
                   borderRadius: 13,
                   paddingVertical: 14,
                   alignItems: "center",

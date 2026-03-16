@@ -11,10 +11,10 @@ type Props = {
   user: UserProfile;
   onEdit?: (user: UserProfile) => void;
   onDelete?: (id: string) => void;
-  getSupervisorName: (supervisorId?: string | null) => string;
+  // getSupervisorName: (supervisorId?: string | null) => string;
 };
 
-const UserCard = ({ user, onEdit, onDelete, getSupervisorName }: Props) => {
+export const UserCard = ({ user, onEdit, onDelete }: Props) => {
   return (
     <View
       style={tw`flex-row justify-between bg-white border ${TW.BORDER} rounded-2xl px-4 py-4`}
@@ -85,4 +85,3 @@ const UserCard = ({ user, onEdit, onDelete, getSupervisorName }: Props) => {
   );
 };
 
-export default UserCard;

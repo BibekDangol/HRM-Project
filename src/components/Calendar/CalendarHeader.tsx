@@ -1,4 +1,3 @@
-import { Settings } from "lucide-react-native";
 import React from "react";
 import { Pressable, Text, View } from "react-native";
 import tw from "twrnc";
@@ -11,7 +10,7 @@ export function CalendarHeader({ onSettingsPress }: Props) {
   return (
     <View style={tw`flex-row items-center justify-between p-5`}>
       <Text style={tw`text-2xl font-extrabold text-slate-900`}>
-        Calendar Admin
+        Calendar
       </Text>
       <Pressable
         onPress={onSettingsPress}
@@ -21,7 +20,7 @@ export function CalendarHeader({ onSettingsPress }: Props) {
           pressed && tw`opacity-70`,
         ]}
       >
-        <Settings />
+        {/* <Settings /> */}
       </Pressable>
     </View>
   );

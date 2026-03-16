@@ -29,7 +29,7 @@ export function buildPeriodMarks(start: string, end: string) {
     marks[key] = {
       startingDay: key === start,
       endingDay: key === end,
-      color: "#2563eb",
+      color: "#F59E0B",
       textColor: "white",
     };
 

@@ -24,10 +24,15 @@ type Props = {
   approvedPath: string;
   pendingPath: string;
   rejectedPath: string;
-  fetchLeaves: (orgId: number, userId?: string) => Promise<any[]>;
+  fetchLeaves: (orgId: number, userId: string) => Promise<any[]>;
 };
 
-export default function LeaveView({ approvedPath, pendingPath, rejectedPath, fetchLeaves }: Props) {
+export default function LeaveView({
+  approvedPath,
+  pendingPath,
+  rejectedPath,
+  fetchLeaves,
+}: Props) {
   const router = useRouter();
   const { userProfile } = useUsersStore();
   const { leaves, setLeaves } = useLeaveStore();
@@ -60,7 +65,17 @@ export default function LeaveView({ approvedPath, pendingPath, rejectedPath, fet
     setRefreshing(false);
   };
 
-  const goToDetails = (leave: any) => { let pathname = ""; if (leave.status === "approved") { pathname = approvedPath; } else if (leave.status === "pending") { pathname = pendingPath; } else { pathname = rejectedPath; } router.push({ pathname: pathname as any, params: { id: leave.id }, }); };
+  const goToDetails = (leave: any) => {
+    let pathname = "";
+    if (leave.status === "approved") {
+      pathname = approvedPath;
+    } else if (leave.status === "pending") {
+      pathname = pendingPath;
+    } else {
+      pathname = rejectedPath;
+    }
+    router.push({ pathname: pathname as any, params: { id: leave.id } });
+  };
 
   if (loading) return <LoadingIndicator message="Loading leave requests..." />;
 
@@ -80,7 +95,9 @@ export default function LeaveView({ approvedPath, pendingPath, rejectedPath, fet
                 pressed && !isActive && tw`opacity-70`,
               ]}
             >
-              <Text style={tw`text-sm font-bold ${isActive ? TW.textButton : TW.textPrimary}`}>
+              <Text
+                style={tw`text-sm font-bold ${isActive ? TW.textButton : TW.textPrimary}`}
+              >
                 {tab.toUpperCase()}
               </Text>
             </Pressable>
@@ -109,7 +126,9 @@ export default function LeaveView({ approvedPath, pendingPath, rejectedPath, fet
               ]}
             >
               {/* Icon */}
-              <View style={tw`h-12 w-12 rounded-xl bg-slate-100 items-center justify-center mr-4`}>
+              <View
+                style={tw`h-12 w-12 rounded-xl bg-slate-100 items-center justify-center mr-4`}
+              >
                 <CalendarClock size={20} color="#475569" />
               </View>
 
@@ -120,7 +139,9 @@ export default function LeaveView({ approvedPath, pendingPath, rejectedPath, fet
                 </Text>
                 <Text style={tw`text-xs ${TW.textSecondary} mt-0.5`}>
                   {leave.start_date}
-                  {leave.end_date && leave.end_date !== leave.start_date ? ` → ${leave.end_date}` : ""}
+                  {leave.end_date && leave.end_date !== leave.start_date
+                    ? ` → ${leave.end_date}`
+                    : ""}
                 </Text>
               </View>
 
@@ -138,11 +159,17 @@ export default function LeaveView({ approvedPath, pendingPath, rejectedPath, fet
         }}
         ListEmptyComponent={
           <View style={tw`items-center justify-center py-20`}>
-            <View style={tw`h-16 w-16 rounded-full ${TW.bgCards} items-center justify-center mb-4`}>
+            <View
+              style={tw`h-16 w-16 rounded-full ${TW.bgCards} items-center justify-center mb-4`}
+            >
               <CalendarClock size={28} color="#94a3b8" />
             </View>
-            <Text style={tw`text-base font-semibold ${TW.textPrimary}`}>No leave requests</Text>
-            <Text style={tw`text-sm mt-1 ${TW.textSecondary}`}>All leave requests will appear here</Text>
+            <Text style={tw`text-base font-semibold ${TW.textPrimary}`}>
+              No leave requests
+            </Text>
+            <Text style={tw`text-sm mt-1 ${TW.textSecondary}`}>
+              All leave requests will appear here
+            </Text>
           </View>
         }
       />

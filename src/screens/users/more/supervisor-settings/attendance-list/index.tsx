@@ -1,12 +1,14 @@
 import { FlatList, Pressable, Text, TextInput, View } from "react-native";
 import React, { useCallback, useEffect, useState } from "react";
 
-import UserCard from "@/src/screens/admin/components/UserCard";
 import { UserProfile } from "@/src/types/admin";
 import { fetchSupervisorUnderUsersService } from "@/src/services/admin.service";
 import tw from "twrnc";
 import { useRouter } from "expo-router";
 import { useUsersStore } from "@/src/store/useUsersStore";
+import { UserCard } from "@/src/screens/admin/components/UserCard";
+import { TW } from "@/theme/twStyles";
+import HeaderWithSearch from "@/src/components/HeaderWithSearch";
 
 const AttendanceUserList = () => {
   const router = useRouter();
@@ -36,25 +38,25 @@ const AttendanceUserList = () => {
     loadUsers();
   }, [loadUsers]);
   return (
-    <View style={tw`flex-1 bg-gray-100`}>
+    <View style={tw`flex-1 bg-white`}>
       {/* Search Bar */}
-      <View style={tw`px-4 py-3`}>
-        <TextInput
-          placeholder="Search employee..."
-          value={search}
-          onChangeText={setSearch}
-          style={tw`bg-white rounded-xl px-4 py-3 shadow text-gray-900`}
-        />
-      </View>
+      <HeaderWithSearch />
       {/* Users List */}
       <FlatList
-        contentContainerStyle={tw`px-4 pb-6`}
         data={users}
         keyExtractor={(item) => item.id}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={[
+          tw`px-4 pt-2 pb-6`,
+          users.length === 0 ? tw`flex-grow justify-center` : undefined,
+        ]}
+        ItemSeparatorComponent={() => <View style={tw`h-3`} />}
         ListEmptyComponent={
-          <Text style={tw`text-center text-gray-500 mt-10`}>
-            {loading ? "Loading..." : "No users found"}
-          </Text>
+          <View style={tw`items-center justify-center py-16`}>
+            <Text style={tw`text-base text-gray-500`}>
+              {loading ? "Loading..." : "No users found"}
+            </Text>
+          </View>
         }
         renderItem={({ item }) => (
           <Pressable
@@ -68,6 +70,7 @@ const AttendanceUserList = () => {
                 },
               })
             }
+            style={tw`rounded-2xl overflow-hidden`}
           >
             <UserCard user={item} />
           </Pressable>
