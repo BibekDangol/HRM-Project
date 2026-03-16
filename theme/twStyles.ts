@@ -1,7 +1,7 @@
 export const TW = {
   bgPrimary: "#FDF8F0",// cream background
   bgSecondary: "#1B4A5A",    // deep teal
-
+  bgWhite:"bg-white",
   bgAction: "bg-[#1B4A5A]",       // teal action button
   bgButton: "bg-white",           // white button
   bgCards: "bg-gray-50 border border-gray-200",

@@ -1,11 +1,11 @@
-import { Pencil, Trash2 } from "lucide-react-native";
 import { Alert, Pressable, Text, View } from "react-native";
+import { Pencil, Trash2 } from "lucide-react-native";
 
-import { UserProfile } from "@/src/types/admin";
-import { TW } from "@/theme/twStyles";
-import React from "react";
-import tw from "twrnc";
 import Capsule from "../../../components/Capsule";
+import React from "react";
+import { TW } from "@/theme/twStyles";
+import { UserProfile } from "@/src/types/admin";
+import tw from "twrnc";
 
 type Props = {
   user: UserProfile;
@@ -39,7 +39,6 @@ const UserCard = ({ user, onEdit, onDelete, getSupervisorName }: Props) => {
           Supervisor: {getSupervisorName(user.supervisor_id)}
         </Text> */}
       </View>
-
       {/* Action Buttons */}
       {(onEdit || onDelete) && (
         <View style={tw`flex-row gap-2`}>

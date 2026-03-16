@@ -1,5 +1,3 @@
-// app/(admin)/settings/leave/index.tsx
-
 import { useCallback, useEffect, useState } from "react";
 import { Alert, FlatList, Text, TouchableOpacity, View } from "react-native";
 
@@ -8,6 +6,8 @@ import LoadingIndicator from "@/src/components/LoadingIndicator";
 import { fetchLeaveTypesService } from "@/src/services/leave.type.service";
 import { useLeaveTypeStore } from "@/src/store/useLeaveTypeStore";
 import { useUsersStore } from "@/src/store/useUsersStore";
+import { TW } from "@/theme/twStyles";
+import { Plus } from "lucide-react-native";
 import tw from "twrnc";
 import AddLeaveTypeModal from "./AddLeaveTypeModal";
 
@@ -28,27 +28,31 @@ export default function LeaveTypeSettings() {
 
   const loadLeaveTypes = useCallback(async () => {
     if (!userProfile?.organization_id) return;
+
     try {
       setLoading(true);
-      console.log(loading);
-      const result = await fetchLeaveTypesService(userProfile.organization_id);
+      const result = await fetchLeaveTypesService(
+        userProfile.organization_id
+      );
+
       setLeaveTypes(result || []);
-      setLoading(false);
-      console.log(loading);
     } catch (err: any) {
       Alert.alert("Error", err.message);
+    } finally {
+      setLoading(false);
     }
   }, [userProfile]);
-  // Load leave types
+
   useEffect(() => {
     loadLeaveTypes();
   }, [loadLeaveTypes]);
+
   const onRefresh = async () => {
     setRefreshing(true);
     await loadLeaveTypes();
     setRefreshing(false);
   };
-  // ADD
+
   const handleAddLeaveType = async (name: string, limit: number) => {
     try {
       const res = await apiClient.post("/add-leave-type", {
@@ -64,11 +68,10 @@ export default function LeaveTypeSettings() {
     }
   };
 
-  // EDIT
   const handleEditLeaveType = async (
     id: string,
     name: string,
-    limit: number,
+    limit: number
   ) => {
     try {
       const res = await apiClient.put("/edit-leave-type", {
@@ -85,9 +88,8 @@ export default function LeaveTypeSettings() {
     }
   };
 
-  // DELETE
   const handleDelete = async (id: string) => {
-    Alert.alert("Confirm", "Delete this leave type?", [
+    Alert.alert("Delete Leave Type", "Are you sure?", [
       { text: "Cancel" },
       {
         text: "Delete",
@@ -97,6 +99,7 @@ export default function LeaveTypeSettings() {
             await apiClient.delete("/delete-leave-type", {
               data: { id },
             });
+
             removeLeaveType(id);
           } catch (err: any) {
             Alert.alert("Error", err.message);
@@ -107,59 +110,87 @@ export default function LeaveTypeSettings() {
   };
 
   return (
-    <View style={tw`flex-1 bg-white p-4`}>
+    <View style={tw`flex-1 ${TW.bgPrimary} p-4`}>
+
       {/* Header */}
-      <View style={tw`flex-row justify-between items-center mb-4`}>
-        <Text style={tw`text-xl font-bold`}>Leave Types</Text>
+      <View style={tw`flex-row items-center justify-between mb-5`}>
+        <Text style={tw`text-xl font-bold ${TW.textPrimary}`}>
+          Leave Types
+        </Text>
+
         <TouchableOpacity
           onPress={() => {
             setSelectedType(null);
             setShowModal(true);
           }}
-          style={tw`bg-green-600 px-4 py-2 rounded`}
+          activeOpacity={0.8}
+          style={tw`h-12 w-12 rounded-full ${TW.bgAction} items-center justify-center`}
         >
-          <Text style={tw`text-white`}>Add</Text>
+          <Plus size={22} color="white" strokeWidth={2.5} />
         </TouchableOpacity>
       </View>
-      {/* List */}
+
       {loading ? (
-        <LoadingIndicator message="Loading Leave Types" />
+        <LoadingIndicator message="Loading Leave Types..." />
       ) : (
         <FlatList
           data={leaveTypes}
           keyExtractor={(item) => item.id}
           refreshing={refreshing}
           onRefresh={onRefresh}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={() => (
+            <View style={tw`items-center mt-20`}>
+              <Text style={tw`${TW.textSecondary}`}>
+                No leave types found
+              </Text>
+            </View>
+          )}
           renderItem={({ item }) => (
             <View
-              style={tw`p-3 border rounded mb-2 flex-row justify-between items-center`}
+              style={tw`bg-white rounded-2xl p-4 mb-3 border ${TW.BORDER} flex-row justify-between items-center`}
             >
+              {/* Leave Info */}
               <View>
-                <Text style={tw`font-semibold`}>{item.name}</Text>
-                <Text style={tw`text-gray-500`}>{item.leave_limit} days</Text>
+                <Text style={tw`text-base font-semibold ${TW.textPrimary}`}>
+                  {item.name}
+                </Text>
+
+                <Text style={tw`text-sm ${TW.textSecondary}`}>
+                  {item.leave_limit} days allowed
+                </Text>
               </View>
+
+              {/* Actions */}
               <View style={tw`flex-row`}>
                 <TouchableOpacity
+                  activeOpacity={0.8}
                   onPress={() => {
                     setSelectedType(item);
                     setShowModal(true);
                   }}
-                  style={tw`bg-blue-500 px-3 py-1 rounded mr-2`}
+                  style={tw`bg-[#E6F1F3] px-3 py-2 rounded-lg mr-2`}
                 >
-                  <Text style={tw`text-white`}>Edit</Text>
+                  <Text style={tw`${TW.textSecondary} font-medium`}>
+                    Edit
+                  </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
+                  activeOpacity={0.8}
                   onPress={() => handleDelete(item.id)}
-                  style={tw`bg-red-500 px-3 py-1 rounded`}
+                  style={tw`bg-red-50 px-3 py-2 rounded-lg`}
                 >
-                  <Text style={tw`text-white`}>Delete</Text>
+                  <Text style={tw`text-red-600 font-medium`}>
+                    Delete
+                  </Text>
                 </TouchableOpacity>
               </View>
             </View>
           )}
         />
       )}
+
       {/* Modal */}
       <AddLeaveTypeModal
         visible={showModal}
@@ -170,7 +201,7 @@ export default function LeaveTypeSettings() {
         onSubmit={
           selectedType
             ? (name: string, limit: number) =>
-                handleEditLeaveType(selectedType.id, name, limit)
+              handleEditLeaveType(selectedType.id, name, limit)
             : handleAddLeaveType
         }
       />

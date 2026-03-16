@@ -17,7 +17,7 @@ const QuickActions = () => {
       <View style={tw`flex-row flex-wrap justify-between`}>
         {/* Add Employee */}
         <TouchableOpacity
-          onPress={() => router.push('/(admin)/manage-users')}
+          onPress={() => router.replace('/(admin)/manage-users')}
           style={tw`w-[48%] ${TW.bgCards} p-4 rounded-xl mb-3 items-center`}
         >
           <UserPlus size={24} color="#1B4A5A" />
@@ -28,7 +28,7 @@ const QuickActions = () => {
 
         {/* Request Leave */}
         <TouchableOpacity
-          onPress={() => router.push('/(admin)/leave')}
+          onPress={() => router.replace('/(admin)/leave')}
           style={tw`w-[48%] ${TW.bgCards} p-4 rounded-xl mb-3 items-center`}
         >
           <CalendarPlus size={24} color="#1B4A5A" />
@@ -39,7 +39,7 @@ const QuickActions = () => {
 
         {/* Attendance */}
         <TouchableOpacity
-          onPress={() => router.push('/(admin)/more/attendance-list')}
+          onPress={() => router.replace('/(admin)/more/attendance-list')}
           style={tw`w-[48%] ${TW.bgCards} p-4 rounded-xl mb-3 items-center`}
         >
           <Clock size={24} color="#1B4A5A" />
@@ -50,7 +50,7 @@ const QuickActions = () => {
 
         {/* Reports */}
         <TouchableOpacity
-          onPress={() => router.push('/(admin)/more/holidays')}
+          onPress={() => router.replace('/(admin)/more/holidays')}
           style={tw`w-[48%] ${TW.bgCards} p-4 rounded-xl mb-3 items-center`}
         >
           <FileText size={24} color="#1B4A5A" />
