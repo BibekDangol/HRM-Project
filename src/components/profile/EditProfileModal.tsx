@@ -2,7 +2,6 @@ import { ProfileData } from "@/src/types/profile.types";
 import { FormInput, FormOutput } from "@/src/types/user";
 import { TW } from "@/theme/twStyles";
 import { Lock, X } from "lucide-react-native";
-import React from "react";
 import { Control, Controller, FieldErrors } from "react-hook-form";
 import {
   KeyboardAvoidingView,

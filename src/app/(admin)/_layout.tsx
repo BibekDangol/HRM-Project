@@ -1,8 +1,7 @@
 import { Tabs, usePathname, useRouter } from "expo-router";
 import { ArrowLeft, User } from "lucide-react-native";
-import React, { useCallback, useEffect } from "react";
-import { Pressable, Text, View, useWindowDimensions } from "react-native";
-
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Pressable, Text, View } from "react-native";
 import { adminTabs } from "@/src/config/adminTabs";
 import { useAdminHeaderMenu } from "@/src/hooks/useAdminHeaderMenu";
 import AdminTabBar from "@/src/screens/admin/components/AdminTabBar";
@@ -20,7 +19,7 @@ export default function AdminLayout() {
   const menu = useAdminHeaderMenu();
   const { user, loading } = useAuthStore();
   const { userProfile, setUserProfile } = useUsersStore();
-  const [checkOpen, setCheckOpen] = React.useState(false);
+  const [checkOpen, setCheckOpen] = useState(false);
   const {
     width: screenWidth,
     height: screenHeight,
@@ -40,8 +39,8 @@ export default function AdminLayout() {
   useEffect(() => {
     fetchUserProfile();
   }, [fetchUserProfile, loading]);
-  const [loadingAttendance, setLoadingAttendance] = React.useState(false);
-  const checkActionLockRef = React.useRef(false);
+  const [loadingAttendance, setLoadingAttendance] = useState(false);
+  const checkActionLockRef = useRef(false);
   const showBackButton = !adminTabs.some((tab) => pathname?.includes(tab.name));
   const isLocked = loadingAttendance || checkActionLockRef.current;
   return (

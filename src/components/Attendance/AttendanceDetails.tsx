@@ -6,9 +6,8 @@ import SummaryBox from "@/src/components/SummaryBox";
 import { useAttendance } from "@/src/hooks/useAttendance";
 import { TW } from "@/theme/twStyles";
 import { Ionicons } from "@expo/vector-icons";
-import React from "react";
 import tw from "twrnc";
-import { BackButton } from "../BackButton";
+import { useState } from "react";
 
 type Props = {
   userId: string;
@@ -26,7 +25,7 @@ const AttendanceView: React.FC<Props> = ({ userId, name }) => {
     setExpandedDayId,
   } = useAttendance(userId);
 
-  const [showMonthPicker, setShowMonthPicker] = React.useState(false);
+  const [showMonthPicker, setShowMonthPicker] = useState(false);
 
   const renderItem = (day: string, records: any[]) => {
     const isExpanded = expandedDayId === day;
@@ -65,21 +64,14 @@ const AttendanceView: React.FC<Props> = ({ userId, name }) => {
         {isExpanded && (
           <View style={tw`mt-3 pt-3 border-t ${TW.BORDER}`}>
             {records.map((r) => (
-              <View
-                key={r.id}
-                style={tw`flex-row justify-between mb-1`}
-              >
-                <Text style={tw`${TW.textSecondary}`}>
-                  Check In
-                </Text>
+              <View key={r.id} style={tw`flex-row justify-between mb-1`}>
+                <Text style={tw`${TW.textSecondary}`}>Check In</Text>
 
                 <Text style={tw`font-medium ${TW.textPrimary}`}>
                   {formatTime(r.check_in_time)}
                 </Text>
 
-                <Text style={tw`${TW.textSecondary}`}>
-                  Check Out
-                </Text>
+                <Text style={tw`${TW.textSecondary}`}>Check Out</Text>
 
                 <Text style={tw`font-medium ${TW.textPrimary}`}>
                   {formatTime(r.check_out_time)}
@@ -96,9 +88,7 @@ const AttendanceView: React.FC<Props> = ({ userId, name }) => {
       {/* Header */}
       <View style={tw`flex-row justify-between items-center mb-5`}>
         <View>
-          <Text style={tw`text-xl font-bold ${TW.textPrimary}`}>
-            {name}
-          </Text>
+          <Text style={tw`text-xl font-bold ${TW.textPrimary}`}>{name}</Text>
           <Text style={tw`${TW.textSecondary}`}>
             {selectedMonth ?? getMonthKey(getTodayDate())}
           </Text>
@@ -120,16 +110,18 @@ const AttendanceView: React.FC<Props> = ({ userId, name }) => {
                 setSelectedMonth(month);
                 setShowMonthPicker(false);
               }}
-              style={tw`px-4 py-2 mr-2 mb-2 rounded-xl border ${selectedMonth === month
-                ? "bg-[#E6F1F3] border-[#1B4A5A]"
-                : "bg-white border-slate-200"
-                }`}
+              style={tw`px-4 py-2 mr-2 mb-2 rounded-xl border ${
+                selectedMonth === month
+                  ? "bg-[#E6F1F3] border-[#1B4A5A]"
+                  : "bg-white border-slate-200"
+              }`}
             >
               <Text
-                style={tw`text-sm ${selectedMonth === month
-                  ? "text-[#1B4A5A] font-semibold"
-                  : "text-gray-600"
-                  }`}
+                style={tw`text-sm ${
+                  selectedMonth === month
+                    ? "text-[#1B4A5A] font-semibold"
+                    : "text-gray-600"
+                }`}
               >
                 {month}
               </Text>

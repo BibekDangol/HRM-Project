@@ -1,7 +1,6 @@
-import React from "react";
-import { Pressable, Text, View } from "react-native";
-import { ChevronRight, Lock } from "lucide-react-native";
 import { TW } from "@/theme/twStyles";
+import { ChevronRight, Lock } from "lucide-react-native";
+import { Pressable, Text, View } from "react-native";
 
 type Props = {
   icon: React.ReactNode;
@@ -31,7 +30,7 @@ export default function InfoRow({
         backgroundColor: "#ffffff",
         opacity: pressed && onPress && !locked ? 0.6 : 1,
         borderBottomWidth: isLast ? 0 : 0.5,
-        borderBottomColor: "#E5E7EB", 
+        borderBottomColor: "#E5E7EB",
       })}
     >
       <View

@@ -1,16 +1,12 @@
-import * as React from "react";
-
+import { TW } from "@/theme/twStyles";
+import { useRouter } from "expo-router";
 import {
   BookUser,
   CalendarFold,
   CalendarX,
   ChevronRight,
-  Layers,
 } from "lucide-react-native";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
-
-import { TW } from "@/theme/twStyles";
-import { useRouter } from "expo-router";
 import tw from "twrnc";
 
 export default function MoreScreen() {

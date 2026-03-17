@@ -1,10 +1,9 @@
-import React from "react";
 import { Text, View } from "react-native";
 import tw from "twrnc";
 
 export interface MonthItem {
   key: string;
-  endKey?: string; 
+  endKey?: string;
   label: string;
   color: string;
   tag: string;

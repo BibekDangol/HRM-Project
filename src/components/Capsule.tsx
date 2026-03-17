@@ -1,6 +1,4 @@
 import { Text, View } from "react-native";
-
-import React from "react";
 import tw from "twrnc";
 
 type Colors = "red" | "green" | "yellow" | "orange" | "gray" | "teal"; // added gray

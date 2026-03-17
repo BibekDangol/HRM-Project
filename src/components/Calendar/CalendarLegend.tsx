@@ -1,8 +1,7 @@
+import { useCalendarStore } from "@/src/utils/adminCalendar";
 import { Circle } from "lucide-react-native";
-import React from "react";
 import { Text, View } from "react-native";
 import tw from "twrnc";
-import { useCalendarStore } from "@/src/utils/adminCalendar";
 
 const LEGEND_ITEMS = [
   ["publicHoliday", "Holiday"],

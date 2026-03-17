@@ -1,11 +1,9 @@
-import * as React from "react";
-
 import {
   CalendarItem,
   HolidaysEventsSection,
 } from "@/src/components/HolidaysEventsSection";
 import { CircleCheckBig, User } from "lucide-react-native";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Alert, RefreshControl, ScrollView, Text, View } from "react-native";
 
 import StatCard from "@/src/screens/admin/components/StatCard";
@@ -32,7 +30,7 @@ export default function DashboardScreen() {
   const [calendarLoading, setCalendarLoading] = useState(false);
   const [selectedMonthIndex, setSelectedMonthIndex] = useState(now.getMonth());
   const [selectedYear, setSelectedYear] = useState(now.getFullYear());
-  const monthTitle = React.useMemo(
+  const monthTitle = useMemo(
     () => MONTHS[selectedMonthIndex],
     [selectedMonthIndex],
   );
