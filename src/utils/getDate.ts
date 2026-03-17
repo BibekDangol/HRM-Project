@@ -1,6 +1,14 @@
+import { NEPAL_OFFSET_MIN } from "../constants";
+
+export function nepalDateYYYYMMDD(now = new Date()) {
+  const nepalNow = new Date(now.getTime() + NEPAL_OFFSET_MIN * 60 * 1000);
+  return nepalNow.toISOString().slice(0, 10);
+}
+
 export const getTodayDate = ()=>{
   return new Date().toISOString().split("T")[0];
 };
+
 export const getTodayDisplayDate=()=>{
 return new Date().toDateString();
 }
