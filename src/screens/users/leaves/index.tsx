@@ -212,7 +212,8 @@ export default function LeavesScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor={PRIMARY}
+            colors={["#1B4A5A"]}
+            tintColor="#1B4A5A"
           />
         }
         contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 100 }}

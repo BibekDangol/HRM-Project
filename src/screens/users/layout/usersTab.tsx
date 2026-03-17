@@ -65,14 +65,18 @@ export default function UsersTabsLayout() {
   const menu = useAdminHeaderMenu();
 
   const [loadingAttendance, setLoadingAttendance] = React.useState(false);
-  const [attendance, setAttendance] = React.useState<AttendanceRow | null>(null);
+  const [attendance, setAttendance] = React.useState<AttendanceRow | null>(
+    null,
+  );
 
   const [checkedInAt, setCheckedInAt] = React.useState<Date | null>(null);
   const [now, setNow] = React.useState<number>(() => Date.now());
 
   const [commentModalOpen, setCommentModalOpen] = React.useState(false);
   const [commentText, setCommentText] = React.useState("");
-  const [commentMode, setCommentMode] = React.useState<"checkin" | "checkout" | null>(null);
+  const [commentMode, setCommentMode] = React.useState<
+    "checkin" | "checkout" | null
+  >(null);
 
   const checkActionLockRef = React.useRef(false);
 
@@ -137,7 +141,7 @@ export default function UsersTabsLayout() {
       const { data, error } = await supabase
         .from("attendance")
         .select(
-          "id,user_id,date,check_in_time,check_out_time,status,check_in_comment,check_out_comment,check_in_lat,check_in_lng,check_out_lat,check_out_lng"
+          "id,user_id,date,check_in_time,check_out_time,status,check_in_comment,check_out_comment,check_in_lat,check_in_lng,check_out_lat,check_out_lng",
         )
         .eq("user_id", user.id)
         .order("check_in_time", { ascending: false })
@@ -163,7 +167,7 @@ export default function UsersTabsLayout() {
     const { data, error } = await supabase
       .from("attendance")
       .select(
-        "id,user_id,date,check_in_time,check_out_time,status,check_in_comment,check_out_comment,check_in_lat,check_in_lng,check_out_lat,check_out_lng"
+        "id,user_id,date,check_in_time,check_out_time,status,check_in_comment,check_out_comment,check_in_lat,check_in_lng,check_out_lat,check_out_lng",
       )
       .eq("user_id", userId)
       .is("check_out_time", null)
@@ -222,10 +226,10 @@ export default function UsersTabsLayout() {
           check_out_lat: null,
           check_out_lng: null,
         },
-        { onConflict: "user_id,date" }
+        { onConflict: "user_id,date" },
       )
       .select(
-        "id,user_id,date,check_in_time,check_out_time,status,check_in_comment,check_out_comment,check_in_lat,check_in_lng,check_out_lat,check_out_lng"
+        "id,user_id,date,check_in_time,check_out_time,status,check_in_comment,check_out_comment,check_in_lat,check_in_lng,check_out_lat,check_out_lng",
       )
       .single();
 
@@ -252,7 +256,7 @@ export default function UsersTabsLayout() {
       if (!openRow) {
         Alert.alert(
           "No open session",
-          "You haven't checked in yet (or already checked out)."
+          "You haven't checked in yet (or already checked out).",
         );
         return;
       }
@@ -268,7 +272,7 @@ export default function UsersTabsLayout() {
         })
         .eq("id", openRow.id)
         .select(
-          "id,user_id,date,check_in_time,check_out_time,status,check_out_comment,check_in_comment,check_in_lat,check_in_lng,check_out_lat,check_out_lng"
+          "id,user_id,date,check_in_time,check_out_time,status,check_out_comment,check_in_comment,check_in_lat,check_in_lng,check_out_lat,check_out_lng",
         )
         .single();
 
@@ -278,7 +282,7 @@ export default function UsersTabsLayout() {
       setAttendance(row);
       setCheckedInAt(null);
     },
-    [getAnyOpenAttendanceRow]
+    [getAnyOpenAttendanceRow],
   );
 
   React.useEffect(() => {
@@ -322,7 +326,14 @@ export default function UsersTabsLayout() {
         setLoadingAttendance(false);
       }
     });
-  }, [runOnce, commentText, commentMode, checkIn, checkOut, fetchLatestAttendance]);
+  }, [
+    runOnce,
+    commentText,
+    commentMode,
+    checkIn,
+    checkOut,
+    fetchLatestAttendance,
+  ]);
 
   const onToggleCheck = React.useCallback(() => {
     return runOnce(async () => {
@@ -345,7 +356,7 @@ export default function UsersTabsLayout() {
           if (anyOpen?.status === "incomplete") {
             Alert.alert(
               "Already checked in",
-              `You still have an open session from ${anyOpen.date}. Please check out first.`
+              `You still have an open session from ${anyOpen.date}. Please check out first.`,
             );
             setCheckOpen(false);
             return;
@@ -424,7 +435,7 @@ export default function UsersTabsLayout() {
                 tw`rounded-t-3xl px-5 pt-4 pb-10`,
                 { backgroundColor: TW.bgPrimary },
               ]}
-              onPress={() => { }}
+              onPress={() => {}}
             >
               <View style={tw`items-center mb-5`}>
                 <View
@@ -435,8 +446,12 @@ export default function UsersTabsLayout() {
                 />
               </View>
 
-              <Text style={[tw`text-xl font-bold mb-1`, { color: TW.bgSecondary }]}>
-                {commentMode === "checkin" ? "Late Check-in" : "Early Check-out"}
+              <Text
+                style={[tw`text-xl font-bold mb-1`, { color: TW.bgSecondary }]}
+              >
+                {commentMode === "checkin"
+                  ? "Late Check-in"
+                  : "Early Check-out"}
               </Text>
 
               <Text style={[tw`text-sm mb-5`, { color: TW.textSecondary }]}>
@@ -479,7 +494,9 @@ export default function UsersTabsLayout() {
                     },
                   ]}
                 >
-                  <Text style={[tw`font-bold text-sm`, { color: TW.bgSecondary }]}>
+                  <Text
+                    style={[tw`font-bold text-sm`, { color: TW.bgSecondary }]}
+                  >
                     Cancel
                   </Text>
                 </Pressable>
@@ -600,7 +617,8 @@ export default function UsersTabsLayout() {
                               color: TW.textPrimary,
                             }}
                           >
-                            Since {checkedInAt ? formatSinceTime(checkedInAt) : "--"}
+                            Since{" "}
+                            {checkedInAt ? formatSinceTime(checkedInAt) : "--"}
                           </Text>
 
                           <Text
@@ -671,7 +689,13 @@ export default function UsersTabsLayout() {
               </View>
 
               {/* Profile button + ProfileMenu */}
-              <View style={{ marginRight: 0, position: "relative" }}>
+              <View
+                style={{
+                  position: "relative",
+                  marginRight: 4,
+                  zIndex: 999,
+                }}
+              >
                 <Pressable
                   disabled={isLocked}
                   onPress={() => {
@@ -695,14 +719,38 @@ export default function UsersTabsLayout() {
                   <User size={17} color="#ffffff" />
                 </Pressable>
 
-                <ProfileMenu
-                  open={menu.open}
-                  onProfile={() => {
-                    menu.close?.();
-                    router.push("/(users)/profile");
-                  }}
-                  onLogout={onLogout}
-                />
+                {menu.open && (
+                  <>
+                    <Pressable
+                      onPress={menu.close}
+                      style={{
+                        position: "absolute",
+                        top: -1000,
+                        left: -1000,
+                        right: -1000,
+                        bottom: -1000,
+                      }}
+                    />
+                    <View
+                      style={{
+                        position: "absolute",
+                        top: 6,
+                        right: 0,
+                        zIndex: 9999,
+                        elevation: 20,
+                      }}
+                    >
+                      <ProfileMenu
+                        open={menu.open}
+                        onProfile={() => {
+                          menu.close?.();
+                          router.push("/(users)/profile");
+                        }}
+                        onLogout={onLogout}
+                      />
+                    </View>
+                  </>
+                )}
               </View>
             </View>
           ),

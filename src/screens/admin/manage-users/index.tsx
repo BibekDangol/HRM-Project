@@ -23,7 +23,8 @@ import { useAuthStore } from "@/src/store/useAuthStore";
 import { useUsersStore } from "@/src/store/useUsersStore";
 import { TW } from "@/theme/twStyles";
 import tw from "twrnc";
-import UserCard from "../components/UserCard";
+
+import { UserCard } from "../components/UserCard";
 import EditUserModal from "./EditUserModal";
 
 const ManageUsers = () => {
@@ -59,7 +60,7 @@ const ManageUsers = () => {
 
       const fetchedUsers = await fetchUsersService(
         profile.organization_id,
-        debouncedSearchQuery
+        debouncedSearchQuery,
       );
       setUsers(fetchedUsers);
     } catch (err) {
@@ -150,7 +151,7 @@ const ManageUsers = () => {
       Alert.alert("Deleted", "User deleted successfully");
       const updatedUsers = await fetchUsersService(userProfile.organization_id);
       setUsers(updatedUsers);
-    } catch (err: any) { }
+    } catch (err: any) {}
   };
 
   const getSupervisorName = (supervisorId?: string | null) => {
@@ -178,7 +179,10 @@ const ManageUsers = () => {
               <View
                 style={tw`flex-row ${TW.bgButton} rounded-3xl px-4 py-2 items-center border ${TW.BORDER} justify-between`}
               >
-                <Search size={18} color={TW.bgSecondary.replace("text-", "#")} />
+                <Search
+                  size={18}
+                  color={TW.bgSecondary.replace("text-", "#")}
+                />
                 <TextInput
                   placeholder="Search users..."
                   placeholderTextColor={TW.textSecondary.replace("text-", "#")}
@@ -224,7 +228,9 @@ const ManageUsers = () => {
                   >
                     Pending{" "}
                     {pendingCount > 0 && (
-                      <Text style={{ color: TW.textTertiary }}>({pendingCount})</Text>
+                      <Text style={{ color: TW.textTertiary }}>
+                        ({pendingCount})
+                      </Text>
                     )}
                   </Text>
                 </Pressable>
@@ -246,12 +252,18 @@ const ManageUsers = () => {
                   >
                     Active{" "}
                     {activeCount > 0 && (
-                      <Text style={{ color: TW.textTertiary }}>({activeCount})</Text>
+                      <Text style={{ color: TW.textTertiary }}>
+                        ({activeCount})
+                      </Text>
                     )}
                   </Text>
                 </Pressable>
               </View>
-              <Text style={tw`text - xs ${TW.textSecondary}`}> {activeTab === "pending" ? pendingCount : activeCount} users found </Text>
+              <Text style={tw`text - xs ${TW.textSecondary}`}>
+                {" "}
+                {activeTab === "pending" ? pendingCount : activeCount} users
+                found{" "}
+              </Text>
             </View>
             {/* Users List */}
             <FlatList
@@ -278,7 +290,10 @@ const ManageUsers = () => {
                     <View
                       style={tw`h-16 w-16 rounded-full ${TW.bgCards} items-center justify-center mb-4`}
                     >
-                      <Search size={26} color={TW.textSecondary.replace("text-", "#")} />
+                      <Search
+                        size={26}
+                        color={TW.textSecondary.replace("text-", "#")}
+                      />
                     </View>
                     <Text style={tw`text-base font-semibold ${TW.textPrimary}`}>
                       No users found
@@ -356,10 +371,7 @@ const ManageUsers = () => {
             <Pressable
               onPress={async () => {
                 await Clipboard.setStringAsync(tempPassword);
-                Alert.alert(
-                  "Copied",
-                  "Temporary password copied to clipboard"
-                );
+                Alert.alert("Copied", "Temporary password copied to clipboard");
               }}
               style={({ pressed }) => [
                 tw`flex-row items-center justify-center ${TW.bgSecondary} py-4 rounded-2xl mb-3`,

@@ -30,6 +30,8 @@ export default function SupervisorSettings() {
         <RefreshControl
           refreshing={isRefreshing || statsLoading}
           onRefresh={onRefresh}
+          colors={["#1B4A5A"]}
+          tintColor="#1B4A5A"
         />
       }
     >
@@ -77,11 +79,9 @@ export default function SupervisorSettings() {
           </View>
           <ChevronRight size={20} color="#7AA5B2" />
         </TouchableOpacity>
-        <TouchableOpacity
+        {/* <TouchableOpacity
           activeOpacity={0.75}
-          onPress={() =>
-            router.navigate("/(users)/more/test")
-          }
+          onPress={() => router.navigate("/(users)/more/test")}
           style={[
             tw`rounded-2xl px-4 py-5 mb-4 flex-row items-center justify-between`,
             {
@@ -113,7 +113,7 @@ export default function SupervisorSettings() {
             </View>
           </View>
           <ChevronRight size={20} color="#7AA5B2" />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
         {/* Leave */}
         <TouchableOpacity
           activeOpacity={0.75}

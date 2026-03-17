@@ -10,7 +10,6 @@ import { useUsersStore } from "@/src/store/useUsersStore";
 import { TW } from "@/theme/twStyles";
 import { useRouter } from "expo-router";
 import tw from "twrnc";
-import { BackButton } from "../BackButton";
 
 const statusConfig: Record<string, { bg: string; text: string; dot: string }> =
   {
@@ -30,7 +29,7 @@ type Props = {
   fetchLeaves: (orgId: number, userId: string) => Promise<any[]>;
 };
 
-export default function LeaveView({
+export default function AdminLeaveView({
   approvedPath,
   pendingPath,
   rejectedPath,
@@ -85,9 +84,7 @@ export default function LeaveView({
   return (
     <View style={tw`flex-1 bg-white`}>
       {/* Tabs */}
-      <View style={tw`px-4 pt-3`}>
-        <BackButton />
-      </View>
+      <View style={tw`px-4 pt-3`}>{/* <BackButton /> */}</View>
       <View style={tw`flex-row mx-2 mt-2 rounded-2xl p-1 bg-slate-100`}>
         {(["pending", "approved", "rejected"] as LeaveStatus[]).map((tab) => {
           const isActive = activeTab === tab;

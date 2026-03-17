@@ -10,6 +10,8 @@ import { TW } from "@/theme/twStyles";
 import { Plus } from "lucide-react-native";
 import tw from "twrnc";
 import AddLeaveTypeModal from "./AddLeaveTypeModal";
+import { BackButton } from "@/src/components/BackButton";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function LeaveTypeSettings() {
   const { userProfile } = useUsersStore();
@@ -31,9 +33,7 @@ export default function LeaveTypeSettings() {
 
     try {
       setLoading(true);
-      const result = await fetchLeaveTypesService(
-        userProfile.organization_id
-      );
+      const result = await fetchLeaveTypesService(userProfile.organization_id);
 
       setLeaveTypes(result || []);
     } catch (err: any) {
@@ -71,7 +71,7 @@ export default function LeaveTypeSettings() {
   const handleEditLeaveType = async (
     id: string,
     name: string,
-    limit: number
+    limit: number,
   ) => {
     try {
       const res = await apiClient.put("/edit-leave-type", {
@@ -110,13 +110,16 @@ export default function LeaveTypeSettings() {
   };
 
   return (
-    <View style={tw`flex-1 ${TW.bgPrimary} p-4`}>
-
+    <SafeAreaView
+      edges={["bottom", "left", "right"]}
+      style={tw`flex-1 bg-white px-4`}
+    >
+      <View style={tw`pt-3`}>
+        <BackButton />
+      </View>
       {/* Header */}
       <View style={tw`flex-row items-center justify-between mb-5`}>
-        <Text style={tw`text-xl font-bold ${TW.textPrimary}`}>
-          Leave Types
-        </Text>
+        <Text style={tw`text-xl font-bold ${TW.textPrimary}`}>Leave Types</Text>
 
         <TouchableOpacity
           onPress={() => {
@@ -131,7 +134,7 @@ export default function LeaveTypeSettings() {
       </View>
 
       {loading ? (
-        <LoadingIndicator message="Loading Leave Types..." />
+        <LoadingIndicator />
       ) : (
         <FlatList
           data={leaveTypes}
@@ -141,9 +144,7 @@ export default function LeaveTypeSettings() {
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={() => (
             <View style={tw`items-center mt-20`}>
-              <Text style={tw`${TW.textSecondary}`}>
-                No leave types found
-              </Text>
+              <Text style={tw`${TW.textSecondary}`}>No leave types found</Text>
             </View>
           )}
           renderItem={({ item }) => (
@@ -171,9 +172,7 @@ export default function LeaveTypeSettings() {
                   }}
                   style={tw`bg-[#E6F1F3] px-3 py-2 rounded-lg mr-2`}
                 >
-                  <Text style={tw`${TW.textSecondary} font-medium`}>
-                    Edit
-                  </Text>
+                  <Text style={tw`${TW.textSecondary} font-medium`}>Edit</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -181,9 +180,7 @@ export default function LeaveTypeSettings() {
                   onPress={() => handleDelete(item.id)}
                   style={tw`bg-red-50 px-3 py-2 rounded-lg`}
                 >
-                  <Text style={tw`text-red-600 font-medium`}>
-                    Delete
-                  </Text>
+                  <Text style={tw`text-red-600 font-medium`}>Delete</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -201,10 +198,10 @@ export default function LeaveTypeSettings() {
         onSubmit={
           selectedType
             ? (name: string, limit: number) =>
-              handleEditLeaveType(selectedType.id, name, limit)
+                handleEditLeaveType(selectedType.id, name, limit)
             : handleAddLeaveType
         }
       />
-    </View>
+    </SafeAreaView>
   );
 }
