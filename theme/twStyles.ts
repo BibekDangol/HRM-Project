@@ -17,5 +17,7 @@ export const TW = {
 
   DANGER: "#EF4444",       // strong red
   SUCCESS: "text-[#16A34A]",      // strong green
-  BORDER: "border-[#EEF2F4]"      // light gray border
+  BORDER: "border-[#EEF2F4]",      // light gray border
+
+  SUCCESS_COLOR:"#16A34A"
 };
