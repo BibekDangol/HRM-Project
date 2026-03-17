@@ -105,13 +105,15 @@ export default function DashboardScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={["#1F7A4D"]}
-            tintColor="#1F7A4D"
+            colors={["#1B4A5A"]}
+            tintColor="#1B4A5A"
           />
         }
       >
         {/* Stats Cards */}
-        <Text style={tw`font-semibold ${TW.textPrimary} py-2 text-lg`}>High-Level Metrics</Text>
+        <Text style={tw`font-semibold ${TW.textPrimary} py-2 text-lg`}>
+          High-Level Metrics
+        </Text>
         <View style={tw`flex-col gap-4`}>
           <View style={tw`flex-row flex-wrap justify-between`}>
             <StatCard
@@ -135,7 +137,6 @@ export default function DashboardScreen() {
             onViewAll={() => router.push("/(admin)/holidays")}
           />
         </View>
-
       </ScrollView>
     </View>
   );

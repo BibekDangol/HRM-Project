@@ -1,6 +1,6 @@
 import { Tabs, usePathname, useRouter } from "expo-router";
 import { ArrowLeft, User } from "lucide-react-native";
-import { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import { Pressable, Text, View, useWindowDimensions } from "react-native";
 
 import { adminTabs } from "@/src/config/adminTabs";
@@ -20,7 +20,7 @@ export default function AdminLayout() {
   const menu = useAdminHeaderMenu();
   const { user, loading } = useAuthStore();
   const { userProfile, setUserProfile } = useUsersStore();
-
+  const [checkOpen, setCheckOpen] = React.useState(false);
   const {
     width: screenWidth,
     height: screenHeight,
@@ -40,9 +40,10 @@ export default function AdminLayout() {
   useEffect(() => {
     fetchUserProfile();
   }, [fetchUserProfile, loading]);
-
+  const [loadingAttendance, setLoadingAttendance] = React.useState(false);
+  const checkActionLockRef = React.useRef(false);
   const showBackButton = !adminTabs.some((tab) => pathname?.includes(tab.name));
-
+  const isLocked = loadingAttendance || checkActionLockRef.current;
   return (
     <Tabs
       screenOptions={{
@@ -127,9 +128,14 @@ export default function AdminLayout() {
         ),
 
         headerRight: () => (
-          <View style={{ marginRight: 16, position: "relative" }}>
+          <View style={{ marginRight: 16 }}>
             <Pressable
-              onPress={menu.toggle}
+              disabled={isLocked}
+              onPress={() => {
+                if (isLocked) return;
+                setCheckOpen(false);
+                menu.toggle();
+              }}
               style={({ pressed }) => ({
                 height: buttonSize,
                 width: buttonSize,
@@ -145,14 +151,41 @@ export default function AdminLayout() {
               <User size={17} color="#ffffff" />
             </Pressable>
 
-            <ProfileMenu
-              open={menu.open}
-              onProfile={() => {
-                menu.close?.();
-                router.push("/(admin)/profile");
-              }}
-              onLogout={menu.logout}
-            />
+            {menu.open && (
+              <>
+                {/* BACKDROP (click outside to close) */}
+                <Pressable
+                  onPress={menu.close}
+                  style={{
+                    position: "absolute",
+                    top: -1000,
+                    left: -1000,
+                    right: -1000,
+                    bottom: -1000,
+                  }}
+                />
+
+                {/* MENU */}
+                <View
+                  style={{
+                    position: "absolute",
+                    top: 6,
+                    right: 0,
+                    zIndex: 9999,
+                    elevation: 20,
+                  }}
+                >
+                  <ProfileMenu
+                    open={menu.open}
+                    onProfile={() => {
+                      menu.close?.();
+                      router.push("/(admin)/profile");
+                    }}
+                    onLogout={menu.logout}
+                  />
+                </View>
+              </>
+            )}
           </View>
         ),
       }}

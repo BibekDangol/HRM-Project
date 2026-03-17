@@ -6,9 +6,8 @@ import { fetchSupervisorUnderUsersService } from "@/src/services/admin.service";
 import tw from "twrnc";
 import { useRouter } from "expo-router";
 import { useUsersStore } from "@/src/store/useUsersStore";
-import { UserCard } from "@/src/screens/admin/components/UserCard";
-import { TW } from "@/theme/twStyles";
 import HeaderWithSearch from "@/src/components/HeaderWithSearch";
+import { UserCard } from "@/src/screens/admin/components/UserCard";
 
 const AttendanceUserList = () => {
   const router = useRouter();
@@ -16,7 +15,7 @@ const AttendanceUserList = () => {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
-
+  const getSupervisorName = () => "No supervisor";
   const loadUsers = useCallback(async () => {
     if (!userProfile?.id || !userProfile?.organization_id) return;
     try {
@@ -72,7 +71,7 @@ const AttendanceUserList = () => {
             }
             style={tw`rounded-2xl overflow-hidden`}
           >
-            <UserCard user={item} />
+            <UserCard user={item} getSupervisorName={getSupervisorName} />
           </Pressable>
         )}
       />

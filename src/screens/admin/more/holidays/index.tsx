@@ -16,6 +16,7 @@ import { DayCell } from "@/src/components/Calendar/DayCell";
 import { HolidayRangeModal } from "@/src/components/Calendar/HolidayRangeModal";
 import { SharedCalendar } from "@/src/components/SharedCalendar";
 import { TW } from "@/theme/twStyles";
+import { BackButton } from "@/src/components/BackButton";
 
 interface Props {
   currentUserId: string;
@@ -225,6 +226,9 @@ export default function AdminCalendarScreen({
       edges={["bottom", "left", "right"]}
       style={tw`flex-1 bg-white`}
     >
+      <View style={tw`px-4 pt-3`}>
+        <BackButton />
+      </View>
       <CalendarHeader onSettingsPress={() => setShowSettings(true)} />
       <ScrollView showsVerticalScrollIndicator={false}>
         <SharedCalendar

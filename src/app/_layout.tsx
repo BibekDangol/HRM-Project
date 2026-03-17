@@ -2,8 +2,7 @@ import { Stack } from "expo-router";
 import { useEffect } from "react";
 import { useAuthStore } from "../store/useAuthStore";
 import { supabase } from "../supabase/supabaseClient";
-import { useAuthStore } from "../store/useAuthStore";
-import { useEffect } from "react";
+
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 export default function Layout() {

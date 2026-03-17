@@ -316,6 +316,8 @@ export default function HomeScreen() {
         <RefreshControl
           refreshing={isRefreshing || profileLoading || statsLoading}
           onRefresh={onRefresh}
+          colors={["#1B4A5A"]}
+          tintColor="#1B4A5A"
         />
       }
     >

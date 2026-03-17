@@ -35,16 +35,16 @@ export default function MoreScreen() {
       icon: CalendarX,
       path: "/(admin)/more/holidays",
     },
-    {
-      title: "Others",
-      description: "Additional admin tools",
-      icon: Layers,
-      path: "",
-    },
+    // {
+    //   title: "Others",
+    //   description: "Additional admin tools",
+    //   icon: Layers,
+    //   path: "",
+    // },
   ];
 
   return (
-    <View style={tw`flex-1 ${TW.bgPrimary}`}>
+    <View style={tw`flex-1 bg-white`}>
       <ScrollView contentContainerStyle={tw`p-4`}>
         {menuItems.map((item, index) => {
           const Icon = item.icon;

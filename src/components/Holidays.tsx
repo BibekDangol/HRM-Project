@@ -224,6 +224,8 @@ export default function HolidaysEventsScreen() {
           <RefreshControl
             refreshing={refreshing || loading}
             onRefresh={onRefresh}
+            colors={["#1B4A5A"]}
+            tintColor="#1B4A5A"
           />
         }
       >

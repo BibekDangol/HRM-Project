@@ -11,7 +11,7 @@ type Props = {
   user: UserProfile;
   onEdit?: (user: UserProfile) => void;
   onDelete?: (id: string) => void;
-  // getSupervisorName: (supervisorId?: string | null) => string;
+  getSupervisorName: (supervisorId: string | null) => string;
 };
 
 export const UserCard = ({ user, onEdit, onDelete }: Props) => {

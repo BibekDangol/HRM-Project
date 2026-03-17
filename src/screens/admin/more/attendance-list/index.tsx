@@ -6,7 +6,8 @@ import { useUsersStore } from "@/src/store/useUsersStore";
 import { UserProfile } from "@/src/types/admin";
 import { useRouter } from "expo-router";
 import tw from "twrnc";
-import UserCard from "../../components/UserCard";
+import { UserCard } from "../../components/UserCard";
+import HeaderWithSearch from "@/src/components/HeaderWithSearch";
 
 const AttendanceUserList = () => {
   const router = useRouter();
@@ -24,8 +25,7 @@ const AttendanceUserList = () => {
         search,
       );
       setUsers(usersData);
-    } catch (err) {
-    }
+    } catch (err) {}
   }, [userProfile?.id, userProfile?.organization_id, search]);
 
   useEffect(() => {
@@ -34,16 +34,9 @@ const AttendanceUserList = () => {
 
   return (
     <>
-      <View style={tw`flex-1 bg-gray-100`}>
+      <View style={tw`flex-1 bg-white`}>
         {/* Search Bar */}
-        <View style={tw`px-4 py-3`}>
-          <TextInput
-            placeholder="Search employee..."
-            value={search}
-            onChangeText={setSearch}
-            style={tw`bg-white rounded-xl px-4 py-3 shadow text-gray-900`}
-          />
-        </View>
+        <HeaderWithSearch />
         {/* Users List */}
         <FlatList
           contentContainerStyle={tw`px-4 pb-6 flex gap-4`}
