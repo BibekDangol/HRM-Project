@@ -1,38 +1,38 @@
-import { SafeAreaProvider } from "react-native-safe-area-context";
+import * as Linking from "expo-linking";
+
 import { Stack } from "expo-router";
-import { supabase } from "../supabase/supabaseClient";
-import { useAuthStore } from "../store/useAuthStore";
 import { useEffect } from "react";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import { supabase } from "../supabase/supabaseClient";
 
 export default function Layout() {
-  const restoreSession = useAuthStore((s) => s.restoreSession);
-
   useEffect(() => {
-    const init = async () => {
-      // Restore persisted session
-      await restoreSession();
-
-      const { data: listener } = supabase.auth.onAuthStateChange(
-        async (_event, session) => {
-          if (session) {
-            await restoreSession();
-          } else {
-            useAuthStore.setState({
-              session: null,
-              user: null,
-              role: "user",
-              loading: false,
-            });
-          }
-        },
+    const handleDeepLink = async (event: { url: string }) => {
+      console.log("Deep link received:", event.url);
+      const url = event.url;
+      console.log("This is check in layout url cha kinai bhanera", url);
+      const hash = url.split("#")[1];
+      if (!hash) return;
+      const params = Object.fromEntries(
+        hash.split("&").map((param) => param.split("=")),
       );
-
-      return () => listener.subscription.unsubscribe();
+      if (params.access_token && params.refresh_token) {
+        console.log(
+          "This is layout check, if access token cha kinai",
+          params.access_token,
+        );
+        await supabase.auth.setSession({
+          access_token: params.access_token,
+          refresh_token: params.refresh_token,
+        });
+      }
     };
-
-    init();
-  }, [restoreSession]);
-
+    const subscription = Linking.addEventListener("url", handleDeepLink);
+    Linking.getInitialURL().then((url) => {
+      if (url) handleDeepLink({ url });
+    });
+    return () => subscription.remove();
+  }, []);
   return (
     <SafeAreaProvider>
       <Stack screenOptions={{ headerShown: false }} />
