@@ -1,11 +1,10 @@
-import { CircleCheck, User } from "lucide-react-native";
-import { Pressable, Text, View } from "react-native";
 import { formatElapsed, formatSinceTime } from "@/src/utils/attendanceHelper";
+import { CircleCheck, LogOut, User } from "lucide-react-native";
+import { Pressable, Text, View } from "react-native";
 
 import ProfileMenu from "@/src/screens/admin/components/ProfileMenu";
-import React from "react";
 import { TW } from "@/theme/twStyles";
-import tw from "twrnc";
+import React from "react";
 
 interface Props {
   isLocked: boolean;
@@ -36,75 +35,96 @@ const HeaderRight: React.FC<Props> = ({
 }) => {
   return (
     <View
-      style={[
-        tw`flex-row items-center gap-3`,
-        { marginRight: 16, marginBottom: 8 },
-      ]}>
-      {/* Check in/out */}
-      <View style={{ position: "relative" }}>
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 12,
+        marginRight: 16,
+        marginBottom: 8,
+        zIndex: 100,
+      }}
+    >
+      {/* ── Check In / Out ── */}
+      <View style={{ position: "relative", zIndex: 100 }}>
         <Pressable
           disabled={isLocked}
           onPress={onCheckInAndOut}
-          style={({ pressed }) => [
-            tw`h-8 w-8 rounded-full items-center justify-center`,
-            { opacity: pressed || isLocked ? 0.7 : 1 },
-          ]}
-          hitSlop={10}>
+          hitSlop={10}
+          style={({ pressed }) => ({
+            height: 36,
+            width: 36,
+            borderRadius: 18,
+            alignItems: "center",
+            justifyContent: "center",
+            opacity: pressed || isLocked ? 0.7 : 1,
+          })}
+        >
           <View
-            style={[
-              tw`h-3 w-3 rounded-full`,
-              { backgroundColor: isCheckedIn ? "#4ADE80" : "#FCA5A5" },
-            ]}
+            style={{
+              height: 12,
+              width: 12,
+              borderRadius: 6,
+              backgroundColor: isCheckedIn ? "#4ADE80" : "#FCA5A5",
+            }}
           />
         </Pressable>
 
         {isCheckOpen && (
-          <View
-            style={{
-              position: "absolute",
-              right: 0,
-              top: 46,
-              width: 180,
-              borderRadius: 16,
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.12,
-              shadowRadius: 12,
-              elevation: 8,
-              backgroundColor: "#ffffff",
-            }}>
+          <>
+            {/* Backdrop */}
+            <Pressable
+              onPress={onCheckInAndOut}
+              style={{
+                position: "absolute",
+                top: -1000,
+                left: -1000,
+                right: -1000,
+                bottom: -1000,
+              }}
+            />
+
+            {/* Dropdown */}
             <View
               style={{
+                position: "absolute",
+                right: 0,
+                top: 44,
+                width: 170,
+                zIndex: 9999,
+                elevation: 20,
                 borderRadius: 16,
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.12,
+                shadowRadius: 12,
+                backgroundColor: "#fff",
                 borderWidth: 1,
-                borderColor: TW.BORDER,
-                overflow: "hidden",
-                backgroundColor: "#ffffff",
-              }}>
+                borderColor: "#CBD5E1",
+                padding: 12,
+              }}
+            >
               {isCheckedIn ? (
-                <View
-                  style={{
-                    padding: 16,
-                    alignItems: "center",
-                  }}>
+                <View style={{ alignItems: "center" }}>
                   <Text
                     style={{
-                      fontSize: 11,
+                      fontSize: 12,
                       fontWeight: "500",
-                      color: TW.textPrimary,
-                    }}>
+                      color: TW.textSecondary ?? "#002354",
+                      marginBottom: 4,
+                    }}
+                  >
                     Since {checkedInAt ? formatSinceTime(checkedInAt) : "--"}
                   </Text>
 
                   <Text
                     style={{
-                      fontSize: 30,
+                      fontSize: 24,
                       fontWeight: "800",
                       color: TW.textPrimary,
-                      marginTop: 4,
-                      marginBottom: 12,
+                      marginBottom: 10,
                       letterSpacing: -0.5,
-                    }}>
+                    }}
+                  >
                     {formatElapsed(elapsedMs)}
                   </Text>
 
@@ -113,19 +133,25 @@ const HeaderRight: React.FC<Props> = ({
                     disabled={isLocked}
                     style={({ pressed }) => ({
                       width: "100%",
-                      paddingVertical: 12,
-                      borderRadius: 12,
+                      flexDirection: "row",
                       alignItems: "center",
+                      justifyContent: "center",
+                      gap: 6,
+                      paddingVertical: 10,
+                      borderRadius: 10,
                       backgroundColor: TW.DANGER,
-                      opacity: isLocked ? 0.6 : pressed ? 0.85 : 1,
-                    })}>
+                      opacity: isLocked ? 0.5 : pressed ? 0.85 : 1,
+                    })}
+                  >
+                    <LogOut size={14} color={TW.bgPrimary} />
                     <Text
                       style={{
-                        color: "#ffffff",
+                        color: TW.bgPrimary,
                         fontWeight: "700",
                         fontSize: 13,
-                      }}>
-                      {isLocked ? "..." : "Check Out"}
+                      }}
+                    >
+                      {isLocked ? "Please wait…" : "Check Out"}
                     </Text>
                   </Pressable>
                 </View>
@@ -137,32 +163,36 @@ const HeaderRight: React.FC<Props> = ({
                     flexDirection: "row",
                     alignItems: "center",
                     justifyContent: "center",
-                    gap: 6,
-                    paddingHorizontal: 16,
-                    paddingVertical: 16,
-                    opacity: isLocked ? 0.6 : pressed ? 0.85 : 1,
-                  })}>
-                  <CircleCheck size={18} color={TW.SUCCESS_COLOR} />
+                    gap: 8,
+                    paddingVertical: 10,
+                    borderRadius: 10,
+                    backgroundColor: "#22C55E",
+                    opacity: isLocked ? 0.5 : pressed ? 0.85 : 1,
+                  })}
+                >
+                  <CircleCheck size={16} color={TW.bgPrimary} />
                   <Text
                     style={{
                       fontWeight: "700",
                       fontSize: 13,
-                      color: TW.SUCCESS,
-                    }}>
-                    {isLocked ? "..." : "Check In"}
+                      color: TW.bgPrimary,
+                    }}
+                  >
+                    {isLocked ? "Please wait…" : "Check In"}
                   </Text>
                 </Pressable>
               )}
             </View>
-          </View>
+          </>
         )}
       </View>
 
-      {/* Profile button + ProfileMenu */}
-      <View style={{ marginRight: 0, position: "relative" }}>
+      {/* ── Profile button + menu ── */}
+      <View style={{ position: "relative", zIndex: 200 }}>
         <Pressable
           disabled={isLocked}
           onPress={onProfileClick}
+          hitSlop={10}
           style={({ pressed }) => ({
             height: 36,
             width: 36,
@@ -174,15 +204,43 @@ const HeaderRight: React.FC<Props> = ({
             justifyContent: "center",
             opacity: pressed || isLocked ? 0.75 : 1,
           })}
-          hitSlop={10}>
+        >
           <User size={17} color="#ffffff" />
         </Pressable>
 
-        <ProfileMenu
-          open={isProfileMenuOpen}
-          onProfile={onProfileMenuClick}
-          onLogout={onLogout}
-        />
+        {isProfileMenuOpen && (
+          <>
+            {/* Backdrop */}
+            <Pressable
+              onPress={onProfileClick}
+              style={{
+                position: "absolute",
+                top: -1000,
+                left: -1000,
+                right: -1000,
+                bottom: -1000,
+              }}
+            />
+
+            {/* Menu */}
+            <View
+              style={{
+                position: "absolute",
+                top: 0,
+                right: 0,
+                zIndex: 9999,
+                elevation: 20,
+                minWidth: 160,
+              }}
+            >
+              <ProfileMenu
+                open={isProfileMenuOpen}
+                onProfile={onProfileMenuClick}
+                onLogout={onLogout}
+              />
+            </View>
+          </>
+        )}
       </View>
     </View>
   );

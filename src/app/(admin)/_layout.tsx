@@ -1,17 +1,17 @@
-import { Tabs, usePathname, useRouter } from "expo-router";
-import { ArrowLeft, User } from "lucide-react-native";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { Pressable, Text, View } from "react-native";
 import { adminTabs } from "@/src/config/adminTabs";
 import { useAdminHeaderMenu } from "@/src/hooks/useAdminHeaderMenu";
+import { useDimension } from "@/src/hooks/useDimension";
 import AdminTabBar from "@/src/screens/admin/components/AdminTabBar";
 import ProfileMenu from "@/src/screens/admin/components/ProfileMenu";
 import { fetchCurrentUserProfleService } from "@/src/services/currentuser.service";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { useUsersStore } from "@/src/store/useUsersStore";
 import { TW } from "@/theme/twStyles";
+import { Tabs, usePathname, useRouter } from "expo-router";
+import { ArrowLeft, User } from "lucide-react-native";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Pressable, Text, View, StatusBar, Platform } from "react-native"; 
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useDimension } from "@/src/hooks/useDimension";
 
 export default function AdminLayout() {
   const router = useRouter();
@@ -30,6 +30,7 @@ export default function AdminLayout() {
   const insets = useSafeAreaInsets();
   const isLandscape = screenWidth > screenHeight;
   const buttonSize = isTablet ? 42 : isSmallPhone ? 32 : 36;
+
   const fetchUserProfile = useCallback(async () => {
     if (!user?.id || userProfile) return;
     const profile = await fetchCurrentUserProfleService(user?.id);
@@ -39,164 +40,159 @@ export default function AdminLayout() {
   useEffect(() => {
     fetchUserProfile();
   }, [fetchUserProfile, loading]);
+
   const [loadingAttendance, setLoadingAttendance] = useState(false);
   const checkActionLockRef = useRef(false);
   const showBackButton = !adminTabs.some((tab) => pathname?.includes(tab.name));
   const isLocked = loadingAttendance || checkActionLockRef.current;
+
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: true,
-        headerShadowVisible: false,
-        headerTitleAlign: "left",
+    <>
+      {/* ✅ StatusBar fix — forces white icons on your dark teal header */}
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor={TW.bgSecondary} // Android: matches your teal header
+        translucent={false}
+      />
 
-        sceneStyle: {
-          backgroundColor: pathname?.includes("/profile")
-            ? TW.bgSecondary
-            : "#ffffff",
-        },
+      <Tabs
+        screenOptions={{
+          headerShown: true,
+          headerShadowVisible: false,
+          headerTitleAlign: "left",
 
-        tabBarStyle: {
-          backgroundColor: "#ffffff",
-        },
-        headerStyle: {
-          backgroundColor: TW.bgSecondary,
-          borderBottomLeftRadius: 30,
-          borderBottomRightRadius: 30,
-          height: 100,
-        },
+          sceneStyle: {
+            backgroundColor: pathname?.includes("/profile")
+              ? TW.bgSecondary
+              : "#ffffff",
+          },
 
-        headerLeft: showBackButton
-          ? () => (
-              <Pressable
-                onPress={() => router.back()}
+          tabBarStyle: {
+            backgroundColor: "#ffffff",
+          },
+          headerStyle: {
+            backgroundColor: TW.bgSecondary,
+            borderBottomLeftRadius: 30,
+            borderBottomRightRadius: 30,
+            height: 100,
+          },
+
+          headerLeft: showBackButton
+            ? () => (
+                <Pressable
+                  onPress={() => router.back()}
+                  style={{
+                    marginLeft: 16,
+                    height: 36,
+                    width: 36,
+                    borderRadius: 12,
+                    backgroundColor: "rgba(255,255,255,0.2)",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <ArrowLeft size={20} color="#ffffff" />
+                </Pressable>
+              )
+            : () => null,
+
+          headerTitle: () => (
+            <View
+              style={{ flexDirection: "row", alignItems: "center", gap: 10 }}
+            >
+              <View
                 style={{
-                  marginLeft: 16,
-                  height: 36,
-                  width: 36,
+                  width: 32,
+                  height: 32,
                   borderRadius: 12,
                   backgroundColor: "rgba(255,255,255,0.2)",
                   alignItems: "center",
                   justifyContent: "center",
                 }}
               >
-                <ArrowLeft size={20} color="#ffffff" />
-              </Pressable>
-            )
-          : () => null,
-
-        headerTitle: () => (
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              gap: 10,
-            }}
-          >
-            <View
-              style={{
-                width: 32,
-                height: 32,
-                borderRadius: 12,
-                backgroundColor: "rgba(255,255,255,0.2)",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
+                <Text
+                  style={{ color: "#ffffff", fontSize: 13, fontWeight: "700" }}
+                >
+                  {userProfile?.first_name?.charAt(0)?.toUpperCase() ?? "A"}
+                </Text>
+              </View>
               <Text
-                style={{
-                  color: "#ffffff",
-                  fontSize: 13,
-                  fontWeight: "700",
-                }}
+                style={{ color: "#ffffff", fontSize: 16, fontWeight: "700" }}
               >
-                {userProfile?.first_name?.charAt(0)?.toUpperCase() ?? "A"}
+                {userProfile?.first_name ?? "Admin"}
               </Text>
             </View>
+          ),
 
-            <Text
-              style={{
-                color: "#ffffff",
-                fontSize: 16,
-                fontWeight: "700",
-              }}
-            >
-              {userProfile?.first_name ?? "Admin"}
-            </Text>
-          </View>
-        ),
+          headerRight: () => (
+            <View style={{ marginRight: 16 }}>
+              <Pressable
+                disabled={isLocked}
+                onPress={() => {
+                  if (isLocked) return;
+                  setCheckOpen(false);
+                  menu.toggle();
+                }}
+                style={({ pressed }) => ({
+                  height: buttonSize,
+                  width: buttonSize,
+                  borderRadius: buttonSize / 2,
+                  backgroundColor: "rgba(255,255,255,0.15)",
+                  borderWidth: 2,
+                  borderColor: "rgba(255,255,255,0.5)",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  opacity: pressed ? 0.75 : 1,
+                })}
+              >
+                <User size={17} color="#ffffff" />
+              </Pressable>
 
-        headerRight: () => (
-          <View style={{ marginRight: 16 }}>
-            <Pressable
-              disabled={isLocked}
-              onPress={() => {
-                if (isLocked) return;
-                setCheckOpen(false);
-                menu.toggle();
-              }}
-              style={({ pressed }) => ({
-                height: buttonSize,
-                width: buttonSize,
-                borderRadius: buttonSize / 2,
-                backgroundColor: "rgba(255,255,255,0.15)",
-                borderWidth: 2,
-                borderColor: "rgba(255,255,255,0.5)",
-                alignItems: "center",
-                justifyContent: "center",
-                opacity: pressed ? 0.75 : 1,
-              })}
-            >
-              <User size={17} color="#ffffff" />
-            </Pressable>
-
-            {menu.open && (
-              <>
-                {/* BACKDROP (click outside to close) */}
-                <Pressable
-                  onPress={menu.close}
-                  style={{
-                    position: "absolute",
-                    top: -1000,
-                    left: -1000,
-                    right: -1000,
-                    bottom: -1000,
-                  }}
-                />
-
-                {/* MENU */}
-                <View
-                  style={{
-                    position: "absolute",
-                    top: 6,
-                    right: 0,
-                    zIndex: 9999,
-                    elevation: 20,
-                  }}
-                >
-                  <ProfileMenu
-                    open={menu.open}
-                    onProfile={() => {
-                      menu.close?.();
-                      router.push("/(admin)/profile");
+              {menu.open && (
+                <>
+                  <Pressable
+                    onPress={menu.close}
+                    style={{
+                      position: "absolute",
+                      top: -1000,
+                      left: -1000,
+                      right: -1000,
+                      bottom: -1000,
                     }}
-                    onLogout={menu.logout}
                   />
-                </View>
-              </>
-            )}
-          </View>
-        ),
-      }}
-      tabBar={(props) => <AdminTabBar {...props} />}
-    >
-      {adminTabs.map((tab) => (
-        <Tabs.Screen
-          key={tab.name}
-          name={tab.name}
-          options={{ title: tab.title }}
-        />
-      ))}
-    </Tabs>
+                  <View
+                    style={{
+                      position: "absolute",
+                      top: 6,
+                      right: 0,
+                      zIndex: 9999,
+                      elevation: 20,
+                    }}
+                  >
+                    <ProfileMenu
+                      open={menu.open}
+                      onProfile={() => {
+                        menu.close?.();
+                        router.push("/(admin)/profile");
+                      }}
+                      onLogout={menu.logout}
+                    />
+                  </View>
+                </>
+              )}
+            </View>
+          ),
+        }}
+        tabBar={(props) => <AdminTabBar {...props} />}
+      >
+        {adminTabs.map((tab) => (
+          <Tabs.Screen
+            key={tab.name}
+            name={tab.name}
+            options={{ title: tab.title }}
+          />
+        ))}
+      </Tabs>
+    </>
   );
 }

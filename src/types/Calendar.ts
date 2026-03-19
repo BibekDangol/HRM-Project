@@ -28,3 +28,20 @@ export interface CalendarState {
   days: Record<string, DayConfig>;
 }
 export type ModalMode = "view" | "addHoliday" | "addEvent";
+
+export type CalendarItem = {
+  id: string;
+  title: string;
+  type: "holiday" | "event";
+  color: string;
+  start_date: string;
+  end_date: string | null;
+};
+export type ActivityRecord = {
+  id: string;
+  date: string;
+  status: string;
+  check_in_time: string | null;
+  check_out_time: string | null;
+  check_in_comment: string | null;
+};

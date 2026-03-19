@@ -1,4 +1,4 @@
-import { WeekendRules } from "../types/adminCalendar";
+import { WeekendRules } from "../types/Calendar";
 
 export const COLOR_PRESETS = [
   "#EF4444",

@@ -5,7 +5,7 @@ import {
   CalendarState,
   DayConfig,
   WeekendRules,
-} from "../types/adminCalendar";
+} from "../types/Calendar";
 
 const DAY_NAME_TO_DOW: Record<string, number> = {
   sunday: 0,
@@ -74,9 +74,10 @@ export function getMonthStats(year: number, month: number) {
   let totalEvents = 0;
 
   for (let d = 1; d <= totalDays; d++) {
-    const key = `${year}-${String(month).padStart(2, "0")}-${
-      String(d).padStart(2, "0")
-    }`;
+    const key = `${year}-${String(month).padStart(2, "0")}-${String(d).padStart(
+      2,
+      "0",
+    )}`;
     const cfg = days[key];
 
     // Inline getDayType — calendarStore isn't defined yet at this point
@@ -246,27 +247,30 @@ export function buildAdminMarks(
   const total = new Date(year, month, 0).getDate();
 
   for (let d = 1; d <= total; d++) {
-    const key = `${year}-${String(month).padStart(2, "0")}-${
-      String(d).padStart(2, "0")
-    }`;
+    const key = `${year}-${String(month).padStart(2, "0")}-${String(d).padStart(
+      2,
+      "0",
+    )}`;
     const type = calendarStore.getDayType(key);
     const cfg = days[key];
 
     const customStyles = {
       container: {
-        backgroundColor: type === "publicHoliday"
-          ? colors.publicHoliday + "30"
-          : type === "weekend"
-          ? colors.weekend + "30"
-          : undefined,
+        backgroundColor:
+          type === "publicHoliday"
+            ? colors.publicHoliday + "30"
+            : type === "weekend"
+              ? colors.weekend + "30"
+              : undefined,
         borderRadius: 8,
       },
       text: {
-        color: type === "publicHoliday"
-          ? colors.publicHoliday
-          : type === "weekend"
-          ? colors.weekend
-          : colors.officeDay,
+        color:
+          type === "publicHoliday"
+            ? colors.publicHoliday
+            : type === "weekend"
+              ? colors.weekend
+              : colors.officeDay,
         fontWeight: type !== "officeDay" ? ("700" as const) : ("500" as const),
       },
     };

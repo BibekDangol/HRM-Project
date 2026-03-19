@@ -5,7 +5,7 @@ import { useAuthStore } from "@/src/store/useAuthStore";
 import { TW } from "@/theme/twStyles";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
-import { Eye, EyeOff } from "lucide-react-native";
+import { Eye, EyeClosed } from "lucide-react-native";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
@@ -152,7 +152,7 @@ export default function SignupScreen() {
                         value={value}
                         onChangeText={onChange}
                         onBlur={onBlur}
-                        placeholderTextColor="#b8b5b5"
+                        placeholderTextColor="#7e7e7e"
                         returnKeyType="next"
                         autoCapitalize="words"
                         style={[
@@ -191,7 +191,7 @@ export default function SignupScreen() {
                         value={value}
                         onChangeText={onChange}
                         onBlur={onBlur}
-                        placeholderTextColor="#b8b5b5"
+                        placeholderTextColor="#7e7e7e"
                         returnKeyType="next"
                         autoCapitalize="words"
                         style={[
@@ -230,7 +230,7 @@ export default function SignupScreen() {
                         value={value}
                         onChangeText={onChange}
                         onBlur={onBlur}
-                        placeholderTextColor="#b8b5b5"
+                        placeholderTextColor="#7e7e7e"
                         returnKeyType="next"
                         autoCapitalize="words"
                         style={[
@@ -275,7 +275,7 @@ export default function SignupScreen() {
                         value={value}
                         onChangeText={onChange}
                         onBlur={onBlur}
-                        placeholderTextColor="#b8b5b5"
+                        placeholderTextColor="#7e7e7e"
                         style={[
                           tw`${TW.bgButton} rounded-xl px-4`,
                           {
@@ -318,8 +318,8 @@ export default function SignupScreen() {
                               fontSize: inputFontSize,
                             },
                           ]}
-                          placeholder="• • • • • • • • • • • • •"
-                          placeholderTextColor="#b8b5b5"
+                          placeholder="•••••••••••••"
+                          placeholderTextColor="#7e7e7e"
                           secureTextEntry={!showPassword}
                           autoCapitalize="none"
                           autoCorrect={false}
@@ -336,9 +336,12 @@ export default function SignupScreen() {
                           style={tw`px-3 py-2`}
                         >
                           {showPassword ? (
-                            <EyeOff size={isTablet ? 24 : 22} color="#888" />
+                            <Eye size={isTablet ? 24 : 22} color="#7e7e7e" />
                           ) : (
-                            <Eye size={isTablet ? 24 : 22} color="#888" />
+                            <EyeClosed
+                              size={isTablet ? 24 : 22}
+                              color="#7e7e7e"
+                            />
                           )}
                         </TouchableOpacity>
                       </View>
@@ -376,8 +379,8 @@ export default function SignupScreen() {
                               fontSize: inputFontSize,
                             },
                           ]}
-                          placeholder="• • • • • • • • • • • • •"
-                          placeholderTextColor="#b8b5b5"
+                          placeholder="•••••••••••••"
+                          placeholderTextColor="#7e7e7e"
                           secureTextEntry={!showConfirmPassword}
                           autoCapitalize="none"
                           autoCorrect={false}
@@ -397,9 +400,12 @@ export default function SignupScreen() {
                           style={tw`px-3 py-2`}
                         >
                           {showConfirmPassword ? (
-                            <EyeOff size={isTablet ? 24 : 22} color="#888" />
+                            <Eye size={isTablet ? 24 : 22} color="#7e7e7e" />
                           ) : (
-                            <Eye size={isTablet ? 24 : 22} color="#888" />
+                            <EyeClosed
+                              size={isTablet ? 24 : 22}
+                              color="#7e7e7e"
+                            />
                           )}
                         </TouchableOpacity>
                       </View>
