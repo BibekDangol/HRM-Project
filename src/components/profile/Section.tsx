@@ -1,6 +1,5 @@
-import React from "react";
-import { Platform, Text, View } from "react-native";
 import { TW } from "@/theme/twStyles";
+import { Platform, Text, View } from "react-native";
 
 type Props = {
   title: string;

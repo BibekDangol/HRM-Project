@@ -1,5 +1,4 @@
 import { TW } from "@/theme/twStyles";
-import React from "react";
 import { Text, TextInput, View } from "react-native";
 
 type Props = {

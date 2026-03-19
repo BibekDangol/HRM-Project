@@ -1,7 +1,8 @@
-import { Eye, EyeOff } from "lucide-react-native";
+import { Eye, EyeClosed } from "lucide-react-native";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
+  ActivityIndicator,
   Alert,
   Keyboard,
   KeyboardAvoidingView,
@@ -23,6 +24,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
 import tw from "twrnc";
 import { z } from "zod";
+import LoadingIndicator from "@/src/components/LoadingIndicator";
 
 type FormData = z.infer<typeof loginSchema>;
 
@@ -96,11 +98,10 @@ const LoginScreen = () => {
                 },
               ]}>
               <Logo />
-
-              <View style={tw`items-center flex flex-col gap-1`}>
+              <View style={tw`items-center flex flex-col`}>
                 <Text
                   style={[
-                    tw`font-bold ${TW.textPrimary}`,
+                    tw`font-bold ${TW.textPrimary} -mt-6`, // pull text up aggressively
                     { fontSize: isTablet ? 36 : isSmallPhone ? 26 : 30 },
                   ]}>
                   TechHaus
@@ -147,7 +148,7 @@ const LoginScreen = () => {
                           },
                         ]}
                         placeholder="Enter your email"
-                        placeholderTextColor="#b8b5b5"
+                        placeholderTextColor="#7e7e7e"
                         keyboardType="email-address"
                         autoCapitalize="none"
                         value={value}
@@ -193,8 +194,8 @@ const LoginScreen = () => {
                               fontSize: isTablet ? 16 : 14,
                             },
                           ]}
-                          placeholder="• • • • • • • • • • • • •"
-                          placeholderTextColor="#b8b5b5"
+                          placeholder="•••••••••••••"
+                          placeholderTextColor="#7e7e7e"
                           secureTextEntry={!showPassword}
                           value={value}
                           onChangeText={(text) => {
@@ -208,9 +209,12 @@ const LoginScreen = () => {
                           hitSlop={10}
                           style={tw`pr-3`}>
                           {showPassword ? (
-                            <EyeOff size={isTablet ? 24 : 22} color="#888" />
+                            <Eye size={isTablet ? 24 : 22} color="#7e7e7e" />
                           ) : (
-                            <Eye size={isTablet ? 24 : 22} color="#888" />
+                            <EyeClosed
+                              size={isTablet ? 24 : 22}
+                              color="#7e7e7e"
+                            />
                           )}
                         </TouchableOpacity>
                       </View>
@@ -256,14 +260,21 @@ const LoginScreen = () => {
                     },
                   ]}
                   onPress={handleSubmit(onValidSubmit)}
-                  disabled={isSubmitting}>
-                  <Text
-                    style={[
-                      tw`font-semibold ${TW.textButton}`,
-                      { fontSize: isTablet ? 18 : 16 },
-                    ]}>
-                    {isSubmitting ? "Logging in..." : "Login"}
-                  </Text>
+                  disabled={isSubmitting}
+                >
+                  <View style={tw`flex-row items-center gap-2`}>
+                    {isSubmitting && (
+                      <ActivityIndicator size="small" color="#ffffff" />
+                    )}
+                    <Text
+                      style={[
+                        tw`font-semibold ${TW.textButton}`,
+                        { fontSize: isTablet ? 18 : 16 },
+                      ]}
+                    >
+                      {isSubmitting ? "Logging in..." : "Login"}
+                    </Text>
+                  </View>
                 </TouchableOpacity>
 
                 {/* Signup Row */}

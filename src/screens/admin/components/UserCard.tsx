@@ -1,11 +1,9 @@
-import { Alert, Pressable, Text, View } from "react-native";
-import { Pencil, Trash2 } from "lucide-react-native";
-
-import Capsule from "../../../components/Capsule";
-import React from "react";
-import { TW } from "@/theme/twStyles";
 import { UserProfile } from "@/src/types/admin";
+import { TW } from "@/theme/twStyles";
+import { Pencil, Trash2 } from "lucide-react-native";
+import { Alert, Pressable, Text, View } from "react-native";
 import tw from "twrnc";
+import Capsule from "../../../components/Capsule";
 
 type Props = {
   user: UserProfile;
@@ -67,7 +65,7 @@ export const UserCard = ({ user, onEdit, onDelete }: Props) => {
                       style: "destructive",
                       onPress: () => onDelete?.(user.id),
                     },
-                  ]
+                  ],
                 )
               }
               hitSlop={8}
@@ -84,4 +82,3 @@ export const UserCard = ({ user, onEdit, onDelete }: Props) => {
     </View>
   );
 };
-

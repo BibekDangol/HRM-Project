@@ -25,6 +25,7 @@ import {
 import { router } from "expo-router";
 import { CalendarDays } from "lucide-react-native";
 import tw from "twrnc";
+import { ActivityRecord, CalendarItem } from "@/src/types/Calendar";
 
 export default function HomeScreen() {
   const user = useAuthStore((s) => s.user);
@@ -50,25 +51,9 @@ export default function HomeScreen() {
     incomplete: 0,
   });
 
-  type CalendarItem = {
-    id: string;
-    title: string;
-    type: "holiday" | "event";
-    color: string;
-    start_date: string;
-    end_date: string | null;
-  };
   const [calendarItems, setCalendarItems] = useState<CalendarItem[]>([]);
   const [calendarLoading, setCalendarLoading] = useState(false);
 
-  type ActivityRecord = {
-    id: string;
-    date: string;
-    status: string;
-    check_in_time: string | null;
-    check_out_time: string | null;
-    check_in_comment: string | null;
-  };
   const [activityLog, setActivityLog] = useState<ActivityRecord[]>([]);
   const [activityLoading, setActivityLoading] = useState(false);
 
@@ -324,17 +309,14 @@ export default function HomeScreen() {
       {/* Attendance for this Month */}
       <View style={tw`bg-white p-2`}>
         <View style={tw`flex-row items-center justify-between mb-4`}>
-          <View>
-            <Text style={tw`text-lg font-bold text-gray-800`}>
-              Attendance for {monthTitle}
-            </Text>
-            <Text style={tw`text-gray-500 mt-1`}>{yearTitle}</Text>
-          </View>
+          <Text style={tw`text-lg font-bold text-gray-800`}>
+            Attendance for {monthTitle} {yearTitle}
+          </Text>
 
           <Pressable
             onPress={() => setMonthModalOpen(true)}
             style={({ pressed }) => [
-              tw`px-4 py-3 rounded-full`,
+              tw`px-3 py-2 rounded-full`,
               pressed && { opacity: 0.85 },
             ]}
           >
@@ -352,7 +334,7 @@ export default function HomeScreen() {
               bg: "#E6F4F4",
             },
             {
-              label: "Absents",
+              label: "Absent",
               value: stats.absent,
               color: "#EF4444",
               bg: "#FEE2E2",

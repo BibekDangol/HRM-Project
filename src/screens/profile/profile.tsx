@@ -1,16 +1,14 @@
-import React from "react";
-import { ActivityIndicator, Alert, ScrollView, Text, View } from "react-native";
+import LoadingIndicator from "@/src/components/LoadingIndicator";
+import ProfileActions from "@/src/components/profile/EditProfile";
+import EditProfileModal from "@/src/components/profile/EditProfileModal";
+import InfoRow from "@/src/components/profile/InfoRow";
+import ProfileHero from "@/src/components/profile/ProfileHero";
+import Section from "@/src/components/profile/Section";
+import { useProfile } from "@/src/hooks/useProfile";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { TW } from "@/theme/twStyles";
-
 import { Mail, User } from "lucide-react-native";
-import { useProfile } from "@/src/hooks/useProfile";
-import ProfileActions from "@/src/components/profile/EditProfile";
-import Section from "@/src/components/profile/Section";
-import InfoRow from "@/src/components/profile/InfoRow";
-import EditProfileModal from "@/src/components/profile/EditProfileModal";
-import ProfileHero from "@/src/components/profile/ProfileHero";
-import LoadingIndicator from "@/src/components/LoadingIndicator";
+import { ScrollView, View } from "react-native";
 
 export default function ProfileScreen() {
   const user = useAuthStore((s) => s.user);

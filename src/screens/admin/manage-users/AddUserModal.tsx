@@ -9,11 +9,9 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-
 import { UserProfile } from "@/src/types/admin";
 import { TW } from "@/theme/twStyles";
 import { zodResolver } from "@hookform/resolvers/zod";
-import React from "react";
 import tw from "twrnc";
 import { z } from "zod";
 
@@ -86,9 +84,14 @@ const AddUserModal = ({
               <Controller
                 control={control}
                 name="first_name"
-                render={({ field: { value, onChange }, fieldState: { error } }) => (
+                render={({
+                  field: { value, onChange },
+                  fieldState: { error },
+                }) => (
                   <View style={tw`mb-4`}>
-                    <Text style={tw`text-sm font-semibold mb-1 ${TW.textSecondary}`}>
+                    <Text
+                      style={tw`text-sm font-semibold mb-1 ${TW.textSecondary}`}
+                    >
                       First Name
                     </Text>
 
@@ -113,9 +116,14 @@ const AddUserModal = ({
               <Controller
                 control={control}
                 name="last_name"
-                render={({ field: { value, onChange }, fieldState: { error } }) => (
+                render={({
+                  field: { value, onChange },
+                  fieldState: { error },
+                }) => (
                   <View style={tw`mb-4`}>
-                    <Text style={tw`text-sm font-semibold mb-1 ${TW.textSecondary}`}>
+                    <Text
+                      style={tw`text-sm font-semibold mb-1 ${TW.textSecondary}`}
+                    >
                       Last Name
                     </Text>
 
@@ -140,9 +148,14 @@ const AddUserModal = ({
               <Controller
                 control={control}
                 name="email"
-                render={({ field: { value, onChange }, fieldState: { error } }) => (
+                render={({
+                  field: { value, onChange },
+                  fieldState: { error },
+                }) => (
                   <View style={tw`mb-4`}>
-                    <Text style={tw`text-sm font-semibold mb-1 ${TW.textSecondary}`}>
+                    <Text
+                      style={tw`text-sm font-semibold mb-1 ${TW.textSecondary}`}
+                    >
                       Email
                     </Text>
 
@@ -171,11 +184,16 @@ const AddUserModal = ({
                 name="supervisor_id"
                 render={({ field: { value, onChange } }) => (
                   <View style={tw`mb-6`}>
-                    <Text style={tw`text-sm font-semibold mb-2 ${TW.textSecondary}`}>
+                    <Text
+                      style={tw`text-sm font-semibold mb-2 ${TW.textSecondary}`}
+                    >
                       Supervisor
                     </Text>
 
-                    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                    <ScrollView
+                      horizontal
+                      showsHorizontalScrollIndicator={false}
+                    >
                       {supervisors.map((sup) => {
                         const selected = value === sup.id;
 
@@ -191,8 +209,9 @@ const AddUserModal = ({
                             ]}
                           >
                             <Text
-                              style={tw`text-sm ${selected ? TW.textPrimary : TW.textSecondary
-                                }`}
+                              style={tw`text-sm ${
+                                selected ? TW.textPrimary : TW.textSecondary
+                              }`}
                             >
                               {sup.first_name} {sup.last_name}
                             </Text>
@@ -206,7 +225,6 @@ const AddUserModal = ({
 
               {/* ACTION BUTTONS */}
               <View style={tw`flex-row justify-between mt-6`}>
-
                 {/* Cancel */}
                 <TouchableOpacity
                   onPress={onClose}
@@ -230,9 +248,7 @@ const AddUserModal = ({
                     {isSubmitting ? "Adding..." : "Add User"}
                   </Text>
                 </TouchableOpacity>
-
               </View>
-
             </View>
           </ScrollView>
         </KeyboardAvoidingView>

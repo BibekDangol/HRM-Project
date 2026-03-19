@@ -23,7 +23,7 @@ type Props = {
 
 const CARD_RADIUS = 20;
 const MAX_VISIBLE = 5;
-const CARD_HEIGHT = 108;
+const CARD_HEIGHT = 96;
 
 export const HolidaysEventsSection = ({
   calendarItems,
@@ -68,7 +68,7 @@ export const HolidaysEventsSection = ({
           paddingHorizontal: 14,
           borderWidth: 1,
           borderColor: "#EAECEF",
-          shadowColor: "#000",
+          shadowColor: "#ffffff",
           shadowOpacity: 0.05,
           shadowRadius: 8,
           shadowOffset: { width: 0, height: 2 },
@@ -77,8 +77,8 @@ export const HolidaysEventsSection = ({
       >
         <View
           style={{
-            width: 64,
-            height: 64,
+            width: 72,
+            height: 72,
             borderRadius: 16,
             backgroundColor: "#F8FAFC",
             alignItems: "center",

@@ -1,6 +1,6 @@
 import { parseLocalYMD } from "@/src/constants/adminCalendar";
 import { supabase } from "@/src/supabase/supabaseClient";
-import { ModalMode } from "@/src/types/adminCalendar";
+import { ModalMode } from "@/src/types/Calendar";
 import { calendarStore, useCalendarStore } from "@/src/utils/adminCalendar";
 
 import { useState } from "react";
@@ -16,8 +16,8 @@ import {
   View,
 } from "react-native";
 import tw from "twrnc";
-import { Dot } from "./Dot";
 import { ColorPicker } from "./ColorPicker";
+import { Dot } from "./Dot";
 
 export function DayModal({
   visible,

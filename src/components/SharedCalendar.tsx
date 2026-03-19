@@ -1,6 +1,5 @@
-import { TW } from "@/theme/twStyles";
 import { DayCell } from "@/src/components/Calendar/DayCell";
-import React from "react";
+import { TW } from "@/theme/twStyles";
 import { View } from "react-native";
 import { Calendar } from "react-native-calendars";
 import tw from "twrnc";

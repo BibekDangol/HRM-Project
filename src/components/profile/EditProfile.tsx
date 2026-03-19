@@ -1,6 +1,5 @@
 import { TW } from "@/theme/twStyles";
 import { Pencil } from "lucide-react-native";
-import React from "react";
 import { Platform, Pressable } from "react-native";
 
 type Props = {

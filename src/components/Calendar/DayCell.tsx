@@ -1,6 +1,5 @@
 import { TODAY } from "@/src/constants/adminCalendar";
 import { calendarStore, useCalendarStore } from "@/src/utils/adminCalendar";
-import React from "react";
 import { Pressable, Text, View } from "react-native";
 import tw from "twrnc";
 
