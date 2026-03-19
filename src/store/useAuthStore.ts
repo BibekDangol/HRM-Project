@@ -11,6 +11,12 @@ type SignUpData = {
   organizationName: string;
 };
 type SignInResult = { error: string } | { role: string; status: string | null };
+type ForgotPasswordState = {
+  loading: boolean;
+  emailSent: boolean;
+  error: string | null;
+};
+type ForgotPasswordResult = { success: true } | { error: string };
 type AuthState = {
   user: User | null;
   session: Session | null;
@@ -22,6 +28,9 @@ type AuthState = {
   signOut: () => Promise<void>;
   restoreSession: () => Promise<void>;
   updateStatus: (status: "pending" | "active") => void;
+  forgotPasswordState: ForgotPasswordState;
+  forgotPassword: (email: string) => Promise<ForgotPasswordResult>;
+  resetForgotPasswordState: () => void;
 };
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
@@ -29,6 +38,11 @@ export const useAuthStore = create<AuthState>((set) => ({
   role: null,
   loading: false,
   status: null,
+  forgotPasswordState: {
+    loading: false,
+    emailSent: false,
+    error: null,
+  },
   signUp: async ({
     email,
     password,
@@ -74,16 +88,16 @@ export const useAuthStore = create<AuthState>((set) => ({
           last_name: lastName,
           organization_id: orgId,
           role: "admin",
-          status:"active",
+          status: "active",
         })
         .select();
       if (profileError) throw profileError;
-      console.log(profile[0])
+      console.log(profile[0]);
       set({
         session: authData.session,
         user: authData.user,
         role: profile[0].role,
-        status:profile[0].status,
+        status: profile[0].status,
         loading: false,
       });
       set({ loading: false });
@@ -134,6 +148,59 @@ export const useAuthStore = create<AuthState>((set) => ({
     } finally {
       set({ user: null, session: null, role: null, loading: false });
     }
+  },
+  forgotPassword: async (email: string): Promise<ForgotPasswordResult> => {
+    set({
+      forgotPasswordState: { loading: true, emailSent: false, error: null },
+    });
+
+    try {
+      const { error, data } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: __DEV__
+          ? "exp://192.168.40.108:8081/--/resetPassword"
+          : "myapp://resetPassword",
+      });
+      //to seprate server/--/from app.
+      console.log("forgot password errr", error);
+      console.log("forgot password data", data);
+
+      if (error) {
+        set({
+          forgotPasswordState: {
+            loading: false,
+            emailSent: false,
+            error: error.message,
+          },
+        });
+
+        return { error: error.message };
+      }
+
+      set({
+        forgotPasswordState: {
+          loading: false,
+          emailSent: true,
+          error: null,
+        },
+      });
+
+      return { success: true };
+    } catch (err: any) {
+      set({
+        forgotPasswordState: {
+          loading: false,
+          emailSent: false,
+          error: err.message,
+        },
+      });
+
+      return { error: err.message };
+    }
+  },
+  resetForgotPasswordState: () => {
+    set({
+      forgotPasswordState: { loading: false, emailSent: false, error: null },
+    });
   },
   restoreSession: async () => {
     try {
