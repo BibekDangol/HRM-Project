@@ -1,12 +1,14 @@
 import { useAttendance } from "@/src/hooks/useAttendance";
 import { formatTime, getMonthKey, getTodayDate } from "@/src/utils/getDate";
+import { MAX_YEAR, MIN_YEAR, MONTHS } from "@/src/utils/userDashboard";
 import { TW } from "@/theme/twStyles";
 import * as FileSystem from "expo-file-system/legacy";
 import * as Sharing from "expo-sharing";
-import { Calendar, Download, FileText } from "lucide-react-native";
+import { Calendar, Download } from "lucide-react-native";
 import { useState } from "react";
 import {
   Alert,
+  Modal,
   Platform,
   Pressable,
   ScrollView,
@@ -24,11 +26,6 @@ type Props = {
   designation?: string;
   manager?: string;
 };
-
-// ─── Constants ────────────────────────────────────────────────────────────────
-// const BRAND = "#1B3A4B";
-// const BRAND_LIGHT = "#d6eaf0";
-// const BRAND_MUTED = "#7fb6c9";
 
 const STATUS_CONFIG: Record<
   string,
@@ -90,7 +87,6 @@ const buildCSV = (
     })}`,
   );
   lines.push("");
-
   lines.push("Summary");
   lines.push(`Days Present,${summary.present}`);
   lines.push(`Days Absent,${summary.absent}`);
@@ -100,8 +96,8 @@ const buildCSV = (
     totalDays > 0 ? Math.round((summary.present / totalDays) * 100) : 0;
   lines.push(`Attendance Rate,${rate}%`);
   lines.push("");
-
   lines.push("Date,Status,Check In,Check Out,Hours");
+
   for (const [day, records] of Object.entries(groupedByDate)) {
     const r = records[0];
     if (!r) continue;
@@ -127,10 +123,8 @@ const buildCSV = (
 const exportCSV = async (csvString: string, filename: string) => {
   try {
     if (Platform.OS === "android") {
-      // ── Android: save directly to Downloads via StorageAccessFramework ──
       const permissions =
         await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
-
       if (!permissions.granted) {
         Alert.alert(
           "Permission denied",
@@ -138,28 +132,23 @@ const exportCSV = async (csvString: string, filename: string) => {
         );
         return;
       }
-
       const fileUri = await FileSystem.StorageAccessFramework.createFileAsync(
         permissions.directoryUri,
         filename,
         "text/csv",
       );
-
       await FileSystem.writeAsStringAsync(fileUri, csvString, {
         encoding: FileSystem.EncodingType.UTF8,
       });
-
       Alert.alert(
         "Saved!",
         `${filename} has been saved to your selected folder.`,
       );
     } else {
-      // ── iOS: write to temp dir then open share/save sheet ──
       const tempUri = FileSystem.documentDirectory + filename;
       await FileSystem.writeAsStringAsync(tempUri, csvString, {
         encoding: FileSystem.EncodingType.UTF8,
       });
-
       const isAvailable = await Sharing.isAvailableAsync();
       if (isAvailable) {
         await Sharing.shareAsync(tempUri, {
@@ -181,7 +170,6 @@ const exportCSV = async (csvString: string, filename: string) => {
 };
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
-
 const StatusBadge = ({ status }: { status: string }) => {
   const cfg = STATUS_CONFIG[status] ?? {
     label: status,
@@ -252,118 +240,18 @@ const StatBox = ({
   </View>
 );
 
-const TableHeader = () => (
-  <View
-    style={[
-      tw`flex-row items-center px-4 py-2.5`,
-      { backgroundColor: TW.bgSecondary },
-    ]}
-  >
-    {[
-      { label: "Date", flex: 2.5 },
-      { label: "Status", flex: 2.2 },
-      { label: "In", flex: 1.5 },
-      { label: "Out", flex: 1.5 },
-      { label: "Hrs", flex: 1, right: true },
-    ].map((col) => (
-      <Text
-        key={col.label}
-        style={{
-          flex: col.flex,
-          color: TW.BRAND_MUTED,
-          fontSize: 10,
-          letterSpacing: 1.1,
-          textTransform: "uppercase",
-          fontWeight: "600",
-          textAlign: col.right ? "right" : "left",
-        }}
-      >
-        {col.label}
-      </Text>
-    ))}
-  </View>
-);
-
-const TableRow = ({
-  day,
-  records,
-  index,
-}: {
-  day: string;
-  records: any[];
-  index: number;
-}) => {
-  const r = records[0];
-  if (!r) return null;
-
-  let hours = "—";
-  if (r.check_in_time && r.check_out_time) {
-    const diff =
-      (new Date(r.check_out_time).getTime() -
-        new Date(r.check_in_time).getTime()) /
-      3600000;
-    hours = `${diff.toFixed(1)}h`;
-  }
-
-  const checkIn = formatTime(r.check_in_time) || "—";
-  const checkOut = formatTime(r.check_out_time) || "—";
-  const isDash = (v: string) => v === "—";
-  const isEven = index % 2 === 0;
-
-  return (
-    <View
-      style={[
-        tw`flex-row items-center px-4 py-3 border-b border-slate-100`,
-        { backgroundColor: isEven ? "#fff" : "#f9fbfc" },
-      ]}
-    >
-      <Text
-        style={{
-          flex: 2.5,
-          fontSize: 12,
-          fontWeight: "600",
-          color: TW.bgSecondary,
-        }}
-      >
-        {day}
-      </Text>
-      <View style={{ flex: 2.2 }}>
-        <StatusBadge status={r.status ?? "unknown"} />
-      </View>
-      <Text
-        style={[
-          { flex: 1.5, fontSize: 12 },
-          isDash(checkIn) ? { color: "#c5d4d9" } : { color: "#3d5c68" },
-        ]}
-      >
-        {checkIn}
-      </Text>
-      <Text
-        style={[
-          { flex: 1.5, fontSize: 12 },
-          isDash(checkOut) ? { color: "#c5d4d9" } : { color: "#3d5c68" },
-        ]}
-      >
-        {checkOut}
-      </Text>
-      <Text
-        style={[
-          { flex: 1, fontSize: 12, fontWeight: "600", textAlign: "right" },
-          isDash(hours) ? { color: "#c5d4d9" } : { color: TW.bgSecondary },
-        ]}
-      >
-        {hours}
-      </Text>
-    </View>
-  );
-};
-
 // ─── Main component ───────────────────────────────────────────────────────────
 const AttendanceView: React.FC<Props> = ({ userId, name }) => {
-  const { summary, months, groupedByDate, selectedMonth, setSelectedMonth } =
+  const { summary, groupedByDate, selectedMonth, setSelectedMonth } =
     useAttendance(userId);
 
   const [showMonthPicker, setShowMonthPicker] = useState(false);
+
+  // ── Year state for the modal stepper ──
+  const now = new Date();
+  const [pickerYear, setPickerYear] = useState(
+    Math.min(now.getFullYear(), MAX_YEAR),
+  );
 
   const currentMonth = selectedMonth ?? getMonthKey(getTodayDate());
   const reportDate = new Date().toLocaleDateString("en-GB", {
@@ -372,13 +260,13 @@ const AttendanceView: React.FC<Props> = ({ userId, name }) => {
     year: "numeric",
   });
 
-  // ── Filter all records to the selected month ──
+  // ── Filter records to selected month ──
   const filteredEntries = Object.entries(groupedByDate).filter(([day]) =>
     day.startsWith(currentMonth),
   );
   const filteredByMonth = Object.fromEntries(filteredEntries);
 
-  // ── Recompute summary for the selected month only ──
+  // ── Recompute summary for selected month ──
   const monthSummary = filteredEntries.reduce(
     (acc, [, records]) => {
       const status = records[0]?.status ?? "";
@@ -389,12 +277,6 @@ const AttendanceView: React.FC<Props> = ({ userId, name }) => {
     },
     { present: 0, absent: 0, leave: 0 },
   );
-  const totalDays =
-    monthSummary.present + monthSummary.absent + monthSummary.leave;
-  const rate =
-    totalDays > 0 ? Math.round((monthSummary.present / totalDays) * 100) : 0;
-
-  const entries = filteredEntries;
 
   const handleDownload = () => {
     const csvString = buildCSV(
@@ -406,6 +288,9 @@ const AttendanceView: React.FC<Props> = ({ userId, name }) => {
     const filename = `attendance_${name.replace(/\s+/g, "_")}_${currentMonth}.csv`;
     exportCSV(csvString, filename);
   };
+
+  const canIncYear = pickerYear < MAX_YEAR;
+  const canDecYear = pickerYear > MIN_YEAR;
 
   return (
     <ScrollView
@@ -463,12 +348,6 @@ const AttendanceView: React.FC<Props> = ({ userId, name }) => {
               },
             ]}
           >
-            {/* <View
-              style={[
-                tw`w-2 h-2 rounded-full mr-2`,
-                { backgroundColor: "#4ade80" },
-              ]}
-            /> */}
             <Text
               style={{ color: TW.BRAND_LIGHT, fontSize: 13, fontWeight: "600" }}
             >
@@ -479,13 +358,11 @@ const AttendanceView: React.FC<Props> = ({ userId, name }) => {
           {/* Action buttons */}
           <View style={tw`flex-row gap-2`}>
             <Pressable
-              onPress={() => setShowMonthPicker((v) => !v)}
+              onPress={() => setShowMonthPicker(true)}
               style={[
                 tw`flex-1 flex-row items-center justify-center gap-1.5 py-2.5 rounded-xl`,
                 {
-                  backgroundColor: showMonthPicker
-                    ? "rgba(255,255,255,0.22)"
-                    : "rgba(255,255,255,0.1)",
+                  backgroundColor: "rgba(255,255,255,0.1)",
                   borderWidth: 1,
                   borderColor: "rgba(255,255,255,0.18)",
                 },
@@ -499,7 +376,7 @@ const AttendanceView: React.FC<Props> = ({ userId, name }) => {
                   fontWeight: "500",
                 }}
               >
-                {showMonthPicker ? "Close" : "Change Month"}
+                Change Month
               </Text>
             </Pressable>
 
@@ -528,48 +405,6 @@ const AttendanceView: React.FC<Props> = ({ userId, name }) => {
           </View>
         </View>
 
-        {/* ── Month picker ────────────────────────────────────────────────── */}
-        {showMonthPicker && (
-          <View
-            style={[
-              tw`flex-row flex-wrap px-4 py-3 border-b border-slate-200`,
-              { backgroundColor: "#f0f5f7" },
-            ]}
-          >
-            {months.map((month) => {
-              const active = currentMonth === month;
-              return (
-                <Pressable
-                  key={month}
-                  onPress={() => {
-                    setSelectedMonth(month);
-                    setShowMonthPicker(false);
-                  }}
-                  style={[
-                    tw`mr-2 mb-2 px-3 py-1.5 rounded-lg border`,
-                    active
-                      ? {
-                          backgroundColor: TW.bgSecondary,
-                          borderColor: TW.bgSecondary,
-                        }
-                      : { backgroundColor: "#fff", borderColor: "#dde8ed" },
-                  ]}
-                >
-                  <Text
-                    style={{
-                      fontSize: 12,
-                      fontWeight: "500",
-                      color: active ? "#fff" : "#5a7e8e",
-                    }}
-                  >
-                    {month}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </View>
-        )}
-
         {/* ── Summary stats ───────────────────────────────────────────────── */}
         <View style={tw`px-4 pt-5 pb-2`}>
           <SectionLabel>Summary</SectionLabel>
@@ -589,36 +424,154 @@ const AttendanceView: React.FC<Props> = ({ userId, name }) => {
               label={"On\nLeave"}
               accent="#b56b00"
             />
-            {/* <StatBox
-              value={`${rate}%`}
-              label={"Attend-\nance"}
-              accent={BRAND}
-            /> */}
           </View>
         </View>
-
-        {/* ── Daily log ───────────────────────────────────────────────────── */}
-        {/* <View style={tw`px-4 pt-4 pb-5`}>
-          <SectionLabel>{`Daily Log — ${currentMonth}`}</SectionLabel>
-          <View style={tw`rounded-xl overflow-hidden border border-slate-200`}>
-            <TableHeader />
-            {entries.length === 0 ? (
-              <View style={tw`items-center py-10 bg-white`}>
-                <FileText size={28} color="#c5d4d9" />
-                <Text style={[tw`text-sm mt-2`, { color: "#94a3b8" }]}>
-                  No records for {currentMonth}
-                </Text>
-              </View>
-            ) : (
-              entries.map(([day, records], index) => (
-                <TableRow key={day} day={day} records={records} index={index} />
-              ))
-            )}
-          </View> */}
-        {/* </View> */}
       </View>
+
+      {/* ── Month Picker Modal (from HomeScreen) ────────────────────────── */}
+      <Modal
+        visible={showMonthPicker}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowMonthPicker(false)}
+      >
+        <Pressable
+          style={tw`flex-1 bg-black/50 justify-end`}
+          onPress={() => setShowMonthPicker(false)}
+        >
+          <Pressable
+            style={[
+              tw`rounded-t-3xl px-5 pt-3 pb-8`,
+              { backgroundColor: "#ffffff" },
+            ]}
+            onPress={() => {}}
+          >
+            {/* Handle */}
+            <View style={tw`items-center mb-4`}>
+              <View
+                style={[
+                  tw`h-1 w-10 rounded-full`,
+                  { backgroundColor: TW.bgSecondary },
+                ]}
+              />
+            </View>
+
+            {/* Year stepper */}
+            <View style={tw`flex-row items-center justify-center gap-5 mb-5`}>
+              <Pressable
+                disabled={!canDecYear}
+                onPress={() => setPickerYear((y) => Math.max(MIN_YEAR, y - 1))}
+                style={({ pressed }) => [
+                  tw`h-9 w-9 rounded-full items-center justify-center border`,
+                  { borderColor: "#e2e8f0", backgroundColor: "#fff" },
+                  (!canDecYear || pressed) && { opacity: 0.4 },
+                ]}
+              >
+                <Text style={[tw`font-bold text-base`, { color: "#1F2937" }]}>
+                  ‹
+                </Text>
+              </Pressable>
+
+              <Text
+                style={[
+                  tw`text-lg font-bold w-16 text-center`,
+                  { color: "#1F2937" },
+                ]}
+              >
+                {pickerYear}
+              </Text>
+
+              <Pressable
+                disabled={!canIncYear}
+                onPress={() => setPickerYear((y) => Math.min(MAX_YEAR, y + 1))}
+                style={({ pressed }) => [
+                  tw`h-9 w-9 rounded-full items-center justify-center border`,
+                  { borderColor: "#e2e8f0", backgroundColor: "#fff" },
+                  (!canIncYear || pressed) && { opacity: 0.4 },
+                ]}
+              >
+                <Text style={[tw`font-bold text-base`, { color: "#1F2937" }]}>
+                  ›
+                </Text>
+              </Pressable>
+            </View>
+
+            {/* 3-col month grid */}
+            <View style={tw`flex-row flex-wrap gap-2 mb-5`}>
+              {MONTHS.map((m, idx) => {
+                const currentYear = now.getFullYear();
+                const currentMonthIdx = now.getMonth();
+
+                const isFuture =
+                  pickerYear === currentYear && idx > currentMonthIdx;
+
+                const monthKey = `${pickerYear}-${String(idx + 1).padStart(2, "0")}`;
+                const isActive = currentMonth === monthKey && !isFuture;
+
+                const isCurrent =
+                  idx === currentMonthIdx && pickerYear === currentYear;
+
+                return (
+                  <Pressable
+                    key={m}
+                    disabled={isFuture}
+                    onPress={() => {
+                      setSelectedMonth(monthKey);
+                      setShowMonthPicker(false);
+                    }}
+                    style={({ pressed }) => [
+                      tw`py-3 rounded-2xl items-center justify-center`,
+                      { width: "31%" },
+                      isActive
+                        ? { backgroundColor: TW.bgSecondary }
+                        : isCurrent
+                          ? {
+                              backgroundColor: "#FFFBEB",
+                              borderWidth: 1.5,
+                              borderColor: "#FFC107",
+                            }
+                          : isFuture
+                            ? { backgroundColor: "#F9FAFB" }
+                            : { backgroundColor: "#F3F4F6" },
+                      pressed && !isFuture && { opacity: 0.8 },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        tw`text-sm font-semibold text-center`,
+                        isActive
+                          ? { color: "#ffffff" }
+                          : isFuture
+                            ? { color: "#CBD5E1" }
+                            : { color: "#1F2937" },
+                      ]}
+                    >
+                      {m}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+
+            {/* Done */}
+            <Pressable
+              onPress={() => setShowMonthPicker(false)}
+              style={({ pressed }) => [
+                tw`py-4 rounded-full items-center`,
+                { backgroundColor: TW.bgSecondary },
+                pressed && { opacity: 0.85 },
+              ]}
+            >
+              <Text style={[tw`font-bold text-base`, { color: "#ffffff" }]}>
+                Done
+              </Text>
+            </Pressable>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </ScrollView>
   );
 };
 
 export default AttendanceView;
+ 

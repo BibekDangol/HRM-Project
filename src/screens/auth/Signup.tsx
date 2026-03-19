@@ -9,6 +9,7 @@ import { Eye, EyeClosed } from "lucide-react-native";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
+  ActivityIndicator,
   Alert,
   Keyboard,
   KeyboardAvoidingView,
@@ -417,44 +418,62 @@ export default function SignupScreen() {
                     </View>
                   )}
                 />
-
-                {/* Submit Button */}
-                <TouchableOpacity
-                  disabled={loading}
-                  onPress={handleSubmit(handleSignup)}
-                  activeOpacity={0.75}
-                  style={[
-                    tw`rounded-xl items-center justify-center ${TW.bgAction}`,
-                    { paddingVertical: isTablet ? 18 : 15, marginTop: 4 },
-                    loading && tw`opacity-70`,
-                  ]}
-                >
-                  <Text
+                <View style={[tw`flex-col w-full`, { gap: 16, marginTop: 16 }]}>
+                  {/* Submit Button */}
+                  <TouchableOpacity
+                    disabled={loading}
+                    onPress={handleSubmit(handleSignup)}
+                    activeOpacity={0.75}
                     style={[
-                      tw`${TW.textButton} font-semibold`,
-                      { fontSize: isTablet ? 18 : 16 },
+                      tw`rounded-xl items-center justify-center ${TW.bgAction}`,
+                      {
+                        paddingVertical: isTablet ? 18 : 15,
+                        marginTop: 4,
+                      },
+                      loading ? tw`opacity-90` : tw`opacity-100`,
                     ]}
                   >
-                    {loading ? "Creating..." : "Create Organization"}
-                  </Text>
-                </TouchableOpacity>
+                    <View style={tw`flex-row items-center gap-2`}>
+                      {loading && (
+                        <ActivityIndicator size="small" color="#ffffff" />
+                      )}
+                      <Text
+                        style={[
+                          tw`${TW.textButton} font-semibold`,
+                          { fontSize: isTablet ? 18 : 14 },
+                        ]}
+                      >
+                        {loading ? "Creating..." : "Create Organization"}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
 
-                {/* Login redirect */}
-                <TouchableOpacity
-                  onPress={() => router.push("/(auth)/login")}
-                  activeOpacity={0.7}
-                  style={tw`mt-3`}
-                >
-                  <Text
-                    style={[
-                      tw`text-center ${TW.textPrimary}`,
-                      { fontSize: isTablet ? 15 : 14 },
-                    ]}
-                  >
-                    Already have an account?{" "}
-                    <Text style={tw`font-semibold underline`}>Login</Text>
-                  </Text>
-                </TouchableOpacity>
+                  {/* Login redirect */}
+
+                  <View style={tw`flex-row justify-center`}>
+                    <Text
+                      style={[
+                        tw`${TW.textPrimary}`,
+                        { fontSize: isTablet ? 15 : 14 },
+                      ]}
+                    >
+                      Already have an account?{" "}
+                    </Text>
+
+                    <TouchableOpacity
+                      onPress={() => router.push("/(auth)/login")}
+                    >
+                      <Text
+                        style={[
+                          tw`${TW.textPrimary} font-semibold underline`,
+                          { fontSize: isTablet ? 15 : 14 },
+                        ]}
+                      >
+                        Log in
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
               </View>
             </View>
           </Pressable>
