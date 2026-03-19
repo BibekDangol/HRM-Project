@@ -67,6 +67,11 @@ export default function ApplyLeaveScreen() {
   const [calYear, setCalYear] = useState(new Date().getFullYear());
   const [calMonth, setCalMonth] = useState(new Date().getMonth() + 1);
 
+  // ✅ Store existing applied leave date ranges (approved + pending)
+  const [appliedDateRanges, setAppliedDateRanges] = useState<
+    { start: string; end: string }[]
+  >([]);
+
   const {
     control,
     handleSubmit,
@@ -159,8 +164,37 @@ export default function ApplyLeaveScreen() {
 
   const markingType = selectedStart && selectedEnd ? "period" : "custom";
 
+  // ✅ Helper: check if a single date overlaps any existing applied leave
+  const isDateAlreadyApplied = useCallback(
+    (dateStr: string) => {
+      return appliedDateRanges.some(
+        (range) => dateStr >= range.start && dateStr <= range.end,
+      );
+    },
+    [appliedDateRanges],
+  );
+
+  // ✅ Helper: check if a date range overlaps any existing applied leave
+  const hasRangeOverlap = useCallback(
+    (start: string, end: string) => {
+      return appliedDateRanges.some(
+        (range) => start <= range.end && end >= range.start,
+      );
+    },
+    [appliedDateRanges],
+  );
+
   const onDayPress = (day: { dateString: string }) => {
     const dateStr = day.dateString;
+
+    // ✅ Block already-applied dates
+    if (isDateAlreadyApplied(dateStr)) {
+      Alert.alert(
+        "Already Applied",
+        "You already have a pending or approved leave on this date.",
+      );
+      return;
+    }
 
     if (!selectedStart || (selectedStart && selectedEnd)) {
       setSelectedStart(dateStr);
@@ -174,6 +208,17 @@ export default function ApplyLeaveScreen() {
     const finalEnd = isBeforeOrEqual(selectedStart, dateStr)
       ? dateStr
       : selectedStart;
+
+    // ✅ Block if the full selected range overlaps any existing leave
+    if (hasRangeOverlap(finalStart, finalEnd)) {
+      Alert.alert(
+        "Overlap Detected",
+        "Your selected date range overlaps with an existing leave.",
+      );
+      setSelectedStart("");
+      setSelectedEnd("");
+      return;
+    }
 
     setSelectedStart(finalStart);
     setSelectedEnd(finalEnd);
@@ -219,6 +264,14 @@ export default function ApplyLeaveScreen() {
         .lte("start_date", to);
 
       if (leavesError) throw leavesError;
+
+      // ✅ Extract applied date ranges (pending + approved only)
+      const ranges = (leavesData ?? [])
+        .filter((l: any) =>
+          ["approved", "pending"].includes(String(l.status).toLowerCase()),
+        )
+        .map((l: any) => ({ start: l.start_date, end: l.end_date }));
+      setAppliedDateRanges(ranges);
 
       const approvedByType = new Map<number, number>();
       const pendingByType = new Map<number, number>();
@@ -295,6 +348,16 @@ export default function ApplyLeaveScreen() {
       Alert.alert("Form Error", "End date must be after start date.");
       return;
     }
+
+    // ✅ Final overlap check before submitting (safety net)
+    if (hasRangeOverlap(localStartDate, localEndDate)) {
+      Alert.alert(
+        "Overlap Detected",
+        "Your selected dates overlap with an existing pending or approved leave.",
+      );
+      return;
+    }
+
     const daysCount = computedDaysCount;
     if (daysCount == null) {
       Alert.alert(
@@ -782,7 +845,7 @@ export default function ApplyLeaveScreen() {
                 )}
               </View>
 
-              {/* Buttons — Cancel left transparent, Submit right teal */}
+              {/* Buttons */}
               <View style={{ marginTop: 32, flexDirection: "row", gap: 12 }}>
                 <Pressable
                   disabled={submitting}

@@ -24,7 +24,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
 import tw from "twrnc";
 import { z } from "zod";
-import LoadingIndicator from "@/src/components/LoadingIndicator";
 
 type FormData = z.infer<typeof loginSchema>;
 
@@ -79,7 +78,8 @@ const LoginScreen = () => {
       <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
         <KeyboardAvoidingView
           style={tw`flex-1`}
-          behavior={Platform.OS === "ios" ? "padding" : undefined}>
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+        >
           <ScrollView
             contentContainerStyle={[
               tw`flex-grow justify-center`,
@@ -89,21 +89,24 @@ const LoginScreen = () => {
               },
             ]}
             keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator={false}>
+            showsVerticalScrollIndicator={false}
+          >
             <View
               style={[
                 tw`self-center w-full`,
                 {
                   maxWidth: isTablet ? 500 : width,
                 },
-              ]}>
+              ]}
+            >
               <Logo />
               <View style={tw`items-center flex flex-col`}>
                 <Text
                   style={[
-                    tw`font-bold ${TW.textPrimary} -mt-6`, // pull text up aggressively
-                    { fontSize: isTablet ? 36 : isSmallPhone ? 26 : 30 },
-                  ]}>
+                    tw`font-bold ${TW.textPrimary} -mt-6`,
+                    { fontSize: 24 },
+                  ]}
+                >
                   TechHaus
                 </Text>
 
@@ -111,27 +114,28 @@ const LoginScreen = () => {
                   style={[
                     tw`${TW.textSecondary} text-center`,
                     { fontSize: isTablet ? 18 : isSmallPhone ? 14 : 16 },
-                  ]}>
+                  ]}
+                >
                   Streamlining your workforce management
                 </Text>
               </View>
 
+              {/* Form Fields */}
               <View
-                style={[
-                  tw`flex flex-col gap-4 mt-8 w-full`,
-                  { marginTop: isTablet ? 40 : 32 },
-                ]}>
+                style={[tw`flex flex-col w-full`, { gap: 16, marginTop: 16 }]}
+              >
                 {/* EMAIL */}
                 <Controller
                   control={control}
                   name="email"
                   render={({ field: { value, onChange } }) => (
-                    <View style={tw`mb-3`}>
+                    <View>
                       <Text
                         style={[
                           tw`${TW.textSecondary} font-semibold mb-2`,
                           { fontSize: isTablet ? 16 : 14 },
-                        ]}>
+                        ]}
+                      >
                         Email
                       </Text>
 
@@ -166,6 +170,7 @@ const LoginScreen = () => {
                     </View>
                   )}
                 />
+
                 {/* PASSWORD */}
                 <Controller
                   control={control}
@@ -176,12 +181,14 @@ const LoginScreen = () => {
                         style={[
                           tw`${TW.textSecondary} font-semibold mb-2`,
                           { fontSize: isTablet ? 16 : 14 },
-                        ]}>
+                        ]}
+                      >
                         Password
                       </Text>
 
                       <View
-                        style={tw`${TW.bgButton} rounded-lg flex-row items-center`}>
+                        style={tw`${TW.bgButton} rounded-lg flex-row items-center`}
+                      >
                         <TextInput
                           style={[
                             tw`flex-1 px-3`,
@@ -207,7 +214,8 @@ const LoginScreen = () => {
                         <TouchableOpacity
                           onPress={toggleShowPassword}
                           hitSlop={10}
-                          style={tw`pr-3`}>
+                          style={tw`pr-3`}
+                        >
                           {showPassword ? (
                             <Eye size={isTablet ? 24 : 22} color="#7e7e7e" />
                           ) : (
@@ -228,28 +236,24 @@ const LoginScreen = () => {
                   )}
                 />
               </View>
+
               {/* Forgot Password */}
               <TouchableOpacity
                 style={tw`mt-3`}
                 onPress={() => router.push("/(auth)/forgotPassword")}
-                // onPress={() =>
-                //   router.push("techhaushrm://(auth)/resetPassword")
-                // }
               >
                 <Text
                   style={[
                     tw`text-right ${TW.textPrimary} font-semibold`,
                     { fontSize: isTablet ? 15 : 14 },
-                  ]}>
+                  ]}
+                >
                   Forgot Password?
                 </Text>
               </TouchableOpacity>
 
-              <View
-                style={[
-                  tw`flex-col justify-between w-full`,
-                  { gap: isTablet ? 28 : 20, marginTop: isTablet ? 36 : 28 },
-                ]}>
+              {/* Bottom Actions */}
+              <View style={[tw`flex-col w-full`, { gap: 16, marginTop: 16 }]}>
                 {/* Login Button */}
                 <TouchableOpacity
                   style={[
@@ -269,7 +273,7 @@ const LoginScreen = () => {
                     <Text
                       style={[
                         tw`font-semibold ${TW.textButton}`,
-                        { fontSize: isTablet ? 18 : 16 },
+                        { fontSize: isTablet ? 18 : 14 },
                       ]}
                     >
                       {isSubmitting ? "Logging in..." : "Login"}
@@ -278,22 +282,25 @@ const LoginScreen = () => {
                 </TouchableOpacity>
 
                 {/* Signup Row */}
-                <View style={tw`flex-row gap-2 justify-center`}>
+                <View style={tw`flex-row justify-center`}>
                   <Text
                     style={[
                       tw`${TW.textPrimary}`,
                       { fontSize: isTablet ? 15 : 14 },
-                    ]}>
+                    ]}
+                  >
                     Don&apos;t have an account?
                   </Text>
 
                   <TouchableOpacity
-                    onPress={() => router.push("/(auth)/signup")}>
+                    onPress={() => router.push("/(auth)/signup")}
+                  >
                     <Text
                       style={[
                         tw`${TW.textPrimary} font-semibold underline`,
                         { fontSize: isTablet ? 15 : 14 },
-                      ]}>
+                      ]}
+                    >
                       Sign up
                     </Text>
                   </TouchableOpacity>

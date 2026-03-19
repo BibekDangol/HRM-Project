@@ -1,6 +1,6 @@
 import { DayCell } from "@/src/components/Calendar/DayCell";
 import { TW } from "@/theme/twStyles";
-import { View } from "react-native";
+import { View, Text } from "react-native";
 import { Calendar } from "react-native-calendars";
 import tw from "twrnc";
 
@@ -14,6 +14,8 @@ interface SharedCalendarProps {
   dayComponent?: any;
   showLegend?: boolean;
 }
+
+const todayStr = new Date().toISOString().split("T")[0];
 
 export function SharedCalendar({
   year,
@@ -29,12 +31,44 @@ export function SharedCalendar({
     dayComponent ??
     (({ date, state, marking }: any) => {
       if (!date) return null;
+
+      const isPast = date.dateString < todayStr;
+
+      // ✅ Saturday = 6, Sunday = 0
+      const dayOfWeek = new Date(date.dateString).getDay();
+      const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+
+      // ✅ Grey out only past NON-weekend days — no tap
+      if (isPast && !isWeekend) {
+        return (
+          <View
+            style={{
+              width: 32,
+              height: 32,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 13,
+                color: "#94a3b8",
+                // opacity: 0.4,
+              }}
+            >
+              {date.day}
+            </Text>
+          </View>
+        );
+      }
       return (
         <DayCell
           date={date}
           state={state}
           marking={marking}
-          onPress={(dateString) => onDayPress({ dateString })}
+          onPress={
+            isPast ? () => {} : (dateString) => onDayPress({ dateString })
+          }
         />
       );
     });
