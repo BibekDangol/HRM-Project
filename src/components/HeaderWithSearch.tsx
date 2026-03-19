@@ -1,29 +1,36 @@
-import { TW } from "@/theme/twStyles";
-import { useRouter } from "expo-router";
 import { ArrowLeft, Search, X } from "lucide-react-native";
 import React, { useRef, useState } from "react";
 import { Pressable, TextInput, View } from "react-native";
+
 import tw from "twrnc";
 
-export default function HeaderWithSearch() {
-  const router = useRouter();
+type HeaderWithSearchProps = {
+  search: string;
+  onSearchChange: (value: string) => void;
+  onBack?: () => void;
+};
 
+export default function HeaderWithSearch({
+  search,
+  onSearchChange,
+  onBack,
+}: HeaderWithSearchProps) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [search, setSearch] = useState("");
-
   const inputRef = useRef<TextInput>(null);
 
   const openSearch = () => {
     setIsSearchOpen(true);
-    setTimeout(() => {
-      inputRef.current?.focus();
-    }, 100);
+    setTimeout(() => inputRef.current?.focus(), 100);
   };
 
   const closeSearch = () => {
     setIsSearchOpen(false);
-    setSearch("");
+    onSearchChange("");
     inputRef.current?.blur();
+  };
+
+  const searchFn = (str: unknown) => {
+    console.log("🚀 ~ searchFn ~ str:", str);
   };
 
   return (
@@ -31,60 +38,36 @@ export default function HeaderWithSearch() {
       {/* Back button */}
       <Pressable
         onPress={() => {
-          if (isSearchOpen) {
-            closeSearch();
-          } else {
-            router.back();
-          }
+          if (isSearchOpen) closeSearch();
+          else onBack?.();
         }}
-        style={tw`w-10 h-10 items-center justify-center rounded-full mr-2`}
-      >
+        style={tw`w-10 h-10 items-center justify-center rounded-full mr-2`}>
         <ArrowLeft size={22} color="#1B4A5A" />
       </Pressable>
 
-      {/* Middle / right area */}
       {isSearchOpen ? (
         <View
-          style={[
-            tw`flex-1 flex-row items-center rounded-xl px-3 py-2`,
-            {
-              backgroundColor: "#FFFFFF",
-              borderWidth: 1,
-              borderColor: "#E2E8F0",
-            },
-          ]}
-        >
-          <Search size={18} color={TW.bgSecondary} />
-
+          style={tw`flex-1 flex-row items-center rounded-xl px-3 py-2 border border-gray-300`}>
+          <Search size={18} color="#7AA5B2" />
           <TextInput
             ref={inputRef}
             placeholder="Search..."
-            placeholderTextColor={TW.bgSecondary}
             value={search}
-            onChangeText={setSearch}
-            style={[
-              tw`flex-1 ml-2 text-base text-gray-900 justify-center`,
-              { paddingVertical: 4 },
-            ]}
+            onChangeText={onSearchChange}
+            style={tw`flex-1 ml-2 text-base`}
           />
-
           {search.length > 0 && (
-            <Pressable onPress={() => setSearch("")} style={tw`ml-2`}>
+            <Pressable onPress={() => onSearchChange("")}>
               <X size={18} color="#7AA5B2" />
             </Pressable>
           )}
         </View>
       ) : (
-        <>
-          {/* <View style={tw`flex-1`}></View> */}
-
-          <Pressable
-            onPress={openSearch}
-            style={tw`w-10 h-10 items-end justify-center rounded-full flex-1`}
-          >
-            <Search size={22} color="#1B4A5A" />
-          </Pressable>
-        </>
+        <Pressable
+          onPress={openSearch}
+          style={tw`w-10 h-10 items-end justify-center flex-1`}>
+          <Search size={22} color="#1B4A5A" />
+        </Pressable>
       )}
     </View>
   );
