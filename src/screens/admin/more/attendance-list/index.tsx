@@ -1,31 +1,42 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { FlatList, Pressable, Text, TextInput, View } from "react-native";
+import { FlatList, Pressable, Text, View } from "react-native";
 
+import HeaderWithSearch from "@/src/components/HeaderWithSearch";
+import LoadingIndicator from "@/src/components/LoadingIndicator"; // 👈 create or import a loading spinner
 import { fetchUsersService } from "@/src/services/admin.service";
 import { useUsersStore } from "@/src/store/useUsersStore";
 import { UserProfile } from "@/src/types/admin";
 import { useRouter } from "expo-router";
 import tw from "twrnc";
 import { UserCard } from "../../components/UserCard";
-import HeaderWithSearch from "@/src/components/HeaderWithSearch";
 
 const AttendanceUserList = () => {
   const router = useRouter();
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(true); // 👈 loading state
   const { userProfile } = useUsersStore();
-  const filteredUsers = users.filter((u) => u.first_name?.toLowerCase());
+
+  const filteredUsers = users.filter((u) =>
+    u.first_name?.toLowerCase().includes(search.toLowerCase()),
+  );
   const getSupervisorName = () => "No supervisor";
 
   const loadUsers = useCallback(async () => {
     if (!userProfile?.id) return;
+
+    setLoading(true); // start loading
     try {
       const usersData = await fetchUsersService(
         userProfile.organization_id,
         search,
       );
       setUsers(usersData);
-    } catch (err) {}
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false); // stop loading
+    }
   }, [userProfile?.id, userProfile?.organization_id, search]);
 
   useEffect(() => {
@@ -33,11 +44,20 @@ const AttendanceUserList = () => {
   }, [loadUsers]);
 
   return (
-    <>
-      <View style={tw`flex-1 bg-white`}>
-        {/* Search Bar */}
-        <HeaderWithSearch />
-        {/* Users List */}
+    <View style={tw`flex-1 bg-white`}>
+      {/* Search Bar */}
+      <HeaderWithSearch
+        search={search}
+        onSearchChange={setSearch}
+        onBack={() => router.back()}
+      />
+
+      {/* Users List */}
+      {loading ? (
+        <View style={tw`flex-1 justify-center items-center`}>
+          <LoadingIndicator message="Loading Users..." />
+        </View>
+      ) : (
         <FlatList
           contentContainerStyle={tw`px-4 pb-6 flex gap-4`}
           data={filteredUsers}
@@ -57,14 +77,13 @@ const AttendanceUserList = () => {
                     name: item.first_name + " " + item.last_name,
                   },
                 })
-              }
-            >
+              }>
               <UserCard user={item} getSupervisorName={getSupervisorName} />
             </Pressable>
           )}
         />
-      </View>
-    </>
+      )}
+    </View>
   );
 };
 

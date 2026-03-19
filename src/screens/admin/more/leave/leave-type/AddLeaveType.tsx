@@ -2,16 +2,16 @@ import { useCallback, useEffect, useState } from "react";
 import { Alert, FlatList, Text, TouchableOpacity, View } from "react-native";
 
 import { apiClient } from "@/src/api/apiClient";
+import { BackButton } from "@/src/components/BackButton";
 import LoadingIndicator from "@/src/components/LoadingIndicator";
 import { fetchLeaveTypesService } from "@/src/services/leave.type.service";
 import { useLeaveTypeStore } from "@/src/store/useLeaveTypeStore";
 import { useUsersStore } from "@/src/store/useUsersStore";
 import { TW } from "@/theme/twStyles";
 import { Plus } from "lucide-react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import tw from "twrnc";
 import AddLeaveTypeModal from "./AddLeaveTypeModal";
-import { BackButton } from "@/src/components/BackButton";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function LeaveTypeSettings() {
   const { userProfile } = useUsersStore();
@@ -89,6 +89,7 @@ export default function LeaveTypeSettings() {
   };
 
   const handleDelete = async (id: string) => {
+    if (loading) return;
     Alert.alert("Delete Leave Type", "Are you sure?", [
       { text: "Cancel" },
       {
@@ -96,13 +97,15 @@ export default function LeaveTypeSettings() {
         style: "destructive",
         onPress: async () => {
           try {
+            setLoading(true);
             await apiClient.delete("/delete-leave-type", {
               data: { id },
             });
-
             removeLeaveType(id);
           } catch (err: any) {
             Alert.alert("Error", err.message);
+          } finally {
+            setLoading(false);
           }
         },
       },
@@ -112,8 +115,7 @@ export default function LeaveTypeSettings() {
   return (
     <SafeAreaView
       edges={["bottom", "left", "right"]}
-      style={tw`flex-1 bg-white px-4`}
-    >
+      style={tw`flex-1 bg-white px-4`}>
       <View style={tw`pt-3`}>
         <BackButton />
       </View>
@@ -127,8 +129,7 @@ export default function LeaveTypeSettings() {
             setShowModal(true);
           }}
           activeOpacity={0.8}
-          style={tw`h-12 w-12 rounded-full ${TW.bgAction} items-center justify-center`}
-        >
+          style={tw`h-12 w-12 rounded-full ${TW.bgAction} items-center justify-center`}>
           <Plus size={22} color="white" strokeWidth={2.5} />
         </TouchableOpacity>
       </View>
@@ -149,8 +150,7 @@ export default function LeaveTypeSettings() {
           )}
           renderItem={({ item }) => (
             <View
-              style={tw`bg-white rounded-2xl p-4 mb-3 border ${TW.BORDER} flex-row justify-between items-center`}
-            >
+              style={tw`bg-white rounded-2xl p-4 mb-3 border ${TW.BORDER} flex-row justify-between items-center`}>
               {/* Leave Info */}
               <View>
                 <Text style={tw`text-base font-semibold ${TW.textPrimary}`}>
@@ -170,16 +170,14 @@ export default function LeaveTypeSettings() {
                     setSelectedType(item);
                     setShowModal(true);
                   }}
-                  style={tw`bg-[#E6F1F3] px-3 py-2 rounded-lg mr-2`}
-                >
+                  style={tw`bg-[#E6F1F3] px-3 py-2 rounded-lg mr-2`}>
                   <Text style={tw`${TW.textSecondary} font-medium`}>Edit</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                   activeOpacity={0.8}
                   onPress={() => handleDelete(item.id)}
-                  style={tw`bg-red-50 px-3 py-2 rounded-lg`}
-                >
+                  style={tw`bg-red-50 px-3 py-2 rounded-lg`}>
                   <Text style={tw`text-red-600 font-medium`}>Delete</Text>
                 </TouchableOpacity>
               </View>
@@ -195,6 +193,8 @@ export default function LeaveTypeSettings() {
           setShowModal(false);
           setSelectedType(null);
         }}
+        initialName={selectedType?.name}
+        initialLimit={selectedType?.leave_limit}
         onSubmit={
           selectedType
             ? (name: string, limit: number) =>
