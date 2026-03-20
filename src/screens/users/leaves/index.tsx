@@ -1,3 +1,14 @@
+import { useAuthStore } from "@/src/store/useAuthStore";
+import { supabase } from "@/src/supabase/supabaseClient";
+import {
+  LeaveDetailsRow,
+  LeaveTypeRowIndex,
+  LeaveTypeStats,
+} from "@/src/types/userLeave";
+import { getLeaveDays } from "@/src/utils/leaveUtils";
+import { TW } from "@/theme/twStyles";
+import { useRouter } from "expo-router";
+import { Clock, Pencil } from "lucide-react-native";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -7,26 +18,15 @@ import {
   Text,
   View,
 } from "react-native";
-import { Clock, Edit2 } from "lucide-react-native";
 import tw from "twrnc";
-import { supabase } from "@/src/supabase/supabaseClient";
-import { useAuthStore } from "@/src/store/useAuthStore";
-import { useRouter } from "expo-router";
-import {
-  LeaveDetailsRow,
-  LeaveTypeRowIndex,
-  LeaveTypeStats,
-} from "@/src/types/userLeave";
-import { getLeaveDays } from "@/src/utils/leaveUtils";
 
-const PRIMARY = "#008080";
+const PAGE_SIZE = 10;
 
 type FilterTab = "all" | "pending" | "approved" | "rejected";
 
-const STATUS_CONFIG: Record<
-  string,
-  { label: string; color: string; bg: string; border: string }
-> = {
+const STATUS_CONFIG: {
+  [key: string]: { label: string; color: string; bg: string; border: string };
+} = {
   approved: {
     label: "APPROVED",
     color: "#008080",
@@ -59,13 +59,6 @@ const formatRange = (start: string, end: string) =>
     ? formatDate(start)
     : `${formatDate(start)} - ${formatDate(end)}`;
 
-const TABS: { key: FilterTab; label: string }[] = [
-  { key: "all", label: "All" },
-  { key: "pending", label: "Pending" },
-  { key: "approved", label: "Approved" },
-  { key: "rejected", label: "Rejected" },
-];
-
 export default function LeavesScreen() {
   const user = useAuthStore((s) => s.user);
   const userId = user?.id;
@@ -77,6 +70,12 @@ export default function LeavesScreen() {
   const [leaves, setLeaves] = useState<LeaveDetailsRow[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<FilterTab>("all");
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Reset page on tab change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab]);
 
   const currentYearRange = useMemo(() => {
     const y = new Date().getFullYear();
@@ -136,12 +135,41 @@ export default function LeavesScreen() {
   }, [load]);
   // ─────────────────────────────────────────────────────────────
 
+  // ── Tab counts ────────────────────────────────────────────────
+  const tabCounts: {
+    all: number;
+    pending: number;
+    approved: number;
+    rejected: number;
+  } = useMemo(
+    () => ({
+      all: leaves.length,
+      pending: leaves.filter(
+        (l) => String(l.status ?? "").toLowerCase() === "pending",
+      ).length,
+      approved: leaves.filter(
+        (l) => String(l.status ?? "").toLowerCase() === "approved",
+      ).length,
+      rejected: leaves.filter(
+        (l) => String(l.status ?? "").toLowerCase() === "rejected",
+      ).length,
+    }),
+    [leaves],
+  );
+
+  const TABS: { key: FilterTab; label: string }[] = [
+    { key: "all", label: "All" },
+    { key: "pending", label: "Pending" },
+    { key: "approved", label: "Approved" },
+    { key: "rejected", label: "Rejected" },
+  ];
+  // ─────────────────────────────────────────────────────────────
+
   // ── Stats per leave type ──────────────────────────────────────
   const stats: LeaveTypeStats[] = useMemo(() => {
-    const byType: Record<
-      number,
-      { approved: number; pending: number; rejected: number }
-    > = {};
+    const byType: {
+      [id: number]: { approved: number; pending: number; rejected: number };
+    } = {};
 
     for (const lv of leaves) {
       if (!lv.leave_type_id) continue;
@@ -170,13 +198,40 @@ export default function LeavesScreen() {
   }, [leaveTypes, leaves]);
   // ─────────────────────────────────────────────────────────────
 
-  // ── Filtered list ─────────────────────────────────────────────
+  // ── Filtered + paginated list ─────────────────────────────────
   const filteredLeaves = useMemo(() => {
     if (activeTab === "all") return leaves;
     return leaves.filter(
       (l) => String(l.status ?? "").toLowerCase() === activeTab,
     );
   }, [leaves, activeTab]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredLeaves.length / PAGE_SIZE));
+  const pagedLeaves = filteredLeaves.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE,
+  );
+
+  const getPageNumbers = () => {
+    if (totalPages <= 5)
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    if (currentPage <= 3) return [1, 2, 3, 4, 5];
+    if (currentPage >= totalPages - 2)
+      return [
+        totalPages - 4,
+        totalPages - 3,
+        totalPages - 2,
+        totalPages - 1,
+        totalPages,
+      ];
+    return [
+      currentPage - 2,
+      currentPage - 1,
+      currentPage,
+      currentPage + 1,
+      currentPage + 2,
+    ];
+  };
   // ─────────────────────────────────────────────────────────────
 
   // ── Leave type name lookup ────────────────────────────────────
@@ -197,7 +252,7 @@ export default function LeavesScreen() {
   if (loading) {
     return (
       <View style={tw`flex-1 items-center justify-center bg-white`}>
-        <ActivityIndicator color={PRIMARY} />
+        <ActivityIndicator color={TW.bgSecondary} />
         <Text style={tw`mt-2 text-slate-500 text-sm`}>Loading…</Text>
       </View>
     );
@@ -206,7 +261,7 @@ export default function LeavesScreen() {
   return (
     <View style={tw`flex-1 bg-white`}>
       <FlatList
-        data={filteredLeaves}
+        data={pagedLeaves}
         keyExtractor={(item) => item.id}
         refreshControl={
           <RefreshControl
@@ -297,6 +352,7 @@ export default function LeavesScreen() {
               >
                 {TABS.map((tab) => {
                   const isActive = activeTab === tab.key;
+                  const count = tabCounts[tab.key];
                   return (
                     <Pressable
                       key={tab.key}
@@ -305,7 +361,7 @@ export default function LeavesScreen() {
                         marginRight: 24,
                         paddingBottom: 12,
                         borderBottomWidth: isActive ? 2 : 0,
-                        borderBottomColor: PRIMARY,
+                        borderBottomColor: TW.bgSecondary,
                       }}
                     >
                       <Text
@@ -316,6 +372,18 @@ export default function LeavesScreen() {
                         }}
                       >
                         {tab.label}
+                        {count > 0 && (
+                          <Text
+                            style={{
+                              fontSize: 13,
+                              fontWeight: "600",
+                              color: isActive ? TW.bgSecondary : "#CBD5E1",
+                            }}
+                          >
+                            {" "}
+                            ({count})
+                          </Text>
+                        )}
                       </Text>
                     </Pressable>
                   );
@@ -383,7 +451,7 @@ export default function LeavesScreen() {
                   style={{
                     flexDirection: "row",
                     alignItems: "center",
-                    gap: 6,
+                    gap: 8,
                   }}
                 >
                   <View
@@ -410,6 +478,26 @@ export default function LeavesScreen() {
 
                   {/* Edit only when pending */}
                   {canEdit && (
+                    // <Pressable
+                    //   onPress={() =>
+                    //     router.push({
+                    //       pathname: "/(users)/leaves/edit",
+                    //       params: { leaveId: item.id },
+                    //     })
+                    //   }
+                    //   style={({ pressed }) => ({
+                    //     width: 32,
+                    //     height: 32,
+                    //     borderRadius: 16,
+                    //     backgroundColor: "#F1F5F9",
+                    //     alignItems: "center",
+                    //     justifyContent: "center",
+                    //     opacity: pressed ? 0.7 : 1,
+                    //   })}
+                    // >
+                    //   <Edit2 size={14} color="#64748B" strokeWidth={2} />
+                    // </Pressable>
+
                     <Pressable
                       onPress={() =>
                         router.push({
@@ -417,17 +505,13 @@ export default function LeavesScreen() {
                           params: { leaveId: item.id },
                         })
                       }
-                      style={({ pressed }) => ({
-                        width: 32,
-                        height: 32,
-                        borderRadius: 16,
-                        backgroundColor: "#F1F5F9",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        opacity: pressed ? 0.7 : 1,
-                      })}
+                      hitSlop={12}
+                      style={({ pressed }) => [
+                        tw`w-10 h-10 rounded-full items-center justify-center ${TW.bgAction}/90`,
+                        pressed && tw`opacity-70`,
+                      ]}
                     >
-                      <Edit2 size={14} color="#64748B" strokeWidth={2} />
+                      <Pencil size={18} color={TW.bgPrimary} />
                     </Pressable>
                   )}
                 </View>
@@ -468,6 +552,100 @@ export default function LeavesScreen() {
             </Text>
           </View>
         }
+        // ── Pagination ────────────────────────────────────────
+        ListFooterComponent={
+          filteredLeaves.length > 0 ? (
+            <View style={{ paddingTop: 8, paddingBottom: 16 }}>
+              <View
+                style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
+              >
+                {/* Prev */}
+                <Pressable
+                  onPress={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  style={({ pressed }) => ({
+                    flex: 1,
+                    height: 40,
+                    borderRadius: 10,
+                    borderWidth: 1,
+                    borderColor: "#E2E8F0",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    opacity: currentPage === 1 ? 0.3 : pressed ? 0.7 : 1,
+                  })}
+                >
+                  <Text
+                    style={{
+                      color: "#0F172A",
+                      fontWeight: "700",
+                      fontSize: 14,
+                    }}
+                  >
+                    ‹ Prev
+                  </Text>
+                </Pressable>
+
+                {/* Page numbers */}
+                {getPageNumbers().map((page) => (
+                  <Pressable
+                    key={page}
+                    onPress={() => setCurrentPage(page)}
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 10,
+                      alignItems: "center",
+                      justifyContent: "center",
+                      backgroundColor:
+                        currentPage === page ? TW.bgSecondary : "transparent",
+                      borderWidth: currentPage === page ? 0 : 1,
+                      borderColor: "#E2E8F0",
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontSize: 14,
+                        fontWeight: "600",
+                        color: currentPage === page ? "#fff" : "#0F172A",
+                      }}
+                    >
+                      {page}
+                    </Text>
+                  </Pressable>
+                ))}
+
+                {/* Next */}
+                <Pressable
+                  onPress={() =>
+                    setCurrentPage((p) => Math.min(totalPages, p + 1))
+                  }
+                  disabled={currentPage === totalPages}
+                  style={({ pressed }) => ({
+                    flex: 1,
+                    height: 40,
+                    borderRadius: 10,
+                    borderWidth: 1,
+                    borderColor: "#E2E8F0",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    opacity:
+                      currentPage === totalPages ? 0.3 : pressed ? 0.7 : 1,
+                  })}
+                >
+                  <Text
+                    style={{
+                      color: "#0F172A",
+                      fontWeight: "700",
+                      fontSize: 14,
+                    }}
+                  >
+                    Next ›
+                  </Text>
+                </Pressable>
+              </View>
+            </View>
+          ) : null
+        }
       />
 
       {/* ── FAB ── */}
@@ -480,15 +658,11 @@ export default function LeavesScreen() {
           width: 56,
           height: 56,
           borderRadius: 28,
-          backgroundColor: PRIMARY,
+          backgroundColor: TW.bgSecondary,
           alignItems: "center",
           justifyContent: "center",
-          shadowColor: PRIMARY,
-          shadowOpacity: 0.4,
-          shadowRadius: 12,
-          shadowOffset: { width: 0, height: 6 },
           elevation: 8,
-          opacity: pressed ? 0.85 : 1,
+          opacity: pressed ? 0.8 : 0.9,
         })}
       >
         <Text style={{ color: "#fff", fontSize: 28, lineHeight: 32 }}>+</Text>

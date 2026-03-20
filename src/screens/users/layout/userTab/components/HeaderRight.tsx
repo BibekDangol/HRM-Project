@@ -1,6 +1,6 @@
 import { formatElapsed, formatSinceTime } from "@/src/utils/attendanceHelper";
 import { CircleCheck, LogOut, User } from "lucide-react-native";
-import { Pressable, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, Text, View } from "react-native";
 
 import ProfileMenu from "@/src/screens/admin/components/ProfileMenu";
 import { TW } from "@/theme/twStyles";
@@ -144,15 +144,19 @@ const HeaderRight: React.FC<Props> = ({
                     })}
                   >
                     <LogOut size={14} color={TW.bgPrimary} />
-                    <Text
-                      style={{
-                        color: TW.bgPrimary,
-                        fontWeight: "700",
-                        fontSize: 13,
-                      }}
-                    >
-                      {isLocked ? "Please wait…" : "Check Out"}
-                    </Text>
+                    {isLocked ? (
+                      <ActivityIndicator size="small" color={TW.bgPrimary} />
+                    ) : (
+                      <Text
+                        style={{
+                          color: TW.bgPrimary,
+                          fontWeight: "700",
+                          fontSize: 13,
+                        }}
+                      >
+                        Check Out
+                      </Text>
+                    )}
                   </Pressable>
                 </View>
               ) : (
@@ -171,15 +175,19 @@ const HeaderRight: React.FC<Props> = ({
                   })}
                 >
                   <CircleCheck size={16} color={TW.bgPrimary} />
-                  <Text
-                    style={{
-                      fontWeight: "700",
-                      fontSize: 13,
-                      color: TW.bgPrimary,
-                    }}
-                  >
-                    {isLocked ? "Please wait…" : "Check In"}
-                  </Text>
+                  {isLocked ? (
+                    <ActivityIndicator size="small" color={TW.bgPrimary} />
+                  ) : (
+                    <Text
+                      style={{
+                        fontWeight: "700",
+                        fontSize: 13,
+                        color: TW.bgPrimary,
+                      }}
+                    >
+                      Check In
+                    </Text>
+                  )}
                 </Pressable>
               )}
             </View>

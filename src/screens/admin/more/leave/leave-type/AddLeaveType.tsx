@@ -1,5 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
-import { Alert, FlatList, Text, TouchableOpacity, View } from "react-native";
+import {
+  Alert,
+  FlatList,
+  Pressable,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 import { apiClient } from "@/src/api/apiClient";
 import { BackButton } from "@/src/components/BackButton";
@@ -8,7 +15,7 @@ import { fetchLeaveTypesService } from "@/src/services/leave.type.service";
 import { useLeaveTypeStore } from "@/src/store/useLeaveTypeStore";
 import { useUsersStore } from "@/src/store/useUsersStore";
 import { TW } from "@/theme/twStyles";
-import { Plus } from "lucide-react-native";
+import { Pencil, Plus, Trash2 } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import tw from "twrnc";
 import AddLeaveTypeModal from "./AddLeaveTypeModal";
@@ -115,7 +122,8 @@ export default function LeaveTypeSettings() {
   return (
     <SafeAreaView
       edges={["bottom", "left", "right"]}
-      style={tw`flex-1 bg-white px-4`}>
+      style={tw`flex-1 bg-white px-4`}
+    >
       <View style={tw`pt-3`}>
         <BackButton />
       </View>
@@ -123,15 +131,15 @@ export default function LeaveTypeSettings() {
       <View style={tw`flex-row items-center justify-between mb-5`}>
         <Text style={tw`text-xl font-bold ${TW.textPrimary}`}>Leave Types</Text>
 
-        <TouchableOpacity
+        <Pressable
           onPress={() => {
             setSelectedType(null);
             setShowModal(true);
           }}
-          activeOpacity={0.8}
-          style={tw`h-12 w-12 rounded-full ${TW.bgAction} items-center justify-center`}>
+          style={tw`h-12 w-12 rounded-full ${TW.bgAction}/90 items-center justify-center`}
+        >
           <Plus size={22} color="white" strokeWidth={2.5} />
-        </TouchableOpacity>
+        </Pressable>
       </View>
 
       {loading ? (
@@ -150,7 +158,8 @@ export default function LeaveTypeSettings() {
           )}
           renderItem={({ item }) => (
             <View
-              style={tw`bg-white rounded-2xl p-4 mb-3 border ${TW.BORDER} flex-row justify-between items-center`}>
+              style={tw`bg-white rounded-2xl p-4 mb-3 border ${TW.BORDER} flex-row justify-between items-center`}
+            >
               {/* Leave Info */}
               <View>
                 <Text style={tw`text-base font-semibold ${TW.textPrimary}`}>
@@ -163,23 +172,31 @@ export default function LeaveTypeSettings() {
               </View>
 
               {/* Actions */}
-              <View style={tw`flex-row`}>
-                <TouchableOpacity
-                  activeOpacity={0.8}
+              <View style={tw`flex-row gap-2`}>
+                <Pressable
                   onPress={() => {
                     setSelectedType(item);
                     setShowModal(true);
                   }}
-                  style={tw`bg-[#E6F1F3] px-3 py-2 rounded-lg mr-2`}>
-                  <Text style={tw`${TW.textSecondary} font-medium`}>Edit</Text>
-                </TouchableOpacity>
+                  hitSlop={12}
+                  style={({ pressed }) => [
+                    tw`w-10 h-10 rounded-full items-center justify-center ${TW.bgAction}/90`,
+                    pressed && tw`opacity-70`,
+                  ]}
+                >
+                  <Pencil size={18} color={TW.bgPrimary} />
+                </Pressable>
 
-                <TouchableOpacity
-                  activeOpacity={0.8}
+                <Pressable
                   onPress={() => handleDelete(item.id)}
-                  style={tw`bg-red-50 px-3 py-2 rounded-lg`}>
-                  <Text style={tw`text-red-600 font-medium`}>Delete</Text>
-                </TouchableOpacity>
+                  hitSlop={8}
+                  style={({ pressed }) => [
+                    tw`w-10 h-10 rounded-full items-center justify-center bg-red-400`,
+                    pressed && tw`opacity-70`,
+                  ]}
+                >
+                  <Trash2 size={18} color={TW.bgPrimary} />
+                </Pressable>
               </View>
             </View>
           )}

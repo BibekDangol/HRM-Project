@@ -45,7 +45,7 @@ export const UserCard = ({ user, onEdit, onDelete }: Props) => {
               onPress={() => onEdit?.(user)}
               hitSlop={12}
               style={({ pressed }) => [
-                tw`w-10 h-10 rounded-full items-center justify-center bg-[#1B4A5A]/70`,
+                tw`w-10 h-10 rounded-full items-center justify-center ${TW.bgAction}/90`,
                 pressed && tw`opacity-70`,
               ]}
             >

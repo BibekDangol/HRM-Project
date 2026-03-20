@@ -37,10 +37,10 @@ export default function EditLeaveScreen() {
   const user = useAuthStore((s) => s.user);
 
   const params = useLocalSearchParams<{
-    id?: string | string[];
+    leaveId?: string | string[];
   }>();
 
-  const leaveId = firstParam(params.id);
+  const leaveId = firstParam(params.leaveId);
 
   const [screenLoading, setScreenLoading] = useState(false);
   const [localStartDate, setLocalStartDate] = useState("");
@@ -54,7 +54,6 @@ export default function EditLeaveScreen() {
   const [leaveTypeError, setLeaveTypeError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  // ✅ Calendar modal state
   const [calendarVisible, setCalendarVisible] = useState(false);
   const [selectedStart, setSelectedStart] = useState("");
   const [selectedEnd, setSelectedEnd] = useState("");
@@ -88,7 +87,6 @@ export default function EditLeaveScreen() {
     return n ?? null;
   }, [localStartDate, localEndDate, isHalfDay]);
 
-  // ✅ Calendar marked dates
   const adminMarks = buildAdminMarks(calYear, calMonth);
   const todayStr = new Date().toISOString().split("T")[0];
 
@@ -144,14 +142,12 @@ export default function EditLeaveScreen() {
 
   const markingType = selectedStart && selectedEnd ? "period" : "custom";
 
-  // ✅ Open calendar modal
   const openCalendar = () => {
     setSelectedStart(localStartDate || "");
     setSelectedEnd(isHalfDay ? localStartDate || "" : localEndDate || "");
     setCalendarVisible(true);
   };
 
-  // ✅ Handle day press inside modal
   const onDayPress = (day: { dateString: string }) => {
     const dateStr = day.dateString;
 
@@ -208,8 +204,10 @@ export default function EditLeaveScreen() {
   useEffect(() => {
     (async () => {
       if (!leaveId || !user?.id) return;
+
       try {
         setScreenLoading(true);
+
         const { data, error } = await supabase
           .from("leaves")
           .select(
@@ -232,16 +230,24 @@ export default function EditLeaveScreen() {
           return;
         }
 
-        setLocalStartDate(String(data.start_date ?? ""));
-        setLocalEndDate(String(data.end_date ?? ""));
-        setSelectedLeaveType(Number(data.leave_type_id ?? ""));
+        const start = data.start_date ?? "";
+        const end = data.end_date ?? "";
+
+        setLocalStartDate(start);
+        setLocalEndDate(end);
+        setSelectedStart(start);
+        setSelectedEnd(end);
+
+        setSelectedLeaveType(
+          data.leave_type_id ? Number(data.leave_type_id) : null,
+        );
 
         const dayType = String(data.day_type ?? "").toUpperCase();
         const isHalf = dayType === "MORNING" || dayType === "EVENING";
         const session = dayType === "EVENING" ? "evening" : "morning";
 
         reset({
-          reason: String(data.reason ?? ""),
+          reason: data.reason ?? "",
           isHalfDay: isHalf,
           halfSession: session,
         });
@@ -252,7 +258,7 @@ export default function EditLeaveScreen() {
         setScreenLoading(false);
       }
     })();
-  }, [leaveId, reset, router, user?.id]);
+  }, [leaveId, user?.id]);
 
   const handleLeaveTypeChange = (id: number) => {
     setSelectedLeaveType(id);
