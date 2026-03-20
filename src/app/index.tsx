@@ -3,16 +3,9 @@ import { Redirect } from "expo-router";
 import LoadingIndicator from "../components/LoadingIndicator";
 
 export default function Index() {
-  console.log("app index>>>>>>>>>>>>1");
-
   const { loading, role } = useAuthStore();
-
-  console.log("app index>>>>>>>>>>>>2");
-
   const { user } = useAuthStore();
-
-  console.log("app index>>>>>>>>>>>>3");
-
+  console.log("index", role);
   if (loading) {
     return <LoadingIndicator message="Loading.." />;
   }

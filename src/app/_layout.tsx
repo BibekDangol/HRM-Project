@@ -3,9 +3,12 @@ import * as Linking from "expo-linking";
 import { Stack } from "expo-router";
 import { useEffect } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { useAuthStore } from "../store/useAuthStore";
 import { supabase } from "../supabase/supabaseClient";
 
 export default function Layout() {
+  const { role, restoreSession } = useAuthStore();
+  console.log("🚀 ~ Layout ~ role:", role);
   useEffect(() => {
     const handleDeepLink = async (event: { url: string }) => {
       console.log("Deep link received:", event.url);
@@ -27,6 +30,7 @@ export default function Layout() {
         });
       }
     };
+    restoreSession();
     const subscription = Linking.addEventListener("url", handleDeepLink);
     Linking.getInitialURL().then((url) => {
       if (url) handleDeepLink({ url });
