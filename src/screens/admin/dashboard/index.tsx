@@ -119,11 +119,11 @@ export default function DashboardScreen() {
               value={totalusers}
               icon={<User size={24} color="white" />}
             />
-            <StatCard
+            {/* <StatCard
               title="Total Projects"
               value={1}
               icon={<CircleCheckBig size={24} color="white" />}
-            />
+            /> */}
           </View>
           <QuickAction />
           {/* Holidays & Events Section */}
