@@ -1,9 +1,9 @@
-import UserLeaveView from "@/src/components/Leave/UserLeaveView";
+import AdminLeaveView from "@/src/components/Leave/AdminLeaveView";
 import { fetchLeaveBySupervisor } from "@/src/services/leave.service";
 
 export default function SupervisorLeaveScreen() {
   return (
-    <UserLeaveView
+    <AdminLeaveView
       approvedPath="/(users)/more/supervisor-settings/leave/approved-details"
       pendingPath="/(users)/more/supervisor-settings/leave/leave-details"
       rejectedPath="/(users)/more/supervisor-settings/leave/rejected-details"

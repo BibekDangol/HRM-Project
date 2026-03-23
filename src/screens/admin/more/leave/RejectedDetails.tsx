@@ -1,70 +1,109 @@
-import { useEffect, useState } from 'react'
-import { Text, View } from 'react-native'
+import React, { useEffect, useState } from "react";
+import { ScrollView, Text, View } from "react-native";
 
-import { fetchLeaveById } from '@/src/services/leave.service'
-import { useLocalSearchParams } from 'expo-router'
-import tw from 'twrnc'
+import LoadingIndicator from "@/src/components/LoadingIndicator";
+import { fetchLeaveById } from "@/src/services/leave.service";
+import { useLocalSearchParams } from "expo-router";
+import tw from "twrnc";
 
-const RejectedDetails = () => {
-  const [leave, setLeave] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
+export default function LeaveRejectedDetailsScreen() {
   const { id } = useLocalSearchParams();
+  const [leave, setLeave] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    if (!id) return
+    if (!id) return;
     const loadLeave = async () => {
       try {
-        const result = await fetchLeaveById(id as string)
-        setLeave(result)
+        const data = await fetchLeaveById(id as string);
+        setLeave(data);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
+    loadLeave();
+  }, [id]);
 
-    loadLeave()
-  }, [id])
+  if (loading) return <LoadingIndicator message="Loading..." />;
 
-  if (loading) {
-    return <Text style={tw`p-4 text-gray-500`}>Loading...</Text>
-  }
   if (!leave) {
-    return <Text style={tw`p-4 text-red-500`}>Leave not found</Text>
+    return (
+      <View style={tw`flex-1 justify-center items-center p-4`}>
+        <Text style={tw`text-red-500 text-lg`}>Leave not found</Text>
+      </View>
+    );
   }
+  const leaveDuration =
+    leave.days_count < 1 ? `Half Day (${leave.day_type})` : "Full Day";
   return (
-    <View style={tw`flex-1 p-4`}>
-      {/* Status */}
-      <View style={tw`mb-4`}>
-        <Text style={tw`text-lg font-semibold text-red-600`}>
-          Rejected
+    <ScrollView style={tw`flex-1 bg-gray-100`}>
+      <View style={tw`bg-white m-4 rounded-xl p-4 shadow`}>
+        {/* Header */}
+        <Text style={tw`text-lg font-bold text-gray-900 mb-1`}>
+          Leave Rejected
         </Text>
-      </View>
-
-      {/* Leave Info */}
-      <View style={tw`mb-4`}>
-        <Text style={tw`text-sm text-gray-500`}>Leave Type</Text>
-        <Text style={tw`text-base`}>{leave.leave_types.name}</Text>
-      </View>
-
-      <View style={tw`mb-4`}>
-        <Text style={tw`text-sm text-gray-500`}>From</Text>
-        <Text style={tw`text-base`}>{leave.start_date}</Text>
-      </View>
-
-      <View style={tw`mb-4`}>
-        <Text style={tw`text-sm text-gray-500`}>To</Text>
-        <Text style={tw`text-base`}>{leave.end_date}</Text>
-      </View>
-
-      {/* Rejection Reason */}
-      <View style={tw`mt-6 p-4 bg-red-50 rounded-lg border border-red-200`}>
-        <Text style={tw`text-sm text-red-600 font-semibold mb-1`}>
-          Rejection Reason
+        <Text style={tw`text-red-600 font-semibold mb-4`}>
+          This leave request has been rejected
         </Text>
-        <Text style={tw`text-red-700`}>
-          {leave.rejectionReason || 'No reason provided'}
-        </Text>
+
+        {/* Employee Info */}
+        <View style={tw`mb-4`}>
+          <Text style={tw`text-gray-500 text-sm`}>Employee Name</Text>
+          <Text style={tw`text-gray-900 text-base font-semibold`}>
+            {leave.first_name} {leave.last_name}
+          </Text>
+        </View>
+
+        {/* Leave Type */}
+        <View style={tw`mb-4`}>
+          <Text style={tw`text-gray-500 text-sm`}>Leave Type</Text>
+          <Text style={tw`text-gray-900`}>
+            {leave.leave_type_name || leave.leave_types?.name}
+          </Text>
+        </View>
+
+        {/* Dates */}
+        <View style={tw`flex-row justify-between mb-4`}>
+          <View>
+            <Text style={tw`text-gray-500 text-sm`}>Start Date</Text>
+            <Text style={tw`text-gray-900`}>{leave.start_date}</Text>
+          </View>
+          <View>
+            <Text style={tw`text-gray-500 text-sm`}>End Date</Text>
+            <Text style={tw`text-gray-900`}>{leave.end_date}</Text>
+          </View>
+        </View>
+
+        {/* Duration */}
+        <View style={tw`mb-4`}>
+          <Text style={tw`text-gray-500 text-sm`}>Duration</Text>
+          <Text style={tw`text-gray-900`}>{leaveDuration}</Text>
+        </View>
+
+        {/* Reason */}
+        <View style={tw`mb-4`}>
+          <Text style={tw`text-gray-500 text-sm`}>Reason</Text>
+          <Text style={tw`text-gray-900`}>{leave.reason || "N/A"}</Text>
+        </View>
+
+        {/* Rejection Info */}
+        <View style={tw`border-t border-gray-200 pt-4`}>
+          <Text style={tw`text-gray-500 text-sm`}>Status</Text>
+          <Text style={tw`text-red-600 font-semibold mb-2`}>
+            {leave.status.toUpperCase()}
+          </Text>
+
+          <Text style={tw`text-gray-500 text-sm`}>Rejected By</Text>
+          <Text style={tw`text-gray-900 mb-2`}>
+            {leave.action_taken_by_name || "N/A"}
+          </Text>
+
+          <Text style={tw`text-gray-500 text-sm`}>Rejection Reason</Text>
+          <Text style={tw`text-red-700`}>
+            {leave.rejectionReason || "No reason provided"}
+          </Text>
+        </View>
       </View>
-    </View>
-  )
+    </ScrollView>
+  );
 }
-
-export default RejectedDetails

@@ -7,7 +7,9 @@ import { useAuthStore } from "../store/useAuthStore";
 import { supabase } from "../supabase/supabaseClient";
 
 export default function Layout() {
-  const { role, restoreSession } = useAuthStore();
+  const { role, restoreSession, session } = useAuthStore();
+  console.log("🚀 ~ Layout ~ session:", session?.access_token);
+
   console.log("🚀 ~ Layout ~ role:", role);
   useEffect(() => {
     const handleDeepLink = async (event: { url: string }) => {

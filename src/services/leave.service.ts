@@ -19,6 +19,8 @@ export type Leave = {
   first_name: string;
   last_name: string;
   action_taken_by: string;
+  day_type: string;
+  action_taken_by_name: string;
 };
 
 // Fetch all leave requests for an organization

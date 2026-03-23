@@ -13,12 +13,12 @@ apiClient.interceptors.request.use(
   (config) => {
     const session = useAuthStore.getState().session;
     const token = session?.access_token;
-
+    console.log("token", token);
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
 
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
