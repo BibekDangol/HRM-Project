@@ -1,8 +1,9 @@
+import { ScrollView, View } from "react-native";
+
 import { ActivityLogSection } from "@/src/components/ActivityLog";
 import { BackButton } from "@/src/components/BackButton";
-import { router } from "expo-router";
 import React from "react";
-import { ScrollView, View } from "react-native";
+import { router } from "expo-router";
 
 export default function ActivityLogPage() {
   return (
@@ -15,8 +16,7 @@ export default function ActivityLogPage() {
           paddingHorizontal: 16,
           paddingTop: 64, // ← space so content doesn't hide under button
           paddingBottom: 40,
-        }}
-      >
+        }}>
         <ActivityLogSection hideTitle />
       </ScrollView>
     </View>

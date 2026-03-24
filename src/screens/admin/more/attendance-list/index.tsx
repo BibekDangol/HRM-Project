@@ -3,6 +3,7 @@ import { FlatList, Pressable, Text, View } from "react-native";
 
 import HeaderWithSearch from "@/src/components/HeaderWithSearch";
 import LoadingIndicator from "@/src/components/LoadingIndicator"; // 👈 create or import a loading spinner
+import { useDebounce } from "@/src/hooks/useDebounce";
 import { fetchUsersService } from "@/src/services/admin.service";
 import { useUsersStore } from "@/src/store/useUsersStore";
 import { UserProfile } from "@/src/types/admin";
@@ -16,9 +17,9 @@ const AttendanceUserList = () => {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true); // 👈 loading state
   const { userProfile } = useUsersStore();
-
+  const debouncedSearchQuery = useDebounce(search, 300);
   const filteredUsers = users.filter((u) =>
-    u.first_name?.toLowerCase().includes(search.toLowerCase()),
+    u.first_name?.toLowerCase().includes(debouncedSearchQuery.toLowerCase()),
   );
   const getSupervisorName = () => "No supervisor";
 
@@ -29,7 +30,7 @@ const AttendanceUserList = () => {
     try {
       const usersData = await fetchUsersService(
         userProfile.organization_id,
-        search,
+        debouncedSearchQuery,
       );
       setUsers(usersData);
     } catch (err) {
@@ -37,7 +38,7 @@ const AttendanceUserList = () => {
     } finally {
       setLoading(false); // stop loading
     }
-  }, [userProfile?.id, userProfile?.organization_id, search]);
+  }, [userProfile?.id, userProfile?.organization_id, debouncedSearchQuery]);
 
   useEffect(() => {
     loadUsers();

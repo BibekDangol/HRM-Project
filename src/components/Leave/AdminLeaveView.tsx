@@ -1,3 +1,4 @@
+import { RelativePathString, useRouter } from "expo-router";
 import { CalendarClock, ChevronRight } from "lucide-react-native";
 import { useCallback, useEffect, useState } from "react";
 import { FlatList, Pressable, Text, View } from "react-native";
@@ -8,7 +9,6 @@ import { useAuthStore } from "@/src/store/useAuthStore";
 import { useLeaveStore } from "@/src/store/useLeaveStore";
 import { useUsersStore } from "@/src/store/useUsersStore";
 import { TW } from "@/theme/twStyles";
-import { useRouter } from "expo-router";
 import tw from "twrnc";
 
 const statusConfig: Record<string, { bg: string; text: string; dot: string }> =
@@ -76,7 +76,10 @@ export default function AdminLeaveView({
     } else {
       pathname = rejectedPath;
     }
-    router.push({ pathname: pathname as any, params: { id: leave.id } });
+    router.push({
+      pathname: pathname as RelativePathString,
+      params: { id: leave.id },
+    });
   };
 
   if (loading) return <LoadingIndicator />;
@@ -96,11 +99,9 @@ export default function AdminLeaveView({
                 tw`flex-1 py-3 rounded-xl items-center`,
                 isActive ? tw`${TW.bgAction}` : null,
                 pressed && !isActive && tw`opacity-70`,
-              ]}
-            >
+              ]}>
               <Text
-                style={tw`text-sm font-bold ${isActive ? TW.textButton : TW.textPrimary}`}
-              >
+                style={tw`text-sm font-bold ${isActive ? TW.textButton : TW.textPrimary}`}>
                 {tab.toUpperCase()}
               </Text>
             </Pressable>
@@ -126,12 +127,10 @@ export default function AdminLeaveView({
               style={({ pressed }) => [
                 tw`flex-row items-center bg-white border ${TW.BORDER} rounded-2xl px-4 py-4`,
                 pressed && tw`bg-slate-50`,
-              ]}
-            >
+              ]}>
               {/* Icon */}
               <View
-                style={tw`h-12 w-12 rounded-xl bg-slate-100 items-center justify-center mr-4`}
-              >
+                style={tw`h-12 w-12 rounded-xl bg-slate-100 items-center justify-center mr-4`}>
                 <CalendarClock size={20} color="#475569" />
               </View>
 
@@ -150,8 +149,7 @@ export default function AdminLeaveView({
 
               {/* Status Badge */}
               <View
-                style={tw`flex-row items-center px-3 py-1.5 rounded-xl mr-3 ${cfg.bg}`}
-              >
+                style={tw`flex-row items-center px-3 py-1.5 rounded-xl mr-3 ${cfg.bg}`}>
                 <View style={tw`h-1.5 w-1.5 rounded-full mr-1.5 ${cfg.dot}`} />
                 <Text style={tw`text-xs font-bold ${cfg.text}`}>
                   {leave.status.toUpperCase()}
@@ -165,8 +163,7 @@ export default function AdminLeaveView({
         ListEmptyComponent={
           <View style={tw`items-center justify-center py-20`}>
             <View
-              style={tw`h-16 w-16 rounded-full ${TW.bgCards} items-center justify-center mb-4`}
-            >
+              style={tw`h-16 w-16 rounded-full ${TW.bgCards} items-center justify-center mb-4`}>
               <CalendarClock size={28} color="#94a3b8" />
             </View>
             <Text style={tw`text-base font-semibold ${TW.textPrimary}`}>

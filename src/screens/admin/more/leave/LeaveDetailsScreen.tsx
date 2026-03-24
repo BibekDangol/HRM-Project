@@ -127,13 +127,13 @@ export default function LeaveDetailScreen() {
       });
       // Navigate only if approved
       if (status === "approved") {
-        router.push({
+        router.replace({
           pathname: "/(admin)/leave/approved-details",
           params: { id: leave.id }, // pass leave ID
         });
       }
       if (status === "rejected") {
-        router.push({
+        router.replace({
           pathname: "/(admin)/leave/rejected-details",
           params: { id: leave.id }, // pass leave ID
         });
@@ -316,11 +316,11 @@ export default function LeaveDetailScreen() {
         <Pressable
           onPress={() => handleStatusChange("rejected")}
           style={({ pressed }) => [
-            tw`flex-1 flex-row items-center justify-center py-4 rounded-2xl border border-slate-200`,
+            tw`flex-1 flex-row items-center justify-center py-4 rounded-2xl ${TW.bgRejected}`,
             pressed && tw`opacity-70`,
           ]}>
-          <XCircle size={18} color="#ef4444" />
-          <Text style={tw`text-red-500 font-bold ml-2`}>Reject</Text>
+          <XCircle size={18} color="#ffffff" />
+          <Text style={tw`text-white font-bold ml-2`}>Reject</Text>
         </Pressable>
 
         <Pressable
@@ -331,7 +331,7 @@ export default function LeaveDetailScreen() {
           style={({ pressed }) => [
             tw`flex-1 flex-row items-center justify-center py-4 rounded-2xl ${TW.bgAction}`,
           ]}>
-          <CheckCircle size={18} color={"#94a3b8"} />
+          <CheckCircle size={18} color={"#ffffff"} />
           <Text style={[tw`font-bold ml-2`, tw`text-white`]}>Approve</Text>
         </Pressable>
       </View>

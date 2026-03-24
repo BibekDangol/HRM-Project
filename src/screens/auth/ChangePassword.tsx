@@ -15,6 +15,7 @@ import { apiClient } from "@/src/api/apiClient";
 import { changePasswordSchema } from "@/src/schema/auth";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { FormData } from "@/src/types/changePassword";
+import { TW } from "@/theme/twStyles";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
@@ -48,21 +49,17 @@ const ChangePasswordScreen = () => {
     }
 
     try {
-      // Call edge function via apiClient
       const { data: result } = await apiClient.post("/change-password", {
         userId: user.id,
         oldPassword: data.oldPassword,
         newPassword: data.newPassword,
       });
-
       if (!result.success) {
         Alert.alert("Error", result.error || "Failed to change password");
         return;
       }
-
       // Clear local session/auth
       useAuthStore.getState().signOut(); // Make sure you have a logout action that clears session
-
       Alert.alert(
         "Success",
         "Password updated successfully. Please login again.",
@@ -71,86 +68,112 @@ const ChangePasswordScreen = () => {
             text: "OK",
             onPress: () => router.replace("/login"), // redirect to login screen
           },
-        ]
+        ],
       );
     } catch (err: any) {
-      Alert.alert("Error", err.response?.data?.error || err.message || "Something went wrong");
+      Alert.alert(
+        "Error",
+        err.response?.data?.error || err.message || "Something went wrong",
+      );
     }
   };
   return (
-    <View style={tw`flex-1 bg-[#F5F5F5]`}>
+    <View style={tw`flex-1 ${TW.bgPrimary} justify-center`}>
       <KeyboardAvoidingView
         style={tw`flex-1`}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-      >
+        behavior={Platform.OS === "ios" ? "padding" : undefined}>
         <ScrollView
-          contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}
-          style={tw`px-6`}
-          keyboardShouldPersistTaps="handled"
-        >
-          <Text
-            style={tw`text-[28px] font-bold text-center text-[#1F7A4D] mb-8`}
-          >
-            Change Password
-          </Text>
+          contentContainerStyle={tw`flex-grow justify-center px-6`}
+          keyboardShouldPersistTaps="handled">
+          {/* Header */}
+          <View style={tw`items-center mb-6`}>
+            <Text style={tw`text-2xl font-bold ${TW.textPrimary}`}>
+              Change Password
+            </Text>
+            <Text style={tw`${TW.textSecondary} text-center mt-1`}>
+              Update your password securely
+            </Text>
+          </View>
 
-          {["oldPassword", "newPassword", "confirmPassword"].map((field) => {
-            const showToggle =
-              field === "oldPassword" ? showOld : field === "newPassword" ? showNew : showConfirm;
-            const setShowToggle =
-              field === "oldPassword" ? setShowOld : field === "newPassword" ? setShowNew : setShowConfirm;
-            const label =
-              field === "oldPassword"
-                ? "Old Password"
-                : field === "newPassword"
-                  ? "New Password"
-                  : "Confirm Password";
+          {/* Fields */}
+          <View style={tw`gap-4`}>
+            {["oldPassword", "newPassword", "confirmPassword"].map((field) => {
+              const showToggle =
+                field === "oldPassword"
+                  ? showOld
+                  : field === "newPassword"
+                    ? showNew
+                    : showConfirm;
 
-            return (
-              <Controller
-                key={field}
-                control={control}
-                name={field as keyof FormData}
-                render={({ field: { value, onChange } }) => (
-                  <View style={tw`mb-3`}>
-                    <Text style={tw`text-[14px] font-semibold text-[#6E6F71] mb-1`}>
-                      {label}
-                    </Text>
-                    <View style={tw`h-[52px] bg-white rounded-xl px-4 flex-row items-center`}>
-                      <TextInput
-                        style={tw`flex-1 text-[16px]`}
-                        secureTextEntry={!showToggle}
-                        value={value}
-                        onChangeText={onChange}
-                      />
-                      <TouchableOpacity onPress={() => setShowToggle(!showToggle)}>
-                        <MaterialCommunityIcons
-                          name={showToggle ? "eye-off" : "eye"}
-                          size={22}
-                          color="#888"
-                        />
-                      </TouchableOpacity>
-                    </View>
-                    {errors[field as keyof FormData] && (
-                      <Text style={tw`text-[#FF6B6B] text-[13px] mt-1`}>
-                        {errors[field as keyof FormData]?.message}
+              const setShowToggle =
+                field === "oldPassword"
+                  ? setShowOld
+                  : field === "newPassword"
+                    ? setShowNew
+                    : setShowConfirm;
+
+              const label =
+                field === "oldPassword"
+                  ? "Old Password"
+                  : field === "newPassword"
+                    ? "New Password"
+                    : "Confirm Password";
+
+              return (
+                <Controller
+                  key={field}
+                  control={control}
+                  name={field as keyof FormData}
+                  render={({ field: { value, onChange } }) => (
+                    <View>
+                      <Text style={tw`${TW.textSecondary} font-semibold mb-2`}>
+                        {label}
                       </Text>
-                    )}
-                  </View>
-                )}
-              />
-            );
-          })}
 
+                      <View
+                        style={tw`${TW.bgButton} rounded-lg flex-row items-center`}>
+                        <TextInput
+                          style={tw`flex-1 px-3 py-4`}
+                          secureTextEntry={!showToggle}
+                          value={value}
+                          onChangeText={onChange}
+                          placeholder="••••••••"
+                          placeholderTextColor="#7e7e7e"
+                        />
+
+                        <TouchableOpacity
+                          onPress={() => setShowToggle(!showToggle)}
+                          style={tw`pr-3`}>
+                          <MaterialCommunityIcons
+                            name={showToggle ? "eye-off" : "eye"}
+                            size={22}
+                            color="#7e7e7e"
+                          />
+                        </TouchableOpacity>
+                      </View>
+
+                      {errors[field as keyof FormData] && (
+                        <Text style={tw`text-[#FF6B6B] text-[13px] mt-1`}>
+                          {errors[field as keyof FormData]?.message}
+                        </Text>
+                      )}
+                    </View>
+                  )}
+                />
+              );
+            })}
+          </View>
+
+          {/* Button */}
           <TouchableOpacity
             style={[
-              tw`h-[52px] rounded-xl items-center justify-center bg-[#1F7A4D]`,
-              isSubmitting ? tw`opacity-70` : tw`opacity-100`,
+              tw`rounded-xl items-center justify-center mt-6 ${TW.bgAction}`,
+              isSubmitting ? tw`opacity-80` : tw`opacity-100`,
+              { paddingVertical: 16 },
             ]}
             onPress={handleSubmit(onSubmit)}
-            disabled={isSubmitting}
-          >
-            <Text style={tw`text-white text-[18px] font-semibold`}>
+            disabled={isSubmitting}>
+            <Text style={tw`text-white font-semibold text-[16px]`}>
               {isSubmitting ? "Updating..." : "Update Password"}
             </Text>
           </TouchableOpacity>

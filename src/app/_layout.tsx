@@ -7,23 +7,16 @@ import { useAuthStore } from "../store/useAuthStore";
 import { supabase } from "../supabase/supabaseClient";
 
 export default function Layout() {
-  const { role, restoreSession } = useAuthStore();
-  console.log("🚀 ~ Layout ~ role:", role);
+  const { role, restoreSession, session } = useAuthStore();
   useEffect(() => {
     const handleDeepLink = async (event: { url: string }) => {
-      console.log("Deep link received:", event.url);
       const url = event.url;
-      console.log("This is check in layout url cha kinai bhanera", url);
       const hash = url.split("#")[1];
       if (!hash) return;
       const params = Object.fromEntries(
         hash.split("&").map((param) => param.split("=")),
       );
       if (params.access_token && params.refresh_token) {
-        console.log(
-          "This is layout check, if access token cha kinai",
-          params.access_token,
-        );
         await supabase.auth.setSession({
           access_token: params.access_token,
           refresh_token: params.refresh_token,

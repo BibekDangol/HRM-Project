@@ -1,21 +1,37 @@
 import React, { useEffect, useState } from "react";
-import { Alert, Text, TextInput, TouchableOpacity, View } from "react-native";
+import {
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 import { supabase } from "@/src/supabase/supabaseClient";
+import { TW } from "@/theme/twStyles";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import tw from "twrnc";
 
 const ResetPassword = () => {
   const router = useRouter();
+
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [recoverySession, setRecoverySession] = useState<any>(null);
 
-  // Listen for password recovery session
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  // ✅ Listen for recovery session
   useEffect(() => {
     const { data: listener } = supabase.auth.onAuthStateChange(
       (event, session) => {
         if (event === "PASSWORD_RECOVERY" && session) {
-          console.log("Recovery session established!");
           setRecoverySession(session);
         }
       },
@@ -25,49 +41,134 @@ const ResetPassword = () => {
   }, []);
 
   const handleReset = async () => {
-    if (!password) {
-      Alert.alert("Error", "Password is required");
+    if (!password || !confirmPassword) {
+      Alert.alert("Error", "All fields are required");
       return;
     }
+
+    if (password !== confirmPassword) {
+      Alert.alert("Error", "Passwords do not match");
+      return;
+    }
+
     if (!recoverySession) {
       Alert.alert(
         "Error",
-        "Recovery session not found. Please open the reset link from your email again.",
+        "Recovery session not found. Please open the reset link again.",
       );
       return;
     }
-    const { error } = await supabase.auth.updateUser(
-      { password },
-      recoverySession,
-    );
 
-    if (error) {
-      Alert.alert("Error", error.message);
-    } else {
-      Alert.alert("Success", "Password updated");
-      // logout recovery session
+    try {
+      setLoading(true);
+
+      const { error } = await supabase.auth.updateUser(
+        { password },
+        recoverySession,
+      );
+
+      if (error) throw error;
+
+      Alert.alert("Success", "Password updated successfully");
+
       await supabase.auth.signOut();
       router.replace("/(auth)/login");
+    } catch (err: any) {
+      Alert.alert("Error", err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <View style={tw`flex-1 justify-center px-5`}>
-      <Text style={tw`text-xl font-bold mb-4`}>Reset Password</Text>
+    <View style={tw`flex-1 ${TW.bgPrimary} justify-center`}>
+      <KeyboardAvoidingView
+        style={tw`flex-1`}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}>
+        <ScrollView
+          contentContainerStyle={tw`flex-grow justify-center px-6`}
+          keyboardShouldPersistTaps="handled">
+          {/* Header */}
+          <View style={tw`items-center mb-6`}>
+            <Text style={tw`text-2xl font-bold ${TW.textPrimary}`}>
+              Reset Password
+            </Text>
+            <Text style={tw`${TW.textSecondary} text-center mt-1`}>
+              Enter your new password below
+            </Text>
+          </View>
 
-      <TextInput
-        style={tw`border rounded-lg p-3 mb-4`}
-        placeholder="New Password"
-        secureTextEntry
-        value={password}
-        onChangeText={setPassword}
-      />
+          {/* Password */}
+          <View style={tw`mb-4`}>
+            <Text style={tw`${TW.textSecondary} font-semibold mb-2`}>
+              New Password
+            </Text>
 
-      <TouchableOpacity
-        style={tw`bg-green-500 p-4 rounded-lg`}
-        onPress={handleReset}>
-        <Text style={tw`text-white text-center`}>Update Password</Text>
-      </TouchableOpacity>
+            <View style={tw`${TW.bgButton} rounded-lg flex-row items-center`}>
+              <TextInput
+                style={tw`flex-1 px-3 py-4`}
+                secureTextEntry={!showPassword}
+                value={password}
+                onChangeText={setPassword}
+                placeholder="••••••••"
+                placeholderTextColor="#7e7e7e"
+              />
+
+              <TouchableOpacity
+                onPress={() => setShowPassword(!showPassword)}
+                style={tw`pr-3`}>
+                <MaterialCommunityIcons
+                  name={showPassword ? "eye-off" : "eye"}
+                  size={22}
+                  color="#7e7e7e"
+                />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Confirm Password */}
+          <View style={tw`mb-4`}>
+            <Text style={tw`${TW.textSecondary} font-semibold mb-2`}>
+              Confirm Password
+            </Text>
+
+            <View style={tw`${TW.bgButton} rounded-lg flex-row items-center`}>
+              <TextInput
+                style={tw`flex-1 px-3 py-4`}
+                secureTextEntry={!showConfirm}
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                placeholder="••••••••"
+                placeholderTextColor="#7e7e7e"
+              />
+
+              <TouchableOpacity
+                onPress={() => setShowConfirm(!showConfirm)}
+                style={tw`pr-3`}>
+                <MaterialCommunityIcons
+                  name={showConfirm ? "eye-off" : "eye"}
+                  size={22}
+                  color="#7e7e7e"
+                />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Button */}
+          <TouchableOpacity
+            style={[
+              tw`rounded-xl items-center justify-center ${TW.bgAction}`,
+              loading ? tw`opacity-80` : tw`opacity-100`,
+              { paddingVertical: 16 },
+            ]}
+            onPress={handleReset}
+            disabled={loading}>
+            <Text style={tw`text-white font-semibold text-[16px]`}>
+              {loading ? "Updating..." : "Update Password"}
+            </Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </View>
   );
 };
