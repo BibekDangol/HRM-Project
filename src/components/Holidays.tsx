@@ -283,6 +283,7 @@ export default function HolidaysEventsScreen() {
           paddingTop: 16,
           paddingBottom: insets.bottom + 24,
         }}
+        showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
             refreshing={refreshing || loading}

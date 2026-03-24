@@ -373,6 +373,7 @@ export default function LeavesScreen() {
         ref={flatListRef}
         data={pageLoading ? [] : pagedLeaves}
         keyExtractor={(item) => item.id}
+        showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}

@@ -75,16 +75,23 @@ const ChangePasswordScreen = () => {
         "Error",
         err.response?.data?.error || err.message || "Something went wrong",
       );
+      Alert.alert(
+        "Error",
+        err.response?.data?.error || err.message || "Something went wrong",
+      );
     }
   };
   return (
     <View style={tw`flex-1 ${TW.bgPrimary} justify-center`}>
       <KeyboardAvoidingView
         style={tw`flex-1`}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}>
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      >
         <ScrollView
           contentContainerStyle={tw`flex-grow justify-center px-6`}
-          keyboardShouldPersistTaps="handled">
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
           {/* Header */}
           <View style={tw`items-center mb-6`}>
             <Text style={tw`text-2xl font-bold ${TW.textPrimary}`}>
@@ -131,7 +138,8 @@ const ChangePasswordScreen = () => {
                       </Text>
 
                       <View
-                        style={tw`${TW.bgButton} rounded-lg flex-row items-center`}>
+                        style={tw`${TW.bgButton} rounded-lg flex-row items-center`}
+                      >
                         <TextInput
                           style={tw`flex-1 px-3 py-4`}
                           secureTextEntry={!showToggle}
@@ -143,7 +151,8 @@ const ChangePasswordScreen = () => {
 
                         <TouchableOpacity
                           onPress={() => setShowToggle(!showToggle)}
-                          style={tw`pr-3`}>
+                          style={tw`pr-3`}
+                        >
                           <MaterialCommunityIcons
                             name={showToggle ? "eye-off" : "eye"}
                             size={22}
@@ -172,7 +181,8 @@ const ChangePasswordScreen = () => {
               { paddingVertical: 16 },
             ]}
             onPress={handleSubmit(onSubmit)}
-            disabled={isSubmitting}>
+            disabled={isSubmitting}
+          >
             <Text style={tw`text-white font-semibold text-[16px]`}>
               {isSubmitting ? "Updating..." : "Update Password"}
             </Text>

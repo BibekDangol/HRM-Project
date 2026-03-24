@@ -99,6 +99,7 @@ export default function DashboardScreen() {
     <View style={tw`flex-1`}>
       <ScrollView
         contentContainerStyle={tw`px-4 pt-6 pb-10`}
+        showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}

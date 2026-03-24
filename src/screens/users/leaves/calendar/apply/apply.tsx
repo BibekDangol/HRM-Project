@@ -543,7 +543,6 @@ export default function ApplyLeaveScreen() {
         </Pressable>
       </Modal>
 
-      {/* ✅ Main Form */}
       <KeyboardAvoidingView
         style={{ flex: 1, backgroundColor: "#ffffff" }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -558,6 +557,7 @@ export default function ApplyLeaveScreen() {
                 paddingBottom: 112,
               }}
               keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}
             >
               <BackButton
                 color={TW.bgSecondary}

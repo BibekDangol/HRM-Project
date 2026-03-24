@@ -266,6 +266,7 @@ export default function HomeScreen() {
       <ScrollView
         style={tw`bg-white flex-1`}
         contentContainerStyle={{ paddingVertical: 16 }}
+        showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
             refreshing={isRefreshing || profileLoading || statsLoading}
@@ -438,8 +439,9 @@ export default function HomeScreen() {
         <Modal
           visible={monthModalOpen}
           transparent
-          animationType="slide"
-          onRequestClose={() => setMonthModalOpen(false)}>
+          animationType="none"
+          onRequestClose={() => setMonthModalOpen(false)}
+        >
           <Pressable
             style={tw`flex-1 bg-black/50 justify-end`}
             onPress={() => setMonthModalOpen(false)}>

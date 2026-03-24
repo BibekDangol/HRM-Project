@@ -1,4 +1,14 @@
 import {
+  Leave,
+  LeaveStatus,
+  fetchLeaveById,
+  sumUserLeaveDaysByType,
+  updateLeaveStatus,
+} from "@/src/services/leave.service";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { CheckCircle, XCircle } from "lucide-react-native";
+import { useEffect, useState } from "react";
+import {
   ActivityIndicator,
   Alert,
   Pressable,
@@ -6,21 +16,11 @@ import {
   Text,
   View,
 } from "react-native";
-import { CheckCircle, XCircle } from "lucide-react-native";
-import {
-  Leave,
-  LeaveStatus,
-  fetchLeaveById,
-  sumUserLeaveDaysByType,
-  updateLeaveStatus,
-} from "@/src/services/leave.service";
-import { useEffect, useState } from "react";
-import { useLocalSearchParams, useRouter } from "expo-router";
 
-import { TW } from "@/theme/twStyles";
-import tw from "twrnc";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { useLeaveStore } from "@/src/store/useLeaveStore";
+import { TW } from "@/theme/twStyles";
+import tw from "twrnc";
 
 // Helper component: Label + Value (full control)
 function LabelValue({
@@ -42,7 +42,8 @@ function LabelValue({
         {label}
       </Text>
       <Text
-        style={[tw`text-sm font-semibold`, { color: "#111827" }, valueStyle]}>
+        style={[tw`text-sm font-semibold`, { color: "#111827" }, valueStyle]}
+      >
         {value}
       </Text>
     </View>
@@ -162,10 +163,12 @@ export default function LeaveDetailScreen() {
     <View style={tw`flex-1 bg-white`}>
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={tw`pb-32`}>
+        contentContainerStyle={tw`pb-32`}
+      >
         {/* Profile Card */}
         <View
-          style={tw`mx-5 mt-5 rounded-3xl bg-slate-50 border border-slate-100 px-5 py-6 items-center`}>
+          style={tw`mx-5 mt-5 rounded-3xl bg-slate-50 border border-slate-100 px-5 py-6 items-center`}
+        >
           {/* Avatar */}
 
           {/* Name */}
@@ -183,7 +186,8 @@ export default function LeaveDetailScreen() {
             style={[
               tw`mt-3 px-4 py-1.5 rounded-full`,
               { backgroundColor: cfg.bg },
-            ]}>
+            ]}
+          >
             <Text style={[tw`text-xs font-bold`, { color: cfg.text }]}>
               {cfg.label}
             </Text>
@@ -208,7 +212,8 @@ export default function LeaveDetailScreen() {
                       remainingDays <= 0
                         ? tw`text-red-500`
                         : tw`text-emerald-600`,
-                    ]}>
+                    ]}
+                  >
                     {remainingDays}
                   </Text>
                   <Text style={tw`text-xs text-slate-400`}>Remaining</Text>
@@ -229,7 +234,8 @@ export default function LeaveDetailScreen() {
         {/* Details Section */}
         <View style={tw`px-5 mt-6 border-t border-slate-100`}>
           <Text
-            style={tw`text-xs font-bold text-slate-400 uppercase tracking-wider mb-2`}>
+            style={tw`text-xs font-bold text-slate-400 uppercase tracking-wider mb-2`}
+          >
             Details
           </Text>
 
@@ -264,7 +270,8 @@ export default function LeaveDetailScreen() {
         {usedDays !== null && remainingDays !== null && (
           <View style={tw`px-5 mt-6`}>
             <Text
-              style={tw`text-xs font-bold text-slate-400 uppercase tracking-wider mb-2`}>
+              style={tw`text-xs font-bold text-slate-400 uppercase tracking-wider mb-2`}
+            >
               Leave Balance
             </Text>
 
@@ -312,13 +319,15 @@ export default function LeaveDetailScreen() {
 
       {/* Action Buttons */}
       <View
-        style={tw`absolute bottom-0 left-0 right-0 bg-white border-t border-slate-100 px-5 py-4 flex-row gap-3`}>
+        style={tw`absolute bottom-0 left-0 right-0 bg-white border-t border-slate-100 px-5 py-4 flex-row gap-3`}
+      >
         <Pressable
           onPress={() => handleStatusChange("rejected")}
           style={({ pressed }) => [
             tw`flex-1 flex-row items-center justify-center py-4 rounded-2xl ${TW.bgRejected}`,
             pressed && tw`opacity-70`,
-          ]}>
+          ]}
+        >
           <XCircle size={18} color="#ffffff" />
           <Text style={tw`text-white font-bold ml-2`}>Reject</Text>
         </Pressable>
@@ -330,7 +339,8 @@ export default function LeaveDetailScreen() {
           }}
           style={({ pressed }) => [
             tw`flex-1 flex-row items-center justify-center py-4 rounded-2xl ${TW.bgAction}`,
-          ]}>
+          ]}
+        >
           <CheckCircle size={18} color={"#ffffff"} />
           <Text style={[tw`font-bold ml-2`, tw`text-white`]}>Approve</Text>
         </Pressable>

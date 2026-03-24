@@ -16,7 +16,9 @@ export default function ActivityLogPage() {
           paddingHorizontal: 16,
           paddingTop: 64, // ← space so content doesn't hide under button
           paddingBottom: 40,
-        }}>
+        }}
+        showsVerticalScrollIndicator={false}
+      >
         <ActivityLogSection hideTitle />
       </ScrollView>
     </View>

@@ -468,6 +468,7 @@ export default function EditLeaveScreen() {
             paddingTop: 16,
             paddingBottom: 112,
           }}
+          showsVerticalScrollIndicator={false}
         >
           <BackButton
             color={TW.bgSecondary}
