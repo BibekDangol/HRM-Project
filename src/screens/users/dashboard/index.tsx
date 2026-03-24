@@ -1,4 +1,3 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Alert,
   Modal,
@@ -8,28 +7,29 @@ import {
   Text,
   View,
 } from "react-native";
-
-import { ActivityLogSection } from "@/src/components/ActivityLog";
-import { HolidaysEventsSection } from "@/src/components/HolidaysEventsSection";
-import { useAttendanceContext } from "@/src/context/AttendanceContext";
-import { useAuthStore } from "@/src/store/useAuthStore";
-import { supabase } from "@/src/supabase/supabaseClient";
-import { CalendarItem } from "@/src/types/Calendar";
-import { ProfileData } from "@/src/types/profile.types";
-import { AttendanceRow } from "@/src/types/user";
-import { formatElapsed, formatSinceTime } from "@/src/utils/attendanceHelper";
+import { CalendarDays, CircleCheck, LogOut } from "lucide-react-native";
 import {
-  getNepalMonthDateRangeYYYYMMDD,
-  getNepalMonthRangeUTCISO,
   MAX_YEAR,
   MIN_YEAR,
   MONTHS,
+  getNepalMonthDateRangeYYYYMMDD,
+  getNepalMonthRangeUTCISO,
   normalize,
 } from "@/src/utils/userDashboard";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { formatElapsed, formatSinceTime } from "@/src/utils/attendanceHelper";
+
+import { ActivityLogSection } from "@/src/components/ActivityLog";
+import { AttendanceRow } from "@/src/types/user";
+import { CalendarItem } from "@/src/types/Calendar";
+import { HolidaysEventsSection } from "@/src/components/HolidaysEventsSection";
+import { ProfileData } from "@/src/types/profile.types";
 import { TW } from "@/theme/twStyles";
 import { router } from "expo-router";
-import { CalendarDays, CircleCheck, LogOut } from "lucide-react-native";
+import { supabase } from "@/src/supabase/supabaseClient";
 import tw from "twrnc";
+import { useAttendanceContext } from "@/src/context/AttendanceContext";
+import { useAuthStore } from "@/src/store/useAuthStore";
 
 export default function HomeScreen() {
   const user = useAuthStore((s) => s.user);
@@ -273,8 +273,7 @@ export default function HomeScreen() {
             colors={["#1B4A5A"]}
             tintColor="#1B4A5A"
           />
-        }
-      >
+        }>
         {/* ── Check In / Out Card ── */}
         <View style={{ paddingHorizontal: 16 }}>
           <View
@@ -291,8 +290,7 @@ export default function HomeScreen() {
               shadowOffset: { width: 0, height: 4 },
               elevation: 4,
               marginBottom: 16,
-            }}
-          >
+            }}>
             {/* Left: status + timer */}
             <View style={{ gap: 2 }}>
               <Text
@@ -300,8 +298,7 @@ export default function HomeScreen() {
                   fontSize: 12,
                   color: "rgba(255,255,255,0.6)",
                   fontWeight: "500",
-                }}
-              >
+                }}>
                 {att.isCheckedIn ? "Currently working" : "Not checked in"}
               </Text>
               {att.isCheckedIn ? (
@@ -312,13 +309,11 @@ export default function HomeScreen() {
                       fontWeight: "800",
                       color: "#ffffff",
                       letterSpacing: -0.5,
-                    }}
-                  >
+                    }}>
                     {formatElapsed(att.elapsedMs)}
                   </Text>
                   <Text
-                    style={{ fontSize: 11, color: "rgba(255,255,255,0.5)" }}
-                  >
+                    style={{ fontSize: 11, color: "rgba(255,255,255,0.5)" }}>
                     Since{" "}
                     {att.checkedInAt ? formatSinceTime(att.checkedInAt) : "--"}
                   </Text>
@@ -329,8 +324,7 @@ export default function HomeScreen() {
                     fontSize: 20,
                     fontWeight: "700",
                     color: "rgba(255,255,255,0.3)",
-                  }}
-                >
+                  }}>
                   --:--:--
                 </Text>
               )}
@@ -349,16 +343,14 @@ export default function HomeScreen() {
                 borderRadius: 14,
                 backgroundColor: "#FFB300",
                 opacity: att.isLocked || pressed ? 0.7 : 1,
-              })}
-            >
+              })}>
               {att.isCheckedIn ? (
                 <LogOut size={15} color="#1F2937" />
               ) : (
                 <CircleCheck size={15} color="#1F2937" />
               )}
               <Text
-                style={{ fontWeight: "700", fontSize: 13, color: "#1F2937" }}
-              >
+                style={{ fontWeight: "700", fontSize: 13, color: "#1F2937" }}>
                 {att.isLocked
                   ? "..."
                   : att.isCheckedIn
@@ -380,8 +372,7 @@ export default function HomeScreen() {
               style={({ pressed }) => [
                 tw`px-3 py-2 rounded-full`,
                 pressed && { opacity: 0.85 },
-              ]}
-            >
+              ]}>
               <CalendarDays color="#475569" />
             </Pressable>
           </View>
@@ -413,11 +404,9 @@ export default function HomeScreen() {
                 style={[
                   tw`flex-1 rounded-2xl px-3 py-4 items-center gap-1`,
                   { backgroundColor: item.bg },
-                ]}
-              >
+                ]}>
                 <Text
-                  style={[tw`text-4xl font-extrabold`, { color: item.color }]}
-                >
+                  style={[tw`text-4xl font-extrabold`, { color: item.color }]}>
                   {statsLoading ? "—" : item.value}
                 </Text>
                 <Text style={[tw`text-sm font-semibold`, { color: "#6B7280" }]}>
@@ -450,19 +439,16 @@ export default function HomeScreen() {
           visible={monthModalOpen}
           transparent
           animationType="slide"
-          onRequestClose={() => setMonthModalOpen(false)}
-        >
+          onRequestClose={() => setMonthModalOpen(false)}>
           <Pressable
             style={tw`flex-1 bg-black/50 justify-end`}
-            onPress={() => setMonthModalOpen(false)}
-          >
+            onPress={() => setMonthModalOpen(false)}>
             <Pressable
               style={[
                 tw`rounded-t-3xl px-5 pt-3 pb-8`,
                 { backgroundColor: "#ffffff" },
               ]}
-              onPress={() => {}}
-            >
+              onPress={() => {}}>
               {/* Handle */}
               <View style={tw`items-center mb-4`}>
                 <View
@@ -484,8 +470,7 @@ export default function HomeScreen() {
                     tw`h-9 w-9 rounded-full items-center justify-center border`,
                     { borderColor: "#e2e8f0", backgroundColor: "#fff" },
                     (!canDecYear || pressed) && { opacity: 0.4 },
-                  ]}
-                >
+                  ]}>
                   <Text style={[tw`font-bold text-base`, { color: "#1F2937" }]}>
                     ‹
                   </Text>
@@ -495,8 +480,7 @@ export default function HomeScreen() {
                   style={[
                     tw`text-lg font-bold w-16 text-center`,
                     { color: "#1F2937" },
-                  ]}
-                >
+                  ]}>
                   {selectedYear}
                 </Text>
 
@@ -517,8 +501,7 @@ export default function HomeScreen() {
                     tw`h-9 w-9 rounded-full items-center justify-center border`,
                     { borderColor: "#e2e8f0", backgroundColor: "#fff" },
                     (!canIncYear || pressed) && { opacity: 0.4 },
-                  ]}
-                >
+                  ]}>
                   <Text style={[tw`font-bold text-base`, { color: "#1F2937" }]}>
                     ›
                   </Text>
@@ -561,8 +544,7 @@ export default function HomeScreen() {
                               ? { backgroundColor: "#F9FAFB" }
                               : { backgroundColor: "#F3F4F6" },
                         pressed && !isFuture && { opacity: 0.8 },
-                      ]}
-                    >
+                      ]}>
                       <Text
                         style={[
                           tw`text-sm font-semibold text-center`,
@@ -571,8 +553,7 @@ export default function HomeScreen() {
                             : isFuture
                               ? { color: "#CBD5E1" }
                               : { color: "#1F2937" },
-                        ]}
-                      >
+                        ]}>
                         {m}
                       </Text>
                     </Pressable>
@@ -587,8 +568,7 @@ export default function HomeScreen() {
                   tw`py-4 rounded-full items-center`,
                   { backgroundColor: "#FFC107" },
                   pressed && { opacity: 0.85 },
-                ]}
-              >
+                ]}>
                 <Text style={[tw`font-bold text-base`, { color: "#1F2937" }]}>
                   Done
                 </Text>

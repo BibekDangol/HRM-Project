@@ -1,15 +1,15 @@
 // app/(admin)/settings/leave/index.tsx
 
-import { useCallback, useEffect, useState } from "react";
 import { Alert, FlatList, Text, TouchableOpacity, View } from "react-native";
+import { useCallback, useEffect, useState } from "react";
 
-import { apiClient } from "@/src/api/apiClient";
+import AddLeaveTypeModal from "./AddLeaveTypeModal";
 import LoadingIndicator from "@/src/components/LoadingIndicator";
+import { apiClient } from "@/src/api/apiClient";
 import { fetchLeaveTypesService } from "@/src/services/leave.type.service";
+import tw from "twrnc";
 import { useLeaveTypeStore } from "@/src/store/useLeaveTypeStore";
 import { useUsersStore } from "@/src/store/useUsersStore";
-import tw from "twrnc";
-import AddLeaveTypeModal from "./AddLeaveTypeModal";
 
 export default function LeaveTypeSettings() {
   const { userProfile } = useUsersStore();
@@ -30,11 +30,9 @@ export default function LeaveTypeSettings() {
     if (!userProfile?.organization_id) return;
     try {
       setLoading(true);
-      console.log(loading);
       const result = await fetchLeaveTypesService(userProfile.organization_id);
       setLeaveTypes(result || []);
       setLoading(false);
-      console.log(loading);
     } catch (err: any) {
       Alert.alert("Error", err.message);
     }
@@ -116,8 +114,7 @@ export default function LeaveTypeSettings() {
             setSelectedType(null);
             setShowModal(true);
           }}
-          style={tw`bg-green-600 px-4 py-2 rounded`}
-        >
+          style={tw`bg-green-600 px-4 py-2 rounded`}>
           <Text style={tw`text-white`}>Add</Text>
         </TouchableOpacity>
       </View>
@@ -132,8 +129,7 @@ export default function LeaveTypeSettings() {
           onRefresh={onRefresh}
           renderItem={({ item }) => (
             <View
-              style={tw`p-3 border rounded mb-2 flex-row justify-between items-center`}
-            >
+              style={tw`p-3 border rounded mb-2 flex-row justify-between items-center`}>
               <View>
                 <Text style={tw`font-semibold`}>{item.name}</Text>
                 <Text style={tw`text-gray-500`}>{item.leave_limit} days</Text>
@@ -144,15 +140,13 @@ export default function LeaveTypeSettings() {
                     setSelectedType(item);
                     setShowModal(true);
                   }}
-                  style={tw`bg-blue-500 px-3 py-1 rounded mr-2`}
-                >
+                  style={tw`bg-blue-500 px-3 py-1 rounded mr-2`}>
                   <Text style={tw`text-white`}>Edit</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                   onPress={() => handleDelete(item.id)}
-                  style={tw`bg-red-500 px-3 py-1 rounded`}
-                >
+                  style={tw`bg-red-500 px-3 py-1 rounded`}>
                   <Text style={tw`text-white`}>Delete</Text>
                 </TouchableOpacity>
               </View>

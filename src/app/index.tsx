@@ -1,11 +1,10 @@
-import { useAuthStore } from "@/src/store/useAuthStore";
-import { Redirect } from "expo-router";
 import LoadingIndicator from "../components/LoadingIndicator";
+import { Redirect } from "expo-router";
+import { useAuthStore } from "@/src/store/useAuthStore";
 
 export default function Index() {
   const { loading, role } = useAuthStore();
   const { user } = useAuthStore();
-  console.log("index", role);
   if (loading) {
     return <LoadingIndicator message="Loading.." />;
   }
