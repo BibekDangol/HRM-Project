@@ -320,7 +320,10 @@ export default function EditLeaveScreen() {
 
       if (error) throw error;
       Alert.alert("Success", "Leave updated successfully.");
-      router.replace("/(users)/leaves/(tabs)");
+      router.replace({
+        pathname: "/(users)/leaves/(tabs)",
+        params: { tab: "pending" },
+      });
     } catch (e: any) {
       Alert.alert("Error", e?.message ?? "Failed to update leave.");
     } finally {
@@ -339,7 +342,7 @@ export default function EditLeaveScreen() {
 
   return (
     <>
-      {/* ✅ Calendar Modal */}
+      {/* Calendar Modal */}
       <Modal
         visible={calendarVisible}
         animationType="slide"
@@ -439,7 +442,6 @@ export default function EditLeaveScreen() {
                 setCalMonth(m.month);
                 setSelectedEnd("");
               }}
-              // showLegend={true}
             />
 
             {/* Selected display */}
@@ -471,7 +473,12 @@ export default function EditLeaveScreen() {
             color={TW.bgSecondary}
             backgroundColor="rgba(27,74,90,0.08)"
             style={{ marginBottom: 16 }}
-            onPress={() => router.replace("/(users)/leaves/(tabs)")}
+            onPress={() =>
+              router.replace({
+                pathname: "/(users)/leaves/(tabs)",
+                params: { tab: "pending" },
+              })
+            }
           />
 
           <Text
@@ -738,11 +745,16 @@ export default function EditLeaveScreen() {
             )}
           </View>
 
-          {/* Buttons — Cancel left transparent, Save right teal */}
+          {/* Buttons */}
           <View style={{ marginTop: 32, flexDirection: "row", gap: 12 }}>
             <Pressable
               disabled={submitting}
-              onPress={() => router.replace("/(users)/leaves/(tabs)")}
+              onPress={() =>
+                router.replace({
+                  pathname: "/(users)/leaves/(tabs)",
+                  params: { tab: "pending" },
+                })
+              }
               style={({ pressed }) => ({
                 flex: 1,
                 borderWidth: 1.5,

@@ -6,8 +6,9 @@ import { fetchSupervisorUnderUsersService } from "@/src/services/admin.service";
 import tw from "twrnc";
 import { useRouter } from "expo-router";
 import { useUsersStore } from "@/src/store/useUsersStore";
-import HeaderWithSearch from "@/src/components/HeaderWithSearch";
+
 import { UserCard } from "@/src/screens/admin/components/UserCard";
+import HeaderWithSearch from "@/src/components/HeaderWithSearch";
 
 const AttendanceUserList = () => {
   const router = useRouter();
@@ -39,7 +40,11 @@ const AttendanceUserList = () => {
   return (
     <View style={tw`flex-1 bg-white`}>
       {/* Search Bar */}
-      <HeaderWithSearch />
+      <HeaderWithSearch
+        search={search}
+        onSearchChange={setSearch}
+        onBack={() => router.back()}
+      />
       {/* Users List */}
       <FlatList
         data={users}

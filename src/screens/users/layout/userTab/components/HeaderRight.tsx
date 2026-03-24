@@ -1,7 +1,6 @@
 import { formatElapsed, formatSinceTime } from "@/src/utils/attendanceHelper";
 import { CircleCheck, LogOut, User } from "lucide-react-native";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
-
 import ProfileMenu from "@/src/screens/admin/components/ProfileMenu";
 import { TW } from "@/theme/twStyles";
 import React from "react";
@@ -71,7 +70,6 @@ const HeaderRight: React.FC<Props> = ({
 
         {isCheckOpen && (
           <>
-            {/* Backdrop */}
             <Pressable
               onPress={onCheckInAndOut}
               style={{
@@ -82,8 +80,6 @@ const HeaderRight: React.FC<Props> = ({
                 bottom: -1000,
               }}
             />
-
-            {/* Dropdown */}
             <View
               style={{
                 position: "absolute",
@@ -115,7 +111,6 @@ const HeaderRight: React.FC<Props> = ({
                   >
                     Since {checkedInAt ? formatSinceTime(checkedInAt) : "--"}
                   </Text>
-
                   <Text
                     style={{
                       fontSize: 24,
@@ -127,7 +122,6 @@ const HeaderRight: React.FC<Props> = ({
                   >
                     {formatElapsed(elapsedMs)}
                   </Text>
-
                   <Pressable
                     onPress={onToggleCheck}
                     disabled={isLocked}
@@ -139,17 +133,17 @@ const HeaderRight: React.FC<Props> = ({
                       gap: 6,
                       paddingVertical: 10,
                       borderRadius: 10,
-                      backgroundColor: TW.DANGER,
+                      backgroundColor: "#FFB300",
                       opacity: isLocked ? 0.5 : pressed ? 0.85 : 1,
                     })}
                   >
-                    <LogOut size={14} color={TW.bgPrimary} />
+                    <LogOut size={14} color="#1F2937" />
                     {isLocked ? (
-                      <ActivityIndicator size="small" color={TW.bgPrimary} />
+                      <ActivityIndicator size="small" color="#1F2937" />
                     ) : (
                       <Text
                         style={{
-                          color: TW.bgPrimary,
+                          color: "#1F2937",
                           fontWeight: "700",
                           fontSize: 13,
                         }}
@@ -170,19 +164,19 @@ const HeaderRight: React.FC<Props> = ({
                     gap: 8,
                     paddingVertical: 10,
                     borderRadius: 10,
-                    backgroundColor: "#22C55E",
+                    backgroundColor: "#FFB300",
                     opacity: isLocked ? 0.5 : pressed ? 0.85 : 1,
                   })}
                 >
-                  <CircleCheck size={16} color={TW.bgPrimary} />
+                  <CircleCheck size={16} color="#1F2937" />
                   {isLocked ? (
-                    <ActivityIndicator size="small" color={TW.bgPrimary} />
+                    <ActivityIndicator size="small" color="#1F2937" />
                   ) : (
                     <Text
                       style={{
                         fontWeight: "700",
                         fontSize: 13,
-                        color: TW.bgPrimary,
+                        color: "#1F2937",
                       }}
                     >
                       Check In
@@ -218,7 +212,6 @@ const HeaderRight: React.FC<Props> = ({
 
         {isProfileMenuOpen && (
           <>
-            {/* Backdrop */}
             <Pressable
               onPress={onProfileClick}
               style={{
@@ -229,8 +222,6 @@ const HeaderRight: React.FC<Props> = ({
                 bottom: -1000,
               }}
             />
-
-            {/* Menu */}
             <View
               style={{
                 position: "absolute",

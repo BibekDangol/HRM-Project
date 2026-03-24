@@ -1,7 +1,7 @@
-import { Pressable, ViewStyle } from "react-native";
+import { TW } from "@/theme/twStyles";
 import { useRouter } from "expo-router";
 import { ArrowLeft } from "lucide-react-native";
-import { TW } from "@/theme/twStyles";
+import { Pressable, ViewStyle } from "react-native";
 
 interface BackButtonProps {
   color?: string;
@@ -9,6 +9,7 @@ interface BackButtonProps {
   size?: number;
   onPress?: () => void;
   style?: ViewStyle;
+  floating?: boolean;
 }
 
 export function BackButton({
@@ -17,6 +18,7 @@ export function BackButton({
   size = 20,
   onPress,
   style,
+  floating = false,
 }: BackButtonProps) {
   const router = useRouter();
 
@@ -27,14 +29,24 @@ export function BackButton({
         height: 36,
         width: 36,
         borderRadius: 12,
-        backgroundColor,
+        backgroundColor: floating ? "#ffffff" : backgroundColor,
         alignItems: "center",
         justifyContent: "center",
         opacity: pressed ? 0.7 : 1,
+        ...(floating && {
+          position: "absolute",
+          top: 16,
+          left: 16,
+          zIndex: 999,
+          backgroundColor: "transparent",
+        }),
+
         ...style,
       })}
     >
-      <ArrowLeft size={size} color={color} />
+      <ArrowLeft size={size} color={floating ? TW.bgSecondary : color} />
     </Pressable>
   );
 }
+
+export default BackButton;

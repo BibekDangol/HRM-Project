@@ -1,15 +1,15 @@
+import { COLOR_PRESETS } from "@/src/constants/adminCalendar";
 import React, { useState } from "react";
 import {
   KeyboardAvoidingView,
   Modal,
   Platform,
   Pressable,
+  Text,
   TextInput,
   View,
-  Text,
 } from "react-native";
 import tw from "twrnc";
-import { COLOR_PRESETS } from "@/src/constants/adminCalendar";
 
 type Step = "choose" | "holiday" | "event";
 
@@ -92,7 +92,7 @@ export function HolidayRangeModal({
           />
 
           {/* Date label */}
-          <Text style={tw`text-xs font-semibold text-slate-400 mb-1`}>
+          <Text style={tw`text-sm font-semibold text-slate-400 mb-1`}>
             {dateLabel}
           </Text>
 
@@ -136,7 +136,7 @@ export function HolidayRangeModal({
               </View>
 
               {isPastDate && (
-                <Text style={tw`text-xs text-gray-700 mt-2 text-center`}>
+                <Text style={tw`text-sm text-gray-700 mt-2 text-center`}>
                   Holidays and Events cannot be added to past dates.
                 </Text>
               )}

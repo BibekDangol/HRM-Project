@@ -1,72 +1,67 @@
-import { Tabs, usePathname, useRouter } from "expo-router";
 import {
-  checkInService,
-  checkOutService,
-  fetchLatestAttendanceService,
-  getAttendanceRulesService,
-  getOpenAttendanceService,
-} from "@/src/services/attendance.service";
-import {
-  getAttendanceStatus,
-  getErrorMessage,
-  needsCheckInCommentNepal,
-  needsCheckOutCommentNepal,
-  parseDate,
-} from "@/src/utils/attendanceHelper";
-import { useCallback, useEffect, useState } from "react";
-
-import { Alert } from "react-native";
-import { AttendanceRow } from "@/src/types/attendance";
-import HeaderRight from "./components/HeaderRight";
-import { MyTabBar } from "../tabBar";
-import ReasonModel from "./components/ReasonModel";
-import { TW } from "@/theme/twStyles";
-import { fetchCurrentUserProfleService } from "@/src/services/currentuser.service";
-import { supabase } from "@/src/supabase/supabaseClient";
+  AttendanceProvider,
+  useAttendanceContext,
+} from "@/src/context/AttendanceContext";
 import { useAdminHeaderMenu } from "@/src/hooks/useAdminHeaderMenu";
-import { useAttendanceNotifications } from "@/src/hooks/useAttendanceNotifications";
+import { fetchCurrentUserProfleService } from "@/src/services/currentuser.service";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { useUsersStore } from "@/src/store/useUsersStore";
+import { supabase } from "@/src/supabase/supabaseClient";
+import { getErrorMessage } from "@/src/utils/attendanceHelper";
+import { TW } from "@/theme/twStyles";
+import { Tabs, usePathname, useRouter } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
+import { Alert } from "react-native";
+import { MyTabBar } from "../tabBar";
+import HeaderRight from "./components/HeaderRight";
+import ReasonModel from "./components/ReasonModel";
 
-export default function UsersTabsLayout() {
-  const { attendanceRules } = useAttendanceNotifications();
+// ── This component reads context directly so it ALWAYS re-renders on state change ──
+function HeaderRightWrapper({
+  checkOpen,
+  isProfileMenuOpen,
+  onCheckInAndOut,
+  onLogout,
+  onProfileClick,
+  onToggleCheck,
+  onProfileMenuClick,
+}: {
+  checkOpen: boolean;
+  isProfileMenuOpen: boolean;
+  onCheckInAndOut: () => void;
+  onLogout: () => void;
+  onProfileClick: () => void;
+  onToggleCheck: () => void;
+  onProfileMenuClick: () => void;
+}) {
+  // ← Subscribes to context directly — re-renders instantly on check-in/out
+  const { isCheckedIn, isLocked, checkedInAt, elapsedMs } =
+    useAttendanceContext();
+
+  return (
+    <HeaderRight
+      isCheckOpen={checkOpen}
+      isProfileMenuOpen={isProfileMenuOpen}
+      onCheckInAndOut={onCheckInAndOut}
+      onLogout={onLogout}
+      onProfileClick={onProfileClick}
+      onToggleCheck={onToggleCheck}
+      onProfileMenuClick={onProfileMenuClick}
+      isCheckedIn={isCheckedIn}
+      isLocked={isLocked}
+      checkedInAt={checkedInAt}
+      elapsedMs={elapsedMs}
+    />
+  );
+}
+
+function LayoutInner() {
+  const att = useAttendanceContext();
   const router = useRouter();
   const pathname = usePathname();
   const signOut = useAuthStore((s) => s.signOut);
-
   const [checkOpen, setCheckOpen] = useState(false);
   const menu = useAdminHeaderMenu();
-
-  const [loadingAttendance, setLoadingAttendance] = useState(false);
-  const [attendance, setAttendance] = useState<AttendanceRow | null>(null);
-
-  const [checkedInAt, setCheckedInAt] = useState<Date | null>(null);
-  const [now, setNow] = useState(() => Date.now());
-
-  const [commentModalOpen, setCommentModalOpen] = useState(false);
-  const [commentText, setCommentText] = useState("");
-  const [commentMode, setCommentMode] = useState<"checkin" | "checkout" | null>(
-    null,
-  );
-
-  const status = getAttendanceStatus(attendance);
-  const isCheckedIn = status === "incomplete";
-  const elapsedMs = checkedInAt ? now - checkedInAt.getTime() : 0;
-
-  // Single disabled flag — drives every button/input in the UI
-  const isLocked = loadingAttendance;
-
-  useEffect(() => {
-    if (!checkedInAt) return;
-    const id = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(id);
-  }, [checkedInAt]);
-
-  const closeAllMenus = useCallback(() => {
-    setCheckOpen(false);
-    menu.close?.();
-  }, [menu]);
-
   const { setUserProfile } = useUsersStore();
 
   useEffect(() => {
@@ -74,44 +69,17 @@ export default function UsersTabsLayout() {
       const {
         data: { user },
       } = await supabase.auth.getUser();
-
       if (!user) return;
       const profile = await fetchCurrentUserProfleService(user.id);
       setUserProfile(profile);
     };
-
     loadCurrentUser();
   }, [setUserProfile]);
 
-  const fetchLatestAttendance = useCallback(async () => {
-    try {
-      setLoadingAttendance(true);
-
-      const { row, checkedInAt } = await fetchLatestAttendanceService();
-
-      setAttendance(row);
-      setCheckedInAt(checkedInAt);
-    } catch (err) {
-      Alert.alert("Attendance fetch failed", getErrorMessage(err));
-    } finally {
-      setLoadingAttendance(false);
-    }
-  }, []);
-  const checkIn = useCallback(async (comment?: string) => {
-    const row = await checkInService(comment);
-    setAttendance(row);
-    setCheckedInAt(parseDate(row.check_in_time));
-  }, []);
-  const checkOut = useCallback(async (comment?: string) => {
-    const row = await checkOutService(comment);
-    setAttendance(row);
-    setCheckedInAt(null);
-  }, []);
-
-  useEffect(() => {
-    getAttendanceRulesService();
-    fetchLatestAttendance();
-  }, [fetchLatestAttendance]);
+  const closeAllMenus = useCallback(() => {
+    setCheckOpen(false);
+    menu.close?.();
+  }, [menu]);
 
   const onLogout = async () => {
     try {
@@ -123,131 +91,39 @@ export default function UsersTabsLayout() {
     }
   };
 
-  const submitComment = useCallback(async () => {
-    const comment = commentText.trim();
-    if (!commentMode) return;
-    if (!comment) {
-      Alert.alert("Comment required", "Please enter a comment.");
-      return;
-    }
-    try {
-      setLoadingAttendance(true);
-      if (commentMode === "checkin") await checkIn(comment);
-      else await checkOut(comment);
-      setCommentModalOpen(false);
-      setCommentText("");
-      setCommentMode(null);
-      setCheckOpen(false);
-    } catch (err: unknown) {
-      Alert.alert("Action failed", getErrorMessage(err));
-      fetchLatestAttendance();
-    } finally {
-      setLoadingAttendance(false);
-    }
-  }, [commentText, commentMode, checkIn, checkOut, fetchLatestAttendance]);
-
-  const onToggleCheck = useCallback(async () => {
-    if (isLocked) return;
-
-    try {
-      const {
-        data: { user },
-        error: userErr,
-      } = await supabase.auth.getUser();
-      if (userErr) throw userErr;
-      if (!user) throw new Error("Not authenticated.");
-      const nowDate = new Date();
-
-      if (!isCheckedIn) {
-        const anyOpen = await getOpenAttendanceService(user.id);
-        if (anyOpen?.status === "incomplete") {
-          Alert.alert(
-            "Already checked in",
-            `You still have an open session from ${anyOpen.date}. Please check out first.`,
-          );
-          setCheckOpen(false);
-          return;
-        }
-
-        if (needsCheckInCommentNepal(attendanceRules)) {
-          setCommentMode("checkin");
-          setCommentText("");
-          setCommentModalOpen(true);
-          return;
-        }
-
-        setLoadingAttendance(true);
-        await checkIn();
-        setCheckOpen(false);
-        return;
-      }
-
-      if (needsCheckOutCommentNepal(attendanceRules)) {
-        setCommentMode("checkout");
-        setCommentText("");
-        setCommentModalOpen(true);
-        return;
-      }
-
-      setLoadingAttendance(true);
-      await checkOut();
-      setCheckOpen(false);
-    } catch (err: unknown) {
-      Alert.alert("Check action failed", getErrorMessage(err));
-      fetchLatestAttendance();
-    } finally {
-      setLoadingAttendance(false);
-    }
-  }, [
-    isLocked,
-    isCheckedIn,
-    checkIn,
-    checkOut,
-    fetchLatestAttendance,
-    attendanceRules,
-  ]);
-
-  const handleCheckInAndOut = () => {
-    if (isLocked) return;
+  const handleCheckInAndOut = useCallback(() => {
+    if (att.isLocked) return;
     menu.close?.();
     setCheckOpen((v) => !v);
-  };
+  }, [att.isLocked, menu]);
 
-  const handleProfileMenu = () => {
+  const handleProfileMenu = useCallback(() => {
     menu.close?.();
     router.push("/(users)/profile");
-  };
+  }, [menu, router]);
 
-  const handleProfileClick = () => {
-    if (isLocked) return;
+  const handleProfileClick = useCallback(() => {
+    if (att.isLocked) return;
     setCheckOpen(false);
     menu.toggle();
-  };
+  }, [att.isLocked, menu]);
 
-  const handleReasonModalClose = () => {
-    if (isLocked) return;
-    setCommentModalOpen(false);
-    setCommentText("");
-    setCommentMode(null);
-  };
-
-  const handleReasonModalCancel = () => {
-    setCommentModalOpen(false);
-    setCommentText("");
-    setCommentMode(null);
-  };
+  const handleToggleCheck = useCallback(async () => {
+    await att.onToggleCheck();
+    setCheckOpen(false);
+  }, [att]);
 
   return (
     <>
       <ReasonModel
-        commentModalOpen={commentModalOpen}
-        isLocked={isLocked}
-        onModalClose={handleReasonModalClose}
-        onSubmitComment={submitComment}
-        commentMode={commentMode ?? ""}
-        commentText={commentText}
-        onReasonModalCancel={handleReasonModalCancel}
-        setCommentText={setCommentText}
+        commentModalOpen={att.commentModalOpen}
+        isLocked={att.isLocked}
+        onModalClose={att.handleReasonModalClose}
+        onSubmitComment={att.submitComment}
+        commentMode={att.commentMode ?? ""}
+        commentText={att.commentText}
+        onReasonModalCancel={att.handleReasonModalCancel}
+        setCommentText={att.setCommentText}
       />
       <Tabs
         screenOptions={{
@@ -271,29 +147,42 @@ export default function UsersTabsLayout() {
             paddingBottom: 8,
           },
           headerShadowVisible: false,
-
+          // ← HeaderRightWrapper reads context itself, bypasses stale closure
           headerRight: () => (
-            <HeaderRight
-              isCheckOpen={checkOpen}
-              elapsedMs={elapsedMs}
-              isLocked={isLocked}
-              checkedInAt={checkedInAt}
-              isCheckedIn={isCheckedIn}
+            <HeaderRightWrapper
+              checkOpen={checkOpen}
               isProfileMenuOpen={menu.open}
               onCheckInAndOut={handleCheckInAndOut}
               onLogout={onLogout}
               onProfileClick={handleProfileClick}
-              onToggleCheck={onToggleCheck}
+              onToggleCheck={handleToggleCheck}
               onProfileMenuClick={handleProfileMenu}
             />
           ),
         }}
-        tabBar={(props) => <MyTabBar {...props} />}>
+        tabBar={(props) => <MyTabBar {...props} />}
+      >
         <Tabs.Screen name="dashboard" options={{ title: "Dashboard" }} />
         <Tabs.Screen name="leaves" options={{ title: "Leaves" }} />
         <Tabs.Screen name="profile/index" options={{ title: "Profile" }} />
         <Tabs.Screen name="more" options={{ title: "Settings" }} />
+        <Tabs.Screen
+          name="holidays"
+          options={{ title: "Holidays and Events" }}
+        />
+        <Tabs.Screen
+          name="activity-log"
+          options={{ title: "Recent Activity" }}
+        />
       </Tabs>
     </>
+  );
+}
+
+export default function UsersTabsLayout() {
+  return (
+    <AttendanceProvider>
+      <LayoutInner />
+    </AttendanceProvider>
   );
 }

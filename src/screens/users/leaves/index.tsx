@@ -1,3 +1,4 @@
+import LoadingIndicator from "@/src/components/LoadingIndicator";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { supabase } from "@/src/supabase/supabaseClient";
 import {
@@ -7,9 +8,15 @@ import {
 } from "@/src/types/userLeave";
 import { getLeaveDays } from "@/src/utils/leaveUtils";
 import { TW } from "@/theme/twStyles";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { Clock, Pencil } from "lucide-react-native";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -63,26 +70,48 @@ export default function LeavesScreen() {
   const user = useAuthStore((s) => s.user);
   const userId = user?.id;
   const router = useRouter();
+  const flatListRef = useRef<FlatList>(null);
+
+  const { tab } = useLocalSearchParams<{ tab?: FilterTab }>();
 
   const [loading, setLoading] = useState(true);
+  const [pageLoading, setPageLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [leaveTypes, setLeaveTypes] = useState<LeaveTypeRowIndex[]>([]);
   const [leaves, setLeaves] = useState<LeaveDetailsRow[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<FilterTab>("all");
+  const [activeTab, setActiveTab] = useState<FilterTab>(
+    tab === "pending" || tab === "approved" || tab === "rejected" ? tab : "all",
+  );
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Reset page on tab change
+  // Prevents loading indicator firing on the very first render
+  const isFirstMount = useRef(true);
+
+  // Reset page + scroll to top on tab change
   useEffect(() => {
     setCurrentPage(1);
+    flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
   }, [activeTab]);
+
+  // Show LoadingIndicator on page change (skip initial mount)
+  useEffect(() => {
+    if (isFirstMount.current) {
+      isFirstMount.current = false;
+      return;
+    }
+    setPageLoading(true);
+    flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+    const timer = setTimeout(() => setPageLoading(false), 350);
+    return () => clearTimeout(timer);
+  }, [currentPage]);
 
   const currentYearRange = useMemo(() => {
     const y = new Date().getFullYear();
     return { from: `${y}-01-01`, to: `${y}-12-31` };
   }, []);
 
-  // ── Fetch ─────────────────────────────────────────────────────
+  // ── Fetch ──────────────────────────────────────────────────────
   const load = useCallback(async () => {
     if (!userId) return;
     setError(null);
@@ -133,15 +162,10 @@ export default function LeavesScreen() {
     await load();
     setRefreshing(false);
   }, [load]);
-  // ─────────────────────────────────────────────────────────────
+  // ──────────────────────────────────────────────────────────────
 
   // ── Tab counts ────────────────────────────────────────────────
-  const tabCounts: {
-    all: number;
-    pending: number;
-    approved: number;
-    rejected: number;
-  } = useMemo(
+  const tabCounts = useMemo(
     () => ({
       all: leaves.length,
       pending: leaves.filter(
@@ -163,7 +187,7 @@ export default function LeavesScreen() {
     { key: "approved", label: "Approved" },
     { key: "rejected", label: "Rejected" },
   ];
-  // ─────────────────────────────────────────────────────────────
+  // ──────────────────────────────────────────────────────────────
 
   // ── Stats per leave type ──────────────────────────────────────
   const stats: LeaveTypeStats[] = useMemo(() => {
@@ -196,7 +220,7 @@ export default function LeavesScreen() {
       };
     });
   }, [leaveTypes, leaves]);
-  // ─────────────────────────────────────────────────────────────
+  // ──────────────────────────────────────────────────────────────
 
   // ── Filtered + paginated list ─────────────────────────────────
   const filteredLeaves = useMemo(() => {
@@ -232,14 +256,14 @@ export default function LeavesScreen() {
       currentPage + 2,
     ];
   };
-  // ─────────────────────────────────────────────────────────────
+  // ──────────────────────────────────────────────────────────────
 
   // ── Leave type name lookup ────────────────────────────────────
   const leaveTypeName = useCallback(
     (id: number | null) => leaveTypes.find((t) => t.id === id)?.name ?? "Leave",
     [leaveTypes],
   );
-  // ─────────────────────────────────────────────────────────────
+  // ──────────────────────────────────────────────────────────────
 
   if (!userId) {
     return (
@@ -258,10 +282,96 @@ export default function LeavesScreen() {
     );
   }
 
+  // ── Pagination footer ──────────────────────────────────────────
+  const PaginationFooter =
+    filteredLeaves.length > 0 ? (
+      <View style={{ paddingTop: 8, paddingBottom: 16 }}>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+          {/* Prev */}
+          <Pressable
+            onPress={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            disabled={currentPage === 1 || pageLoading}
+            style={({ pressed }) => ({
+              flex: 1,
+              height: 40,
+              borderRadius: 10,
+              borderWidth: 1,
+              borderColor: "#E2E8F0",
+              alignItems: "center",
+              justifyContent: "center",
+              opacity:
+                currentPage === 1 || pageLoading ? 0.3 : pressed ? 0.7 : 1,
+            })}
+          >
+            <Text style={{ color: "#0F172A", fontWeight: "700", fontSize: 14 }}>
+              ‹ Prev
+            </Text>
+          </Pressable>
+
+          {/* Page numbers */}
+          {getPageNumbers().map((page) => (
+            <Pressable
+              key={page}
+              onPress={() => setCurrentPage(page)}
+              disabled={pageLoading}
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 10,
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor:
+                  currentPage === page ? TW.bgSecondary : "transparent",
+                borderWidth: currentPage === page ? 0 : 1,
+                borderColor: "#E2E8F0",
+                opacity: pageLoading ? 0.5 : 1,
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 14,
+                  fontWeight: "600",
+                  color: currentPage === page ? "#fff" : "#0F172A",
+                }}
+              >
+                {page}
+              </Text>
+            </Pressable>
+          ))}
+
+          {/* Next */}
+          <Pressable
+            onPress={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+            disabled={currentPage === totalPages || pageLoading}
+            style={({ pressed }) => ({
+              flex: 1,
+              height: 40,
+              borderRadius: 10,
+              borderWidth: 1,
+              borderColor: "#E2E8F0",
+              alignItems: "center",
+              justifyContent: "center",
+              opacity:
+                currentPage === totalPages || pageLoading
+                  ? 0.3
+                  : pressed
+                    ? 0.7
+                    : 1,
+            })}
+          >
+            <Text style={{ color: "#0F172A", fontWeight: "700", fontSize: 14 }}>
+              Next ›
+            </Text>
+          </Pressable>
+        </View>
+      </View>
+    ) : null;
+
   return (
     <View style={tw`flex-1 bg-white`}>
       <FlatList
-        data={pagedLeaves}
+        ref={flatListRef}
+        data={pageLoading ? [] : pagedLeaves}
         keyExtractor={(item) => item.id}
         refreshControl={
           <RefreshControl
@@ -272,24 +382,24 @@ export default function LeavesScreen() {
           />
         }
         contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 100 }}
-        // ── Header: balance + tabs ────────────────────────────
+        // ── Header: balance + tabs ─────────────────────────────
         ListHeaderComponent={
           <View style={tw`items-center justify-between mb-4`}>
-            <View>
-              {/* Balance label */}
-              <Text
-                style={{
-                  color: "#94A3B8",
-                  fontSize: 11,
-                  fontWeight: "700",
-                  letterSpacing: 1.2,
-                  marginTop: 20,
-                  marginBottom: 12,
-                }}
-              >
-                LEAVE BALANCE
-              </Text>
-            </View>
+            {/* Balance label */}
+            <Text
+              style={{
+                color: TW.bgSecondary,
+                fontSize: 16,
+                fontWeight: "500",
+                // letterSpacing: 1.2,
+                marginTop: 20,
+                marginBottom: 12,
+                alignSelf: "center",
+              }}
+            >
+              LEAVE BALANCE
+            </Text>
+
             {/* Balance cards */}
             <FlatList
               data={stats}
@@ -340,312 +450,208 @@ export default function LeavesScreen() {
             />
 
             {/* Filter tabs */}
-            <View style={tw`w-full`}>
-              <View
-                style={{
-                  flexDirection: "row",
-                  marginTop: 24,
-                  marginBottom: 16,
-                  borderBottomWidth: 1,
-                  borderBottomColor: "#E2E8F0",
-                }}
-              >
-                {TABS.map((tab) => {
-                  const isActive = activeTab === tab.key;
-                  const count = tabCounts[tab.key];
-                  return (
-                    <Pressable
-                      key={tab.key}
-                      onPress={() => setActiveTab(tab.key)}
-                      style={{
-                        marginRight: 24,
-                        paddingBottom: 12,
-                        borderBottomWidth: isActive ? 2 : 0,
-                        borderBottomColor: TW.bgSecondary,
-                      }}
-                    >
-                      <Text
-                        style={{
-                          fontSize: 14,
-                          fontWeight: isActive ? "700" : "500",
-                          color: isActive ? "#0F172A" : "#94A3B8",
-                        }}
-                      >
-                        {tab.label}
-                        {count > 0 && (
-                          <Text
-                            style={{
-                              fontSize: 13,
-                              fontWeight: "600",
-                              color: isActive ? TW.bgSecondary : "#CBD5E1",
-                            }}
-                          >
-                            {" "}
-                            ({count})
-                          </Text>
-                        )}
-                      </Text>
-                    </Pressable>
-                  );
-                })}
-              </View>
-            </View>
-          </View>
-        }
-        // ── Leave card ────────────────────────────────────────
-        renderItem={({ item }) => {
-          const status = String(item.status ?? "").toLowerCase();
-          const cfg = STATUS_CONFIG[status] ?? STATUS_CONFIG.pending;
-          const canEdit = status === "pending" && activeTab === "pending";
-          const typeName = leaveTypeName(
-            item.leave_type_id ? Number(item.leave_type_id) : null,
-          );
-
-          return (
             <View
               style={{
-                backgroundColor: "#FFFFFF",
-                borderRadius: 16,
-                padding: 16,
-                marginBottom: 12,
-                shadowColor: "#000",
-                shadowOpacity: 0.04,
-                shadowRadius: 8,
-                shadowOffset: { width: 0, height: 2 },
-                elevation: 2,
+                flexDirection: "row",
+                marginTop: 24,
+                marginBottom: 16,
+                borderBottomWidth: 1,
+                borderBottomColor: "#E2E8F0",
+                width: "100%",
               }}
             >
-              {/* Top row: name + badge + edit */}
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "flex-start",
-                  justifyContent: "space-between",
-                }}
-              >
-                {/* Left: type name + date range */}
-                <View style={{ flex: 1, marginRight: 12 }}>
-                  <Text
-                    style={{
-                      color: "#0F172A",
-                      fontSize: 16,
-                      fontWeight: "700",
-                    }}
-                    numberOfLines={1}
-                  >
-                    {typeName}
-                  </Text>
-                  <Text
-                    style={{
-                      color: "#64748B",
-                      fontSize: 13,
-                      marginTop: 3,
-                    }}
-                  >
-                    {formatRange(item.start_date, item.end_date)}
-                  </Text>
-                </View>
-
-                {/* Right: status badge + edit button */}
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    gap: 8,
-                  }}
-                >
-                  <View
-                    style={{
-                      backgroundColor: cfg.bg,
-                      borderRadius: 20,
-                      borderWidth: 1,
-                      borderColor: cfg.border,
-                      paddingHorizontal: 10,
-                      paddingVertical: 4,
-                    }}
-                  >
-                    <Text
-                      style={{
-                        color: cfg.color,
-                        fontSize: 11,
-                        fontWeight: "700",
-                        letterSpacing: 0.5,
-                      }}
-                    >
-                      {cfg.label}
-                    </Text>
-                  </View>
-
-                  {/* Edit only when pending */}
-                  {canEdit && (
-                    // <Pressable
-                    //   onPress={() =>
-                    //     router.push({
-                    //       pathname: "/(users)/leaves/edit",
-                    //       params: { leaveId: item.id },
-                    //     })
-                    //   }
-                    //   style={({ pressed }) => ({
-                    //     width: 32,
-                    //     height: 32,
-                    //     borderRadius: 16,
-                    //     backgroundColor: "#F1F5F9",
-                    //     alignItems: "center",
-                    //     justifyContent: "center",
-                    //     opacity: pressed ? 0.7 : 1,
-                    //   })}
-                    // >
-                    //   <Edit2 size={14} color="#64748B" strokeWidth={2} />
-                    // </Pressable>
-
-                    <Pressable
-                      onPress={() =>
-                        router.push({
-                          pathname: "/(users)/leaves/edit",
-                          params: { leaveId: item.id },
-                        })
-                      }
-                      hitSlop={12}
-                      style={({ pressed }) => [
-                        tw`w-10 h-10 rounded-full items-center justify-center ${TW.bgAction}/90`,
-                        pressed && tw`opacity-70`,
-                      ]}
-                    >
-                      <Pencil size={18} color={TW.bgPrimary} />
-                    </Pressable>
-                  )}
-                </View>
-              </View>
-
-              {/* Divider */}
-              <View
-                style={{
-                  height: 1,
-                  backgroundColor: "#F1F5F9",
-                  marginVertical: 12,
-                }}
-              />
-
-              {/* Applied on */}
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  gap: 6,
-                }}
-              >
-                <Clock size={13} color="#94A3B8" strokeWidth={1.8} />
-                <Text style={{ color: "#94A3B8", fontSize: 12 }}>
-                  Applied on{" "}
-                  {item.created_at
-                    ? formatDate(item.created_at.split("T")[0])
-                    : "—"}
-                </Text>
-              </View>
-            </View>
-          );
-        }}
-        ListEmptyComponent={
-          <View style={tw`items-center justify-center py-16`}>
-            <Text style={{ color: "#CBD5E1", fontSize: 14 }}>
-              No {activeTab === "all" ? "" : activeTab} leaves found
-            </Text>
-          </View>
-        }
-        // ── Pagination ────────────────────────────────────────
-        ListFooterComponent={
-          filteredLeaves.length > 0 ? (
-            <View style={{ paddingTop: 8, paddingBottom: 16 }}>
-              <View
-                style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
-              >
-                {/* Prev */}
-                <Pressable
-                  onPress={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                  disabled={currentPage === 1}
-                  style={({ pressed }) => ({
-                    flex: 1,
-                    height: 40,
-                    borderRadius: 10,
-                    borderWidth: 1,
-                    borderColor: "#E2E8F0",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    opacity: currentPage === 1 ? 0.3 : pressed ? 0.7 : 1,
-                  })}
-                >
-                  <Text
-                    style={{
-                      color: "#0F172A",
-                      fontWeight: "700",
-                      fontSize: 14,
-                    }}
-                  >
-                    ‹ Prev
-                  </Text>
-                </Pressable>
-
-                {/* Page numbers */}
-                {getPageNumbers().map((page) => (
+              {TABS.map((tab) => {
+                const isActive = activeTab === tab.key;
+                const count = tabCounts[tab.key];
+                return (
                   <Pressable
-                    key={page}
-                    onPress={() => setCurrentPage(page)}
+                    key={tab.key}
+                    onPress={() => setActiveTab(tab.key)}
                     style={{
-                      width: 40,
-                      height: 40,
-                      borderRadius: 10,
-                      alignItems: "center",
-                      justifyContent: "center",
-                      backgroundColor:
-                        currentPage === page ? TW.bgSecondary : "transparent",
-                      borderWidth: currentPage === page ? 0 : 1,
-                      borderColor: "#E2E8F0",
+                      marginRight: 24,
+                      paddingBottom: 12,
+                      borderBottomWidth: isActive ? 2 : 0,
+                      borderBottomColor: TW.bgSecondary,
                     }}
                   >
                     <Text
                       style={{
                         fontSize: 14,
-                        fontWeight: "600",
-                        color: currentPage === page ? "#fff" : "#0F172A",
+                        fontWeight: isActive ? "700" : "500",
+                        color: isActive ? "#0F172A" : "#94A3B8",
                       }}
                     >
-                      {page}
+                      {tab.label}
+                      {count > 0 && (
+                        <Text
+                          style={{
+                            fontSize: 13,
+                            fontWeight: "600",
+                            color: isActive ? TW.bgSecondary : "#CBD5E1",
+                          }}
+                        >
+                          {" "}
+                          ({count})
+                        </Text>
+                      )}
                     </Text>
                   </Pressable>
-                ))}
+                );
+              })}
+            </View>
+          </View>
+        }
+        // ── Leave card ─────────────────────────────────────────
+        renderItem={
+          pageLoading
+            ? () => null
+            : ({ item }) => {
+                const status = String(item.status ?? "").toLowerCase();
+                const cfg = STATUS_CONFIG[status] ?? STATUS_CONFIG.pending;
+                const canEdit = status === "pending" && activeTab === "pending";
+                const typeName = leaveTypeName(
+                  item.leave_type_id ? Number(item.leave_type_id) : null,
+                );
 
-                {/* Next */}
-                <Pressable
-                  onPress={() =>
-                    setCurrentPage((p) => Math.min(totalPages, p + 1))
-                  }
-                  disabled={currentPage === totalPages}
-                  style={({ pressed }) => ({
-                    flex: 1,
-                    height: 40,
-                    borderRadius: 10,
-                    borderWidth: 1,
-                    borderColor: "#E2E8F0",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    opacity:
-                      currentPage === totalPages ? 0.3 : pressed ? 0.7 : 1,
-                  })}
-                >
-                  <Text
+                return (
+                  <View
                     style={{
-                      color: "#0F172A",
-                      fontWeight: "700",
-                      fontSize: 14,
+                      backgroundColor: "#FFFFFF",
+                      borderRadius: 16,
+                      padding: 16,
+                      marginBottom: 12,
+                      shadowColor: "#000",
+                      shadowOpacity: 0.04,
+                      shadowRadius: 8,
+                      shadowOffset: { width: 0, height: 2 },
+                      elevation: 2,
                     }}
                   >
-                    Next ›
-                  </Text>
-                </Pressable>
-              </View>
-            </View>
-          ) : null
+                    {/* Top row: name + badge + edit */}
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "flex-start",
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      {/* Left: type name + date range */}
+                      <View style={{ flex: 1, marginRight: 12 }}>
+                        <Text
+                          style={{
+                            color: "#0F172A",
+                            fontSize: 16,
+                            fontWeight: "700",
+                          }}
+                          numberOfLines={1}
+                        >
+                          {typeName}
+                        </Text>
+                        <Text
+                          style={{
+                            color: "#64748B",
+                            fontSize: 13,
+                            marginTop: 3,
+                          }}
+                        >
+                          {formatRange(item.start_date, item.end_date)}
+                        </Text>
+                      </View>
+
+                      {/* Right: status badge + edit button */}
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          alignItems: "center",
+                          gap: 8,
+                        }}
+                      >
+                        <View
+                          style={{
+                            backgroundColor: cfg.bg,
+                            borderRadius: 20,
+                            borderWidth: 1,
+                            borderColor: cfg.border,
+                            paddingHorizontal: 10,
+                            paddingVertical: 4,
+                          }}
+                        >
+                          <Text
+                            style={{
+                              color: cfg.color,
+                              fontSize: 11,
+                              fontWeight: "700",
+                              letterSpacing: 0.5,
+                            }}
+                          >
+                            {cfg.label}
+                          </Text>
+                        </View>
+
+                        {canEdit && (
+                          <Pressable
+                            onPress={() =>
+                              router.push({
+                                pathname: "/(users)/leaves/edit",
+                                params: { leaveId: item.id },
+                              })
+                            }
+                            hitSlop={12}
+                            style={({ pressed }) => [
+                              tw`w-10 h-10 rounded-full items-center justify-center ${TW.bgAction}/90`,
+                              pressed && tw`opacity-70`,
+                            ]}
+                          >
+                            <Pencil size={18} color={TW.bgPrimary} />
+                          </Pressable>
+                        )}
+                      </View>
+                    </View>
+
+                    {/* Divider */}
+                    <View
+                      style={{
+                        height: 1,
+                        backgroundColor: "#F1F5F9",
+                        marginVertical: 12,
+                      }}
+                    />
+
+                    {/* Applied on */}
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        gap: 6,
+                      }}
+                    >
+                      <Clock size={13} color="#94A3B8" strokeWidth={1.8} />
+                      <Text style={{ color: "#94A3B8", fontSize: 12 }}>
+                        Applied on{" "}
+                        {item.created_at
+                          ? formatDate(item.created_at.split("T")[0])
+                          : "—"}
+                      </Text>
+                    </View>
+                  </View>
+                );
+              }
         }
+        // ── Empty / page loading state ─────────────────────────
+        ListEmptyComponent={
+          pageLoading ? (
+            <View style={{ paddingVertical: 60, alignItems: "center" }}>
+              <LoadingIndicator />
+            </View>
+          ) : (
+            <View style={tw`items-center justify-center py-16`}>
+              <Text style={{ color: "#CBD5E1", fontSize: 14 }}>
+                No {activeTab === "all" ? "" : activeTab} leaves found
+              </Text>
+            </View>
+          )
+        }
+        ListFooterComponent={PaginationFooter}
       />
 
       {/* ── FAB ── */}
