@@ -51,7 +51,7 @@ export function SharedCalendar({
           >
             <Text
               style={{
-                fontSize: 13,
+                fontSize: 12,
                 color: "#94a3b8",
                 // opacity: 0.4,
               }}

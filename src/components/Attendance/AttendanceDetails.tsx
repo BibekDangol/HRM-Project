@@ -184,7 +184,7 @@ const StatusBadge = ({ status }: { status: string }) => {
       <View
         style={[tw`w-1.5 h-1.5 rounded-full`, { backgroundColor: cfg.dot }]}
       />
-      <Text style={tw`text-xs font-medium ${cfg.text}`}>{cfg.label}</Text>
+      <Text style={tw`text-sm font-medium ${cfg.text}`}>{cfg.label}</Text>
     </View>
   );
 };
@@ -247,7 +247,6 @@ const AttendanceView: React.FC<Props> = ({ userId, name }) => {
 
   const [showMonthPicker, setShowMonthPicker] = useState(false);
 
-  // ── Year state for the modal stepper ──
   const now = new Date();
   const [pickerYear, setPickerYear] = useState(
     Math.min(now.getFullYear(), MAX_YEAR),
@@ -260,13 +259,11 @@ const AttendanceView: React.FC<Props> = ({ userId, name }) => {
     year: "numeric",
   });
 
-  // ── Filter records to selected month ──
   const filteredEntries = Object.entries(groupedByDate).filter(([day]) =>
     day.startsWith(currentMonth),
   );
   const filteredByMonth = Object.fromEntries(filteredEntries);
 
-  // ── Recompute summary for selected month ──
   const monthSummary = filteredEntries.reduce(
     (acc, [, records]) => {
       const status = records[0]?.status ?? "";
@@ -293,285 +290,305 @@ const AttendanceView: React.FC<Props> = ({ userId, name }) => {
   const canDecYear = pickerYear > MIN_YEAR;
 
   return (
-    <ScrollView
-      style={tw`flex-1 bg-white`}
-      contentContainerStyle={tw`p-4 pb-14`}
-      showsVerticalScrollIndicator={false}
-    >
-      <BackButton />
-      <View
-        style={tw`bg-white rounded-2xl overflow-hidden border border-slate-200`}
-      >
-        {/* ── Header ─────────────────────────────────────────────────────── */}
-        <View style={[tw`px-5 pt-6 pb-5`, { backgroundColor: TW.bgSecondary }]}>
-          {/* Title + meta */}
-          <View style={tw`flex-row justify-between items-start mb-4`}>
-            <View style={tw`flex-1 pr-4`}>
-              <Text
-                style={[
-                  tw`text-xs mb-1`,
-                  { color: TW.BRAND_MUTED, letterSpacing: 1.2 },
-                ]}
-              >
-                ATTENDANCE REPORT
-              </Text>
-              <Text style={[tw`text-2xl font-bold`, { color: "#fff" }]}>
-                {currentMonth}
-              </Text>
-            </View>
-            <View style={tw`items-end`}>
-              {[
-                ["Generated", reportDate],
-                ["Status", "Final"],
-              ].map(([lbl, val]) => (
-                <Text
-                  key={lbl}
-                  style={[tw`text-xs mb-0.5`, { color: TW.BRAND_MUTED }]}
-                >
-                  {lbl}:{" "}
-                  <Text style={{ color: TW.BRAND_LIGHT, fontWeight: "500" }}>
-                    {val}
-                  </Text>
-                </Text>
-              ))}
-            </View>
-          </View>
-
-          {/* Employee pill */}
-          <View
-            style={[
-              tw`self-start flex-row items-center px-3 py-1.5 rounded-full mb-5`,
-              {
-                backgroundColor: "rgba(255,255,255,0.1)",
-                borderWidth: 1,
-                borderColor: "rgba(255,255,255,0.15)",
-              },
-            ]}
-          >
-            <Text
-              style={{ color: TW.BRAND_LIGHT, fontSize: 13, fontWeight: "600" }}
-            >
-              {name}
-            </Text>
-          </View>
-
-          {/* Action buttons */}
-          <View style={tw`flex-row gap-2`}>
-            <Pressable
-              onPress={() => setShowMonthPicker(true)}
-              style={[
-                tw`flex-1 flex-row items-center justify-center gap-1.5 py-2.5 rounded-xl`,
-                {
-                  backgroundColor: "rgba(255,255,255,0.1)",
-                  borderWidth: 1,
-                  borderColor: "rgba(255,255,255,0.18)",
-                },
-              ]}
-            >
-              <Calendar size={13} color={TW.BRAND_LIGHT} />
-              <Text
-                style={{
-                  color: TW.BRAND_LIGHT,
-                  fontSize: 12,
-                  fontWeight: "500",
-                }}
-              >
-                Change Month
-              </Text>
-            </Pressable>
-
-            <Pressable
-              onPress={handleDownload}
-              style={[
-                tw`flex-1 flex-row items-center justify-center gap-1.5 py-2.5 rounded-xl`,
-                {
-                  backgroundColor: "rgba(255,255,255,0.1)",
-                  borderWidth: 1,
-                  borderColor: "rgba(255,255,255,0.18)",
-                },
-              ]}
-            >
-              <Download size={13} color={TW.BRAND_LIGHT} />
-              <Text
-                style={{
-                  color: TW.BRAND_LIGHT,
-                  fontSize: 12,
-                  fontWeight: "500",
-                }}
-              >
-                Export CSV
-              </Text>
-            </Pressable>
-          </View>
-        </View>
-
-        {/* ── Summary stats ───────────────────────────────────────────────── */}
-        <View style={tw`px-4 pt-5 pb-2`}>
-          <SectionLabel>Summary</SectionLabel>
-          <View style={tw`flex-row -mx-1 mb-2`}>
-            <StatBox
-              value={monthSummary.present}
-              label={"Days\nPresent"}
-              accent="#16704c"
-            />
-            <StatBox
-              value={monthSummary.absent}
-              label={"Days\nAbsent"}
-              accent="#b33030"
-            />
-            <StatBox
-              value={monthSummary.leave}
-              label={"On\nLeave"}
-              accent="#b56b00"
-            />
-          </View>
-        </View>
+    <View style={tw`flex-1 bg-white`}>
+      {/* ── Floating back button ── */}
+      <View style={tw`absolute top-4 left-4 z-50`}>
+        <BackButton />
       </View>
 
-      {/* ── Month Picker Modal (from HomeScreen) ────────────────────────── */}
-      <Modal
-        visible={showMonthPicker}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setShowMonthPicker(false)}
+      <ScrollView
+        style={tw`flex-1 bg-white`}
+        contentContainerStyle={tw`p-4 pb-14`}
+        showsVerticalScrollIndicator={false}
       >
-        <Pressable
-          style={tw`flex-1 bg-black/50 justify-end`}
-          onPress={() => setShowMonthPicker(false)}
-        >
-          <Pressable
-            style={[
-              tw`rounded-t-3xl px-5 pt-3 pb-8`,
-              { backgroundColor: "#ffffff" },
-            ]}
-            onPress={() => {}}
+        {/* Top padding so content clears the floating button */}
+        <View style={tw`pt-12`}>
+          <View
+            style={tw`bg-white rounded-2xl overflow-hidden border border-slate-200`}
           >
-            {/* Handle */}
-            <View style={tw`items-center mb-4`}>
-              <View
-                style={[
-                  tw`h-1 w-10 rounded-full`,
-                  { backgroundColor: TW.bgSecondary },
-                ]}
-              />
-            </View>
-
-            {/* Year stepper */}
-            <View style={tw`flex-row items-center justify-center gap-5 mb-5`}>
-              <Pressable
-                disabled={!canDecYear}
-                onPress={() => setPickerYear((y) => Math.max(MIN_YEAR, y - 1))}
-                style={({ pressed }) => [
-                  tw`h-9 w-9 rounded-full items-center justify-center border`,
-                  { borderColor: "#e2e8f0", backgroundColor: "#fff" },
-                  (!canDecYear || pressed) && { opacity: 0.4 },
-                ]}
-              >
-                <Text style={[tw`font-bold text-base`, { color: "#1F2937" }]}>
-                  ‹
-                </Text>
-              </Pressable>
-
-              <Text
-                style={[
-                  tw`text-lg font-bold w-16 text-center`,
-                  { color: "#1F2937" },
-                ]}
-              >
-                {pickerYear}
-              </Text>
-
-              <Pressable
-                disabled={!canIncYear}
-                onPress={() => setPickerYear((y) => Math.min(MAX_YEAR, y + 1))}
-                style={({ pressed }) => [
-                  tw`h-9 w-9 rounded-full items-center justify-center border`,
-                  { borderColor: "#e2e8f0", backgroundColor: "#fff" },
-                  (!canIncYear || pressed) && { opacity: 0.4 },
-                ]}
-              >
-                <Text style={[tw`font-bold text-base`, { color: "#1F2937" }]}>
-                  ›
-                </Text>
-              </Pressable>
-            </View>
-
-            {/* 3-col month grid */}
-            <View style={tw`flex-row flex-wrap gap-2 mb-5`}>
-              {MONTHS.map((m, idx) => {
-                const currentYear = now.getFullYear();
-                const currentMonthIdx = now.getMonth();
-
-                const isFuture =
-                  pickerYear === currentYear && idx > currentMonthIdx;
-
-                const monthKey = `${pickerYear}-${String(idx + 1).padStart(2, "0")}`;
-                const isActive = currentMonth === monthKey && !isFuture;
-
-                const isCurrent =
-                  idx === currentMonthIdx && pickerYear === currentYear;
-
-                return (
-                  <Pressable
-                    key={m}
-                    disabled={isFuture}
-                    onPress={() => {
-                      setSelectedMonth(monthKey);
-                      setShowMonthPicker(false);
-                    }}
-                    style={({ pressed }) => [
-                      tw`py-3 rounded-2xl items-center justify-center`,
-                      { width: "31%" },
-                      isActive
-                        ? { backgroundColor: TW.bgSecondary }
-                        : isCurrent
-                          ? {
-                              backgroundColor: "#FFFBEB",
-                              borderWidth: 1.5,
-                              borderColor: "#FFC107",
-                            }
-                          : isFuture
-                            ? { backgroundColor: "#F9FAFB" }
-                            : { backgroundColor: "#F3F4F6" },
-                      pressed && !isFuture && { opacity: 0.8 },
+            {/* ── Header ─────────────────────────────────────────────────── */}
+            <View
+              style={[tw`px-5 pt-6 pb-5`, { backgroundColor: TW.bgSecondary }]}
+            >
+              {/* Title + meta */}
+              <View style={tw`flex-row justify-between items-start mb-4`}>
+                <View style={tw`flex-1 pr-4`}>
+                  <Text
+                    style={[
+                      tw`text-xs mb-1`,
+                      { color: TW.BRAND_MUTED, letterSpacing: 1.2 },
                     ]}
                   >
+                    ATTENDANCE REPORT
+                  </Text>
+                  <Text style={[tw`text-2xl font-bold`, { color: "#fff" }]}>
+                    {currentMonth}
+                  </Text>
+                </View>
+                <View style={tw`items-end`}>
+                  {[
+                    ["Generated", reportDate],
+                    ["Status", "Final"],
+                  ].map(([lbl, val]) => (
                     <Text
-                      style={[
-                        tw`text-sm font-semibold text-center`,
-                        isActive
-                          ? { color: "#ffffff" }
-                          : isFuture
-                            ? { color: "#CBD5E1" }
-                            : { color: "#1F2937" },
-                      ]}
+                      key={lbl}
+                      style={[tw`text-xs mb-0.5`, { color: TW.BRAND_MUTED }]}
                     >
-                      {m}
+                      {lbl}:{" "}
+                      <Text
+                        style={{ color: TW.BRAND_LIGHT, fontWeight: "500" }}
+                      >
+                        {val}
+                      </Text>
                     </Text>
-                  </Pressable>
-                );
-              })}
+                  ))}
+                </View>
+              </View>
+
+              {/* Employee pill */}
+              <View
+                style={[
+                  tw`self-start flex-row items-center px-3 py-1.5 rounded-full mb-5`,
+                  {
+                    backgroundColor: "rgba(255,255,255,0.1)",
+                    borderWidth: 1,
+                    borderColor: "rgba(255,255,255,0.15)",
+                  },
+                ]}
+              >
+                <Text
+                  style={{
+                    color: TW.BRAND_LIGHT,
+                    fontSize: 13,
+                    fontWeight: "600",
+                  }}
+                >
+                  {name}
+                </Text>
+              </View>
+
+              {/* Action buttons */}
+              <View style={tw`flex-row gap-2`}>
+                <Pressable
+                  onPress={() => setShowMonthPicker(true)}
+                  style={[
+                    tw`flex-1 flex-row items-center justify-center gap-1.5 py-2.5 rounded-xl`,
+                    {
+                      backgroundColor: "rgba(255,255,255,0.1)",
+                      borderWidth: 1,
+                      borderColor: "rgba(255,255,255,0.18)",
+                    },
+                  ]}
+                >
+                  <Calendar size={13} color={TW.BRAND_LIGHT} />
+                  <Text
+                    style={{
+                      color: TW.BRAND_LIGHT,
+                      fontSize: 12,
+                      fontWeight: "500",
+                    }}
+                  >
+                    Change Month
+                  </Text>
+                </Pressable>
+
+                <Pressable
+                  onPress={handleDownload}
+                  style={[
+                    tw`flex-1 flex-row items-center justify-center gap-1.5 py-2.5 rounded-xl`,
+                    {
+                      backgroundColor: "rgba(255,255,255,0.1)",
+                      borderWidth: 1,
+                      borderColor: "rgba(255,255,255,0.18)",
+                    },
+                  ]}
+                >
+                  <Download size={13} color={TW.BRAND_LIGHT} />
+                  <Text
+                    style={{
+                      color: TW.BRAND_LIGHT,
+                      fontSize: 12,
+                      fontWeight: "500",
+                    }}
+                  >
+                    Export CSV
+                  </Text>
+                </Pressable>
+              </View>
             </View>
 
-            {/* Done */}
+            {/* ── Summary stats ───────────────────────────────────────────── */}
+            <View style={tw`px-4 pt-5 pb-2`}>
+              <SectionLabel>Summary</SectionLabel>
+              <View style={tw`flex-row -mx-1 mb-2`}>
+                <StatBox
+                  value={monthSummary.present}
+                  label={"Days\nPresent"}
+                  accent="#16704c"
+                />
+                <StatBox
+                  value={monthSummary.absent}
+                  label={"Days\nAbsent"}
+                  accent="#b33030"
+                />
+                <StatBox
+                  value={monthSummary.leave}
+                  label={"On\nLeave"}
+                  accent="#b56b00"
+                />
+              </View>
+            </View>
+          </View>
+        </View>
+
+        {/* ── Month Picker Modal ───────────────────────────────────────────── */}
+        <Modal
+          visible={showMonthPicker}
+          transparent
+          animationType="slide"
+          onRequestClose={() => setShowMonthPicker(false)}
+        >
+          <Pressable
+            style={tw`flex-1 bg-black/50 justify-end`}
+            onPress={() => setShowMonthPicker(false)}
+          >
             <Pressable
-              onPress={() => setShowMonthPicker(false)}
-              style={({ pressed }) => [
-                tw`py-4 rounded-full items-center`,
-                { backgroundColor: TW.bgSecondary },
-                pressed && { opacity: 0.85 },
+              style={[
+                tw`rounded-t-3xl px-5 pt-3 pb-8`,
+                { backgroundColor: "#ffffff" },
               ]}
+              onPress={() => {}}
             >
-              <Text style={[tw`font-bold text-base`, { color: "#ffffff" }]}>
-                Done
-              </Text>
+              {/* Handle */}
+              <View style={tw`items-center mb-4`}>
+                <View
+                  style={[
+                    tw`h-1 w-10 rounded-full`,
+                    { backgroundColor: TW.bgSecondary },
+                  ]}
+                />
+              </View>
+
+              {/* Year stepper */}
+              <View style={tw`flex-row items-center justify-center gap-5 mb-5`}>
+                <Pressable
+                  disabled={!canDecYear}
+                  onPress={() =>
+                    setPickerYear((y) => Math.max(MIN_YEAR, y - 1))
+                  }
+                  style={({ pressed }) => [
+                    tw`h-9 w-9 rounded-full items-center justify-center border`,
+                    { borderColor: "#e2e8f0", backgroundColor: "#fff" },
+                    (!canDecYear || pressed) && { opacity: 0.4 },
+                  ]}
+                >
+                  <Text style={[tw`font-bold text-base`, { color: "#1F2937" }]}>
+                    ‹
+                  </Text>
+                </Pressable>
+
+                <Text
+                  style={[
+                    tw`text-lg font-bold w-16 text-center`,
+                    { color: "#1F2937" },
+                  ]}
+                >
+                  {pickerYear}
+                </Text>
+
+                <Pressable
+                  disabled={!canIncYear}
+                  onPress={() =>
+                    setPickerYear((y) => Math.min(MAX_YEAR, y + 1))
+                  }
+                  style={({ pressed }) => [
+                    tw`h-9 w-9 rounded-full items-center justify-center border`,
+                    { borderColor: "#e2e8f0", backgroundColor: "#fff" },
+                    (!canIncYear || pressed) && { opacity: 0.4 },
+                  ]}
+                >
+                  <Text style={[tw`font-bold text-base`, { color: "#1F2937" }]}>
+                    ›
+                  </Text>
+                </Pressable>
+              </View>
+
+              {/* 3-col month grid */}
+              <View style={tw`flex-row flex-wrap gap-2 mb-5`}>
+                {MONTHS.map((m, idx) => {
+                  const currentYear = now.getFullYear();
+                  const currentMonthIdx = now.getMonth();
+
+                  const isFuture =
+                    pickerYear === currentYear && idx > currentMonthIdx;
+
+                  const monthKey = `${pickerYear}-${String(idx + 1).padStart(2, "0")}`;
+                  const isActive = currentMonth === monthKey && !isFuture;
+
+                  const isCurrent =
+                    idx === currentMonthIdx && pickerYear === currentYear;
+
+                  return (
+                    <Pressable
+                      key={m}
+                      disabled={isFuture}
+                      onPress={() => {
+                        setSelectedMonth(monthKey);
+                        setShowMonthPicker(false);
+                      }}
+                      style={({ pressed }) => [
+                        tw`py-3 rounded-2xl items-center justify-center`,
+                        { width: "31%" },
+                        isActive
+                          ? { backgroundColor: TW.bgSecondary }
+                          : isCurrent
+                            ? {
+                                backgroundColor: "#FFFBEB",
+                                borderWidth: 1.5,
+                                borderColor: "#FFC107",
+                              }
+                            : isFuture
+                              ? { backgroundColor: "#F9FAFB" }
+                              : { backgroundColor: "#F3F4F6" },
+                        pressed && !isFuture && { opacity: 0.8 },
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          tw`text-sm font-semibold text-center`,
+                          isActive
+                            ? { color: "#ffffff" }
+                            : isFuture
+                              ? { color: "#CBD5E1" }
+                              : { color: "#1F2937" },
+                        ]}
+                      >
+                        {m}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+
+              {/* Done */}
+              <Pressable
+                onPress={() => setShowMonthPicker(false)}
+                style={({ pressed }) => [
+                  tw`py-4 rounded-full items-center`,
+                  { backgroundColor: TW.bgSecondary },
+                  pressed && { opacity: 0.85 },
+                ]}
+              >
+                <Text style={[tw`font-bold text-base`, { color: "#ffffff" }]}>
+                  Done
+                </Text>
+              </Pressable>
             </Pressable>
           </Pressable>
-        </Pressable>
-      </Modal>
-    </ScrollView>
+        </Modal>
+      </ScrollView>
+    </View>
   );
 };
 
 export default AttendanceView;
- 

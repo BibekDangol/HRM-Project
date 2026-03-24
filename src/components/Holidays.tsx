@@ -12,7 +12,6 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import tw from "twrnc";
-import { BackButton } from "./BackButton";
 
 type FilterType = "all" | "holiday" | "event";
 
@@ -49,32 +48,56 @@ const formatDay = (d: string) => {
   };
 };
 
-const CalendarRow = ({ item }: { item: CalendarItem }) => {
+const todayDate = new Date();
+todayDate.setHours(0, 0, 0, 0);
+
+const getItemStatus = (item: CalendarItem) => {
+  const start = new Date(item.start_date + "T00:00:00");
+  const end = item.end_date ? new Date(item.end_date + "T00:00:00") : start;
+  if (start <= todayDate && end >= todayDate) return "today";
+  if (start > todayDate) return "upcoming";
+  return "past";
+};
+
+const CalendarRow = ({
+  item,
+  isHighlighted,
+}: {
+  item: CalendarItem;
+  isHighlighted: boolean;
+}) => {
   const { day, month, weekday } = formatDay(item.start_date);
+  const status = getItemStatus(item);
+  const isToday = status === "today";
+  const isPast = status === "past";
 
   return (
     <View
       style={{
         flexDirection: "row",
         alignItems: "center",
-        backgroundColor: "#FFFFFF",
+        backgroundColor: isHighlighted ? "#E6F4F4" : "#FFFFFF",
         borderRadius: 16,
         marginBottom: 10,
         padding: 12,
+        borderWidth: 1,
+        borderColor: isHighlighted ? "#008080" : "#EAECEF",
         shadowColor: "#000",
-        shadowOpacity: 0.05,
+        shadowOpacity: isPast ? 0.02 : 0.05,
         shadowRadius: 8,
         shadowOffset: { width: 0, height: 2 },
-        elevation: 2,
+        elevation: isPast ? 0 : 2,
+        opacity: isPast ? 0.5 : 1,
       }}
     >
+      {/* Date block */}
       <View
         style={{
           width: 56,
           height: 56,
           borderRadius: 14,
-          backgroundColor: "#ffffff",
-          borderColor: "#94A3B8",
+          backgroundColor: isHighlighted ? "#ffffff" : "#F8FAFC",
+          borderColor: isHighlighted ? "#008080" : "#94A3B8",
           borderWidth: 1,
           alignItems: "center",
           justifyContent: "center",
@@ -94,7 +117,7 @@ const CalendarRow = ({ item }: { item: CalendarItem }) => {
         </Text>
         <Text
           style={{
-            color: "#1B4A5A",
+            color: isHighlighted ? "#008080" : "#1B4A5A",
             fontSize: 22,
             fontWeight: "800",
             lineHeight: 26,
@@ -102,12 +125,26 @@ const CalendarRow = ({ item }: { item: CalendarItem }) => {
         >
           {day}
         </Text>
-        <Text style={{ color: "#94A3B8", fontSize: 10, fontWeight: "500" }}>
+        <Text style={{ color: "#94A3B8", fontSize: 12, fontWeight: "500" }}>
           {weekday}
         </Text>
       </View>
 
+      {/* Content */}
       <View style={{ flex: 1 }}>
+        {isHighlighted && (
+          <Text
+            style={{
+              color: "#008080",
+              fontSize: 10,
+              fontWeight: "700",
+              letterSpacing: 0.6,
+              marginBottom: 2,
+            }}
+          >
+            {isToday ? "TODAY" : "UPCOMING"}
+          </Text>
+        )}
         <Text
           style={{ color: "#1B4A5A", fontSize: 15, fontWeight: "700" }}
           numberOfLines={1}
@@ -119,20 +156,27 @@ const CalendarRow = ({ item }: { item: CalendarItem }) => {
         </Text>
       </View>
 
+      {/* Type badge */}
       <View
         style={{
-          backgroundColor: "#F1F5F9",
+          backgroundColor: isHighlighted ? "#ffffff" : "#F1F5F9",
           borderRadius: 20,
           paddingHorizontal: 10,
           paddingVertical: 4,
           marginLeft: 8,
+          borderWidth: isHighlighted ? 1 : 0,
+          borderColor: "#008080",
         }}
       >
         <Text
           style={{
             fontSize: 11,
             fontWeight: "600",
-            color: item.type === "holiday" ? "#EF4444" : "#3B82F6",
+            color: isHighlighted
+              ? "#008080"
+              : item.type === "holiday"
+                ? "#EF4444"
+                : "#3B82F6",
           }}
         >
           {item.type === "holiday" ? "Holiday" : "Event"}
@@ -151,7 +195,7 @@ const EmptyState = ({ label }: { label: string }) => (
       alignItems: "center",
     }}
   >
-    <Text style={{ color: "#CBD5E1", fontSize: 13 }}>No {label} found</Text>
+    <Text style={{ color: "#CBD5E1", fontSize: 12 }}>No {label} found</Text>
   </View>
 );
 
@@ -165,8 +209,28 @@ export default function HolidaysEventsScreen() {
   const [filter, setFilter] = useState<FilterType>("all");
   const [filterModalOpen, setFilterModalOpen] = useState(false);
 
-  const filtered =
-    filter === "all" ? items : items.filter((i) => i.type === filter);
+  // Filter by type then sort descending
+  const filtered = (
+    filter === "all" ? items : items.filter((i) => i.type === filter)
+  )
+    .slice()
+    .sort(
+      (a, b) =>
+        new Date(b.start_date).getTime() - new Date(a.start_date).getTime(),
+    );
+
+  // Single item to highlight — today first, else nearest upcoming
+  const highlightId = (() => {
+    const todayItem = filtered.find((i) => getItemStatus(i) === "today");
+    if (todayItem) return todayItem.id;
+    const upcomingItem = [...filtered]
+      .sort(
+        (a, b) =>
+          new Date(a.start_date).getTime() - new Date(b.start_date).getTime(),
+      )
+      .find((i) => getItemStatus(i) === "upcoming");
+    return upcomingItem?.id ?? null;
+  })();
 
   const fetchItems = useCallback(async () => {
     const orgId = userProfile?.organization_id;
@@ -177,7 +241,7 @@ export default function HolidaysEventsScreen() {
         .from("admin_calendar")
         .select("id, title, type, color, start_date, end_date")
         .eq("organization_id", orgId)
-        .order("start_date", { ascending: true });
+        .order("start_date", { ascending: false });
       if (error) throw error;
       setItems((data ?? []) as CalendarItem[]);
     } catch (e) {
@@ -213,12 +277,11 @@ export default function HolidaysEventsScreen() {
   return (
     <>
       <ScrollView
-        style={tw`flex-1 bg-[#F8FAFC]`}
+        style={tw`flex-1 bg-white`}
         contentContainerStyle={{
           paddingHorizontal: 16,
           paddingTop: 16,
           paddingBottom: insets.bottom + 24,
-          backgroundColor: "white",
         }}
         refreshControl={
           <RefreshControl
@@ -238,14 +301,8 @@ export default function HolidaysEventsScreen() {
             marginBottom: 16,
           }}
         >
-          {/* Back button */}
-          <BackButton
-            color="#64748B"
-            backgroundColor="#F1F5F9"
-            style={{ marginLeft: 0 }}
-          />
+          {/* <BackButton floating onPress={() => router.back()} /> */}
 
-          {/* Count label (centered) */}
           <Text
             style={{
               color: "#64748B",
@@ -265,7 +322,6 @@ export default function HolidaysEventsScreen() {
                 : "events"}
           </Text>
 
-          {/* Filter icon */}
           <Pressable
             onPress={() => setFilterModalOpen(true)}
             style={({ pressed }) => ({
@@ -288,7 +344,13 @@ export default function HolidaysEventsScreen() {
         ) : filtered.length === 0 ? (
           <EmptyState label={emptyLabel} />
         ) : (
-          filtered.map((item) => <CalendarRow key={item.id} item={item} />)
+          filtered.map((item) => (
+            <CalendarRow
+              key={item.id}
+              item={item}
+              isHighlighted={item.id === highlightId}
+            />
+          ))
         )}
       </ScrollView>
 
@@ -370,7 +432,6 @@ export default function HolidaysEventsScreen() {
                   >
                     {opt.label}
                   </Text>
-
                   {isActive && (
                     <View
                       style={{

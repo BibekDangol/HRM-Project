@@ -51,7 +51,7 @@ export function MonthEventList({ items }: Props) {
               />
 
               <View style={tw`flex-1`}>
-                <Text style={tw`text-xs text-slate-400`}>{dateLabel}</Text>
+                <Text style={tw`text-sm text-slate-400`}>{dateLabel}</Text>
                 <Text style={tw`text-sm font-medium text-slate-700`}>
                   {item.label}
                 </Text>

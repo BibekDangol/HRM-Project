@@ -1,5 +1,15 @@
-import { Leave, LeaveStatus, updateLeaveStatus } from "@/src/services/leave.service";
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
+import {
+  Leave,
+  LeaveStatus,
+  updateLeaveStatus,
+} from "@/src/services/leave.service";
+import {
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
+} from "react-native";
 
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { useLeaveStore } from "@/src/store/useLeaveStore";
@@ -34,7 +44,9 @@ export default function LeaveDetailView({ leave, onStatusChange }: Props) {
 
   return (
     <ScrollView style={tw`flex-1 bg-white p-4`}>
-      <Text style={tw`text-lg font-bold mb-2`}>{leave.first_name} {leave.last_name}</Text>
+      <Text style={tw`text-lg font-bold mb-2`}>
+        {leave.first_name} {leave.last_name}
+      </Text>
       <Text style={tw`mb-2`}>Type: {leave.leave_type_name}</Text>
       <Text style={tw`mb-2`}>From: {leave.start_date}</Text>
       <Text style={tw`mb-2`}>To: {leave.end_date}</Text>
@@ -48,14 +60,18 @@ export default function LeaveDetailView({ leave, onStatusChange }: Props) {
             style={tw`flex-1 bg-red-500 py-3 rounded-xl`}
             onPress={() => handleStatusChange("rejected")}
           >
-            <Text style={tw`text-white text-center font-bold`}>Reject</Text>
+            <Text style={tw`text-white text-center font-bold text-sm`}>
+              Reject
+            </Text>
           </Pressable>
 
           <Pressable
             style={tw`flex-1 bg-green-600 py-3 rounded-xl`}
             onPress={() => handleStatusChange("approved")}
           >
-            <Text style={tw`text-white text-center font-bold`}>Approve</Text>
+            <Text style={tw`text-white text-center font-bold  text-sm`}>
+              Approve
+            </Text>
           </Pressable>
         </View>
       )}
