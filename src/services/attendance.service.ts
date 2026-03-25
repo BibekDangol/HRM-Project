@@ -26,13 +26,12 @@ export const fetchLatestAttendanceService = async (): Promise<{
   if (error) throw error;
   const row = (data as AttendanceRow | null) ?? null;
   const inAt = parseDate(row?.check_in_time);
-  const checkedInAt =
-    row?.status === "incomplete" && inAt ? inAt : null;
+  const checkedInAt = row?.status === "incomplete" && inAt ? inAt : null;
   return { row, checkedInAt };
 };
 
 export const getOpenAttendanceService = async (
-  userId: string
+  userId: string,
 ): Promise<AttendanceRow | null> => {
   const { data, error } = await supabase
     .from("attendance")
@@ -90,7 +89,7 @@ export const checkInService = async (comment?: string) => {
         check_in_lng: loc.lng,
         check_out_time: null,
       },
-      { onConflict: "user_id,date" }
+      { onConflict: "user_id,date" },
     )
     .select("*")
     .single();
@@ -135,7 +134,6 @@ export const checkOutService = async (comment?: string) => {
   return data as AttendanceRow;
 };
 
-
 export const getAttendanceRulesService = async () => {
   const { data, error } = await supabase
     .from("attendance_rules")
@@ -143,9 +141,8 @@ export const getAttendanceRulesService = async () => {
     .limit(1)
     .maybeSingle();
   if (error) throw error;
-  console.log("yo rules haru ho",data);
   if (!data) {
     throw new Error("Attendance rules not configured.");
   }
   return data;
-}
+};

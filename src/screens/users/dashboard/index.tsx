@@ -1,3 +1,14 @@
+import { formatElapsed, formatSinceTime } from "@/src/utils/attendanceHelper";
+import {
+  MAX_YEAR,
+  MIN_YEAR,
+  MONTHS,
+  getNepalMonthDateRangeYYYYMMDD,
+  getNepalMonthRangeUTCISO,
+  normalize,
+} from "@/src/utils/userDashboard";
+import { CalendarDays, CircleCheck, LogOut } from "lucide-react-native";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Alert,
   Modal,
@@ -7,34 +18,22 @@ import {
   Text,
   View,
 } from "react-native";
-import { CalendarDays, CircleCheck, LogOut } from "lucide-react-native";
-import {
-  MAX_YEAR,
-  MIN_YEAR,
-  MONTHS,
-  getNepalMonthDateRangeYYYYMMDD,
-  getNepalMonthRangeUTCISO,
-  normalize,
-} from "@/src/utils/userDashboard";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { formatElapsed, formatSinceTime } from "@/src/utils/attendanceHelper";
 
 import { ActivityLogSection } from "@/src/components/ActivityLog";
-import { AttendanceRow } from "@/src/types/user";
-import { CalendarItem } from "@/src/types/Calendar";
 import { HolidaysEventsSection } from "@/src/components/HolidaysEventsSection";
-import { ProfileData } from "@/src/types/profile.types";
-import { TW } from "@/theme/twStyles";
-import { router } from "expo-router";
-import { supabase } from "@/src/supabase/supabaseClient";
-import tw from "twrnc";
 import { useAttendanceContext } from "@/src/context/AttendanceContext";
 import { useAuthStore } from "@/src/store/useAuthStore";
+import { supabase } from "@/src/supabase/supabaseClient";
+import { CalendarItem } from "@/src/types/Calendar";
+import { ProfileData } from "@/src/types/profile.types";
+import { AttendanceRow } from "@/src/types/user";
+import { TW } from "@/theme/twStyles";
+import { router } from "expo-router";
+import tw from "twrnc";
 
 export default function HomeScreen() {
   const user = useAuthStore((s) => s.user);
   const att = useAttendanceContext();
-
   const now = new Date();
   const initialYear = Math.min(now.getFullYear(), MAX_YEAR);
 
@@ -101,7 +100,7 @@ export default function HomeScreen() {
           year,
           monthIndex,
         );
-
+        console.log("holidays", startDate);
         const tryDate = await supabase
           .from("attendance")
           .select("status, check_in_comment, date")

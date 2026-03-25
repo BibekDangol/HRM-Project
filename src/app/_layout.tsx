@@ -8,8 +8,7 @@ import { useAuthStore } from "../store/useAuthStore";
 import { supabase } from "../supabase/supabaseClient";
 
 export default function Layout() {
-  const { role, restoreSession, session } = useAuthStore();
-
+  const { restoreSession } = useAuthStore();
   useEffect(() => {
     const handleDeepLink = async (event: { url: string }) => {
       const url = event.url;
@@ -24,6 +23,10 @@ export default function Layout() {
           refresh_token: params.refresh_token,
         });
       }
+      console.log(
+        "recovery session found access token in layout",
+        params.access_token,
+      );
     };
     restoreSession();
     const subscription = Linking.addEventListener("url", handleDeepLink);
