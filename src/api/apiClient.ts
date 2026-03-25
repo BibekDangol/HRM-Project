@@ -1,5 +1,5 @@
-import axios from "axios";
 import { useAuthStore } from "@/src/store/useAuthStore";
+import axios from "axios";
 
 export const apiClient = axios.create({
   baseURL: "https://dibcpzqlaypincnthhnm.supabase.co/functions/v1",
@@ -16,7 +16,6 @@ apiClient.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-
     return config;
   },
   (error) => Promise.reject(error),

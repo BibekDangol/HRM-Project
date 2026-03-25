@@ -21,7 +21,7 @@ export default function ActivityLogPage() {
       <ScrollView
         contentContainerStyle={{
           paddingHorizontal: 16,
-          paddingTop: 64, // ← space so content doesn't hide under button
+          paddingTop: 64,
           paddingBottom: 40,
         }}
         showsVerticalScrollIndicator={false}

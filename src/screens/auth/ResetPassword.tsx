@@ -1,4 +1,3 @@
-import React, { useEffect, useState } from "react";
 import {
   Alert,
   KeyboardAvoidingView,
@@ -9,12 +8,13 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import React, { useEffect, useState } from "react";
 
-import { supabase } from "@/src/supabase/supabaseClient";
-import { TW } from "@/theme/twStyles";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { TW } from "@/theme/twStyles";
+import { supabase } from "@/src/supabase/supabaseClient";
 import tw from "twrnc";
+import { useRouter } from "expo-router";
 
 const ResetPassword = () => {
   const router = useRouter();
@@ -22,35 +22,30 @@ const ResetPassword = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [recoverySession, setRecoverySession] = useState<any>(null);
-
+  console.log("recoverySession", recoverySession);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
 
   // ✅ Listen for recovery session
   useEffect(() => {
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        if (event === "PASSWORD_RECOVERY" && session) {
-          setRecoverySession(session);
-        }
-      },
-    );
-
-    return () => listener.subscription.unsubscribe();
+    const loadSession = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      setRecoverySession(session?.access_token);
+    };
+    loadSession();
   }, []);
-
   const handleReset = async () => {
     if (!password || !confirmPassword) {
       Alert.alert("Error", "All fields are required");
       return;
     }
-
     if (password !== confirmPassword) {
       Alert.alert("Error", "Passwords do not match");
       return;
     }
-
     if (!recoverySession) {
       Alert.alert(
         "Error",
@@ -118,7 +113,7 @@ const ResetPassword = () => {
                 onPress={() => setShowPassword(!showPassword)}
                 style={tw`pr-3`}>
                 <MaterialCommunityIcons
-                  name={showPassword ? "eye-off" : "eye"}
+                  name={showPassword ? "eye-closed" : "eye"}
                   size={22}
                   color="#7e7e7e"
                 />
@@ -146,7 +141,7 @@ const ResetPassword = () => {
                 onPress={() => setShowConfirm(!showConfirm)}
                 style={tw`pr-3`}>
                 <MaterialCommunityIcons
-                  name={showConfirm ? "eye-off" : "eye"}
+                  name={showConfirm ? "eye-closed" : "eye"}
                   size={22}
                   color="#7e7e7e"
                 />

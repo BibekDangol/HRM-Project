@@ -1,7 +1,13 @@
 import { Session, User } from "@supabase/supabase-js";
+import {
+  getSessionWithProfile,
+  signIn,
+  signOut,
+  signUp,
+} from "../services/auth.services";
 
 import { create } from "zustand";
-import { supabase } from "../supabase/supabaseClient";
+import { forgotPasswordService } from "../services/password.services";
 
 type SignUpData = {
   email: string;
@@ -43,139 +49,56 @@ export const useAuthStore = create<AuthState>((set) => ({
     emailSent: false,
     error: null,
   },
-  signUp: async ({
-    email,
-    password,
-    firstName,
-    lastName,
-    organizationName,
-  }) => {
+  signUp: async (payload) => {
     set({ loading: true });
     try {
-      let { data: orgData, error: orgError } = await supabase
-        .from("organization")
-        .select("*")
-        .eq("name", organizationName)
-        .maybeSingle();
-      if (orgError) throw orgError;
-
-      let orgId: number;
-      if (orgData) {
-        orgId = orgData.id;
-      } else {
-        const { data: newOrg, error: newOrgError } = await supabase
-          .from("organization")
-          .insert({ name: organizationName })
-          .select()
-          .single();
-        if (newOrgError || !newOrg?.id)
-          throw newOrgError || new Error("Failed to create organization");
-        orgId = newOrg.id;
-      }
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email,
-        password,
-      });
-      if (authError || !authData?.user)
-        throw authError || new Error("Signup failed");
-      const userId = authData.user.id;
-      const { data: profile, error: profileError } = await supabase
-        .from("profiles")
-        .insert({
-          id: userId,
-          email: email,
-          first_name: firstName,
-          last_name: lastName,
-          organization_id: orgId,
-          role: "admin",
-          status: "active",
-        })
-        .select();
-      if (profileError) throw profileError;
-      console.log(profile[0]);
+      const data = await signUp(payload);
       set({
-        session: authData.session,
-        user: authData.user,
-        role: profile[0].role,
-        status: profile[0].status,
+        session: data.session,
+        user: data.user,
+        role: data.role,
+        status: data.status,
         loading: false,
       });
-      set({ loading: false });
     } catch (err: any) {
-      console.log("Signup error:", err);
+      console.log("signup error:", err.message);
       set({ loading: false });
       throw err;
     }
   },
   signIn: async (email, password) => {
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      if (error || !data.user)
-        return { error: error?.message || "Login failed" };
-
-      const userId = data.user.id;
-      const { data: profileData, error: profileError } = await supabase
-        .from("profiles")
-        .select("role, status")
-        .eq("id", userId)
-        .maybeSingle();
-      if (profileError || !profileData) {
-        return { error: "Failed to fetch user role" };
-      }
+      set({ loading: true });
+      const data = await signIn(email, password);
       set({
         session: data.session,
         user: data.user,
-        role: profileData?.role,
-        status: profileData.status,
+        role: data.role,
+        status: data.status,
         loading: false,
       });
-
-      return { role: profileData.role, status: profileData.status };
+      return { role: data.role, status: data.status };
     } catch (err: any) {
-      console.log("Login error:", err);
+      set({ loading: false });
       return { error: err.message };
     }
   },
   updateStatus: (status) => set({ status }),
   signOut: async () => {
     try {
-      await supabase.auth.signOut();
+      await signOut();
     } catch (err) {
       console.log("SignOut error:", err);
     } finally {
       set({ user: null, session: null, role: null, loading: false });
     }
   },
-  forgotPassword: async (email: string): Promise<ForgotPasswordResult> => {
+  forgotPassword: async (email): Promise<ForgotPasswordResult> => {
     set({
       forgotPasswordState: { loading: true, emailSent: false, error: null },
     });
-
     try {
-      const { error, data } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: __DEV__
-          ? "exp://192.168.40.108:8081/--/resetPassword"
-          : "myapp://resetPassword",
-      });
-      //to seprate server/--/from app.
-      console.log("forgot password errr", error);
-      console.log("forgot password data", data);
-
-      if (error) {
-        set({
-          forgotPasswordState: {
-            loading: false,
-            emailSent: false,
-            error: error.message,
-          },
-        });
-
-        return { error: error.message };
-      }
-
+      await forgotPasswordService(email);
       set({
         forgotPasswordState: {
           loading: false,
@@ -183,7 +106,6 @@ export const useAuthStore = create<AuthState>((set) => ({
           error: null,
         },
       });
-
       return { success: true };
     } catch (err: any) {
       set({
@@ -193,7 +115,6 @@ export const useAuthStore = create<AuthState>((set) => ({
           error: err.message,
         },
       });
-
       return { error: err.message };
     }
   },
@@ -205,27 +126,23 @@ export const useAuthStore = create<AuthState>((set) => ({
   restoreSession: async () => {
     try {
       set({ loading: true });
-      const { data, error } = await supabase.auth.getSession();
-      if (error || !data.session) {
-        set({ session: null, user: null, role: "user", loading: false });
+
+      const data = await getSessionWithProfile();
+
+      if (!data) {
+        set({ session: null, user: null, role: null, loading: false });
         return;
       }
-      const userId = data.session.user.id;
-      const { data: profile, error: profileError } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", userId)
-        .maybeSingle();
-      if (profileError) console.log("Profile fetch failed:", profileError);
+
       set({
         session: data.session,
-        user: data.session.user,
-        role: profile?.role ?? "user",
+        user: data.user,
+        role: data.role,
         loading: false,
       });
     } catch (err) {
       console.log("Restore session error:", err);
-      set({ session: null, user: null, role: "user", loading: false });
+      set({ session: null, user: null, role: null, loading: false });
     }
   },
 }));

@@ -4,6 +4,12 @@ import { apiClient } from "../api/apiClient";
 
 export type LeaveStatus = "pending" | "approved" | "rejected";
 
+export type LeaveType = {
+  id: number;
+  leave_limit: number;
+  name: string;
+};
+
 export type Leave = {
   id: string;
   user_id: string;
@@ -21,6 +27,7 @@ export type Leave = {
   action_taken_by: string;
   day_type: string;
   action_taken_by_name: string;
+  leave_types: LeaveType;
 };
 
 // Fetch all leave requests for an organization
