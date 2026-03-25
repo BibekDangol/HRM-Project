@@ -359,7 +359,7 @@ export default function HolidaysEventsScreen() {
       <Modal
         visible={filterModalOpen}
         transparent
-        animationType="slide"
+        animationType="none"
         onRequestClose={() => setFilterModalOpen(false)}
       >
         <Pressable

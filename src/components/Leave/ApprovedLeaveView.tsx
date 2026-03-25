@@ -12,7 +12,10 @@ export default function ApprovedLeaveView({ leave }: Props) {
     leave.days_count < 1 ? `Half Day (${leave.day_type})` : "Full Day";
 
   return (
-    <ScrollView style={tw`flex-1 bg-gray-100`}>
+    <ScrollView
+      style={tw`flex-1 bg-gray-100`}
+      showsVerticalScrollIndicator={false}
+    >
       <View style={tw`bg-white m-4 rounded-xl p-4 shadow`}>
         {/* Header */}
         <Text style={tw`text-lg font-bold text-gray-900 mb-1`}>

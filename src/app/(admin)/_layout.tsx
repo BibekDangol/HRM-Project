@@ -8,18 +8,30 @@ import { useAuthStore } from "@/src/store/useAuthStore";
 import { useUsersStore } from "@/src/store/useUsersStore";
 import { TW } from "@/theme/twStyles";
 import { Tabs, usePathname, useRouter } from "expo-router";
-import { ArrowLeft, User } from "lucide-react-native";
+import { ArrowLeft, LucideIcon, User } from "lucide-react-native";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Pressable, Text, View, StatusBar, Platform } from "react-native"; 
+import { Pressable, StatusBar, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+type AdminTabItem = {
+  name: string;
+  title: string;
+  icon?: LucideIcon;
+};
 
 export default function AdminLayout() {
   const router = useRouter();
   const pathname = usePathname();
   const menu = useAdminHeaderMenu();
+
   const { user, loading } = useAuthStore();
   const { userProfile, setUserProfile } = useUsersStore();
+
   const [checkOpen, setCheckOpen] = useState(false);
+  const [loadingAttendance, setLoadingAttendance] = useState(false);
+
+  const checkActionLockRef = useRef(false);
+
   const {
     width: screenWidth,
     height: screenHeight,
@@ -31,27 +43,38 @@ export default function AdminLayout() {
   const isLandscape = screenWidth > screenHeight;
   const buttonSize = isTablet ? 42 : isSmallPhone ? 32 : 36;
 
+  const typedAdminTabs = adminTabs as readonly AdminTabItem[];
+
   const fetchUserProfile = useCallback(async () => {
     if (!user?.id || userProfile) return;
-    const profile = await fetchCurrentUserProfleService(user?.id);
+
+    const profile = await fetchCurrentUserProfleService(user.id);
     setUserProfile(profile);
-  }, [user?.id, setUserProfile, userProfile]);
+  }, [user?.id, userProfile, setUserProfile]);
 
   useEffect(() => {
     fetchUserProfile();
   }, [fetchUserProfile, loading]);
 
-  const [loadingAttendance, setLoadingAttendance] = useState(false);
-  const checkActionLockRef = useRef(false);
-  const showBackButton = !adminTabs.some((tab) => pathname?.includes(tab.name));
+  const showBackButton = !typedAdminTabs.some((tab) =>
+    pathname?.includes(tab.name),
+  );
+
   const isLocked = loadingAttendance || checkActionLockRef.current;
+
+  const handleBack = () => {
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace("/(admin)/dashboard");
+    }
+  };
 
   return (
     <>
-      {/* ✅ StatusBar fix — forces white icons on your dark teal header */}
       <StatusBar
         barStyle="light-content"
-        backgroundColor={TW.bgSecondary} // Android: matches your teal header
+        backgroundColor={TW.bgSecondary}
         translucent={false}
       />
 
@@ -70,6 +93,7 @@ export default function AdminLayout() {
           tabBarStyle: {
             backgroundColor: "#ffffff",
           },
+
           headerStyle: {
             backgroundColor: TW.bgSecondary,
             borderBottomLeftRadius: 30,
@@ -80,7 +104,7 @@ export default function AdminLayout() {
           headerLeft: showBackButton
             ? () => (
                 <Pressable
-                  onPress={() => router.back()}
+                  onPress={handleBack}
                   style={{
                     marginLeft: 16,
                     height: 36,
@@ -98,7 +122,11 @@ export default function AdminLayout() {
 
           headerTitle: () => (
             <View
-              style={{ flexDirection: "row", alignItems: "center", gap: 10 }}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 10,
+              }}
             >
               <View
                 style={{
@@ -111,13 +139,22 @@ export default function AdminLayout() {
                 }}
               >
                 <Text
-                  style={{ color: "#ffffff", fontSize: 13, fontWeight: "700" }}
+                  style={{
+                    color: "#ffffff",
+                    fontSize: 13,
+                    fontWeight: "700",
+                  }}
                 >
                   {userProfile?.first_name?.charAt(0)?.toUpperCase() ?? "A"}
                 </Text>
               </View>
+
               <Text
-                style={{ color: "#ffffff", fontSize: 16, fontWeight: "700" }}
+                style={{
+                  color: "#ffffff",
+                  fontSize: 16,
+                  fontWeight: "700",
+                }}
               >
                 {userProfile?.first_name ?? "Admin"}
               </Text>
@@ -160,6 +197,7 @@ export default function AdminLayout() {
                       bottom: -1000,
                     }}
                   />
+
                   <View
                     style={{
                       position: "absolute",
@@ -185,11 +223,13 @@ export default function AdminLayout() {
         }}
         tabBar={(props) => <AdminTabBar {...props} />}
       >
-        {adminTabs.map((tab) => (
+        {typedAdminTabs.map((tab) => (
           <Tabs.Screen
             key={tab.name}
             name={tab.name}
-            options={{ title: tab.title }}
+            options={{
+              title: tab.title,
+            }}
           />
         ))}
       </Tabs>

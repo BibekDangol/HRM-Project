@@ -1,11 +1,15 @@
 import { ProfileData } from "@/src/types/profile.types";
 import { FormInput, FormOutput } from "@/src/types/user";
 import { TW } from "@/theme/twStyles";
+import BottomSheet, {
+  BottomSheetBackdrop,
+  BottomSheetView,
+} from "@gorhom/bottom-sheet";
 import { Lock, X } from "lucide-react-native";
+import { useCallback, useEffect, useRef } from "react";
 import { Control, Controller, FieldErrors } from "react-hook-form";
 import {
   KeyboardAvoidingView,
-  Modal,
   Platform,
   Pressable,
   Text,
@@ -32,42 +36,63 @@ export default function EditProfileModal({
   isSaving,
   onSubmit,
 }: Props) {
+  const bottomSheetRef = useRef<BottomSheet>(null);
+
+  // Open / close in sync with the visible prop
+  useEffect(() => {
+    if (visible) {
+      bottomSheetRef.current?.expand();
+    } else {
+      bottomSheetRef.current?.close();
+    }
+  }, [visible]);
+
+  const renderBackdrop = useCallback(
+    (props: any) => (
+      <BottomSheetBackdrop
+        {...props}
+        disappearsOnIndex={-1}
+        appearsOnIndex={0}
+        opacity={0.4}
+        pressBehavior="close"
+      />
+    ),
+    [],
+  );
+
   return (
-    <Modal visible={visible} transparent animationType="slide">
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-      >
-        <Pressable
-          style={{
-            flex: 1,
-            backgroundColor: "rgba(0,0,0,0.4)",
-            justifyContent: "flex-end",
-          }}
-          onPress={onClose}
+    <BottomSheet
+      ref={bottomSheetRef}
+      index={-1}
+      enableDynamicSizing
+      enablePanDownToClose
+      onClose={onClose}
+      backdropComponent={renderBackdrop}
+      handleIndicatorStyle={{
+        backgroundColor: TW.BORDER,
+        width: 36,
+        height: 4,
+      }}
+      backgroundStyle={{
+        backgroundColor: "#ffffff",
+        borderTopLeftRadius: 26,
+        borderTopRightRadius: 26,
+      }}
+      keyboardBehavior="interactive"
+      keyboardBlurBehavior="restore"
+    >
+      <BottomSheetView>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
-          <Pressable
-            onPress={() => {}}
+          <View
             style={{
-              backgroundColor: "#ffffff",
-              borderTopLeftRadius: 26,
-              borderTopRightRadius: 26,
               paddingHorizontal: 20,
-              paddingTop: 14,
+              paddingTop: 6,
               paddingBottom: Platform.OS === "ios" ? 44 : 32,
             }}
           >
-            <View style={{ alignItems: "center", marginBottom: 18 }}>
-              <View
-                style={{
-                  width: 36,
-                  height: 4,
-                  borderRadius: 2,
-                  backgroundColor: TW.BORDER,
-                }}
-              />
-            </View>
-
+            {/* Header */}
             <View
               style={{
                 flexDirection: "row",
@@ -104,6 +129,7 @@ export default function EditProfileModal({
               </Pressable>
             </View>
 
+            {/* First Name */}
             <Controller
               control={control}
               name="firstName"
@@ -119,6 +145,7 @@ export default function EditProfileModal({
               )}
             />
 
+            {/* Last Name */}
             <Controller
               control={control}
               name="lastName"
@@ -134,6 +161,7 @@ export default function EditProfileModal({
               )}
             />
 
+            {/* Email — locked */}
             <Text
               style={{
                 fontSize: 11,
@@ -173,6 +201,7 @@ export default function EditProfileModal({
               </Text>
             </View>
 
+            {/* Actions */}
             <View style={{ flexDirection: "row", gap: 10 }}>
               <Pressable
                 onPress={onClose}
@@ -216,9 +245,9 @@ export default function EditProfileModal({
                 </Text>
               </Pressable>
             </View>
-          </Pressable>
-        </Pressable>
-      </KeyboardAvoidingView>
-    </Modal>
+          </View>
+        </KeyboardAvoidingView>
+      </BottomSheetView>
+    </BottomSheet>
   );
 }

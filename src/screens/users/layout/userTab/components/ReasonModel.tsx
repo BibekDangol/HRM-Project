@@ -1,3 +1,4 @@
+import React, { Dispatch, SetStateAction } from "react";
 import {
   KeyboardAvoidingView,
   Modal,
@@ -7,7 +8,6 @@ import {
   TextInput,
   View,
 } from "react-native";
-import React, { Dispatch, SetStateAction } from "react";
 
 import { TW } from "@/theme/twStyles";
 import tw from "twrnc";
@@ -41,22 +41,26 @@ const ReasonModel: React.FC<Props> = ({
     <Modal
       transparent
       visible={commentModalOpen}
-      animationType="slide"
-      onRequestClose={onModalClose}>
+      animationType="none"
+      onRequestClose={onModalClose}
+    >
       {/* Backdrop */}
       <Pressable
         style={tw`flex-1 bg-black/50 justify-end`}
-        onPress={onModalClose}>
+        onPress={onModalClose}
+      >
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={tw`w-full`}>
+          style={tw`w-full`}
+        >
           {/* Modal Content */}
           <Pressable
             onPress={(e) => e.stopPropagation()} // prevent closing when clicking inside
             style={[
               tw`rounded-t-3xl px-5 pt-4 pb-10`,
               { backgroundColor: TW.bgPrimary },
-            ]}>
+            ]}
+          >
             {/* Drag indicator */}
             <View style={tw`items-center mb-5`}>
               <View
@@ -69,7 +73,8 @@ const ReasonModel: React.FC<Props> = ({
 
             {/* Title */}
             <Text
-              style={[tw`text-xl font-bold mb-1`, { color: TW.bgSecondary }]}>
+              style={[tw`text-xl font-bold mb-1`, { color: TW.bgSecondary }]}
+            >
               {commentMode === "checkin" ? "Late Check-in" : "Early Check-out"}
             </Text>
 
@@ -111,9 +116,11 @@ const ReasonModel: React.FC<Props> = ({
                     backgroundColor: "transparent",
                     opacity: isLocked ? 0.4 : pressed ? 0.7 : 1,
                   },
-                ]}>
+                ]}
+              >
                 <Text
-                  style={[tw`font-bold text-sm`, { color: TW.bgSecondary }]}>
+                  style={[tw`font-bold text-sm`, { color: TW.bgSecondary }]}
+                >
                   Cancel
                 </Text>
               </Pressable>
@@ -130,7 +137,8 @@ const ReasonModel: React.FC<Props> = ({
                       : TW.bgSecondary,
                     opacity: pressed ? 0.85 : isSubmitDisabled ? 0.8 : 1,
                   },
-                ]}>
+                ]}
+              >
                 <Text style={[tw`font-bold text-sm`, { color: "#fff" }]}>
                   {isLocked ? "..." : "Submit"}
                 </Text>

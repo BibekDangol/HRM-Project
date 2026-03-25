@@ -33,12 +33,8 @@ export function SharedCalendar({
       if (!date) return null;
 
       const isPast = date.dateString < todayStr;
-
-      // ✅ Saturday = 6, Sunday = 0
       const dayOfWeek = new Date(date.dateString).getDay();
       const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-
-      // ✅ Grey out only past NON-weekend days — no tap
       if (isPast && !isWeekend) {
         return (
           <View
