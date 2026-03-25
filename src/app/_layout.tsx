@@ -2,12 +2,14 @@ import * as Linking from "expo-linking";
 
 import { Stack } from "expo-router";
 import { useEffect } from "react";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { useAuthStore } from "../store/useAuthStore";
 import { supabase } from "../supabase/supabaseClient";
 
 export default function Layout() {
   const { role, restoreSession, session } = useAuthStore();
+
   useEffect(() => {
     const handleDeepLink = async (event: { url: string }) => {
       const url = event.url;
@@ -30,9 +32,12 @@ export default function Layout() {
     });
     return () => subscription.remove();
   }, []);
+
   return (
-    <SafeAreaProvider>
-      <Stack screenOptions={{ headerShown: false }} />
-    </SafeAreaProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <Stack screenOptions={{ headerShown: false }} />
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }

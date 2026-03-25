@@ -41,7 +41,10 @@ export default function MoreScreen() {
 
   return (
     <View style={tw`flex-1 bg-white`}>
-      <ScrollView contentContainerStyle={tw`p-4`}>
+      <ScrollView
+        contentContainerStyle={tw`p-4`}
+        showsVerticalScrollIndicator={false}
+      >
         {menuItems.map((item, index) => {
           const Icon = item.icon;
 

@@ -40,11 +40,7 @@ export default function AdminTabBar({ state }: any) {
   const tabCount = adminTabs.length;
   const TAB_W = Math.floor((availableW - TRAY_PADDING * 2) / tabCount);
   const trayW = TAB_W * tabCount + TRAY_PADDING * 2;
-  // ─────────────────────────────────────────────────────────────────
 
-  // ── Fix: determine active tab index safely ────────────────────────
-  // state.index can point to a non-tab route (e.g. profile screen),
-  // which causes the pill to fly off to the right.
   const activeRouteName = state.routes[state.index]?.name;
   const activeTabIdx = adminTabs.findIndex(
     (tab) => tab.name === activeRouteName,

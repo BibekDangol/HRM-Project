@@ -6,14 +6,14 @@ import {
   Modal,
   Platform,
   Pressable,
-  ScrollView,
   Text,
   TextInput,
   View,
 } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import tw from "twrnc";
 
-import { BackButton } from "@/src/components/BackButton";
+import BackButton from "@/src/components/BackButton";
 import {
   buildPeriodMarks,
   isBeforeOrEqual,
@@ -24,7 +24,7 @@ import { LeaveTypeDropdown } from "@/src/components/userLeave/LeaveTypeDropdown"
 import { userLeaveSchema } from "@/src/schema/users/userLeaveApply.schema";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { supabase } from "@/src/supabase/supabaseClient";
-import { FormValues, LeaveTypeRow } from "@/src/types/userLeave";
+import { FormValues, LeaveTypeWithStats } from "@/src/types/userLeave";
 import { buildAdminMarks } from "@/src/utils/adminCalendar";
 import { diffDaysInclusive, firstParam } from "@/src/utils/leaveUtils";
 import { TW } from "@/theme/twStyles";
@@ -32,21 +32,37 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Check, X } from "lucide-react-native";
 import { Controller, useForm } from "react-hook-form";
 
+const SPACING = {
+  screenX: 20,
+  top: 10,
+  section: 16,
+  labelBottom: 8,
+  rowGap: 10,
+  smallGap: 6,
+  inputY: 12,
+  inputX: 14,
+  buttonY: 13,
+};
+
+const ERROR_TEXT = {
+  marginTop: 6,
+  fontSize: 12,
+  color: "#EF4444",
+  fontWeight: "500" as const,
+};
+
 export default function EditLeaveScreen() {
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
 
-  const params = useLocalSearchParams<{
-    leaveId?: string | string[];
-  }>();
-
+  const params = useLocalSearchParams<{ leaveId?: string | string[] }>();
   const leaveId = firstParam(params.leaveId);
 
   const [screenLoading, setScreenLoading] = useState(false);
   const [localStartDate, setLocalStartDate] = useState("");
   const [localEndDate, setLocalEndDate] = useState("");
   const [dateError, setDateError] = useState("");
-  const [leaveTypes, setLeaveTypes] = useState<LeaveTypeRow[]>([]);
+  const [leaveTypes, setLeaveTypes] = useState<LeaveTypeWithStats[]>([]);
   const [selectedLeaveType, setSelectedLeaveType] = useState<number | null>(
     null,
   );
@@ -66,11 +82,12 @@ export default function EditLeaveScreen() {
     setValue,
     watch,
     reset,
+    trigger,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(userLeaveSchema),
     defaultValues: { reason: "", isHalfDay: false, halfSession: "morning" },
-    mode: "onChange",
+    mode: "all",
   });
 
   const isHalfDay = watch("isHalfDay") ?? false;
@@ -109,7 +126,6 @@ export default function EditLeaveScreen() {
   };
 
   let markedDates: Record<string, any>;
-
   if (selectedStart && selectedEnd) {
     const start = isBeforeOrEqual(selectedStart, selectedEnd)
       ? selectedStart
@@ -177,29 +193,75 @@ export default function EditLeaveScreen() {
     }
   };
 
-  useEffect(() => {
-    (async () => {
-      try {
-        setLoadingTypes(true);
-        const { data, error } = await supabase
-          .from("leave_types")
-          .select("id,name,leave_limit")
-          .order("name", { ascending: true });
-        if (error) throw error;
-        setLeaveTypes(
-          (data ?? []).map((r) => ({
-            id: Number(r.id),
-            name: r.name ?? "",
-            leave_limit: Number(r.leave_limit ?? 0),
-          })),
-        );
-      } catch (e: any) {
-        Alert.alert("Error", e?.message ?? "Failed to load leave types.");
-      } finally {
-        setLoadingTypes(false);
+  const fetchLeaveTypes = async () => {
+    if (!user?.id) return;
+
+    try {
+      setLoadingTypes(true);
+
+      const { data: types, error: typesError } = await supabase
+        .from("leave_types")
+        .select("id,name,leave_limit")
+        .order("name", { ascending: true });
+
+      if (typesError) throw typesError;
+
+      const { data: usedData, error: usedError } = await supabase
+        .from("leaves")
+        .select("leave_type_id, days_count")
+        .eq("user_id", user.id)
+        .eq("status", "approved");
+
+      if (usedError) throw usedError;
+
+      const { data: pendingData, error: pendingError } = await supabase
+        .from("leaves")
+        .select("leave_type_id, days_count")
+        .eq("user_id", user.id)
+        .eq("status", "pending");
+
+      if (pendingError) throw pendingError;
+
+      const usedMap: Record<number, number> = {};
+      for (const row of usedData ?? []) {
+        const id = Number(row.leave_type_id);
+        usedMap[id] = (usedMap[id] ?? 0) + Number(row.days_count ?? 0);
       }
-    })();
-  }, []);
+
+      const pendingMap: Record<number, number> = {};
+      for (const row of pendingData ?? []) {
+        const id = Number(row.leave_type_id);
+        pendingMap[id] = (pendingMap[id] ?? 0) + Number(row.days_count ?? 0);
+      }
+
+      const withStats: LeaveTypeWithStats[] = (types ?? []).map((r) => {
+        const id = Number(r.id);
+        const limit = Number(r.leave_limit ?? 0);
+        const approvedUsed = usedMap[id] ?? 0;
+        const pending = pendingMap[id] ?? 0;
+        const remaining = Math.max(0, limit - approvedUsed);
+
+        return {
+          id,
+          name: r.name ?? "",
+          leave_limit: limit,
+          approvedUsed,
+          pending,
+          remaining,
+        };
+      });
+
+      setLeaveTypes(withStats);
+    } catch (e: any) {
+      Alert.alert("Error", e?.message ?? "Failed to load leave types.");
+    } finally {
+      setLoadingTypes(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchLeaveTypes();
+  }, [user?.id]);
 
   useEffect(() => {
     (async () => {
@@ -232,12 +294,10 @@ export default function EditLeaveScreen() {
 
         const start = data.start_date ?? "";
         const end = data.end_date ?? "";
-
         setLocalStartDate(start);
         setLocalEndDate(end);
         setSelectedStart(start);
         setSelectedEnd(end);
-
         setSelectedLeaveType(
           data.leave_type_id ? Number(data.leave_type_id) : null,
         );
@@ -260,37 +320,43 @@ export default function EditLeaveScreen() {
     })();
   }, [leaveId, user?.id]);
 
-  const handleLeaveTypeChange = (id: number) => {
+  const handleLeaveTypeChange = (id: number | null) => {
     setSelectedLeaveType(id);
-    setLeaveTypeError("");
+    if (id != null) setLeaveTypeError("");
+  };
+
+  const validateManualFields = (): boolean => {
+    let hasError = false;
+
+    if (selectedLeaveType == null) {
+      setLeaveTypeError("Leave type is required");
+      hasError = true;
+    } else {
+      setLeaveTypeError("");
+    }
+
+    if (!localStartDate || !localEndDate) {
+      setDateError("Start and end date are required");
+      hasError = true;
+    } else if (localStartDate > localEndDate) {
+      setDateError("End date must be after start date");
+      hasError = true;
+    } else {
+      setDateError("");
+    }
+
+    return hasError;
   };
 
   const onSubmit = async (values: FormValues) => {
-    if (selectedLeaveType == null) {
-      setLeaveTypeError("Leave type is required");
-      Alert.alert("Form Error", "Please select a leave type.");
-      return;
-    }
-    if (!localStartDate || !localEndDate) {
-      setDateError("Start and end date are required");
-      Alert.alert("Form Error", "Please pick start and end date.");
-      openCalendar();
-      return;
-    }
-    if (localStartDate > localEndDate) {
-      setDateError("End date must be after start date");
-      Alert.alert("Form Error", "End date must be after start date.");
-      return;
-    }
+    if (validateManualFields()) return;
+
     const daysCount = computedDaysCount;
     if (daysCount == null) {
-      Alert.alert(
-        "Form Error",
-        "Could not calculate days count. Please re-pick dates.",
-      );
-      openCalendar();
+      setDateError("Could not calculate days. Please re-pick dates.");
       return;
     }
+
     if (!user?.id) {
       Alert.alert("Not signed in", "Please sign in again.");
       return;
@@ -303,6 +369,7 @@ export default function EditLeaveScreen() {
 
     try {
       setSubmitting(true);
+
       const { error } = await supabase
         .from("leaves")
         .update({
@@ -319,6 +386,7 @@ export default function EditLeaveScreen() {
         .eq("user_id", user.id);
 
       if (error) throw error;
+
       Alert.alert("Success", "Leave updated successfully.");
       router.replace({
         pathname: "/(users)/leaves/(tabs)",
@@ -331,18 +399,28 @@ export default function EditLeaveScreen() {
     }
   };
 
+  const handleSavePress = async () => {
+    const manualHasError = validateManualFields();
+    await trigger();
+
+    if (!manualHasError) {
+      handleSubmit(onSubmit)();
+    }
+  };
+
   if (screenLoading) {
     return (
       <View style={tw`flex-1 bg-white items-center justify-center`}>
         <ActivityIndicator />
-        <Text style={tw`mt-2 text-slate-500`}>Loading...</Text>
+        <Text style={{ marginTop: 8, fontSize: 13, color: "#94A3B8" }}>
+          Loading...
+        </Text>
       </View>
     );
   }
 
   return (
     <>
-      {/* Calendar Modal */}
       <Modal
         visible={calendarVisible}
         animationType="slide"
@@ -363,12 +441,11 @@ export default function EditLeaveScreen() {
               backgroundColor: "#ffffff",
               borderTopLeftRadius: 28,
               borderTopRightRadius: 28,
-              paddingBottom: Platform.OS === "ios" ? 44 : 32,
+              paddingBottom: Platform.OS === "ios" ? 40 : 28,
             }}
           >
-            {/* Drag handle */}
             <View
-              style={{ alignItems: "center", paddingTop: 14, marginBottom: 4 }}
+              style={{ alignItems: "center", paddingTop: 12, marginBottom: 8 }}
             >
               <View
                 style={{
@@ -380,32 +457,45 @@ export default function EditLeaveScreen() {
               />
             </View>
 
-            {/* Header */}
             <View
               style={{
                 flexDirection: "row",
                 alignItems: "center",
                 justifyContent: "space-between",
                 paddingHorizontal: 20,
-                paddingVertical: 12,
+                paddingVertical: 10,
+                marginBottom: 8,
               }}
             >
-              <Text
-                style={{
-                  fontSize: 18,
-                  fontWeight: "700",
-                  color: TW.bgSecondary,
-                  letterSpacing: -0.3,
-                }}
-              >
-                Select Date
-              </Text>
+              <View>
+                <Text
+                  style={{
+                    fontSize: 17,
+                    fontWeight: "700",
+                    color: TW.bgSecondary,
+                  }}
+                >
+                  Select Date
+                </Text>
+                <Text
+                  style={{
+                    marginTop: 4,
+                    fontSize: 12,
+                    color: "#94A3B8",
+                  }}
+                >
+                  {selectedStart && !selectedEnd
+                    ? "Tap again to set end date"
+                    : "Tap once for start, again for end"}
+                </Text>
+              </View>
+
               <Pressable
                 onPress={() => setCalendarVisible(false)}
                 style={({ pressed }) => ({
-                  width: 32,
-                  height: 32,
-                  borderRadius: 16,
+                  width: 34,
+                  height: 34,
+                  borderRadius: 17,
                   backgroundColor: "#F1F5F9",
                   alignItems: "center",
                   justifyContent: "center",
@@ -416,21 +506,6 @@ export default function EditLeaveScreen() {
               </Pressable>
             </View>
 
-            {/* Subtitle */}
-            <Text
-              style={{
-                paddingHorizontal: 20,
-                marginBottom: 8,
-                color: "#94A3B8",
-                fontSize: 13,
-              }}
-            >
-              {selectedStart && !selectedEnd
-                ? "Tap again for end date"
-                : "Tap once for start date, tap again for end date"}
-            </Text>
-
-            {/* Calendar */}
             <SharedCalendar
               year={calYear}
               month={calMonth}
@@ -444,13 +519,12 @@ export default function EditLeaveScreen() {
               }}
             />
 
-            {/* Selected display */}
-            <View style={{ paddingHorizontal: 20, paddingTop: 12 }}>
+            <View style={{ paddingHorizontal: 20, paddingTop: 14 }}>
               <Text
                 style={{
-                  color: TW.bgSecondary,
+                  fontSize: 13,
                   fontWeight: "600",
-                  fontSize: 14,
+                  color: TW.bgSecondary,
                 }}
               >
                 Selected: {selectedStart || "-"}
@@ -462,40 +536,80 @@ export default function EditLeaveScreen() {
       </Modal>
 
       <View style={{ flex: 1, backgroundColor: "#ffffff" }}>
-        <ScrollView
+        <KeyboardAwareScrollView
+          enableOnAndroid
+          extraScrollHeight={24}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+          enableAutomaticScroll
           contentContainerStyle={{
-            paddingHorizontal: 20,
-            paddingTop: 16,
-            paddingBottom: 112,
+            paddingHorizontal: SPACING.screenX,
+            paddingTop: SPACING.top,
+            paddingBottom: 36,
           }}
         >
           <BackButton
             color={TW.bgSecondary}
             backgroundColor="rgba(27,74,90,0.08)"
-            style={{ marginBottom: 16 }}
-            onPress={() =>
-              router.replace({
-                pathname: "/(users)/leaves/(tabs)",
-                params: { tab: "pending" },
-              })
-            }
+            style={{ marginBottom: 18 }}
+            onPress={() => router.replace("/(users)/leaves/(tabs)")}
           />
 
-          <Text
-            style={{
-              fontSize: 20,
-              fontWeight: "700",
-              color: TW.bgSecondary,
-              marginBottom: 20,
-              letterSpacing: -0.3,
-            }}
-          >
-            Edit Leave Request
-          </Text>
+          <View style={{ marginBottom: 28 }}>
+            <Text
+              style={{
+                fontSize: 24,
+                fontWeight: "700",
+                color: TW.bgSecondary,
+              }}
+            >
+              Edit Leave Request
+            </Text>
+            <Text
+              style={{
+                marginTop: 6,
+                fontSize: 13,
+                color: "#94A3B8",
+              }}
+            >
+              Update the details of your pending leave
+            </Text>
+          </View>
 
-          {/* Date Fields */}
-          <View style={{ gap: 12 }}>
-            <View style={{ flexDirection: "row", gap: 12 }}>
+          <View style={{ marginBottom: SPACING.section }}>
+            <Text
+              style={[
+                tw`text-base font-semibold`,
+                { color: TW.bgSecondary, marginBottom: SPACING.labelBottom },
+              ]}
+            >
+              Leave Type
+            </Text>
+
+            <LeaveTypeDropdown
+              value={selectedLeaveType}
+              onChange={handleLeaveTypeChange}
+              leaveTypes={leaveTypes}
+              loading={loadingTypes}
+              onRefresh={fetchLeaveTypes}
+            />
+
+            {!!leaveTypeError && (
+              <Text style={ERROR_TEXT}>{leaveTypeError}</Text>
+            )}
+          </View>
+
+          <View>
+            <Text
+              style={[
+                tw`text-base font-semibold`,
+                { color: TW.bgSecondary, marginBottom: SPACING.labelBottom },
+              ]}
+            >
+              Duration
+            </Text>
+
+            <View style={{ flexDirection: "row", gap: SPACING.rowGap }}>
               <View style={{ flex: 1 }}>
                 <DateField
                   label="Start Date"
@@ -503,6 +617,7 @@ export default function EditLeaveScreen() {
                   onPress={openCalendar}
                 />
               </View>
+
               {!isHalfDay && (
                 <View style={{ flex: 1 }}>
                   <DateField
@@ -513,17 +628,11 @@ export default function EditLeaveScreen() {
                 </View>
               )}
             </View>
-            {!!dateError && (
-              <Text
-                style={{ fontSize: 13, color: "#EF4444", fontWeight: "500" }}
-              >
-                {dateError}
-              </Text>
-            )}
+
+            {!!dateError && <Text style={ERROR_TEXT}>{dateError}</Text>}
           </View>
 
-          {/* Half Day */}
-          <View style={{ marginTop: 8 }}>
+          <View style={{ marginBottom: SPACING.section }}>
             <Controller
               control={control}
               name="isHalfDay"
@@ -542,8 +651,10 @@ export default function EditLeaveScreen() {
                       });
                       return;
                     }
+
                     const next = !value;
                     onChange(next);
+
                     if (next) {
                       setValue("halfSession", "morning", {
                         shouldValidate: true,
@@ -554,17 +665,16 @@ export default function EditLeaveScreen() {
                   style={({ pressed }) => ({
                     flexDirection: "row",
                     alignItems: "center",
-                    gap: 12,
-                    paddingHorizontal: 16,
-                    paddingVertical: 12,
-                    borderRadius: 12,
+                    gap: 10,
+                    alignSelf: "flex-start",
                     opacity: pressed ? 0.85 : 1,
+                    marginBottom: value ? 14 : 0,
                   })}
                 >
                   <View
                     style={{
-                      width: 22,
-                      height: 22,
+                      width: 20,
+                      height: 20,
                       borderRadius: 6,
                       borderWidth: 2,
                       borderColor: value ? TW.bgSecondary : "#CBD5E1",
@@ -574,12 +684,13 @@ export default function EditLeaveScreen() {
                     }}
                   >
                     {value ? (
-                      <Check color="#ffffff" size={14} strokeWidth={3} />
+                      <Check color="#ffffff" size={12} strokeWidth={3} />
                     ) : null}
                   </View>
+
                   <Text
                     style={{
-                      fontSize: 15,
+                      fontSize: 13,
                       fontWeight: "600",
                       color: TW.bgSecondary,
                     }}
@@ -591,76 +702,53 @@ export default function EditLeaveScreen() {
             />
 
             {isHalfDay && (
-              <View style={{ marginTop: 12, paddingHorizontal: 4 }}>
+              <View>
                 <Text
-                  style={{
-                    fontSize: 13,
-                    fontWeight: "700",
-                    color: "#94A3B8",
-                    letterSpacing: 0.8,
-                    textTransform: "uppercase",
-                    marginBottom: 8,
-                  }}
+                  style={[
+                    tw`text-base font-semibold`,
+                    {
+                      color: TW.bgSecondary,
+                      marginBottom: SPACING.labelBottom,
+                    },
+                  ]}
                 >
                   Session
                 </Text>
+
                 <Controller
                   control={control}
                   name="halfSession"
                   render={({ field: { value, onChange } }) => (
                     <View style={{ flexDirection: "row", gap: 10 }}>
-                      <Pressable
-                        onPress={() => onChange("morning")}
-                        style={({ pressed }) => ({
-                          flex: 1,
-                          paddingVertical: 12,
-                          borderRadius: 12,
-                          borderWidth: 1.5,
-                          borderColor:
-                            value === "morning" ? TW.bgSecondary : "#E2E8F0",
-                          backgroundColor:
-                            value === "morning" ? TW.bgSecondary : "#ffffff",
-                          alignItems: "center",
-                          opacity: pressed ? 0.85 : 1,
-                        })}
-                      >
-                        <Text
-                          style={{
-                            fontSize: 14,
-                            fontWeight: "600",
-                            color:
-                              value === "morning" ? "#ffffff" : TW.bgSecondary,
-                          }}
+                      {(["morning", "evening"] as const).map((session) => (
+                        <Pressable
+                          key={session}
+                          onPress={() => onChange(session)}
+                          style={({ pressed }) => ({
+                            flex: 1,
+                            paddingVertical: 13,
+                            borderRadius: 12,
+                            borderWidth: 1.5,
+                            borderColor:
+                              value === session ? TW.bgSecondary : "#E2E8F0",
+                            backgroundColor:
+                              value === session ? TW.bgSecondary : "#ffffff",
+                            alignItems: "center",
+                            opacity: pressed ? 0.85 : 1,
+                          })}
                         >
-                          Morning
-                        </Text>
-                      </Pressable>
-                      <Pressable
-                        onPress={() => onChange("evening")}
-                        style={({ pressed }) => ({
-                          flex: 1,
-                          paddingVertical: 12,
-                          borderRadius: 12,
-                          borderWidth: 1.5,
-                          borderColor:
-                            value === "evening" ? TW.bgSecondary : "#E2E8F0",
-                          backgroundColor:
-                            value === "evening" ? TW.bgSecondary : "#ffffff",
-                          alignItems: "center",
-                          opacity: pressed ? 0.85 : 1,
-                        })}
-                      >
-                        <Text
-                          style={{
-                            fontSize: 14,
-                            fontWeight: "600",
-                            color:
-                              value === "evening" ? "#ffffff" : TW.bgSecondary,
-                          }}
-                        >
-                          Evening
-                        </Text>
-                      </Pressable>
+                          <Text
+                            style={{
+                              fontSize: 12,
+                              fontWeight: "500",
+                              color:
+                                value === session ? "#ffffff" : TW.bgSecondary,
+                            }}
+                          >
+                            {session.charAt(0).toUpperCase() + session.slice(1)}
+                          </Text>
+                        </Pressable>
+                      ))}
                     </View>
                   )}
                 />
@@ -668,44 +756,16 @@ export default function EditLeaveScreen() {
             )}
           </View>
 
-          {/* Leave Type */}
-          <View style={{ marginTop: 20 }}>
-            <LeaveTypeDropdown
-              value={selectedLeaveType}
-              onChange={handleLeaveTypeChange}
-              leaveTypes={leaveTypes}
-              loading={loadingTypes}
-              onRefresh={async () => {}}
-              showStats={false}
-            />
-            {!!leaveTypeError && (
-              <Text
-                style={{
-                  marginTop: 6,
-                  color: "#EF4444",
-                  fontWeight: "600",
-                  fontSize: 13,
-                }}
-              >
-                {leaveTypeError}
-              </Text>
-            )}
-          </View>
-
-          {/* Reason */}
-          <View style={{ marginTop: 20 }}>
+          <View style={{ marginBottom: SPACING.section }}>
             <Text
-              style={{
-                fontSize: 13,
-                fontWeight: "700",
-                color: "#94A3B8",
-                letterSpacing: 0.8,
-                textTransform: "uppercase",
-                marginBottom: 8,
-              }}
+              style={[
+                tw`text-base font-semibold`,
+                { color: TW.bgSecondary, marginBottom: SPACING.labelBottom },
+              ]}
             >
               Reason / Description
             </Text>
+
             <Controller
               control={control}
               name="reason"
@@ -717,36 +777,29 @@ export default function EditLeaveScreen() {
                   placeholder="Enter reason for leave..."
                   placeholderTextColor="#CBD5E1"
                   multiline
+                  textAlignVertical="top"
                   style={{
-                    paddingHorizontal: 16,
-                    paddingVertical: 14,
-                    borderRadius: 14,
+                    paddingHorizontal: SPACING.inputX,
+                    paddingVertical: SPACING.inputY,
+                    borderRadius: 12,
                     borderWidth: 1.5,
-                    borderColor: "#E2E8F0",
+                    borderColor: errors.reason ? "#EF4444" : "#E2E8F0",
                     color: TW.bgSecondary,
-                    fontSize: 15,
-                    minHeight: 96,
-                    textAlignVertical: "top",
+                    fontSize: 14,
+                    lineHeight: 22,
+                    minHeight: 90,
+                    backgroundColor: "#ffffff",
                   }}
                 />
               )}
             />
+
             {!!errors.reason?.message && (
-              <Text
-                style={{
-                  marginTop: 6,
-                  color: "#EF4444",
-                  fontWeight: "600",
-                  fontSize: 13,
-                }}
-              >
-                {errors.reason.message}
-              </Text>
+              <Text style={ERROR_TEXT}>{errors.reason.message}</Text>
             )}
           </View>
 
-          {/* Buttons */}
-          <View style={{ marginTop: 32, flexDirection: "row", gap: 12 }}>
+          <View style={{ marginTop: 4, flexDirection: "row", gap: 12 }}>
             <Pressable
               disabled={submitting}
               onPress={() =>
@@ -758,19 +811,19 @@ export default function EditLeaveScreen() {
               style={({ pressed }) => ({
                 flex: 1,
                 borderWidth: 1.5,
-                borderColor: "#6B7280",
+                borderColor: "#CBD5E1",
                 borderRadius: 14,
-                paddingVertical: 16,
+                paddingVertical: SPACING.buttonY,
                 alignItems: "center",
-                backgroundColor: "transparent",
+                backgroundColor: "#ffffff",
                 opacity: pressed || submitting ? 0.6 : 1,
               })}
             >
               <Text
                 style={{
-                  fontSize: 15,
+                  fontSize: 14,
                   fontWeight: "600",
-                  color: TW.bgSecondary,
+                  color: "#64748B",
                 }}
               >
                 Cancel
@@ -779,24 +832,28 @@ export default function EditLeaveScreen() {
 
             <Pressable
               disabled={submitting}
-              onPress={handleSubmit(onSubmit)}
+              onPress={handleSavePress}
               style={({ pressed }) => ({
                 flex: 1,
                 backgroundColor: TW.bgSecondary,
                 borderRadius: 14,
-                paddingVertical: 16,
+                paddingVertical: SPACING.buttonY,
                 alignItems: "center",
                 opacity: submitting ? 0.55 : pressed ? 0.8 : 1,
               })}
             >
               <Text
-                style={{ fontSize: 15, fontWeight: "700", color: "#ffffff" }}
+                style={{
+                  fontSize: 14,
+                  fontWeight: "700",
+                  color: "#ffffff",
+                }}
               >
                 {submitting ? "Saving..." : "Save Changes"}
               </Text>
             </Pressable>
           </View>
-        </ScrollView>
+        </KeyboardAwareScrollView>
       </View>
     </>
   );

@@ -1,3 +1,6 @@
+import { UserProfile } from "@/src/types/admin";
+import { TW } from "@/theme/twStyles";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import {
   KeyboardAvoidingView,
@@ -9,9 +12,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { UserProfile } from "@/src/types/admin";
-import { TW } from "@/theme/twStyles";
-import { zodResolver } from "@hookform/resolvers/zod";
 import tw from "twrnc";
 import { z } from "zod";
 
@@ -60,7 +60,7 @@ const AddUserModal = ({
   };
 
   return (
-    <Modal visible={visible} animationType="slide" transparent>
+    <Modal visible={visible} animationType="none" transparent>
       <View style={tw`flex-1 bg-black/40`}>
         <KeyboardAvoidingView
           style={tw`flex-1`}

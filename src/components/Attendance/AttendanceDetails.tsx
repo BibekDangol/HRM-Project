@@ -445,7 +445,7 @@ const AttendanceView: React.FC<Props> = ({ userId, name }) => {
         <Modal
           visible={showMonthPicker}
           transparent
-          animationType="slide"
+          animationType="none"
           onRequestClose={() => setShowMonthPicker(false)}
         >
           <Pressable

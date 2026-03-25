@@ -24,17 +24,14 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   Alert,
-  Keyboard,
-  KeyboardAvoidingView,
   Modal,
   Platform,
   Pressable,
-  ScrollView,
   Text,
   TextInput,
-  TouchableWithoutFeedback,
   View,
 } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 async function getOrganizationIdByUserId(userId: string) {
   const { data, error } = await supabase
@@ -42,9 +39,26 @@ async function getOrganizationIdByUserId(userId: string) {
     .select("organization_id")
     .eq("id", userId)
     .single();
+
   if (error) throw error;
   return data?.organization_id ?? null;
 }
+
+const SECTION_LABEL = {
+  fontSize: 11,
+  fontWeight: "700" as const,
+  color: "#94A3B8",
+  letterSpacing: 0.9,
+  textTransform: "uppercase" as const,
+  marginBottom: 8,
+};
+
+const ERROR_TEXT = {
+  marginTop: 5,
+  fontSize: 12,
+  color: "#EF4444",
+  fontWeight: "500" as const,
+};
 
 export default function ApplyLeaveScreen() {
   const router = useRouter();
@@ -67,7 +81,6 @@ export default function ApplyLeaveScreen() {
   const [calYear, setCalYear] = useState(new Date().getFullYear());
   const [calMonth, setCalMonth] = useState(new Date().getMonth() + 1);
 
-  // ✅ Store existing applied leave date ranges (approved + pending)
   const [appliedDateRanges, setAppliedDateRanges] = useState<
     { start: string; end: string }[]
   >([]);
@@ -76,11 +89,16 @@ export default function ApplyLeaveScreen() {
     control,
     handleSubmit,
     setValue,
+    trigger,
     watch,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(userLeaveSchema),
-    defaultValues: { reason: "", isHalfDay: false, halfSession: "morning" },
+    defaultValues: {
+      reason: "",
+      isHalfDay: false,
+      halfSession: "morning",
+    },
     mode: "onChange",
   });
 
@@ -92,7 +110,9 @@ export default function ApplyLeaveScreen() {
   }, [leaveTypes, selectedLeaveType]);
 
   useEffect(() => {
-    if (isHalfDay && localStartDate) setLocalEndDate(localStartDate);
+    if (isHalfDay && localStartDate) {
+      setLocalEndDate(localStartDate);
+    }
   }, [isHalfDay, localStartDate]);
 
   const computedDaysCount = useMemo(() => {
@@ -125,7 +145,7 @@ export default function ApplyLeaveScreen() {
           alignItems: "center",
           justifyContent: "center",
         },
-        text: { color: "#FFB300", fontWeight: "bold" },
+        text: { color: "#FFB300", fontWeight: "bold" as const },
       },
     },
   };
@@ -154,7 +174,7 @@ export default function ApplyLeaveScreen() {
             alignItems: "center",
             justifyContent: "center",
           },
-          text: { color: "#fff", fontWeight: "bold" },
+          text: { color: "#fff", fontWeight: "bold" as const },
         },
       },
     };
@@ -164,7 +184,6 @@ export default function ApplyLeaveScreen() {
 
   const markingType = selectedStart && selectedEnd ? "period" : "custom";
 
-  // ✅ Helper: check if a single date overlaps any existing applied leave
   const isDateAlreadyApplied = useCallback(
     (dateStr: string) => {
       return appliedDateRanges.some(
@@ -174,7 +193,6 @@ export default function ApplyLeaveScreen() {
     [appliedDateRanges],
   );
 
-  // ✅ Helper: check if a date range overlaps any existing applied leave
   const hasRangeOverlap = useCallback(
     (start: string, end: string) => {
       return appliedDateRanges.some(
@@ -187,7 +205,6 @@ export default function ApplyLeaveScreen() {
   const onDayPress = (day: { dateString: string }) => {
     const dateStr = day.dateString;
 
-    // ✅ Block already-applied dates
     if (isDateAlreadyApplied(dateStr)) {
       Alert.alert(
         "Already Applied",
@@ -209,7 +226,6 @@ export default function ApplyLeaveScreen() {
       ? dateStr
       : selectedStart;
 
-    // ✅ Block if the full selected range overlaps any existing leave
     if (hasRangeOverlap(finalStart, finalEnd)) {
       Alert.alert(
         "Overlap Detected",
@@ -236,6 +252,7 @@ export default function ApplyLeaveScreen() {
   const loadLeaveTypesWithStats = useCallback(async () => {
     try {
       if (!user?.id) return;
+
       setLoadingTypes(true);
 
       const { data: typeData, error: typeError } = await supabase
@@ -265,12 +282,12 @@ export default function ApplyLeaveScreen() {
 
       if (leavesError) throw leavesError;
 
-      // ✅ Extract applied date ranges (pending + approved only)
       const ranges = (leavesData ?? [])
         .filter((l: any) =>
           ["approved", "pending"].includes(String(l.status).toLowerCase()),
         )
         .map((l: any) => ({ start: l.start_date, end: l.end_date }));
+
       setAppliedDateRanges(ranges);
 
       const approvedByType = new Map<number, number>();
@@ -280,10 +297,12 @@ export default function ApplyLeaveScreen() {
         const typeId = Number(l.leave_type_id);
         const days = calcLeaveDays(l);
         const st = String(l.status ?? "").toLowerCase();
-        if (st === "approved")
+
+        if (st === "approved") {
           approvedByType.set(typeId, (approvedByType.get(typeId) ?? 0) + days);
-        else if (st === "pending")
+        } else if (st === "pending") {
           pendingByType.set(typeId, (pendingByType.get(typeId) ?? 0) + days);
+        }
       }
 
       const merged: LeaveTypeWithStats[] = baseTypes.map((t) => {
@@ -323,33 +342,37 @@ export default function ApplyLeaveScreen() {
     }
   }, [selectedType, computedDaysCount, localStartDate, localEndDate, setValue]);
 
-  const handleLeaveTypeChange = (id: number) => {
+  const handleLeaveTypeChange = (id: number | null) => {
     setSelectedLeaveType(id);
-    setLeaveTypeError("");
+    if (id != null) setLeaveTypeError("");
   };
 
-  const onInvalid = () =>
-    Alert.alert("Form Error", "Please fill all required fields.");
+  const validateManualFields = (): boolean => {
+    let hasError = false;
 
-  const onSubmit = async (values: FormValues) => {
     if (selectedLeaveType == null) {
       setLeaveTypeError("Leave type is required");
-      Alert.alert("Form Error", "Please select a leave type.");
-      return;
-    }
-    if (!localStartDate || !localEndDate) {
-      setDateError("Start and end date are required");
-      Alert.alert("Form Error", "Please pick start and end date.");
-      openCalendar();
-      return;
-    }
-    if (localStartDate > localEndDate) {
-      setDateError("End date must be after start date");
-      Alert.alert("Form Error", "End date must be after start date.");
-      return;
+      hasError = true;
+    } else {
+      setLeaveTypeError("");
     }
 
-    // ✅ Final overlap check before submitting (safety net)
+    if (!localStartDate || !localEndDate) {
+      setDateError("Start and end date are required");
+      hasError = true;
+    } else if (localStartDate > localEndDate) {
+      setDateError("End date must be after start date");
+      hasError = true;
+    } else {
+      setDateError("");
+    }
+
+    return hasError;
+  };
+
+  const onSubmit = async (values: FormValues) => {
+    if (validateManualFields()) return;
+
     if (hasRangeOverlap(localStartDate, localEndDate)) {
       Alert.alert(
         "Overlap Detected",
@@ -360,13 +383,10 @@ export default function ApplyLeaveScreen() {
 
     const daysCount = computedDaysCount;
     if (daysCount == null) {
-      Alert.alert(
-        "Form Error",
-        "Could not calculate days count. Please re-pick dates.",
-      );
-      openCalendar();
+      setDateError("Could not calculate days. Please re-pick dates.");
       return;
     }
+
     if (!user?.id) {
       Alert.alert("Not signed in", "Please sign in again.");
       return;
@@ -392,6 +412,7 @@ export default function ApplyLeaveScreen() {
 
     try {
       setSubmitting(true);
+
       const organizationId = await getOrganizationIdByUserId(user.id);
       if (!organizationId) {
         Alert.alert("Error", "Organization ID not found.");
@@ -414,6 +435,7 @@ export default function ApplyLeaveScreen() {
       ]);
 
       if (error) throw error;
+
       Alert.alert("Success", "Leave applied successfully.");
       router.replace("/(users)/leaves/(tabs)");
     } catch (e: any) {
@@ -423,12 +445,19 @@ export default function ApplyLeaveScreen() {
     }
   };
 
+  const handleSubmitPress = async () => {
+    const manualHasError = validateManualFields();
+    await trigger();
+    if (!manualHasError) {
+      handleSubmit(onSubmit)();
+    }
+  };
+
   return (
     <>
-      {/* ✅ Calendar Modal */}
       <Modal
         visible={calendarVisible}
-        animationType="slide"
+        animationType="none"
         transparent
         onRequestClose={() => setCalendarVisible(false)}
       >
@@ -449,7 +478,6 @@ export default function ApplyLeaveScreen() {
               paddingBottom: Platform.OS === "ios" ? 44 : 32,
             }}
           >
-            {/* Drag handle */}
             <View
               style={{ alignItems: "center", paddingTop: 14, marginBottom: 4 }}
             >
@@ -463,7 +491,6 @@ export default function ApplyLeaveScreen() {
               />
             </View>
 
-            {/* Header */}
             <View
               style={{
                 flexDirection: "row",
@@ -473,16 +500,30 @@ export default function ApplyLeaveScreen() {
                 paddingVertical: 12,
               }}
             >
-              <Text
-                style={{
-                  fontSize: 16,
-                  fontWeight: "700",
-                  color: TW.bgSecondary,
-                  letterSpacing: -0.3,
-                }}
-              >
-                Select Date
-              </Text>
+              <View>
+                <Text
+                  style={{
+                    fontSize: 16,
+                    fontWeight: "700",
+                    color: TW.bgSecondary,
+                    letterSpacing: -0.3,
+                  }}
+                >
+                  Select Date
+                </Text>
+                <Text
+                  style={{
+                    marginTop: 2,
+                    fontSize: 12,
+                    color: "#94A3B8",
+                  }}
+                >
+                  {selectedStart && !selectedEnd
+                    ? "Tap again to set end date"
+                    : "Tap once for start, again for end"}
+                </Text>
+              </View>
+
               <Pressable
                 onPress={() => setCalendarVisible(false)}
                 style={({ pressed }) => ({
@@ -498,20 +539,6 @@ export default function ApplyLeaveScreen() {
                 <X size={15} color={TW.bgSecondary} strokeWidth={2.5} />
               </Pressable>
             </View>
-
-            {/* Subtitle */}
-            <Text
-              style={{
-                paddingHorizontal: 20,
-                marginBottom: 10,
-                color: "#94A3B8",
-                fontSize: 12,
-              }}
-            >
-              {selectedStart && !selectedEnd
-                ? "Tap again for end date"
-                : "Tap once for start date, tap again for end date"}
-            </Text>
 
             <SharedCalendar
               year={calYear}
@@ -530,9 +557,9 @@ export default function ApplyLeaveScreen() {
             <View style={{ paddingHorizontal: 20, paddingTop: 12 }}>
               <Text
                 style={{
-                  color: TW.bgSecondary,
+                  fontSize: 13,
                   fontWeight: "600",
-                  fontSize: 14,
+                  color: TW.bgSecondary,
                 }}
               >
                 Selected: {selectedStart || "-"}
@@ -543,362 +570,298 @@ export default function ApplyLeaveScreen() {
         </Pressable>
       </Modal>
 
-      {/* ✅ Main Form */}
-      <KeyboardAvoidingView
-        style={{ flex: 1, backgroundColor: "#ffffff" }}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
-      >
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-          <View style={{ flex: 1, backgroundColor: "#ffffff" }}>
-            <ScrollView
-              contentContainerStyle={{
-                paddingHorizontal: 20,
-                paddingTop: 16,
-                paddingBottom: 112,
+      <View style={{ flex: 1, backgroundColor: "#ffffff" }}>
+        <KeyboardAwareScrollView
+          enableOnAndroid
+          extraScrollHeight={24}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+          enableAutomaticScroll
+          contentContainerStyle={{
+            paddingHorizontal: 20,
+            paddingTop: 16,
+            paddingBottom: 32,
+          }}
+        >
+          <BackButton
+            color={TW.bgSecondary}
+            backgroundColor="rgba(27,74,90,0.08)"
+            style={{ marginBottom: 16 }}
+            onPress={() => router.replace("/(users)/leaves/(tabs)")}
+          />
+
+          <View style={{ marginBottom: 24 }}>
+            <Text
+              style={{
+                fontSize: 22,
+                fontWeight: "700",
+                color: TW.bgSecondary,
+                letterSpacing: -0.4,
               }}
-              keyboardShouldPersistTaps="handled"
             >
-              <BackButton
-                color={TW.bgSecondary}
-                backgroundColor="rgba(27,74,90,0.08)"
-                style={{ marginBottom: 16 }}
-                onPress={() => router.replace("/(users)/leaves/(tabs)")}
-              />
+              New Leave Request
+            </Text>
+            <Text
+              style={{
+                marginTop: 3,
+                fontSize: 13,
+                color: "#94A3B8",
+                fontWeight: "400",
+              }}
+            >
+              Fill in the details to submit a leave request
+            </Text>
+          </View>
 
-              <Text
-                style={{
-                  fontSize: 20,
-                  fontWeight: "700",
-                  color: TW.bgSecondary,
-                  marginBottom: 20,
-                  letterSpacing: -0.3,
-                }}
-              >
-                New Leave Request
-              </Text>
+          {/* Leave Type */}
+          <View style={{ marginBottom: 20 }}>
+            <Text style={SECTION_LABEL}>Leave Type</Text>
+            <LeaveTypeDropdown
+              value={selectedLeaveType}
+              onChange={handleLeaveTypeChange}
+              leaveTypes={leaveTypes}
+              loading={loadingTypes}
+              onRefresh={loadLeaveTypesWithStats}
+            />
+            {!!leaveTypeError && (
+              <Text style={ERROR_TEXT}>{leaveTypeError}</Text>
+            )}
+          </View>
 
-              {/* Date Fields */}
-              <View style={{ gap: 12 }}>
-                <View style={{ flexDirection: "row", gap: 12 }}>
-                  <View style={{ flex: 1 }}>
-                    <DateField
-                      label="Start Date"
-                      value={localStartDate}
-                      onPress={openCalendar}
-                    />
-                  </View>
-                  {!isHalfDay && (
-                    <View style={{ flex: 1 }}>
-                      <DateField
-                        label="End Date"
-                        value={localEndDate}
-                        onPress={openCalendar}
-                      />
-                    </View>
-                  )}
+          {/* Duration */}
+          <View style={{ marginBottom: 20 }}>
+            <Text style={SECTION_LABEL}>Duration</Text>
+            <View style={{ flexDirection: "row", gap: 12 }}>
+              <View style={{ flex: 1 }}>
+                <DateField
+                  label="Start Date"
+                  value={localStartDate}
+                  onPress={openCalendar}
+                />
+              </View>
+
+              {!isHalfDay && (
+                <View style={{ flex: 1 }}>
+                  <DateField
+                    label="End Date"
+                    value={localEndDate}
+                    onPress={openCalendar}
+                  />
                 </View>
-                {!!dateError && (
-                  <Text
-                    style={{
-                      fontSize: 13,
-                      color: "#EF4444",
-                      fontWeight: "500",
-                    }}
-                  >
-                    {dateError}
-                  </Text>
-                )}
-              </View>
+              )}
+            </View>
+            {!!dateError && <Text style={ERROR_TEXT}>{dateError}</Text>}
+          </View>
 
-              {/* Half Day */}
-              <View style={{ marginTop: 8 }}>
-                <Controller
-                  control={control}
-                  name="isHalfDay"
-                  render={({ field: { value, onChange } }) => (
-                    <Pressable
-                      onPress={() => {
-                        if (
-                          localStartDate &&
-                          localEndDate &&
-                          localStartDate !== localEndDate
-                        ) {
-                          setLocalEndDate(localStartDate);
-                          onChange(true);
-                          setValue("halfSession", "morning", {
-                            shouldValidate: true,
-                          });
-                          return;
-                        }
-                        const next = !value;
-                        onChange(next);
-                        if (next) {
-                          setValue("halfSession", "morning", {
-                            shouldValidate: true,
-                          });
-                          if (localStartDate) setLocalEndDate(localStartDate);
-                        }
-                      }}
-                      style={({ pressed }) => ({
-                        flexDirection: "row",
-                        alignItems: "center",
-                        gap: 12,
-                        paddingHorizontal: 16,
-                        paddingVertical: 12,
-                        borderRadius: 12,
-                        opacity: pressed ? 0.85 : 1,
-                      })}
-                    >
-                      <View
-                        style={{
-                          width: 22,
-                          height: 22,
-                          borderRadius: 6,
-                          borderWidth: 2,
-                          borderColor: value ? TW.bgSecondary : "#CBD5E1",
-                          backgroundColor: value ? TW.bgSecondary : "#ffffff",
-                          alignItems: "center",
-                          justifyContent: "center",
-                        }}
-                      >
-                        {value ? (
-                          <Check color="#ffffff" size={14} strokeWidth={3} />
-                        ) : null}
-                      </View>
-                      <Text
-                        style={{
-                          fontSize: 15,
-                          fontWeight: "600",
-                          color: TW.bgSecondary,
-                        }}
-                      >
-                        Half Day
-                      </Text>
-                    </Pressable>
-                  )}
-                />
-
-                {isHalfDay && (
-                  <View style={{ marginTop: 12, paddingHorizontal: 4 }}>
-                    <Text
-                      style={{
-                        fontSize: 13,
-                        fontWeight: "700",
-                        color: "#94A3B8",
-                        letterSpacing: 0.8,
-                        textTransform: "uppercase",
-                        marginBottom: 8,
-                      }}
-                    >
-                      Session
-                    </Text>
-                    <Controller
-                      control={control}
-                      name="halfSession"
-                      render={({ field: { value, onChange } }) => (
-                        <View style={{ flexDirection: "row", gap: 10 }}>
-                          <Pressable
-                            onPress={() => onChange("morning")}
-                            style={({ pressed }) => ({
-                              flex: 1,
-                              paddingVertical: 12,
-                              borderRadius: 12,
-                              borderWidth: 1.5,
-                              borderColor:
-                                value === "morning"
-                                  ? TW.bgSecondary
-                                  : "#E2E8F0",
-                              backgroundColor:
-                                value === "morning"
-                                  ? TW.bgSecondary
-                                  : "#ffffff",
-                              alignItems: "center",
-                              opacity: pressed ? 0.85 : 1,
-                            })}
-                          >
-                            <Text
-                              style={{
-                                fontSize: 14,
-                                fontWeight: "600",
-                                color:
-                                  value === "morning"
-                                    ? "#ffffff"
-                                    : TW.bgSecondary,
-                              }}
-                            >
-                              Morning
-                            </Text>
-                          </Pressable>
-                          <Pressable
-                            onPress={() => onChange("evening")}
-                            style={({ pressed }) => ({
-                              flex: 1,
-                              paddingVertical: 12,
-                              borderRadius: 12,
-                              borderWidth: 1.5,
-                              borderColor:
-                                value === "evening"
-                                  ? TW.bgSecondary
-                                  : "#E2E8F0",
-                              backgroundColor:
-                                value === "evening"
-                                  ? TW.bgSecondary
-                                  : "#ffffff",
-                              alignItems: "center",
-                              opacity: pressed ? 0.85 : 1,
-                            })}
-                          >
-                            <Text
-                              style={{
-                                fontSize: 14,
-                                fontWeight: "600",
-                                color:
-                                  value === "evening"
-                                    ? "#ffffff"
-                                    : TW.bgSecondary,
-                              }}
-                            >
-                              Evening
-                            </Text>
-                          </Pressable>
-                        </View>
-                      )}
-                    />
-                  </View>
-                )}
-              </View>
-
-              {/* Leave Type */}
-              <View style={{ marginTop: 20 }}>
-                <LeaveTypeDropdown
-                  value={selectedLeaveType}
-                  onChange={handleLeaveTypeChange}
-                  leaveTypes={leaveTypes}
-                  loading={loadingTypes}
-                  onRefresh={loadLeaveTypesWithStats}
-                />
-                {!!leaveTypeError && (
-                  <Text
-                    style={{
-                      marginTop: 6,
-                      color: "#EF4444",
-                      fontWeight: "600",
-                      fontSize: 13,
-                    }}
-                  >
-                    {leaveTypeError}
-                  </Text>
-                )}
-              </View>
-
-              {/* Reason */}
-              <View style={{ marginTop: 20 }}>
-                <Text
-                  style={{
-                    fontSize: 13,
-                    fontWeight: "700",
-                    color: "#94A3B8",
-                    letterSpacing: 0.8,
-                    textTransform: "uppercase",
-                    marginBottom: 8,
-                  }}
-                >
-                  Reason / Description
-                </Text>
-                <Controller
-                  control={control}
-                  name="reason"
-                  render={({ field: { value, onChange, onBlur } }) => (
-                    <TextInput
-                      value={value}
-                      onChangeText={onChange}
-                      onBlur={onBlur}
-                      placeholder="Enter reason for leave..."
-                      placeholderTextColor="#CBD5E1"
-                      multiline
-                      style={{
-                        paddingHorizontal: 16,
-                        paddingVertical: 14,
-                        borderRadius: 14,
-                        borderWidth: 1.5,
-                        borderColor: "#E2E8F0",
-                        color: TW.bgSecondary,
-                        fontSize: 15,
-                        minHeight: 96,
-                        textAlignVertical: "top",
-                      }}
-                    />
-                  )}
-                />
-                {!!errors.reason?.message && (
-                  <Text
-                    style={{
-                      marginTop: 6,
-                      color: "#EF4444",
-                      fontWeight: "600",
-                      fontSize: 13,
-                    }}
-                  >
-                    {errors.reason.message}
-                  </Text>
-                )}
-              </View>
-
-              {/* Buttons */}
-              <View style={{ marginTop: 32, flexDirection: "row", gap: 12 }}>
+          {/* Day Option */}
+          <View style={{ marginBottom: 20 }}>
+            <Text style={SECTION_LABEL}>Day Option</Text>
+            <Controller
+              control={control}
+              name="isHalfDay"
+              render={({ field: { value, onChange } }) => (
                 <Pressable
-                  disabled={submitting}
-                  onPress={() => router.replace("/(users)/leaves/(tabs)")}
+                  onPress={() => {
+                    if (
+                      localStartDate &&
+                      localEndDate &&
+                      localStartDate !== localEndDate
+                    ) {
+                      setLocalEndDate(localStartDate);
+                      onChange(true);
+                      setValue("halfSession", "morning", {
+                        shouldValidate: true,
+                      });
+                      return;
+                    }
+
+                    const next = !value;
+                    onChange(next);
+
+                    if (next) {
+                      setValue("halfSession", "morning", {
+                        shouldValidate: true,
+                      });
+                      if (localStartDate) setLocalEndDate(localStartDate);
+                    }
+                  }}
                   style={({ pressed }) => ({
-                    flex: 1,
-                    borderWidth: 1.5,
-                    borderColor: "#6B7280",
-                    borderRadius: 14,
-                    paddingVertical: 16,
+                    flexDirection: "row",
                     alignItems: "center",
-                    backgroundColor: "transparent",
-                    opacity: pressed || submitting ? 0.6 : 1,
+                    gap: 10,
+                    paddingHorizontal: 14,
+                    paddingVertical: 12,
+                    borderRadius: 12,
+                    borderWidth: 1.5,
+                    borderColor: value ? TW.bgSecondary : "#E2E8F0",
+                    backgroundColor: "#ffffff",
+                    alignSelf: "flex-start",
+                    opacity: pressed ? 0.85 : 1,
                   })}
                 >
+                  <View
+                    style={{
+                      width: 20,
+                      height: 20,
+                      borderRadius: 6,
+                      borderWidth: 2,
+                      borderColor: value ? TW.bgSecondary : "#CBD5E1",
+                      backgroundColor: value ? TW.bgSecondary : "#ffffff",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    {value ? (
+                      <Check color="#ffffff" size={12} strokeWidth={3} />
+                    ) : null}
+                  </View>
+
                   <Text
                     style={{
-                      fontSize: 15,
+                      fontSize: 14,
                       fontWeight: "600",
                       color: TW.bgSecondary,
                     }}
                   >
-                    Cancel
+                    Half Day
                   </Text>
                 </Pressable>
+              )}
+            />
 
-                <Pressable
-                  disabled={submitting}
-                  onPress={handleSubmit(onSubmit, onInvalid)}
-                  style={({ pressed }) => ({
-                    flex: 1,
-                    backgroundColor: TW.bgSecondary,
-                    borderRadius: 14,
-                    paddingVertical: 16,
-                    alignItems: "center",
-                    opacity: submitting ? 0.55 : pressed ? 0.8 : 1,
-                  })}
-                >
-                  <Text
-                    style={{
-                      fontSize: 15,
-                      fontWeight: "700",
-                      color: "#ffffff",
-                    }}
-                  >
-                    {submitting ? "Submitting..." : "Submit"}
-                  </Text>
-                </Pressable>
+            {isHalfDay && (
+              <View style={{ marginTop: 12 }}>
+                <Text style={{ ...SECTION_LABEL, marginBottom: 8 }}>
+                  Session
+                </Text>
+                <Controller
+                  control={control}
+                  name="halfSession"
+                  render={({ field: { value, onChange } }) => (
+                    <View style={{ flexDirection: "row", gap: 10 }}>
+                      {(["morning", "evening"] as const).map((session) => (
+                        <Pressable
+                          key={session}
+                          onPress={() => onChange(session)}
+                          style={({ pressed }) => ({
+                            flex: 1,
+                            paddingVertical: 12,
+                            borderRadius: 12,
+                            borderWidth: 1.5,
+                            borderColor:
+                              value === session ? TW.bgSecondary : "#E2E8F0",
+                            backgroundColor:
+                              value === session ? TW.bgSecondary : "#ffffff",
+                            alignItems: "center",
+                            opacity: pressed ? 0.85 : 1,
+                          })}
+                        >
+                          <Text
+                            style={{
+                              fontSize: 14,
+                              fontWeight: "600",
+                              color:
+                                value === session ? "#ffffff" : TW.bgSecondary,
+                            }}
+                          >
+                            {session.charAt(0).toUpperCase() + session.slice(1)}
+                          </Text>
+                        </Pressable>
+                      ))}
+                    </View>
+                  )}
+                />
               </View>
-            </ScrollView>
+            )}
           </View>
-        </TouchableWithoutFeedback>
-      </KeyboardAvoidingView>
+
+          {/* Reason */}
+          <View style={{ marginBottom: 20 }}>
+            <Text style={SECTION_LABEL}>Reason / Description</Text>
+            <Controller
+              control={control}
+              name="reason"
+              render={({ field: { value, onChange, onBlur } }) => (
+                <TextInput
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  placeholder="Enter reason for leave..."
+                  placeholderTextColor="#CBD5E1"
+                  multiline
+                  textAlignVertical="top"
+                  style={{
+                    paddingHorizontal: 14,
+                    paddingVertical: 13,
+                    borderRadius: 12,
+                    borderWidth: 1.5,
+                    borderColor: errors.reason ? "#EF4444" : "#E2E8F0",
+                    color: TW.bgSecondary,
+                    fontSize: 14,
+                    lineHeight: 22,
+                    minHeight: 120,
+                    backgroundColor: "#ffffff",
+                  }}
+                />
+              )}
+            />
+            {!!errors.reason?.message && (
+              <Text style={ERROR_TEXT}>{errors.reason.message}</Text>
+            )}
+          </View>
+
+          {/* Actions */}
+          <View style={{ marginTop: 12, flexDirection: "row", gap: 12 }}>
+            <Pressable
+              disabled={submitting}
+              onPress={() => router.replace("/(users)/leaves/(tabs)")}
+              style={({ pressed }) => ({
+                flex: 1,
+                borderWidth: 1.5,
+                borderColor: "#CBD5E1",
+                borderRadius: 14,
+                paddingVertical: 15,
+                alignItems: "center",
+                backgroundColor: "#ffffff",
+                opacity: pressed || submitting ? 0.6 : 1,
+              })}
+            >
+              <Text
+                style={{
+                  fontSize: 14,
+                  fontWeight: "600",
+                  color: "#64748B",
+                }}
+              >
+                Cancel
+              </Text>
+            </Pressable>
+
+            <Pressable
+              disabled={submitting}
+              onPress={handleSubmitPress}
+              style={({ pressed }) => ({
+                flex: 1,
+                backgroundColor: TW.bgSecondary,
+                borderRadius: 14,
+                paddingVertical: 15,
+                alignItems: "center",
+                opacity: submitting ? 0.55 : pressed ? 0.8 : 1,
+              })}
+            >
+              <Text
+                style={{
+                  fontSize: 14,
+                  fontWeight: "700",
+                  color: "#ffffff",
+                }}
+              >
+                {submitting ? "Submitting..." : "Submit"}
+              </Text>
+            </Pressable>
+          </View>
+        </KeyboardAwareScrollView>
+      </View>
     </>
   );
 }
