@@ -1,23 +1,13 @@
-import { BackButton } from "@/src/components/BackButton";
 import {
   buildPeriodMarks,
   isBeforeOrEqual,
 } from "@/src/components/Calendar/userCalendar";
-import { SharedCalendar } from "@/src/components/SharedCalendar";
-import { DateField } from "@/src/components/userLeave/DateField";
-import { LeaveTypeDropdown } from "@/src/components/userLeave/LeaveTypeDropdown";
-import { userLeaveSchema } from "@/src/schema/users/userLeaveApply.schema";
-import { useAuthStore } from "@/src/store/useAuthStore";
-import { supabase } from "@/src/supabase/supabaseClient";
 import {
   FormValues,
   LeaveTypeRow,
   LeaveTypeWithStats,
 } from "@/src/types/userLeave";
-import { buildAdminMarks } from "@/src/utils/adminCalendar";
 import { calcLeaveDays, diffDaysInclusive } from "@/src/utils/leaveUtils";
-import { TW } from "@/theme/twStyles";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useFocusEffect, useRouter } from "expo-router";
 import { Check, X } from "lucide-react-native";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
@@ -31,6 +21,17 @@ import {
   TextInput,
   View,
 } from "react-native";
+
+import { BackButton } from "@/src/components/BackButton";
+import { SharedCalendar } from "@/src/components/SharedCalendar";
+import { DateField } from "@/src/components/userLeave/DateField";
+import { LeaveTypeDropdown } from "@/src/components/userLeave/LeaveTypeDropdown";
+import { userLeaveSchema } from "@/src/schema/users/userLeaveApply.schema";
+import { useAuthStore } from "@/src/store/useAuthStore";
+import { supabase } from "@/src/supabase/supabaseClient";
+import { buildAdminMarks } from "@/src/utils/adminCalendar";
+import { TW } from "@/theme/twStyles";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 async function getOrganizationIdByUserId(userId: string) {
@@ -97,7 +98,7 @@ export default function ApplyLeaveScreen() {
     defaultValues: {
       reason: "",
       isHalfDay: false,
-      halfSession: "morning",
+      halfSession: "first_shift",
     },
     mode: "onChange",
   });
@@ -245,7 +246,7 @@ export default function ApplyLeaveScreen() {
 
     if (finalStart !== finalEnd) {
       setValue("isHalfDay", false, { shouldValidate: true });
-      setValue("halfSession", "morning", { shouldValidate: true });
+      setValue("halfSession", "first_shift", { shouldValidate: true });
     }
   };
 
@@ -338,7 +339,7 @@ export default function ApplyLeaveScreen() {
       );
       setLocalEndDate(localStartDate);
       setValue("isHalfDay", false, { shouldValidate: true });
-      setValue("halfSession", "morning", { shouldValidate: true });
+      setValue("halfSession", "first_shift", { shouldValidate: true });
     }
   }, [selectedType, computedDaysCount, localStartDate, localEndDate, setValue]);
 
@@ -403,13 +404,12 @@ export default function ApplyLeaveScreen() {
 
     const dayType =
       localStartDate === localEndDate
-        ? values.halfSession === "morning"
-          ? "MORNING"
-          : values.halfSession === "evening"
-            ? "EVENING"
+        ? values.halfSession === "first_shift"
+          ? "FIRST_SHIFT"
+          : values.halfSession === "second_shift"
+            ? "SECOND_SHIFT"
             : "FULL"
         : "FULL";
-
     try {
       setSubmitting(true);
 
@@ -459,16 +459,14 @@ export default function ApplyLeaveScreen() {
         visible={calendarVisible}
         animationType="none"
         transparent
-        onRequestClose={() => setCalendarVisible(false)}
-      >
+        onRequestClose={() => setCalendarVisible(false)}>
         <Pressable
           style={{
             flex: 1,
             backgroundColor: "rgba(0,0,0,0.4)",
             justifyContent: "flex-end",
           }}
-          onPress={() => setCalendarVisible(false)}
-        >
+          onPress={() => setCalendarVisible(false)}>
           <Pressable
             onPress={() => {}}
             style={{
@@ -476,11 +474,9 @@ export default function ApplyLeaveScreen() {
               borderTopLeftRadius: 28,
               borderTopRightRadius: 28,
               paddingBottom: Platform.OS === "ios" ? 44 : 32,
-            }}
-          >
+            }}>
             <View
-              style={{ alignItems: "center", paddingTop: 14, marginBottom: 4 }}
-            >
+              style={{ alignItems: "center", paddingTop: 14, marginBottom: 4 }}>
               <View
                 style={{
                   width: 40,
@@ -498,8 +494,7 @@ export default function ApplyLeaveScreen() {
                 justifyContent: "space-between",
                 paddingHorizontal: 20,
                 paddingVertical: 12,
-              }}
-            >
+              }}>
               <View>
                 <Text
                   style={{
@@ -507,8 +502,7 @@ export default function ApplyLeaveScreen() {
                     fontWeight: "700",
                     color: TW.bgSecondary,
                     letterSpacing: -0.3,
-                  }}
-                >
+                  }}>
                   Select Date
                 </Text>
                 <Text
@@ -516,8 +510,7 @@ export default function ApplyLeaveScreen() {
                     marginTop: 2,
                     fontSize: 12,
                     color: "#94A3B8",
-                  }}
-                >
+                  }}>
                   {selectedStart && !selectedEnd
                     ? "Tap again to set end date"
                     : "Tap once for start, again for end"}
@@ -534,8 +527,7 @@ export default function ApplyLeaveScreen() {
                   alignItems: "center",
                   justifyContent: "center",
                   opacity: pressed ? 0.5 : 1,
-                })}
-              >
+                })}>
                 <X size={15} color={TW.bgSecondary} strokeWidth={2.5} />
               </Pressable>
             </View>
@@ -560,8 +552,7 @@ export default function ApplyLeaveScreen() {
                   fontSize: 13,
                   fontWeight: "600",
                   color: TW.bgSecondary,
-                }}
-              >
+                }}>
                 Selected: {selectedStart || "-"}
                 {selectedEnd ? ` → ${selectedEnd}` : ""}
               </Text>
@@ -581,8 +572,7 @@ export default function ApplyLeaveScreen() {
             paddingHorizontal: 20,
             paddingTop: 16,
             paddingBottom: 32,
-          }}
-        >
+          }}>
           <BackButton
             color={TW.bgSecondary}
             backgroundColor="rgba(27,74,90,0.08)"
@@ -597,8 +587,7 @@ export default function ApplyLeaveScreen() {
                 fontWeight: "700",
                 color: TW.bgSecondary,
                 letterSpacing: -0.4,
-              }}
-            >
+              }}>
               New Leave Request
             </Text>
             <Text
@@ -607,8 +596,7 @@ export default function ApplyLeaveScreen() {
                 fontSize: 13,
                 color: "#94A3B8",
                 fontWeight: "400",
-              }}
-            >
+              }}>
               Fill in the details to submit a leave request
             </Text>
           </View>
@@ -669,7 +657,7 @@ export default function ApplyLeaveScreen() {
                     ) {
                       setLocalEndDate(localStartDate);
                       onChange(true);
-                      setValue("halfSession", "morning", {
+                      setValue("halfSession", "first_shift", {
                         shouldValidate: true,
                       });
                       return;
@@ -679,7 +667,7 @@ export default function ApplyLeaveScreen() {
                     onChange(next);
 
                     if (next) {
-                      setValue("halfSession", "morning", {
+                      setValue("halfSession", "first_shift", {
                         shouldValidate: true,
                       });
                       if (localStartDate) setLocalEndDate(localStartDate);
@@ -697,8 +685,7 @@ export default function ApplyLeaveScreen() {
                     backgroundColor: "#ffffff",
                     alignSelf: "flex-start",
                     opacity: pressed ? 0.85 : 1,
-                  })}
-                >
+                  })}>
                   <View
                     style={{
                       width: 20,
@@ -709,8 +696,7 @@ export default function ApplyLeaveScreen() {
                       backgroundColor: value ? TW.bgSecondary : "#ffffff",
                       alignItems: "center",
                       justifyContent: "center",
-                    }}
-                  >
+                    }}>
                     {value ? (
                       <Check color="#ffffff" size={12} strokeWidth={3} />
                     ) : null}
@@ -721,8 +707,7 @@ export default function ApplyLeaveScreen() {
                       fontSize: 14,
                       fontWeight: "600",
                       color: TW.bgSecondary,
-                    }}
-                  >
+                    }}>
                     Half Day
                   </Text>
                 </Pressable>
@@ -739,35 +724,38 @@ export default function ApplyLeaveScreen() {
                   name="halfSession"
                   render={({ field: { value, onChange } }) => (
                     <View style={{ flexDirection: "row", gap: 10 }}>
-                      {(["morning", "evening"] as const).map((session) => (
-                        <Pressable
-                          key={session}
-                          onPress={() => onChange(session)}
-                          style={({ pressed }) => ({
-                            flex: 1,
-                            paddingVertical: 12,
-                            borderRadius: 12,
-                            borderWidth: 1.5,
-                            borderColor:
-                              value === session ? TW.bgSecondary : "#E2E8F0",
-                            backgroundColor:
-                              value === session ? TW.bgSecondary : "#ffffff",
-                            alignItems: "center",
-                            opacity: pressed ? 0.85 : 1,
-                          })}
-                        >
-                          <Text
-                            style={{
-                              fontSize: 14,
-                              fontWeight: "600",
-                              color:
-                                value === session ? "#ffffff" : TW.bgSecondary,
-                            }}
-                          >
-                            {session.charAt(0).toUpperCase() + session.slice(1)}
-                          </Text>
-                        </Pressable>
-                      ))}
+                      {(["first_shift", "second_shift"] as const).map(
+                        (session) => (
+                          <Pressable
+                            key={session}
+                            onPress={() => onChange(session)}
+                            style={({ pressed }) => ({
+                              flex: 1,
+                              paddingVertical: 12,
+                              borderRadius: 12,
+                              borderWidth: 1.5,
+                              borderColor:
+                                value === session ? TW.bgSecondary : "#E2E8F0",
+                              backgroundColor:
+                                value === session ? TW.bgSecondary : "#ffffff",
+                              alignItems: "center",
+                              opacity: pressed ? 0.85 : 1,
+                            })}>
+                            <Text
+                              style={{
+                                fontSize: 14,
+                                fontWeight: "600",
+                                color:
+                                  value === session
+                                    ? "#ffffff"
+                                    : TW.bgSecondary,
+                              }}>
+                              {session.charAt(0).toUpperCase() +
+                                session.slice(1)}
+                            </Text>
+                          </Pressable>
+                        ),
+                      )}
                     </View>
                   )}
                 />
@@ -824,15 +812,13 @@ export default function ApplyLeaveScreen() {
                 alignItems: "center",
                 backgroundColor: "#ffffff",
                 opacity: pressed || submitting ? 0.6 : 1,
-              })}
-            >
+              })}>
               <Text
                 style={{
                   fontSize: 14,
                   fontWeight: "600",
                   color: "#64748B",
-                }}
-              >
+                }}>
                 Cancel
               </Text>
             </Pressable>
@@ -847,15 +833,13 @@ export default function ApplyLeaveScreen() {
                 paddingVertical: 15,
                 alignItems: "center",
                 opacity: submitting ? 0.55 : pressed ? 0.8 : 1,
-              })}
-            >
+              })}>
               <Text
                 style={{
                   fontSize: 14,
                   fontWeight: "700",
                   color: "#ffffff",
-                }}
-              >
+                }}>
                 {submitting ? "Submitting..." : "Submit"}
               </Text>
             </Pressable>
