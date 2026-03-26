@@ -1,3 +1,5 @@
+import { Eye, EyeClosed } from "lucide-react-native";
+import React, { useEffect, useState } from "react";
 import {
   Alert,
   KeyboardAvoidingView,
@@ -8,17 +10,16 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import React, { useEffect, useState } from "react";
 
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { TW } from "@/theme/twStyles";
+import { useDimension } from "@/src/hooks/useDimension";
 import { supabase } from "@/src/supabase/supabaseClient";
-import tw from "twrnc";
+import { TW } from "@/theme/twStyles";
 import { useRouter } from "expo-router";
+import tw from "twrnc";
 
 const ResetPassword = () => {
   const router = useRouter();
-
+  const { isTablet } = useDimension();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [recoverySession, setRecoverySession] = useState<any>(null);
@@ -112,11 +113,11 @@ const ResetPassword = () => {
               <TouchableOpacity
                 onPress={() => setShowPassword(!showPassword)}
                 style={tw`pr-3`}>
-                <MaterialCommunityIcons
-                  name={showPassword ? "eye-closed" : "eye"}
-                  size={22}
-                  color="#7e7e7e"
-                />
+                {showPassword ? (
+                  <Eye size={isTablet ? 24 : 22} color="#7e7e7e" />
+                ) : (
+                  <EyeClosed size={isTablet ? 24 : 22} color="#7e7e7e" />
+                )}
               </TouchableOpacity>
             </View>
           </View>
@@ -140,11 +141,11 @@ const ResetPassword = () => {
               <TouchableOpacity
                 onPress={() => setShowConfirm(!showConfirm)}
                 style={tw`pr-3`}>
-                <MaterialCommunityIcons
-                  name={showConfirm ? "eye-closed" : "eye"}
-                  size={22}
-                  color="#7e7e7e"
-                />
+                {showPassword ? (
+                  <Eye size={isTablet ? 24 : 22} color="#7e7e7e" />
+                ) : (
+                  <EyeClosed size={isTablet ? 24 : 22} color="#7e7e7e" />
+                )}
               </TouchableOpacity>
             </View>
           </View>
