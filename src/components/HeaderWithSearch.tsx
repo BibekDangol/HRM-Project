@@ -1,4 +1,4 @@
-import { ArrowLeft, Search, X } from "lucide-react-native";
+import { ChevronLeft, Search, X } from "lucide-react-native";
 import React from "react";
 import { Pressable, TextInput, View } from "react-native";
 import tw from "twrnc";
@@ -20,7 +20,7 @@ export default function HeaderWithSearch({
         onPress={onBack}
         style={tw`w-10 h-10 items-center justify-center mr-2`}
       >
-        <ArrowLeft size={22} color="#1B4A5A" />
+        <ChevronLeft size={22} color="#1B4A5A" />
       </Pressable>
 
       <View

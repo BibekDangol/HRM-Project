@@ -1,4 +1,5 @@
 import { TW } from "@/theme/twStyles";
+import React, { useState } from "react";
 import { Text, TextInput, View } from "react-native";
 
 type Props = {
@@ -18,6 +19,8 @@ export default function ModalInput({
   placeholder,
   error,
 }: Props) {
+  const [focused, setFocused] = useState(false);
+
   return (
     <View style={{ marginBottom: 16 }}>
       <Text
@@ -36,13 +39,17 @@ export default function ModalInput({
       <TextInput
         value={value}
         onChangeText={onChange}
-        onBlur={onBlur}
+        onFocus={() => setFocused(true)}
+        onBlur={() => {
+          setFocused(false);
+          onBlur();
+        }}
         placeholder={placeholder}
         placeholderTextColor="#C9D0D8"
         style={{
-          backgroundColor: error ? "#FEF2F2" : TW.BORDER,
+          backgroundColor: "#FFFFFF",
           borderWidth: 1,
-          borderColor: error ? "#6B7280" : "#6B7280",
+          borderColor: error ? TW.DANGER : focused ? TW.bgSecondary : "#E5E7EB",
           borderRadius: 12,
           paddingHorizontal: 14,
           paddingVertical: 13,

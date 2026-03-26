@@ -1,5 +1,4 @@
 import LoadingIndicator from "@/src/components/LoadingIndicator";
-import ProfileActions from "@/src/components/profile/EditProfile";
 import EditProfileModal from "@/src/components/profile/EditProfileModal";
 import InfoRow from "@/src/components/profile/InfoRow";
 import ProfileHero from "@/src/components/profile/ProfileHero";
@@ -64,10 +63,12 @@ export default function ProfileScreen() {
           onAvatarRemove={onAvatarRemove}
         />
 
-        <View style={{ paddingHorizontal: 20, marginTop: -32 }}>
-          <ProfileActions onEdit={openEdit} />
-
-          <Section title="Personal Info">
+        <View style={{ paddingHorizontal: 20, marginTop: 22 }}>
+          <Section
+            title="Personal Info"
+            rightText="Edit"
+            onRightPress={openEdit}
+          >
             <InfoRow
               icon={<User size={16} color={TW.bgSecondary} strokeWidth={1.8} />}
               label="First Name"

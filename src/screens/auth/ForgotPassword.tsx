@@ -17,7 +17,7 @@ import { useDimension } from "@/src/hooks/useDimension";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { TW } from "@/theme/twStyles";
 import { useRouter } from "expo-router";
-import { ArrowLeft } from "lucide-react-native";
+import { ChevronLeft } from "lucide-react-native";
 import React from "react";
 import tw from "twrnc";
 
@@ -50,7 +50,8 @@ const ForgotPassword = () => {
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <KeyboardAvoidingView
           style={tw`flex-1`}
-          behavior={Platform.OS === "ios" ? "padding" : undefined}>
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+        >
           <ScrollView
             contentContainerStyle={{
               flexGrow: 1,
@@ -59,18 +60,21 @@ const ForgotPassword = () => {
               paddingBottom: 20,
             }}
             keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator={false}>
+            showsVerticalScrollIndicator={false}
+          >
             <View
               style={[
                 tw`flex-1 justify-between`,
                 { maxWidth: isTablet ? 500 : width },
-              ]}>
+              ]}
+            >
               <View style={tw`mt-8`}>
                 {/* Back Button */}
                 <TouchableOpacity
                   onPress={() => router.back()}
-                  style={tw`mb-4`}>
-                  <ArrowLeft size={22} color="#7e7e7e" />
+                  style={tw`mb-4`}
+                >
+                  <ChevronLeft size={22} color="#7e7e7e" />
                 </TouchableOpacity>
                 {/* Header */}
                 <View style={tw`mb-6 mt-8`}>
@@ -81,7 +85,8 @@ const ForgotPassword = () => {
                     style={[
                       tw`${TW.textSecondary} mt-2`,
                       { fontSize: isTablet ? 18 : isSmallPhone ? 14 : 16 },
-                    ]}>
+                    ]}
+                  >
                     Enter your email to receive a reset link
                   </Text>
                 </View>
@@ -96,7 +101,8 @@ const ForgotPassword = () => {
                         style={[
                           tw`${TW.textSecondary} font-semibold mb-2`,
                           { fontSize: isTablet ? 16 : 14 },
-                        ]}>
+                        ]}
+                      >
                         Email
                       </Text>
 
@@ -133,7 +139,8 @@ const ForgotPassword = () => {
                     },
                   ]}
                   onPress={handleSubmit(onSubmit)}
-                  disabled={isSubmitting}>
+                  disabled={isSubmitting}
+                >
                   <View style={tw`flex-row items-center gap-2`}>
                     {isSubmitting && (
                       <ActivityIndicator size="small" color="#ffffff" />
@@ -142,7 +149,8 @@ const ForgotPassword = () => {
                       style={[
                         tw`font-semibold ${TW.textButton}`,
                         { fontSize: isTablet ? 18 : 14 },
-                      ]}>
+                      ]}
+                    >
                       {isSubmitting ? "Sending..." : "Send Reset Link"}
                     </Text>
                   </View>
@@ -155,7 +163,8 @@ const ForgotPassword = () => {
                   style={[
                     tw`${TW.textSecondary}`,
                     { fontSize: isTablet ? 15 : 14 },
-                  ]}>
+                  ]}
+                >
                   Remember your password?{" "}
                 </Text>
 
@@ -164,7 +173,8 @@ const ForgotPassword = () => {
                     style={[
                       tw`${TW.textPrimary} font-semibold`,
                       { fontSize: isTablet ? 15 : 14 },
-                    ]}>
+                    ]}
+                  >
                     Login
                   </Text>
                 </TouchableOpacity>
