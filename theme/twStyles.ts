@@ -1,6 +1,8 @@
 export const TW = {
   bgPrimary: "#FDF8F0",
   bgSecondary: "#1B4A5A",
+  bgYellow: "#FFB300",
+
   bgWhite: "bg-white",
   bgAction: "bg-[#1B4A5A]",
   bgButton: "bg-white",

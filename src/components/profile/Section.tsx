@@ -1,47 +1,66 @@
-import { TW } from "@/theme/twStyles";
-import { Platform, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 
 type Props = {
   title: string;
   children: React.ReactNode;
+  onRightPress?: () => void;
+  rightText?: string;
 };
 
-export default function Section({ title, children }: Props) {
+export default function Section({
+  title,
+  children,
+  onRightPress,
+  rightText,
+}: Props) {
   return (
     <View style={{ marginBottom: 20 }}>
-      <Text
+      {/* Header */}
+      <View
         style={{
-          fontSize: 11,
-          fontWeight: "700",
-          color: "#",
-          letterSpacing: 0.9,
-          textTransform: "uppercase",
-          marginBottom: 8,
-          marginLeft: 2,
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: 10,
         }}
       >
-        {title}
-      </Text>
+        <Text
+          style={{
+            fontSize: 13,
+            fontWeight: "600",
+            letterSpacing: 1,
+            color: "#6B7280",
+          }}
+        >
+          {title.toUpperCase()}
+        </Text>
 
+        {rightText && (
+          <Pressable onPress={onRightPress}>
+            <Text
+              style={{
+                fontSize: 13,
+                fontWeight: "600",
+                color: "#6B7280",
+              }}
+            >
+              {rightText}
+            </Text>
+          </Pressable>
+        )}
+      </View>
+
+      {/* Content */}
       <View
-        style={[
-          {
-            borderRadius: 16,
-            backgroundColor: TW.bgPrimary,
-            borderWidth: 1,
-            borderColor: "#fff",
-          },
-          Platform.OS === "ios"
-            ? {
-                shadowColor: "#000",
-                shadowOffset: { width: 0, height: 1 },
-                shadowOpacity: 0.05,
-                shadowRadius: 6,
-              }
-            : { elevation: 1 },
-        ]}
+        style={{
+          backgroundColor: "#fff",
+          borderRadius: 16,
+          overflow: "hidden",
+          borderWidth: 1,
+          borderColor: "#E5E7EB",
+        }}
       >
-        <View style={{ borderRadius: 15, overflow: "hidden" }}>{children}</View>
+        {children}
       </View>
     </View>
   );

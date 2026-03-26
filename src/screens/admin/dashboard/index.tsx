@@ -2,7 +2,8 @@ import {
   CalendarItem,
   HolidaysEventsSection,
 } from "@/src/components/HolidaysEventsSection";
-import { CircleCheckBig, User } from "lucide-react-native";
+
+import { User } from "lucide-react-native";
 import { useEffect, useMemo, useState } from "react";
 import { Alert, RefreshControl, ScrollView, Text, View } from "react-native";
 
@@ -17,12 +18,16 @@ import { TW } from "@/theme/twStyles";
 import { useRouter } from "expo-router";
 import tw from "twrnc";
 import QuickAction from "../components/QuickAction";
+import AddUserModal, { AddUserFormData } from "../manage-users/AddUserModal";
 
 export default function DashboardScreen() {
   const router = useRouter();
-  const { setUserProfile, users, setUsers } = useUsersStore();
+  const { setUserProfile, users, setUsers, userProfile } = useUsersStore();
   const { user } = useAuthStore();
+
   const [refreshing, setRefreshing] = useState(false);
+  const [addUserModalVisible, setAddUserModalVisible] = useState(false);
+  const [isSubmittingUser, setIsSubmittingUser] = useState(false);
 
   // Calendar state
   const now = new Date();
@@ -30,6 +35,7 @@ export default function DashboardScreen() {
   const [calendarLoading, setCalendarLoading] = useState(false);
   const [selectedMonthIndex, setSelectedMonthIndex] = useState(now.getMonth());
   const [selectedYear, setSelectedYear] = useState(now.getFullYear());
+
   const monthTitle = useMemo(
     () => MONTHS[selectedMonthIndex],
     [selectedMonthIndex],
@@ -37,9 +43,15 @@ export default function DashboardScreen() {
 
   const totalusers = users.length;
 
-  // Load users and current user profile
+  const supervisors = useMemo(() => {
+    return users.filter((u) =>
+      ["admin", "hr", "supervisor"].includes(String(u.role).toLowerCase()),
+    );
+  }, [users]);
+
   const loadUsers = async () => {
     if (!user) return;
+
     try {
       const profile = await fetchCurrentUserProfleService(user.id);
       setUserProfile(profile);
@@ -47,7 +59,6 @@ export default function DashboardScreen() {
       const res = await fetchUsersService(profile.organization_id);
       setUsers(res);
 
-      // Fetch calendar items for the organization
       if (profile.organization_id) {
         await fetchCalendarItems(profile.organization_id);
       }
@@ -56,16 +67,15 @@ export default function DashboardScreen() {
     }
   };
 
-  // Pull-to-refresh
   const onRefresh = async () => {
     setRefreshing(true);
     await loadUsers();
     setRefreshing(false);
   };
 
-  // Fetch calendar items from Supabase
   const fetchCalendarItems = async (orgId: string | number) => {
     setCalendarLoading(true);
+
     try {
       const monthStr = String(selectedMonthIndex + 1).padStart(2, "0");
       const monthStart = `${selectedYear}-${monthStr}-01`;
@@ -90,7 +100,56 @@ export default function DashboardScreen() {
     }
   };
 
-  // Load data on mount
+  const handleAddUser = async (data: AddUserFormData) => {
+    if (!user || !userProfile?.organization_id) {
+      Alert.alert("Error", "Organization or user information is missing.");
+      return;
+    }
+
+    try {
+      setIsSubmittingUser(true);
+
+      // 1. Create auth user
+      const tempPassword = "Password@123"; // replace with better flow later
+
+      const { data: authData, error: authError } =
+        await supabase.auth.admin.createUser({
+          email: data.email,
+          password: tempPassword,
+          email_confirm: true,
+        });
+
+      if (authError) throw authError;
+
+      const newUserId = authData.user?.id;
+      if (!newUserId) {
+        throw new Error("User ID not returned.");
+      }
+
+      // 2. Insert profile row
+      const { error: profileError } = await supabase.from("profiles").insert({
+        id: newUserId,
+        first_name: data.first_name,
+        last_name: data.last_name,
+        email: data.email,
+        organization_id: userProfile.organization_id,
+        supervisor_id: data.supervisor_id,
+        role: "employee",
+        status: "pending",
+      });
+
+      if (profileError) throw profileError;
+
+      Alert.alert("Success", "User added successfully.");
+      setAddUserModalVisible(false);
+      await loadUsers();
+    } catch (error: any) {
+      Alert.alert("Error", error?.message ?? "Failed to add user.");
+    } finally {
+      setIsSubmittingUser(false);
+    }
+  };
+
   useEffect(() => {
     loadUsers();
   }, []);
@@ -109,10 +168,10 @@ export default function DashboardScreen() {
           />
         }
       >
-        {/* Stats Cards */}
         <Text style={tw`font-semibold ${TW.textPrimary} py-2 text-lg`}>
           High-Level Metrics
         </Text>
+
         <View style={tw`flex-col gap-4`}>
           <View style={tw`flex-row flex-wrap justify-between`}>
             <StatCard
@@ -120,14 +179,12 @@ export default function DashboardScreen() {
               value={totalusers}
               icon={<User size={24} color="white" />}
             />
-            {/* <StatCard
-              title="Total Projects"
-              value={1}
-              icon={<CircleCheckBig size={24} color="white" />}
-            /> */}
           </View>
-          <QuickAction />
-          {/* Holidays & Events Section */}
+
+          <QuickAction
+            onOpenAddUserModal={() => setAddUserModalVisible(true)}
+          />
+
           <HolidaysEventsSection
             calendarItems={calendarItems}
             calendarLoading={calendarLoading}
@@ -137,6 +194,15 @@ export default function DashboardScreen() {
           />
         </View>
       </ScrollView>
+
+      <AddUserModal
+        visible={addUserModalVisible}
+        onClose={() => setAddUserModalVisible(false)}
+        onSubmit={handleAddUser}
+        supervisors={supervisors}
+        currentUserId={user?.id ?? ""}
+        isSubmitting={isSubmittingUser}
+      />
     </View>
   );
 }

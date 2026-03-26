@@ -1,18 +1,16 @@
 import { ProfileData } from "@/src/types/profile.types";
 import { FormInput, FormOutput } from "@/src/types/user";
 import { TW } from "@/theme/twStyles";
-import BottomSheet, {
-  BottomSheetBackdrop,
-  BottomSheetView,
-} from "@gorhom/bottom-sheet";
 import { Lock, X } from "lucide-react-native";
-import { useCallback, useEffect, useRef } from "react";
+import React from "react";
 import { Control, Controller, FieldErrors } from "react-hook-form";
 import {
-  KeyboardAvoidingView,
-  Platform,
+  ActivityIndicator,
+  Keyboard,
+  Modal,
   Pressable,
   Text,
+  TouchableWithoutFeedback,
   View,
 } from "react-native";
 import ModalInput from "./ModalInput";
@@ -36,218 +34,218 @@ export default function EditProfileModal({
   isSaving,
   onSubmit,
 }: Props) {
-  const bottomSheetRef = useRef<BottomSheet>(null);
-
-  // Open / close in sync with the visible prop
-  useEffect(() => {
-    if (visible) {
-      bottomSheetRef.current?.expand();
-    } else {
-      bottomSheetRef.current?.close();
-    }
-  }, [visible]);
-
-  const renderBackdrop = useCallback(
-    (props: any) => (
-      <BottomSheetBackdrop
-        {...props}
-        disappearsOnIndex={-1}
-        appearsOnIndex={0}
-        opacity={0.4}
-        pressBehavior="close"
-      />
-    ),
-    [],
-  );
-
   return (
-    <BottomSheet
-      ref={bottomSheetRef}
-      index={-1}
-      enableDynamicSizing
-      enablePanDownToClose
-      onClose={onClose}
-      backdropComponent={renderBackdrop}
-      handleIndicatorStyle={{
-        backgroundColor: TW.BORDER,
-        width: 36,
-        height: 4,
-      }}
-      backgroundStyle={{
-        backgroundColor: "#ffffff",
-        borderTopLeftRadius: 26,
-        borderTopRightRadius: 26,
-      }}
-      keyboardBehavior="interactive"
-      keyboardBlurBehavior="restore"
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      statusBarTranslucent
+      onRequestClose={onClose}
     >
-      <BottomSheetView>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0,0,0,0.35)",
+            justifyContent: "center",
+            alignItems: "center",
+            paddingHorizontal: 20,
+          }}
         >
-          <View
-            style={{
-              paddingHorizontal: 20,
-              paddingTop: 6,
-              paddingBottom: Platform.OS === "ios" ? 44 : 32,
-            }}
-          >
-            {/* Header */}
+          <TouchableWithoutFeedback>
             <View
               style={{
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "space-between",
-                marginBottom: 22,
+                width: "100%",
+                maxWidth: 380,
+                backgroundColor: "#FFFFFF",
+                borderRadius: 22,
+                paddingHorizontal: 16,
+                paddingTop: 16,
+                paddingBottom: 14,
+                shadowColor: "#000",
+                shadowOpacity: 0.12,
+                shadowRadius: 18,
+                shadowOffset: { width: 0, height: 8 },
+                elevation: 8,
               }}
             >
-              <Text
+              {/* Header */}
+              <View
                 style={{
-                  fontSize: 17,
-                  fontWeight: "700",
-                  color: TW.bgSecondary,
-                  letterSpacing: -0.2,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  marginBottom: 14,
                 }}
               >
-                Edit Profile
-              </Text>
+                <View style={{ flex: 1, paddingRight: 12 }}>
+                  <Text
+                    style={{
+                      fontSize: 18,
+                      fontWeight: "800",
+                      color: "#111827",
+                    }}
+                  >
+                    Edit Profile
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: 12,
+                      color: "#6B7280",
+                      marginTop: 2,
+                    }}
+                  >
+                    Update your details
+                  </Text>
+                </View>
+              </View>
 
-              <Pressable
-                onPress={onClose}
-                hitSlop={12}
-                style={({ pressed }) => ({
-                  width: 30,
-                  height: 30,
-                  borderRadius: 15,
-                  backgroundColor: TW.BORDER,
-                  alignItems: "center",
-                  justifyContent: "center",
-                  opacity: pressed ? 0.5 : 1,
-                })}
-              >
-                <X size={15} color={TW.textSecondary} strokeWidth={2} />
-              </Pressable>
-            </View>
-
-            {/* First Name */}
-            <Controller
-              control={control}
-              name="firstName"
-              render={({ field: { value, onChange, onBlur } }) => (
-                <ModalInput
-                  label="First Name"
-                  value={value}
-                  onChange={onChange}
-                  onBlur={onBlur}
-                  placeholder="First name"
-                  error={errors.firstName?.message}
+              {/* Inputs */}
+              <View>
+                <Controller
+                  control={control}
+                  name="firstName"
+                  render={({ field: { value, onChange, onBlur } }) => (
+                    <ModalInput
+                      label="First Name"
+                      value={value ?? ""}
+                      onChange={onChange}
+                      onBlur={onBlur}
+                      placeholder="Enter first name"
+                      error={errors.firstName?.message}
+                    />
+                  )}
                 />
-              )}
-            />
 
-            {/* Last Name */}
-            <Controller
-              control={control}
-              name="lastName"
-              render={({ field: { value, onChange, onBlur } }) => (
-                <ModalInput
-                  label="Last Name"
-                  value={value}
-                  onChange={onChange}
-                  onBlur={onBlur}
-                  placeholder="Last name"
-                  error={errors.lastName?.message}
+                <Controller
+                  control={control}
+                  name="lastName"
+                  render={({ field: { value, onChange, onBlur } }) => (
+                    <ModalInput
+                      label="Last Name"
+                      value={value ?? ""}
+                      onChange={onChange}
+                      onBlur={onBlur}
+                      placeholder="Enter last name"
+                      error={errors.lastName?.message}
+                    />
+                  )}
                 />
-              )}
-            />
 
-            {/* Email — locked */}
-            <Text
-              style={{
-                fontSize: 11,
-                fontWeight: "700",
-                color: "#6B7280",
-                letterSpacing: 0.8,
-                textTransform: "uppercase",
-                marginBottom: 7,
-              }}
-            >
-              Email
-            </Text>
+                {/* Email */}
+                <View>
+                  <Text
+                    style={{
+                      fontSize: 13,
+                      fontWeight: "600",
+                      color: TW.bgSecondary,
+                      marginBottom: 6,
+                    }}
+                  >
+                    Email
+                  </Text>
 
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 9,
-                backgroundColor: TW.BORDER,
-                borderWidth: 1,
-                borderColor: "#6B7280",
-                borderRadius: 12,
-                paddingHorizontal: 14,
-                paddingVertical: 13,
-                marginBottom: 24,
-              }}
-            >
-              <Lock size={13} color={TW.bgSecondary} strokeWidth={1.8} />
-              <Text
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      borderWidth: 1,
+                      borderColor: "#E5E7EB",
+                      backgroundColor: "#F9FAFB",
+                      borderRadius: 12,
+                      paddingHorizontal: 12,
+                      paddingVertical: 12,
+                    }}
+                  >
+                    <Lock size={15} color={TW.bgSecondary} strokeWidth={1.9} />
+                    <Text
+                      numberOfLines={1}
+                      style={{
+                        flex: 1,
+                        marginLeft: 8,
+                        fontSize: 14,
+                        color: "#6B7280",
+                      }}
+                    >
+                      {profile?.email ?? "—"}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+
+              {/* Buttons */}
+              <View
                 style={{
-                  fontSize: 15,
-                  fontWeight: "500",
-                  color: TW.textPrimary,
+                  flexDirection: "row",
+                  gap: 10,
+                  marginTop: 16,
                 }}
               >
-                {profile?.email ?? "—"}
-              </Text>
-            </View>
-
-            {/* Actions */}
-            <View style={{ flexDirection: "row", gap: 10 }}>
-              <Pressable
-                onPress={onClose}
-                style={({ pressed }) => ({
-                  flex: 1,
-                  borderWidth: 1.5,
-                  borderColor: "#6B7280",
-                  borderRadius: 13,
-                  paddingVertical: 14,
-                  alignItems: "center",
-                  opacity: pressed ? 0.6 : 1,
-                })}
-              >
-                <Text
-                  style={{
-                    fontSize: 15,
-                    fontWeight: "600",
-                    color: TW.textSecondary,
+                <Pressable
+                  onPress={() => {
+                    Keyboard.dismiss();
+                    onClose();
                   }}
+                  style={({ pressed }) => ({
+                    flex: 1,
+                    height: 44,
+                    borderRadius: 12,
+                    borderWidth: 1,
+                    borderColor: "#D1D5DB",
+                    backgroundColor: "#FFFFFF",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    opacity: pressed ? 0.7 : 1,
+                  })}
                 >
-                  Cancel
-                </Text>
-              </Pressable>
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      fontWeight: "600",
+                      color: "#6B7280",
+                    }}
+                  >
+                    Cancel
+                  </Text>
+                </Pressable>
 
-              <Pressable
-                onPress={onSubmit}
-                disabled={isSaving}
-                style={({ pressed }) => ({
-                  flex: 1,
-                  backgroundColor: TW.bgSecondary,
-                  borderRadius: 13,
-                  paddingVertical: 14,
-                  alignItems: "center",
-                  opacity: isSaving ? 0.55 : pressed ? 0.8 : 1,
-                })}
-              >
-                <Text
-                  style={{ fontSize: 15, fontWeight: "700", color: "#fff" }}
+                <Pressable
+                  onPress={() => {
+                    Keyboard.dismiss();
+                    onSubmit();
+                  }}
+                  disabled={isSaving}
+                  style={({ pressed }) => ({
+                    flex: 1,
+                    height: 44,
+                    borderRadius: 12,
+                    backgroundColor: TW.bgSecondary,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexDirection: "row",
+                    gap: 8,
+                    opacity: isSaving ? 0.7 : pressed ? 0.85 : 1,
+                  })}
                 >
-                  {isSaving ? "Saving…" : "Update"}
-                </Text>
-              </Pressable>
+                  {isSaving && (
+                    <ActivityIndicator size="small" color="#FFFFFF" />
+                  )}
+
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      fontWeight: "700",
+                      color: "#FFFFFF",
+                    }}
+                  >
+                    {isSaving ? "Saving..." : "Update"}
+                  </Text>
+                </Pressable>
+              </View>
             </View>
-          </View>
-        </KeyboardAvoidingView>
-      </BottomSheetView>
-    </BottomSheet>
+          </TouchableWithoutFeedback>
+        </View>
+      </TouchableWithoutFeedback>
+    </Modal>
   );
 }

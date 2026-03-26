@@ -1,6 +1,6 @@
 import { TW } from "@/theme/twStyles";
 import { useRouter } from "expo-router";
-import { ArrowLeft } from "lucide-react-native";
+import { ChevronLeft } from "lucide-react-native";
 import { Pressable, ViewStyle } from "react-native";
 
 interface BackButtonProps {
@@ -44,7 +44,7 @@ export function BackButton({
         ...style,
       })}
     >
-      <ArrowLeft size={size} color={floating ? TW.bgSecondary : color} />
+      <ChevronLeft size={size} color={floating ? TW.bgSecondary : color} />
     </Pressable>
   );
 }

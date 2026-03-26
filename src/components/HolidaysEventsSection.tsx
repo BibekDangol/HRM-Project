@@ -1,5 +1,5 @@
 import { TW } from "@/theme/twStyles";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Pressable, Text, View, useWindowDimensions } from "react-native";
 import Carousel from "react-native-reanimated-carousel";
 import tw from "twrnc";
@@ -26,6 +26,11 @@ const CARD_RADIUS = 12;
 const MAX_VISIBLE = 5;
 const CARD_HEIGHT = 80;
 
+const parseLocalDate = (dateString: string) => {
+  const [year, month, day] = dateString.split("-").map(Number);
+  return new Date(year, month - 1, day);
+};
+
 export const HolidaysEventsSection = ({
   calendarItems,
   calendarLoading,
@@ -37,57 +42,58 @@ export const HolidaysEventsSection = ({
 
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const today = useMemo(() => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }, []);
 
-  const upcomingItems = calendarItems.filter((item) => {
-    const end = item.end_date
-      ? new Date(item.end_date + "T00:00:00")
-      : new Date(item.start_date + "T00:00:00");
-    return end >= today;
-  });
+  const upcomingItems = useMemo(() => {
+    return calendarItems
+      .filter((item) => {
+        const start = parseLocalDate(item.start_date);
+        start.setHours(0, 0, 0, 0);
+
+        // if date has passed, do not show on dashboard
+        return start >= today;
+      })
+      .sort((a, b) => {
+        const aStart = parseLocalDate(a.start_date).getTime();
+        const bStart = parseLocalDate(b.start_date).getTime();
+        return aStart - bStart;
+      });
+  }, [calendarItems, today]);
 
   const visibleItems = upcomingItems.slice(0, MAX_VISIBLE);
   const total = visibleItems.length;
 
+  const highlightedItemId = visibleItems.length > 0 ? visibleItems[0].id : null;
+
   const formatMonthDay = (d: string) => {
-    const date = new Date(d + "T00:00:00");
+    const date = parseLocalDate(d);
     const month = date
       .toLocaleDateString("en-US", { month: "short" })
       .toUpperCase();
     const day = date.getDate().toString().padStart(2, "0");
     const dayName = date.toLocaleDateString("en-US", { weekday: "short" });
+
     return { month, day, dayName };
   };
 
   const formatWeekday = (d: string) =>
-    new Date(d + "T00:00:00").toLocaleDateString("en-US", {
+    parseLocalDate(d).toLocaleDateString("en-US", {
       weekday: "long",
     });
 
-  const renderCard = ({
-    item,
-    index,
-  }: {
-    item: CalendarItem;
-    index: number;
-  }) => {
+  const renderCard = ({ item }: { item: CalendarItem; index: number }) => {
     const { month, day, dayName } = formatMonthDay(item.start_date);
 
-    const itemStart = new Date(item.start_date + "T00:00:00");
-    const itemEnd = item.end_date
-      ? new Date(item.end_date + "T00:00:00")
-      : itemStart;
-
-    const isToday = itemStart <= today && itemEnd >= today;
-    const isNearest = index === 0;
-    const isHighlighted = isToday || isNearest;
-
+    const isHighlighted = item.id === highlightedItemId;
     const isHoliday = item.type === "holiday";
 
-    const badgeBg = isHoliday ? "#fec3c3" : "#EEF2FF";
-    const badgeText = isHoliday ? "#b40909" : "#4338CA";
-    const badgeDot = isHoliday ? "#f50b0b" : "#6366F1";
+    const badgeBg = isHoliday ? "#FEE2E2" : "#EEF2FF";
+    const badgeText = isHoliday ? "#B91C1C" : "#4338CA";
+    const badgeDot = isHoliday ? "#EF4444" : "#6366F1";
 
     const card = (
       <View
@@ -109,7 +115,6 @@ export const HolidaysEventsSection = ({
           elevation: 1,
         }}
       >
-        {/* ── Left: Date chip ── */}
         <View
           style={{
             alignItems: "center",
@@ -131,6 +136,7 @@ export const HolidaysEventsSection = ({
           >
             {month}
           </Text>
+
           <Text
             style={{
               color: "#0F172A",
@@ -141,6 +147,7 @@ export const HolidaysEventsSection = ({
           >
             {day}
           </Text>
+
           <Text
             style={{
               color: "#94A3B8",
@@ -152,7 +159,6 @@ export const HolidaysEventsSection = ({
           </Text>
         </View>
 
-        {/* ── Divider ── */}
         <View
           style={{
             width: 0.5,
@@ -162,7 +168,6 @@ export const HolidaysEventsSection = ({
           }}
         />
 
-        {/* ── Center: Title + weekday ── */}
         <View style={{ flex: 1, gap: 4 }}>
           {isHighlighted && (
             <Text
@@ -173,21 +178,32 @@ export const HolidaysEventsSection = ({
                 letterSpacing: 0.6,
               }}
             >
-              {isToday ? "TODAY" : "UPCOMING"}
+              UPCOMING
             </Text>
           )}
+
           <Text
-            style={{ color: "#0F172A", fontSize: 14, fontWeight: "600" }}
+            style={{
+              color: "#0F172A",
+              fontSize: 14,
+              fontWeight: "600",
+            }}
             numberOfLines={1}
           >
             {item.title}
           </Text>
-          <Text style={{ color: "#94A3B8", fontSize: 12 }} numberOfLines={1}>
+
+          <Text
+            style={{
+              color: "#94A3B8",
+              fontSize: 12,
+            }}
+            numberOfLines={1}
+          >
             {formatWeekday(item.start_date)}
           </Text>
         </View>
 
-        {/* ── Right: Badge ── */}
         <View
           style={{
             flexDirection: "row",
@@ -250,7 +266,6 @@ export const HolidaysEventsSection = ({
         borderColor: "#E2E8F0",
       }}
     >
-      {/* Date chip skeleton */}
       <View
         style={{
           alignItems: "center",
@@ -288,7 +303,6 @@ export const HolidaysEventsSection = ({
         />
       </View>
 
-      {/* Divider */}
       <View
         style={{
           width: 0.5,
@@ -298,7 +312,6 @@ export const HolidaysEventsSection = ({
         }}
       />
 
-      {/* Content skeleton */}
       <View style={{ flex: 1, gap: 6 }}>
         <View
           style={{
@@ -318,7 +331,6 @@ export const HolidaysEventsSection = ({
         />
       </View>
 
-      {/* Badge skeleton */}
       <View
         style={{
           width: 60,
@@ -332,7 +344,6 @@ export const HolidaysEventsSection = ({
 
   return (
     <View style={{ marginTop: 20 }}>
-      {/* Header */}
       <View
         style={{
           flexDirection: "row",
@@ -344,6 +355,7 @@ export const HolidaysEventsSection = ({
         <Text style={tw`font-semibold ${TW.textPrimary} text-lg`}>
           Holidays &amp; Events
         </Text>
+
         <Pressable
           onPress={onViewAll}
           style={({ pressed }) => ({
@@ -352,13 +364,18 @@ export const HolidaysEventsSection = ({
             paddingHorizontal: 10,
           })}
         >
-          <Text style={{ color: "#475569", fontSize: 12, fontWeight: "600" }}>
+          <Text
+            style={{
+              color: "#475569",
+              fontSize: 12,
+              fontWeight: "600",
+            }}
+          >
             View All
           </Text>
         </Pressable>
       </View>
 
-      {/* Loading */}
       {calendarLoading ? (
         <SkeletonCard />
       ) : total === 0 ? (
@@ -373,10 +390,22 @@ export const HolidaysEventsSection = ({
             gap: 6,
           }}
         >
-          <Text style={{ color: "#CBD5E1", fontWeight: "600", fontSize: 14 }}>
+          <Text
+            style={{
+              color: "#CBD5E1",
+              fontWeight: "600",
+              fontSize: 14,
+            }}
+          >
             No upcoming events
           </Text>
-          <Text style={{ color: "#E2E8F0", fontSize: 12 }}>
+
+          <Text
+            style={{
+              color: "#E2E8F0",
+              fontSize: 12,
+            }}
+          >
             No holidays or events scheduled
           </Text>
         </View>

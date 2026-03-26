@@ -3,14 +3,17 @@ import { TW } from "@/theme/twStyles";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import {
+  ActivityIndicator,
   KeyboardAvoidingView,
   Modal,
   Platform,
+  Pressable,
   ScrollView,
   Text,
   TextInput,
-  TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
+  Keyboard,
 } from "react-native";
 import tw from "twrnc";
 import { z } from "zod";
@@ -33,14 +36,14 @@ const addUserSchema = z.object({
 
 export type AddUserFormData = z.infer<typeof addUserSchema>;
 
-const AddUserModal = ({
+export default function AddUserModal({
   visible,
   onClose,
   onSubmit,
   isSubmitting,
   supervisors,
   currentUserId,
-}: Props) => {
+}: Props) {
   const { control, handleSubmit, reset } = useForm<AddUserFormData>({
     resolver: zodResolver(addUserSchema),
     defaultValues: {
@@ -51,8 +54,6 @@ const AddUserModal = ({
     },
   });
 
-  if (!visible) return null;
-
   const submit = async (data: AddUserFormData) => {
     await onSubmit(data);
     reset();
@@ -60,201 +61,220 @@ const AddUserModal = ({
   };
 
   return (
-    <Modal visible={visible} animationType="none" transparent>
-      <View style={tw`flex-1 bg-black/40`}>
-        <KeyboardAvoidingView
-          style={tw`flex-1`}
-          behavior={Platform.OS === "ios" ? "padding" : undefined}
-        >
-          <ScrollView
-            contentContainerStyle={{ flexGrow: 1, justifyContent: "flex-end" }}
-            keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator={false}
-          >
-            {/* Modal Sheet */}
-            <View style={tw`${TW.bgWhite} rounded-t-3xl px-6 py-8`}>
-              {/* Title */}
-              <Text
-                style={tw`text-2xl font-bold text-center mb-6 ${TW.textPrimary}`}
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      statusBarTranslucent
+      onRequestClose={onClose}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={tw`flex-1 bg-black/40 justify-center items-center px-5`}>
+          <TouchableWithoutFeedback>
+            <KeyboardAvoidingView
+              behavior={Platform.OS === "ios" ? "padding" : undefined}
+              style={{ width: "100%" }}
+            >
+              <View
+                style={[
+                  tw`bg-white rounded-3xl px-5 pt-5 pb-4 self-center`,
+                  {
+                    width: "100%",
+                    maxWidth: 380,
+                  },
+                ]}
               >
-                Add New User
-              </Text>
-
-              {/* FIRST NAME */}
-              <Controller
-                control={control}
-                name="first_name"
-                render={({
-                  field: { value, onChange },
-                  fieldState: { error },
-                }) => (
-                  <View style={tw`mb-4`}>
-                    <Text
-                      style={tw`text-sm font-semibold mb-1 ${TW.textSecondary}`}
-                    >
-                      First Name
-                    </Text>
-
-                    <TextInput
-                      style={tw`h-13 bg-gray-100 rounded-xl px-4 text-base ${TW.textPrimary}`}
-                      placeholder="John"
-                      placeholderTextColor="#9CA3AF"
-                      value={value}
-                      onChangeText={onChange}
-                    />
-
-                    {error && (
-                      <Text style={tw`text-xs mt-1 ${TW.DANGER}`}>
-                        {error.message}
-                      </Text>
-                    )}
-                  </View>
-                )}
-              />
-
-              {/* LAST NAME */}
-              <Controller
-                control={control}
-                name="last_name"
-                render={({
-                  field: { value, onChange },
-                  fieldState: { error },
-                }) => (
-                  <View style={tw`mb-4`}>
-                    <Text
-                      style={tw`text-sm font-semibold mb-1 ${TW.textSecondary}`}
-                    >
-                      Last Name
-                    </Text>
-
-                    <TextInput
-                      style={tw`h-13 bg-gray-100 rounded-xl px-4 text-base ${TW.textPrimary}`}
-                      placeholder="Doe"
-                      placeholderTextColor="#9CA3AF"
-                      value={value}
-                      onChangeText={onChange}
-                    />
-
-                    {error && (
-                      <Text style={tw`text-xs mt-1 ${TW.DANGER}`}>
-                        {error.message}
-                      </Text>
-                    )}
-                  </View>
-                )}
-              />
-
-              {/* EMAIL */}
-              <Controller
-                control={control}
-                name="email"
-                render={({
-                  field: { value, onChange },
-                  fieldState: { error },
-                }) => (
-                  <View style={tw`mb-4`}>
-                    <Text
-                      style={tw`text-sm font-semibold mb-1 ${TW.textSecondary}`}
-                    >
-                      Email
-                    </Text>
-
-                    <TextInput
-                      style={tw`h-13 bg-gray-100 rounded-xl px-4 text-base ${TW.textPrimary}`}
-                      placeholder="example@gmail.com"
-                      placeholderTextColor="#9CA3AF"
-                      autoCapitalize="none"
-                      keyboardType="email-address"
-                      value={value}
-                      onChangeText={onChange}
-                    />
-
-                    {error && (
-                      <Text style={tw`text-xs mt-1 ${TW.DANGER}`}>
-                        {error.message}
-                      </Text>
-                    )}
-                  </View>
-                )}
-              />
-
-              {/* Supervisor */}
-              <Controller
-                control={control}
-                name="supervisor_id"
-                render={({ field: { value, onChange } }) => (
-                  <View style={tw`mb-6`}>
-                    <Text
-                      style={tw`text-sm font-semibold mb-2 ${TW.textSecondary}`}
-                    >
-                      Supervisor
-                    </Text>
-
-                    <ScrollView
-                      horizontal
-                      showsHorizontalScrollIndicator={false}
-                    >
-                      {supervisors.map((sup) => {
-                        const selected = value === sup.id;
-
-                        return (
-                          <TouchableOpacity
-                            key={sup.id}
-                            onPress={() => onChange(sup.id)}
-                            style={[
-                              tw`px-4 py-2 rounded-full mr-2 border`,
-                              selected
-                                ? tw`border-[#1B4A5A] bg-[#E6F1F3]`
-                                : tw`border-gray-300`,
-                            ]}
-                          >
-                            <Text
-                              style={tw`text-sm ${
-                                selected ? TW.textPrimary : TW.textSecondary
-                              }`}
-                            >
-                              {sup.first_name} {sup.last_name}
-                            </Text>
-                          </TouchableOpacity>
-                        );
-                      })}
-                    </ScrollView>
-                  </View>
-                )}
-              />
-
-              {/* ACTION BUTTONS */}
-              <View style={tw`flex-row justify-between mt-6`}>
-                {/* Cancel */}
-                <TouchableOpacity
-                  onPress={onClose}
-                  style={tw`h-13 px-6 rounded-xl justify-center bg-gray-100`}
+                <Text
+                  style={tw`text-xl font-bold text-center mb-5 ${TW.textPrimary}`}
                 >
-                  <Text style={tw`${TW.textSecondary} font-semibold`}>
-                    Cancel
-                  </Text>
-                </TouchableOpacity>
+                  Add New User
+                </Text>
 
-                {/* Submit */}
-                <TouchableOpacity
-                  onPress={handleSubmit(submit)}
-                  disabled={isSubmitting}
-                  style={[
-                    tw`h-13 px-8 rounded-xl items-center justify-center ${TW.bgAction}`,
-                    isSubmitting && tw`opacity-70`,
-                  ]}
+                <ScrollView
+                  keyboardShouldPersistTaps="handled"
+                  showsVerticalScrollIndicator={false}
+                  contentContainerStyle={{ paddingBottom: 4 }}
                 >
-                  <Text style={tw`font-semibold ${TW.textButton}`}>
-                    {isSubmitting ? "Adding..." : "Add User"}
-                  </Text>
-                </TouchableOpacity>
+                  <Controller
+                    control={control}
+                    name="first_name"
+                    render={({
+                      field: { value, onChange, onBlur },
+                      fieldState: { error },
+                    }) => (
+                      <View style={tw`mb-3`}>
+                        <Text
+                          style={tw`text-sm font-semibold mb-1 ${TW.textSecondary}`}
+                        >
+                          First Name
+                        </Text>
+
+                        <TextInput
+                          style={tw`h-12 bg-gray-100 rounded-xl px-4 text-base ${TW.textPrimary}`}
+                          placeholder="John"
+                          placeholderTextColor="#9CA3AF"
+                          value={value}
+                          onChangeText={onChange}
+                          onBlur={onBlur}
+                        />
+
+                        {error && (
+                          <Text style={tw`text-xs mt-1 text-red-500`}>
+                            {error.message}
+                          </Text>
+                        )}
+                      </View>
+                    )}
+                  />
+
+                  <Controller
+                    control={control}
+                    name="last_name"
+                    render={({
+                      field: { value, onChange, onBlur },
+                      fieldState: { error },
+                    }) => (
+                      <View style={tw`mb-3`}>
+                        <Text
+                          style={tw`text-sm font-semibold mb-1 ${TW.textSecondary}`}
+                        >
+                          Last Name
+                        </Text>
+
+                        <TextInput
+                          style={tw`h-12 bg-gray-100 rounded-xl px-4 text-base ${TW.textPrimary}`}
+                          placeholder="Doe"
+                          placeholderTextColor="#9CA3AF"
+                          value={value}
+                          onChangeText={onChange}
+                          onBlur={onBlur}
+                        />
+
+                        {error && (
+                          <Text style={tw`text-xs mt-1 text-red-500`}>
+                            {error.message}
+                          </Text>
+                        )}
+                      </View>
+                    )}
+                  />
+
+                  <Controller
+                    control={control}
+                    name="email"
+                    render={({
+                      field: { value, onChange, onBlur },
+                      fieldState: { error },
+                    }) => (
+                      <View style={tw`mb-3`}>
+                        <Text
+                          style={tw`text-sm font-semibold mb-1 ${TW.textSecondary}`}
+                        >
+                          Email
+                        </Text>
+
+                        <TextInput
+                          style={tw`h-12 bg-gray-100 rounded-xl px-4 text-base ${TW.textPrimary}`}
+                          placeholder="example@gmail.com"
+                          placeholderTextColor="#9CA3AF"
+                          autoCapitalize="none"
+                          keyboardType="email-address"
+                          value={value}
+                          onChangeText={onChange}
+                          onBlur={onBlur}
+                        />
+
+                        {error && (
+                          <Text style={tw`text-xs mt-1 text-red-500`}>
+                            {error.message}
+                          </Text>
+                        )}
+                      </View>
+                    )}
+                  />
+
+                  <Controller
+                    control={control}
+                    name="supervisor_id"
+                    render={({ field: { value, onChange } }) => (
+                      <View style={tw`mb-2`}>
+                        <Text
+                          style={tw`text-sm font-semibold mb-2 ${TW.textSecondary}`}
+                        >
+                          Supervisor
+                        </Text>
+
+                        <ScrollView
+                          horizontal
+                          showsHorizontalScrollIndicator={false}
+                          contentContainerStyle={{ paddingRight: 4 }}
+                        >
+                          {supervisors.map((sup) => {
+                            const selected = value === sup.id;
+
+                            return (
+                              <Pressable
+                                key={sup.id}
+                                onPress={() => onChange(sup.id)}
+                                style={[
+                                  tw`px-4 py-2 rounded-full mr-2 border`,
+                                  selected
+                                    ? tw`border-[#1B4A5A] bg-[#E6F1F3]`
+                                    : tw`border-gray-300 bg-white`,
+                                ]}
+                              >
+                                <Text
+                                  style={tw`text-sm ${
+                                    selected ? TW.textPrimary : TW.textSecondary
+                                  }`}
+                                >
+                                  {sup.first_name} {sup.last_name}
+                                </Text>
+                              </Pressable>
+                            );
+                          })}
+                        </ScrollView>
+                      </View>
+                    )}
+                  />
+                </ScrollView>
+
+                <View style={tw`flex-row gap-3 mt-5`}>
+                  <Pressable
+                    onPress={onClose}
+                    style={tw`flex-1 h-12 rounded-xl justify-center items-center bg-gray-100`}
+                  >
+                    <Text style={tw`${TW.textSecondary} font-semibold`}>
+                      Cancel
+                    </Text>
+                  </Pressable>
+
+                  <Pressable
+                    onPress={handleSubmit(submit)}
+                    disabled={isSubmitting}
+                    style={[
+                      tw`flex-1 h-12 rounded-xl items-center justify-center flex-row`,
+                      tw`${TW.bgAction}`,
+                      isSubmitting && tw`opacity-70`,
+                    ]}
+                  >
+                    {isSubmitting && (
+                      <ActivityIndicator
+                        size="small"
+                        color="#FFFFFF"
+                        style={{ marginRight: 8 }}
+                      />
+                    )}
+                    <Text style={tw`font-semibold ${TW.textButton}`}>
+                      {isSubmitting ? "Adding..." : "Add User"}
+                    </Text>
+                  </Pressable>
+                </View>
               </View>
-            </View>
-          </ScrollView>
-        </KeyboardAvoidingView>
-      </View>
+            </KeyboardAvoidingView>
+          </TouchableWithoutFeedback>
+        </View>
+      </TouchableWithoutFeedback>
     </Modal>
   );
-};
-
-export default AddUserModal;
+}
