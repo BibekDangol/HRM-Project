@@ -1,8 +1,4 @@
 import { BackButton } from "@/src/components/BackButton";
-import {
-  buildPeriodMarks,
-  isBeforeOrEqual,
-} from "@/src/components/Calendar/userCalendar";
 import { SharedCalendar } from "@/src/components/SharedCalendar";
 import { DateField } from "@/src/components/userLeave/DateField";
 import { LeaveTypeDropdown } from "@/src/components/userLeave/LeaveTypeDropdown";
@@ -14,24 +10,24 @@ import {
   LeaveTypeRow,
   LeaveTypeWithStats,
 } from "@/src/types/userLeave";
-import { buildAdminMarks } from "@/src/utils/adminCalendar";
 import { calcLeaveDays, diffDaysInclusive } from "@/src/utils/leaveUtils";
 import { TW } from "@/theme/twStyles";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useFocusEffect, useRouter } from "expo-router";
-import { Check, X } from "lucide-react-native";
+import { Check } from "lucide-react-native";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
+  ActivityIndicator,
   Alert,
   Modal,
-  Platform,
   Pressable,
   Text,
   TextInput,
   View,
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import tw from "twrnc";
 
 async function getOrganizationIdByUserId(userId: string) {
   const { data, error } = await supabase
@@ -44,25 +40,40 @@ async function getOrganizationIdByUserId(userId: string) {
   return data?.organization_id ?? null;
 }
 
-const SECTION_LABEL = {
-  fontSize: 11,
-  fontWeight: "700" as const,
-  color: "#94A3B8",
-  letterSpacing: 0.9,
-  textTransform: "uppercase" as const,
-  marginBottom: 8,
+const SPACING = {
+  screenX: 20,
+  top: 10,
+  section: 16,
+  labelBottom: 8,
+  rowGap: 10,
+  inputY: 12,
+  inputX: 14,
+  buttonY: 13,
 };
 
 const ERROR_TEXT = {
-  marginTop: 5,
+  marginTop: 6,
   fontSize: 12,
   color: "#EF4444",
   fontWeight: "500" as const,
 };
 
+type ActiveDateField = "start" | "end" | null;
+
+function getDateParts(dateStr?: string) {
+  if (!dateStr) {
+    const now = new Date();
+    return { year: now.getFullYear(), month: now.getMonth() + 1 };
+  }
+  const d = new Date(dateStr);
+  return { year: d.getFullYear(), month: d.getMonth() + 1 };
+}
+
 export default function ApplyLeaveScreen() {
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
+
+  const todayStr = new Date().toISOString().split("T")[0];
 
   const [selectedLeaveType, setSelectedLeaveType] = useState<number | null>(
     null,
@@ -76,8 +87,7 @@ export default function ApplyLeaveScreen() {
   const [dateError, setDateError] = useState("");
 
   const [calendarVisible, setCalendarVisible] = useState(false);
-  const [selectedStart, setSelectedStart] = useState("");
-  const [selectedEnd, setSelectedEnd] = useState("");
+  const [activeDateField, setActiveDateField] = useState<ActiveDateField>(null);
   const [calYear, setCalYear] = useState(new Date().getFullYear());
   const [calMonth, setCalMonth] = useState(new Date().getMonth() + 1);
 
@@ -99,7 +109,7 @@ export default function ApplyLeaveScreen() {
       isHalfDay: false,
       halfSession: "morning",
     },
-    mode: "onChange",
+    mode: "all",
   });
 
   const isHalfDay = watch("isHalfDay");
@@ -118,94 +128,85 @@ export default function ApplyLeaveScreen() {
   const computedDaysCount = useMemo(() => {
     if (!localStartDate || !localEndDate) return null;
     if (localStartDate > localEndDate) return null;
-    if (localStartDate === localEndDate) return isHalfDay ? 0.5 : 1;
+
+    if (localStartDate === localEndDate) {
+      return isHalfDay ? 0.5 : 1;
+    }
+
     const n = diffDaysInclusive(localStartDate, localEndDate);
     return n ?? null;
   }, [localStartDate, localEndDate, isHalfDay]);
 
-  const openCalendar = () => {
-    setSelectedStart(localStartDate || "");
-    setSelectedEnd(isHalfDay ? localStartDate || "" : localEndDate || "");
+  const markedDates = useMemo(() => {
+    const marks: Record<string, any> = {};
+
+    if (localStartDate) {
+      marks[localStartDate] = {
+        customStyles: {
+          container: {
+            backgroundColor: TW.bgSecondary,
+          },
+          text: {
+            color: "#ffffff",
+            fontWeight: "700",
+          },
+        },
+      };
+    }
+
+    if (localEndDate && localEndDate !== localStartDate) {
+      marks[localEndDate] = {
+        customStyles: {
+          container: {
+            backgroundColor: TW.bgSecondary,
+          },
+          text: {
+            color: "#ffffff",
+            fontWeight: "700",
+          },
+        },
+      };
+    }
+
+    return marks;
+  }, [localStartDate, localEndDate]);
+
+  const openCalendar = (field: "start" | "end") => {
+    setActiveDateField(field);
+
+    const sourceDate =
+      field === "start"
+        ? localStartDate || localEndDate
+        : localEndDate || localStartDate;
+
+    const parts = getDateParts(sourceDate);
+    setCalYear(parts.year);
+    setCalMonth(parts.month);
     setCalendarVisible(true);
   };
 
-  const adminMarks = buildAdminMarks(calYear, calMonth);
-  const todayStr = new Date().toISOString().split("T")[0];
-
-  const todayMark = {
-    [todayStr]: {
-      customStyles: {
-        container: {
-          borderWidth: 2,
-          borderColor: "#FFB300",
-          borderRadius: 8,
-          backgroundColor: "transparent",
-          width: 32,
-          height: 32,
-          alignItems: "center",
-          justifyContent: "center",
-        },
-        text: { color: "#FFB300", fontWeight: "bold" as const },
-      },
-    },
-  };
-
-  let markedDates: Record<string, any>;
-
-  if (selectedStart && selectedEnd) {
-    const start = isBeforeOrEqual(selectedStart, selectedEnd)
-      ? selectedStart
-      : selectedEnd;
-    const end = isBeforeOrEqual(selectedStart, selectedEnd)
-      ? selectedEnd
-      : selectedStart;
-    markedDates = buildPeriodMarks(start, end);
-  } else if (selectedStart && !selectedEnd) {
-    markedDates = {
-      ...adminMarks,
-      ...todayMark,
-      [selectedStart]: {
-        customStyles: {
-          container: {
-            backgroundColor: "#FFB300",
-            borderRadius: 999,
-            width: 36,
-            height: 36,
-            alignItems: "center",
-            justifyContent: "center",
-          },
-          text: { color: "#fff", fontWeight: "bold" as const },
-        },
-      },
-    };
-  } else {
-    markedDates = { ...adminMarks, ...todayMark };
-  }
-
-  const markingType = selectedStart && selectedEnd ? "period" : "custom";
-
   const isDateAlreadyApplied = useCallback(
-    (dateStr: string) => {
-      return appliedDateRanges.some(
+    (dateStr: string) =>
+      appliedDateRanges.some(
         (range) => dateStr >= range.start && dateStr <= range.end,
-      );
-    },
+      ),
     [appliedDateRanges],
   );
 
   const hasRangeOverlap = useCallback(
-    (start: string, end: string) => {
-      return appliedDateRanges.some(
+    (start: string, end: string) =>
+      appliedDateRanges.some(
         (range) => start <= range.end && end >= range.start,
-      );
-    },
+      ),
     [appliedDateRanges],
   );
 
   const onDayPress = (day: { dateString: string }) => {
-    const dateStr = day.dateString;
+    const selectedDate = day.dateString;
 
-    if (isDateAlreadyApplied(dateStr)) {
+    if (selectedDate < todayStr) return;
+
+    if (isDateAlreadyApplied(selectedDate)) {
       Alert.alert(
         "Already Applied",
         "You already have a pending or approved leave on this date.",
@@ -213,39 +214,39 @@ export default function ApplyLeaveScreen() {
       return;
     }
 
-    if (!selectedStart || (selectedStart && selectedEnd)) {
-      setSelectedStart(dateStr);
-      setSelectedEnd("");
+    if (activeDateField === "start") {
+      setLocalStartDate(selectedDate);
+
+      if (isHalfDay) {
+        setLocalEndDate(selectedDate);
+      } else if (!localEndDate || selectedDate > localEndDate) {
+        setLocalEndDate(selectedDate);
+      }
+
+      setDateError("");
+      setCalendarVisible(false);
+      setActiveDateField(null);
       return;
     }
 
-    const finalStart = isBeforeOrEqual(selectedStart, dateStr)
-      ? selectedStart
-      : dateStr;
-    const finalEnd = isBeforeOrEqual(selectedStart, dateStr)
-      ? dateStr
-      : selectedStart;
+    if (activeDateField === "end") {
+      if (localStartDate && selectedDate < localStartDate) {
+        setDateError("End date must be after start date");
+        return;
+      }
 
-    if (hasRangeOverlap(finalStart, finalEnd)) {
-      Alert.alert(
-        "Overlap Detected",
-        "Your selected date range overlaps with an existing leave.",
-      );
-      setSelectedStart("");
-      setSelectedEnd("");
-      return;
-    }
+      if (localStartDate && hasRangeOverlap(localStartDate, selectedDate)) {
+        Alert.alert(
+          "Overlap Detected",
+          "Your selected date range overlaps with an existing leave.",
+        );
+        return;
+      }
 
-    setSelectedStart(finalStart);
-    setSelectedEnd(finalEnd);
-    setLocalStartDate(finalStart);
-    setLocalEndDate(finalEnd);
-    setDateError("");
-    setCalendarVisible(false);
-
-    if (finalStart !== finalEnd) {
-      setValue("isHalfDay", false, { shouldValidate: true });
-      setValue("halfSession", "morning", { shouldValidate: true });
+      setLocalEndDate(selectedDate);
+      setDateError("");
+      setCalendarVisible(false);
+      setActiveDateField(null);
     }
   };
 
@@ -309,7 +310,13 @@ export default function ApplyLeaveScreen() {
         const approvedUsed = +(approvedByType.get(t.id) ?? 0);
         const pending = +(pendingByType.get(t.id) ?? 0);
         const remaining = +(t.leave_limit - approvedUsed - pending);
-        return { ...t, approvedUsed, pending, remaining };
+
+        return {
+          ...t,
+          approvedUsed,
+          pending,
+          remaining,
+        };
       });
 
       setLeaveTypes(merged);
@@ -402,12 +409,10 @@ export default function ApplyLeaveScreen() {
     }
 
     const dayType =
-      localStartDate === localEndDate
-        ? values.halfSession === "morning"
-          ? "MORNING"
-          : values.halfSession === "evening"
-            ? "EVENING"
-            : "FULL"
+      isHalfDay && localStartDate === localEndDate
+        ? values.halfSession === "evening"
+          ? "EVENING"
+          : "MORNING"
         : "FULL";
 
     try {
@@ -448,420 +453,346 @@ export default function ApplyLeaveScreen() {
   const handleSubmitPress = async () => {
     const manualHasError = validateManualFields();
     await trigger();
+
     if (!manualHasError) {
       handleSubmit(onSubmit)();
     }
   };
 
   return (
-    <>
-      <Modal
-        visible={calendarVisible}
-        animationType="none"
-        transparent
-        onRequestClose={() => setCalendarVisible(false)}
+    <View style={tw`flex-1 bg-white`}>
+      <KeyboardAwareScrollView
+        enableOnAndroid
+        extraScrollHeight={24}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        enableAutomaticScroll
+        contentContainerStyle={{
+          paddingHorizontal: SPACING.screenX,
+          paddingTop: SPACING.top,
+          paddingBottom: 36,
+        }}
       >
-        <Pressable
-          style={{
-            flex: 1,
-            backgroundColor: "rgba(0,0,0,0.4)",
-            justifyContent: "flex-end",
-          }}
-          onPress={() => setCalendarVisible(false)}
-        >
-          <Pressable
-            onPress={() => {}}
-            style={{
-              backgroundColor: "#ffffff",
-              borderTopLeftRadius: 28,
-              borderTopRightRadius: 28,
-              paddingBottom: Platform.OS === "ios" ? 44 : 32,
-            }}
+        <BackButton
+          color={TW.bgSecondary}
+          backgroundColor="rgba(27,74,90,0.08)"
+          style={{ marginBottom: 18 }}
+          onPress={() => router.replace("/(users)/leaves/(tabs)")}
+        />
+
+        <View style={tw`mb-7`}>
+          <Text style={[tw`text-2xl font-bold`, { color: TW.bgSecondary }]}>
+            New Leave Request
+          </Text>
+          <Text style={tw`mt-1.5 text-[13px] text-slate-400`}>
+            Fill in the details to submit a leave request
+          </Text>
+        </View>
+
+        <View style={{ marginBottom: SPACING.section }}>
+          <Text
+            style={[
+              tw`text-base font-semibold`,
+              { color: TW.bgSecondary, marginBottom: SPACING.labelBottom },
+            ]}
           >
-            <View
-              style={{ alignItems: "center", paddingTop: 14, marginBottom: 4 }}
-            >
-              <View
-                style={{
-                  width: 40,
-                  height: 4,
-                  borderRadius: 2,
-                  backgroundColor: "#E2E8F0",
-                }}
+            Leave Type
+          </Text>
+
+          <LeaveTypeDropdown
+            value={selectedLeaveType}
+            onChange={handleLeaveTypeChange}
+            leaveTypes={leaveTypes}
+            loading={loadingTypes}
+            onRefresh={loadLeaveTypesWithStats}
+          />
+
+          {!!leaveTypeError && <Text style={ERROR_TEXT}>{leaveTypeError}</Text>}
+        </View>
+
+        <View>
+          <Text
+            style={[
+              tw`text-base font-semibold`,
+              { color: TW.bgSecondary, marginBottom: SPACING.labelBottom },
+            ]}
+          >
+            Duration
+          </Text>
+
+          <View style={{ flexDirection: "row", gap: SPACING.rowGap }}>
+            <View style={tw`flex-1`}>
+              <DateField
+                label="Start Date"
+                value={localStartDate || "Select start date"}
+                onPress={() => openCalendar("start")}
               />
             </View>
 
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "space-between",
-                paddingHorizontal: 20,
-                paddingVertical: 12,
-              }}
-            >
-              <View>
-                <Text
-                  style={{
-                    fontSize: 16,
-                    fontWeight: "700",
-                    color: TW.bgSecondary,
-                    letterSpacing: -0.3,
-                  }}
-                >
-                  Select Date
-                </Text>
-                <Text
-                  style={{
-                    marginTop: 2,
-                    fontSize: 12,
-                    color: "#94A3B8",
-                  }}
-                >
-                  {selectedStart && !selectedEnd
-                    ? "Tap again to set end date"
-                    : "Tap once for start, again for end"}
-                </Text>
+            {!isHalfDay && (
+              <View style={tw`flex-1`}>
+                <DateField
+                  label="End Date"
+                  value={localEndDate || "Select end date"}
+                  onPress={() => openCalendar("end")}
+                />
               </View>
+            )}
+          </View>
 
+          {!!dateError && <Text style={ERROR_TEXT}>{dateError}</Text>}
+        </View>
+
+        <View style={{ marginBottom: SPACING.section }}>
+          <Text
+            style={[
+              tw`text-base font-semibold`,
+              { color: TW.bgSecondary, marginBottom: SPACING.labelBottom },
+            ]}
+          >
+            Day Option
+          </Text>
+
+          <Controller
+            control={control}
+            name="isHalfDay"
+            render={({ field: { value, onChange } }) => (
               <Pressable
-                onPress={() => setCalendarVisible(false)}
+                onPress={() => {
+                  const next = !value;
+                  onChange(next);
+
+                  if (next && localStartDate) {
+                    setLocalEndDate(localStartDate);
+                    setValue("halfSession", "morning", {
+                      shouldValidate: true,
+                    });
+                  }
+                }}
                 style={({ pressed }) => ({
-                  width: 32,
-                  height: 32,
-                  borderRadius: 16,
-                  backgroundColor: "#F1F5F9",
+                  flexDirection: "row",
                   alignItems: "center",
-                  justifyContent: "center",
-                  opacity: pressed ? 0.5 : 1,
+                  gap: 10,
+                  alignSelf: "flex-start",
+                  opacity: pressed ? 0.85 : 1,
+                  marginBottom: value ? 14 : 0,
                 })}
               >
-                <X size={15} color={TW.bgSecondary} strokeWidth={2.5} />
+                <View
+                  style={{
+                    width: 20,
+                    height: 20,
+                    borderWidth: 2,
+                    borderRadius: 5,
+                    borderColor: value ? TW.bgSecondary : "#CBD5E1",
+                    backgroundColor: value ? TW.bgSecondary : "#ffffff",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  {value ? (
+                    <Check color="#ffffff" size={12} strokeWidth={3} />
+                  ) : null}
+                </View>
+
+                <Text
+                  style={{
+                    fontSize: 13,
+                    fontWeight: "600",
+                    color: TW.bgSecondary,
+                  }}
+                >
+                  Half Day
+                </Text>
               </Pressable>
-            </View>
-
-            <SharedCalendar
-              year={calYear}
-              month={calMonth}
-              markedDates={markedDates}
-              markingType={markingType}
-              onDayPress={onDayPress}
-              onMonthChange={(m: { year: number; month: number }) => {
-                setCalYear(m.year);
-                setCalMonth(m.month);
-                setSelectedEnd("");
-              }}
-              showLegend={true}
-            />
-
-            <View style={{ paddingHorizontal: 20, paddingTop: 12 }}>
-              <Text
-                style={{
-                  fontSize: 13,
-                  fontWeight: "600",
-                  color: TW.bgSecondary,
-                }}
-              >
-                Selected: {selectedStart || "-"}
-                {selectedEnd ? ` → ${selectedEnd}` : ""}
-              </Text>
-            </View>
-          </Pressable>
-        </Pressable>
-      </Modal>
-
-      <View style={{ flex: 1, backgroundColor: "#ffffff" }}>
-        <KeyboardAwareScrollView
-          enableOnAndroid
-          extraScrollHeight={24}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-          enableAutomaticScroll
-          contentContainerStyle={{
-            paddingHorizontal: 20,
-            paddingTop: 16,
-            paddingBottom: 32,
-          }}
-        >
-          <BackButton
-            color={TW.bgSecondary}
-            backgroundColor="rgba(27,74,90,0.08)"
-            style={{ marginBottom: 16 }}
-            onPress={() => router.replace("/(users)/leaves/(tabs)")}
+            )}
           />
 
-          <View style={{ marginBottom: 24 }}>
-            <Text
-              style={{
-                fontSize: 22,
-                fontWeight: "700",
-                color: TW.bgSecondary,
-                letterSpacing: -0.4,
-              }}
-            >
-              New Leave Request
-            </Text>
-            <Text
-              style={{
-                marginTop: 3,
-                fontSize: 13,
-                color: "#94A3B8",
-                fontWeight: "400",
-              }}
-            >
-              Fill in the details to submit a leave request
-            </Text>
-          </View>
-
-          {/* Leave Type */}
-          <View style={{ marginBottom: 20 }}>
-            <Text style={SECTION_LABEL}>Leave Type</Text>
-            <LeaveTypeDropdown
-              value={selectedLeaveType}
-              onChange={handleLeaveTypeChange}
-              leaveTypes={leaveTypes}
-              loading={loadingTypes}
-              onRefresh={loadLeaveTypesWithStats}
-            />
-            {!!leaveTypeError && (
-              <Text style={ERROR_TEXT}>{leaveTypeError}</Text>
-            )}
-          </View>
-
-          {/* Duration */}
-          <View style={{ marginBottom: 20 }}>
-            <Text style={SECTION_LABEL}>Duration</Text>
-            <View style={{ flexDirection: "row", gap: 12 }}>
-              <View style={{ flex: 1 }}>
-                <DateField
-                  label="Start Date"
-                  value={localStartDate}
-                  onPress={openCalendar}
-                />
-              </View>
-
-              {!isHalfDay && (
-                <View style={{ flex: 1 }}>
-                  <DateField
-                    label="End Date"
-                    value={localEndDate}
-                    onPress={openCalendar}
-                  />
-                </View>
-              )}
-            </View>
-            {!!dateError && <Text style={ERROR_TEXT}>{dateError}</Text>}
-          </View>
-
-          {/* Day Option */}
-          <View style={{ marginBottom: 20 }}>
-            <Text style={SECTION_LABEL}>Day Option</Text>
-            <Controller
-              control={control}
-              name="isHalfDay"
-              render={({ field: { value, onChange } }) => (
-                <Pressable
-                  onPress={() => {
-                    if (
-                      localStartDate &&
-                      localEndDate &&
-                      localStartDate !== localEndDate
-                    ) {
-                      setLocalEndDate(localStartDate);
-                      onChange(true);
-                      setValue("halfSession", "morning", {
-                        shouldValidate: true,
-                      });
-                      return;
-                    }
-
-                    const next = !value;
-                    onChange(next);
-
-                    if (next) {
-                      setValue("halfSession", "morning", {
-                        shouldValidate: true,
-                      });
-                      if (localStartDate) setLocalEndDate(localStartDate);
-                    }
-                  }}
-                  style={({ pressed }) => ({
-                    flexDirection: "row",
-                    alignItems: "center",
-                    gap: 10,
-                    paddingHorizontal: 14,
-                    paddingVertical: 12,
-                    borderRadius: 12,
-                    borderWidth: 1.5,
-                    borderColor: value ? TW.bgSecondary : "#E2E8F0",
-                    backgroundColor: "#ffffff",
-                    alignSelf: "flex-start",
-                    opacity: pressed ? 0.85 : 1,
-                  })}
-                >
-                  <View
-                    style={{
-                      width: 20,
-                      height: 20,
-                      borderRadius: 6,
-                      borderWidth: 2,
-                      borderColor: value ? TW.bgSecondary : "#CBD5E1",
-                      backgroundColor: value ? TW.bgSecondary : "#ffffff",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    {value ? (
-                      <Check color="#ffffff" size={12} strokeWidth={3} />
-                    ) : null}
-                  </View>
-
-                  <Text
-                    style={{
-                      fontSize: 14,
-                      fontWeight: "600",
-                      color: TW.bgSecondary,
-                    }}
-                  >
-                    Half Day
-                  </Text>
-                </Pressable>
-              )}
-            />
-
-            {isHalfDay && (
-              <View style={{ marginTop: 12 }}>
-                <Text style={{ ...SECTION_LABEL, marginBottom: 8 }}>
-                  Session
-                </Text>
-                <Controller
-                  control={control}
-                  name="halfSession"
-                  render={({ field: { value, onChange } }) => (
-                    <View style={{ flexDirection: "row", gap: 10 }}>
-                      {(["morning", "evening"] as const).map((session) => (
-                        <Pressable
-                          key={session}
-                          onPress={() => onChange(session)}
-                          style={({ pressed }) => ({
-                            flex: 1,
-                            paddingVertical: 12,
-                            borderRadius: 12,
-                            borderWidth: 1.5,
-                            borderColor:
-                              value === session ? TW.bgSecondary : "#E2E8F0",
-                            backgroundColor:
-                              value === session ? TW.bgSecondary : "#ffffff",
-                            alignItems: "center",
-                            opacity: pressed ? 0.85 : 1,
-                          })}
-                        >
-                          <Text
-                            style={{
-                              fontSize: 14,
-                              fontWeight: "600",
-                              color:
-                                value === session ? "#ffffff" : TW.bgSecondary,
-                            }}
-                          >
-                            {session.charAt(0).toUpperCase() + session.slice(1)}
-                          </Text>
-                        </Pressable>
-                      ))}
-                    </View>
-                  )}
-                />
-              </View>
-            )}
-          </View>
-
-          {/* Reason */}
-          <View style={{ marginBottom: 20 }}>
-            <Text style={SECTION_LABEL}>Reason / Description</Text>
-            <Controller
-              control={control}
-              name="reason"
-              render={({ field: { value, onChange, onBlur } }) => (
-                <TextInput
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  placeholder="Enter reason for leave..."
-                  placeholderTextColor="#CBD5E1"
-                  multiline
-                  textAlignVertical="top"
-                  style={{
-                    paddingHorizontal: 14,
-                    paddingVertical: 13,
-                    borderRadius: 12,
-                    borderWidth: 1.5,
-                    borderColor: errors.reason ? "#EF4444" : "#E2E8F0",
+          {isHalfDay && (
+            <View>
+              <Text
+                style={[
+                  tw`text-base font-semibold`,
+                  {
                     color: TW.bgSecondary,
-                    fontSize: 14,
-                    lineHeight: 22,
-                    minHeight: 120,
-                    backgroundColor: "#ffffff",
-                  }}
-                />
-              )}
-            />
-            {!!errors.reason?.message && (
-              <Text style={ERROR_TEXT}>{errors.reason.message}</Text>
+                    marginBottom: SPACING.labelBottom,
+                  },
+                ]}
+              >
+                Session
+              </Text>
+
+              <Controller
+                control={control}
+                name="halfSession"
+                render={({ field: { value, onChange } }) => (
+                  <View style={tw`flex-row gap-2.5`}>
+                    {(["morning", "evening"] as const).map((session) => (
+                      <Pressable
+                        key={session}
+                        onPress={() => onChange(session)}
+                        style={({ pressed }) => ({
+                          flex: 1,
+                          paddingVertical: 13,
+                          borderWidth: 1.5,
+                          borderRadius: 10,
+                          borderColor:
+                            value === session ? TW.bgSecondary : "#E2E8F0",
+                          backgroundColor:
+                            value === session ? TW.bgSecondary : "#ffffff",
+                          alignItems: "center",
+                          opacity: pressed ? 0.85 : 1,
+                        })}
+                      >
+                        <Text
+                          style={{
+                            fontSize: 12,
+                            fontWeight: "500",
+                            color:
+                              value === session ? "#ffffff" : TW.bgSecondary,
+                          }}
+                        >
+                          {session.charAt(0).toUpperCase() + session.slice(1)}
+                        </Text>
+                      </Pressable>
+                    ))}
+                  </View>
+                )}
+              />
+            </View>
+          )}
+        </View>
+
+        <View style={{ marginBottom: SPACING.section }}>
+          <Text
+            style={[
+              tw`text-base font-semibold`,
+              { color: TW.bgSecondary, marginBottom: SPACING.labelBottom },
+            ]}
+          >
+            Reason / Description
+          </Text>
+
+          <Controller
+            control={control}
+            name="reason"
+            render={({ field: { value, onChange, onBlur } }) => (
+              <TextInput
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                placeholder="Enter reason for leave..."
+                placeholderTextColor="#CBD5E1"
+                multiline
+                textAlignVertical="top"
+                style={{
+                  paddingHorizontal: SPACING.inputX,
+                  paddingVertical: SPACING.inputY,
+                  borderWidth: 1.5,
+                  borderRadius: 10,
+                  borderColor: errors.reason ? "#EF4444" : "#E2E8F0",
+                  color: TW.bgSecondary,
+                  fontSize: 14,
+                  lineHeight: 22,
+                  minHeight: 90,
+                  backgroundColor: "#ffffff",
+                }}
+              />
             )}
-          </View>
+          />
 
-          {/* Actions */}
-          <View style={{ marginTop: 12, flexDirection: "row", gap: 12 }}>
-            <Pressable
-              disabled={submitting}
-              onPress={() => router.replace("/(users)/leaves/(tabs)")}
-              style={({ pressed }) => ({
-                flex: 1,
-                borderWidth: 1.5,
-                borderColor: "#CBD5E1",
-                borderRadius: 14,
-                paddingVertical: 15,
-                alignItems: "center",
-                backgroundColor: "#ffffff",
-                opacity: pressed || submitting ? 0.6 : 1,
-              })}
-            >
-              <Text
-                style={{
-                  fontSize: 14,
-                  fontWeight: "600",
-                  color: "#64748B",
-                }}
-              >
-                Cancel
-              </Text>
-            </Pressable>
+          {!!errors.reason?.message && (
+            <Text style={ERROR_TEXT}>{errors.reason.message}</Text>
+          )}
+        </View>
 
-            <Pressable
-              disabled={submitting}
-              onPress={handleSubmitPress}
-              style={({ pressed }) => ({
-                flex: 1,
-                backgroundColor: TW.bgSecondary,
-                borderRadius: 14,
-                paddingVertical: 15,
-                alignItems: "center",
-                opacity: submitting ? 0.55 : pressed ? 0.8 : 1,
-              })}
+        <View style={tw`mt-1 flex-row gap-3`}>
+          <Pressable
+            disabled={submitting}
+            onPress={() => router.replace("/(users)/leaves/(tabs)")}
+            style={({ pressed }) => ({
+              flex: 1,
+              borderWidth: 1.5,
+              borderColor: "#CBD5E1",
+              borderRadius: 10,
+              paddingVertical: SPACING.buttonY,
+              alignItems: "center",
+              backgroundColor: "#ffffff",
+              opacity: pressed || submitting ? 0.6 : 1,
+            })}
+          >
+            <Text
+              style={{
+                fontSize: 14,
+                fontWeight: "600",
+                color: "#64748B",
+              }}
             >
-              <Text
-                style={{
-                  fontSize: 14,
-                  fontWeight: "700",
-                  color: "#ffffff",
-                }}
-              >
-                {submitting ? "Submitting..." : "Submit"}
-              </Text>
-            </Pressable>
-          </View>
-        </KeyboardAwareScrollView>
-      </View>
-    </>
+              Cancel
+            </Text>
+          </Pressable>
+
+          <Pressable
+            disabled={submitting}
+            onPress={handleSubmitPress}
+            style={({ pressed }) => ({
+              flex: 1,
+              backgroundColor: TW.bgSecondary,
+              borderRadius: 10,
+              paddingVertical: SPACING.buttonY,
+              alignItems: "center",
+              flexDirection: "row",
+              justifyContent: "center",
+              gap: 8,
+              opacity: submitting ? 0.55 : pressed ? 0.8 : 1,
+            })}
+          >
+            {submitting && <ActivityIndicator size="small" color="#ffffff" />}
+            <Text
+              style={{
+                fontSize: 14,
+                fontWeight: "700",
+                color: "#ffffff",
+              }}
+            >
+              {submitting ? "Submitting" : "Submit"}
+            </Text>
+          </Pressable>
+        </View>
+      </KeyboardAwareScrollView>
+
+      <Modal
+        visible={calendarVisible}
+        animationType="fade"
+        transparent
+        onRequestClose={() => {
+          setCalendarVisible(false);
+          setActiveDateField(null);
+        }}
+      >
+        <View style={tw`flex-1 bg-black/25 justify-center items-center px-4`}>
+          <Pressable
+            style={tw`absolute inset-0`}
+            onPress={() => {
+              setCalendarVisible(false);
+              setActiveDateField(null);
+            }}
+          />
+
+          <SharedCalendar
+            year={calYear}
+            month={calMonth}
+            markedDates={markedDates}
+            markingType="custom"
+            onDayPress={onDayPress}
+            onMonthChange={(m) => {
+              setCalYear(m.year);
+              setCalMonth(m.month);
+            }}
+            minDate={todayStr}
+          />
+        </View>
+      </Modal>
+    </View>
   );
 }

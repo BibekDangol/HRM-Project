@@ -1,6 +1,5 @@
 import { TW } from "@/theme/twStyles";
-import { ChevronRight, Lock } from "lucide-react-native";
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
 
 type Props = {
   icon: React.ReactNode;
@@ -20,19 +19,18 @@ export default function InfoRow({
   locked,
 }: Props) {
   return (
-    <Pressable
-      onPress={locked ? undefined : onPress}
-      style={({ pressed }) => ({
+    <View
+      style={{
         flexDirection: "row",
         alignItems: "center",
         paddingHorizontal: 16,
         paddingVertical: 13,
         backgroundColor: "#ffffff",
-        opacity: pressed && onPress && !locked ? 0.6 : 1,
         borderBottomWidth: isLast ? 0 : 0.5,
         borderBottomColor: "#E5E7EB",
-      })}
+      }}
     >
+      {/* Icon */}
       <View
         style={{
           width: 36,
@@ -47,23 +45,25 @@ export default function InfoRow({
         {icon}
       </View>
 
+      {/* Text Content */}
       <View style={{ flex: 1 }}>
         <Text
           style={{
             fontSize: 11,
             fontWeight: "600",
-            color: "#D3D3D3 ",
+            color: "#8d8d8d",
             letterSpacing: 0.3,
             marginBottom: 2,
           }}
         >
           {label}
         </Text>
+
         <Text
           style={{
             fontSize: 14,
             fontWeight: "500",
-            color: locked ? "#D3D3D3 " : TW.bgSecondary,
+            color: locked ? "#D3D3D3" : TW.bgSecondary,
             letterSpacing: 0.1,
           }}
           numberOfLines={1}
@@ -71,12 +71,6 @@ export default function InfoRow({
           {value || "—"}
         </Text>
       </View>
-
-      {locked ? (
-        <Lock size={13} color={"#6B7280"} strokeWidth={1.6} />
-      ) : onPress ? (
-        <ChevronRight size={15} color={"#6B7280"} strokeWidth={1.6} />
-      ) : null}
-    </Pressable>
+    </View>
   );
 }
