@@ -19,11 +19,9 @@ export const adminAddUserService = async (
   payload: AdminAddUserPayload,
 ): Promise<AdminAddUserResponse> => {
   const response = await apiClient.post("/admin-add-user", payload);
-
   if (!response.data?.success) {
     throw new Error(response.data?.error || "Failed to create user");
   }
-
   return response.data;
 };
 
