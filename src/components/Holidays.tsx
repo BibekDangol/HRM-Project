@@ -305,7 +305,6 @@ export default function HolidaysEventsScreen() {
               color: "#64748B",
               fontSize: 13,
               flex: 1,
-              textAlign: "center",
             }}>
             <Text style={{ color: "#0F172A", fontWeight: "700" }}>
               {filtered.length}

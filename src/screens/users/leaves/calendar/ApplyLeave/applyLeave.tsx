@@ -1,13 +1,4 @@
 import {
-  FormValues,
-  LeaveTypeRow,
-  LeaveTypeWithStats,
-} from "@/src/types/userLeave";
-import { calcLeaveDays, diffDaysInclusive } from "@/src/utils/leaveUtils";
-import { useFocusEffect, useRouter } from "expo-router";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
-import {
   ActivityIndicator,
   Alert,
   Modal,
@@ -16,19 +7,28 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { Controller, useForm } from "react-hook-form";
+import {
+  FormValues,
+  LeaveTypeRow,
+  LeaveTypeWithStats,
+} from "@/src/types/userLeave";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { calcLeaveDays, diffDaysInclusive } from "@/src/utils/leaveUtils";
+import { useFocusEffect, useRouter } from "expo-router";
 
 import { BackButton } from "@/src/components/BackButton";
-import { SharedCalendar } from "@/src/components/SharedCalendar";
-import { DateField } from "@/src/components/userLeave/DateField";
-import { LeaveTypeDropdown } from "@/src/components/userLeave/LeaveTypeDropdown";
-import { userLeaveSchema } from "@/src/schema/users/userLeaveApply.schema";
-import { useAuthStore } from "@/src/store/useAuthStore";
-import { supabase } from "@/src/supabase/supabaseClient";
-import { TW } from "@/theme/twStyles";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Check } from "lucide-react-native";
+import { DateField } from "@/src/components/userLeave/DateField";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { LeaveTypeDropdown } from "@/src/components/userLeave/LeaveTypeDropdown";
+import { SharedCalendar } from "@/src/components/SharedCalendar";
+import { TW } from "@/theme/twStyles";
+import { supabase } from "@/src/supabase/supabaseClient";
 import tw from "twrnc";
+import { useAuthStore } from "@/src/store/useAuthStore";
+import { userLeaveSchema } from "@/src/schema/users/userLeaveApply.schema";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 async function getOrganizationIdByUserId(userId: string) {
   const { data, error } = await supabase
@@ -42,18 +42,18 @@ async function getOrganizationIdByUserId(userId: string) {
 }
 
 const SPACING = {
-  screenX: 20,
-  top: 10,
-  section: 16,
+  screenX: 16,
+  top: 18,
+  section: 2,
   labelBottom: 8,
   rowGap: 10,
-  inputY: 12,
-  inputX: 14,
-  buttonY: 13,
+  inputY: 20,
+  inputX: 12,
+  buttonY: 12,
 };
 
 const ERROR_TEXT = {
-  marginTop: 6,
+  marginTop: 5,
   fontSize: 12,
   color: "#EF4444",
   fontWeight: "500" as const,
@@ -471,16 +471,18 @@ export default function ApplyLeaveScreen() {
         contentContainerStyle={{
           paddingHorizontal: SPACING.screenX,
           paddingTop: SPACING.top,
-          paddingBottom: 36,
+          flexGrow: 1,
+          gap: 18,
+          paddingBottom: 16,
         }}>
-        <BackButton
+        {/* <BackButton
           color={TW.bgSecondary}
           backgroundColor="rgba(27,74,90,0.08)"
           style={{ marginBottom: 18 }}
           onPress={() => router.replace("/(users)/leaves/(tabs)")}
-        />
+        /> */}
 
-        <View style={tw`mb-7`}>
+        <View style={tw``}>
           <Text style={[tw`text-2xl font-bold`, { color: TW.bgSecondary }]}>
             New Leave Request
           </Text>

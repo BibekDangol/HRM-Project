@@ -1,6 +1,6 @@
-import { RelativePathString, useRouter } from "expo-router";
+import { RelativePathString, useFocusEffect, useRouter } from "expo-router";
 import { CalendarClock, ChevronRight } from "lucide-react-native";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { FlatList, Pressable, Text, View } from "react-native";
 
 import LoadingIndicator from "@/src/components/LoadingIndicator";
@@ -44,6 +44,16 @@ export default function AdminLeaveView({
   const [refreshing, setRefreshing] = useState(false);
 
   const filteredLeaves = leaves.filter((leave) => leave.status === activeTab);
+  const listRef = useRef<FlatList>(null);
+
+  useFocusEffect(
+    useCallback(() => {
+      setActiveTab("pending");
+      requestAnimationFrame(() => {
+        listRef.current?.scrollToOffset({ offset: 0, animated: false });
+      });
+    }, []),
+  );
 
   const loadLeaves = useCallback(async () => {
     if (!userProfile || !user) return;
@@ -111,6 +121,7 @@ export default function AdminLeaveView({
 
       {/* Leave List */}
       <FlatList
+        ref={listRef}
         data={filteredLeaves}
         keyExtractor={(item) => item.id.toString()}
         showsVerticalScrollIndicator={false}

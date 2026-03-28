@@ -1,6 +1,7 @@
 import { formatElapsed, formatSinceTime } from "@/src/utils/attendanceHelper";
 import { CircleCheck, LogOut, User } from "lucide-react-native";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
+
 import ProfileMenu from "@/src/screens/admin/components/ProfileMenu";
 import { TW } from "@/theme/twStyles";
 import React from "react";
@@ -41,8 +42,7 @@ const HeaderRight: React.FC<Props> = ({
         marginRight: 16,
         marginBottom: 8,
         zIndex: 100,
-      }}
-    >
+      }}>
       {/* ── Check In / Out ── */}
       <View style={{ position: "relative", zIndex: 100 }}>
         <Pressable
@@ -55,9 +55,8 @@ const HeaderRight: React.FC<Props> = ({
             borderRadius: 18,
             alignItems: "center",
             justifyContent: "center",
-            opacity: pressed || isLocked ? 0.7 : 1,
-          })}
-        >
+            // opacity: pressed || isLocked ? 0.9 : 1,
+          })}>
           <View
             style={{
               height: 12,
@@ -97,8 +96,7 @@ const HeaderRight: React.FC<Props> = ({
                 borderWidth: 1,
                 borderColor: "#CBD5E1",
                 padding: 12,
-              }}
-            >
+              }}>
               {isCheckedIn ? (
                 <View style={{ alignItems: "center" }}>
                   <Text
@@ -107,8 +105,7 @@ const HeaderRight: React.FC<Props> = ({
                       fontWeight: "500",
                       color: TW.textSecondary ?? "#002354",
                       marginBottom: 4,
-                    }}
-                  >
+                    }}>
                     Since {checkedInAt ? formatSinceTime(checkedInAt) : "--"}
                   </Text>
                   <Text
@@ -118,8 +115,7 @@ const HeaderRight: React.FC<Props> = ({
                       color: TW.textPrimary,
                       marginBottom: 10,
                       letterSpacing: -0.5,
-                    }}
-                  >
+                    }}>
                     {formatElapsed(elapsedMs)}
                   </Text>
                   <Pressable
@@ -135,8 +131,7 @@ const HeaderRight: React.FC<Props> = ({
                       borderRadius: 10,
                       backgroundColor: "#FFB300",
                       opacity: isLocked ? 0.5 : pressed ? 0.85 : 1,
-                    })}
-                  >
+                    })}>
                     <LogOut size={14} color="#1F2937" />
                     {isLocked ? (
                       <ActivityIndicator size="small" color="#1F2937" />
@@ -146,8 +141,7 @@ const HeaderRight: React.FC<Props> = ({
                           color: "#1F2937",
                           fontWeight: "700",
                           fontSize: 13,
-                        }}
-                      >
+                        }}>
                         Check Out
                       </Text>
                     )}
@@ -166,8 +160,7 @@ const HeaderRight: React.FC<Props> = ({
                     borderRadius: 10,
                     backgroundColor: "#FFB300",
                     opacity: isLocked ? 0.5 : pressed ? 0.85 : 1,
-                  })}
-                >
+                  })}>
                   <CircleCheck size={16} color="#1F2937" />
                   {isLocked ? (
                     <ActivityIndicator size="small" color="#1F2937" />
@@ -177,8 +170,7 @@ const HeaderRight: React.FC<Props> = ({
                         fontWeight: "700",
                         fontSize: 13,
                         color: "#1F2937",
-                      }}
-                    >
+                      }}>
                       Check In
                     </Text>
                   )}
@@ -204,9 +196,8 @@ const HeaderRight: React.FC<Props> = ({
             borderColor: "rgba(255,255,255,0.5)",
             alignItems: "center",
             justifyContent: "center",
-            opacity: pressed || isLocked ? 0.75 : 1,
-          })}
-        >
+            // opacity: pressed || isLocked ? 0.75 : 1,
+          })}>
           <User size={17} color="#ffffff" />
         </Pressable>
 
@@ -230,8 +221,7 @@ const HeaderRight: React.FC<Props> = ({
                 zIndex: 9999,
                 elevation: 20,
                 minWidth: 160,
-              }}
-            >
+              }}>
               <ProfileMenu
                 open={isProfileMenuOpen}
                 onProfile={onProfileMenuClick}

@@ -4,8 +4,12 @@ import { useState } from "react";
 
 export function useAdminHeaderMenu() {
   const router = useRouter();
-  const signOut = useAuthStore(s => s.signOut);
+  const signOut = useAuthStore((s) => s.signOut);
+
   const [open, setOpen] = useState(false);
+
+  const toggle = () => setOpen((v) => !v);
+  const close = () => setOpen(false);
 
   const logout = async () => {
     setOpen(false);
@@ -15,8 +19,8 @@ export function useAdminHeaderMenu() {
 
   return {
     open,
-    toggle: () => setOpen(v => !v),
-    close: () => setOpen(false),
+    toggle,
+    close,
     logout,
   };
 }

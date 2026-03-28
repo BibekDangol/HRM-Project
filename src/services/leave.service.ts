@@ -46,9 +46,9 @@ export async function fetchLeaveById(id: string): Promise<Leave> {
     action: "fetchLeaveById",
     payload: { id },
   });
+
   return res.data.data;
 }
-
 // Update leave status
 export async function updateLeaveStatus(
   id: string,
