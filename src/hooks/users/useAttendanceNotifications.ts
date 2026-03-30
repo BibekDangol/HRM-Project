@@ -1,10 +1,10 @@
 import {
   registerForPushNotificationsAsync,
   scheduleAttendanceNotifications,
-} from "../services/attendanceNotification.service";
+} from "../../services/users/attendanceNotification.service";
 import { useEffect, useState } from "react";
 
-import { getAttendanceRulesService } from "../services/attendance.service";
+import { getAttendanceRulesService } from "../../services/users/attendance.service";
 
 export function useAttendanceNotifications() {
   const [attendanceRules, setAttendanceRules] = useState<Record<

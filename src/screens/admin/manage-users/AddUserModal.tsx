@@ -1,9 +1,7 @@
-import { UserProfile } from "@/src/types/admin";
-import { TW } from "@/theme/twStyles";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import {
   ActivityIndicator,
+  Keyboard,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -13,8 +11,12 @@ import {
   TextInput,
   TouchableWithoutFeedback,
   View,
-  Keyboard,
 } from "react-native";
+
+import { UserProfile } from "@/src/types/admin";
+import { TW } from "@/theme/twStyles";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Picker } from "@react-native-picker/picker";
 import tw from "twrnc";
 import { z } from "zod";
 
@@ -66,15 +68,13 @@ export default function AddUserModal({
       transparent
       animationType="fade"
       statusBarTranslucent
-      onRequestClose={onClose}
-    >
+      onRequestClose={onClose}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={tw`flex-1 bg-black/40 justify-center items-center px-5`}>
           <TouchableWithoutFeedback>
             <KeyboardAvoidingView
               behavior={Platform.OS === "ios" ? "padding" : undefined}
-              style={{ width: "100%" }}
-            >
+              style={{ width: "100%" }}>
               <View
                 style={[
                   tw`bg-white rounded-3xl px-5 pt-5 pb-4 self-center`,
@@ -82,19 +82,16 @@ export default function AddUserModal({
                     width: "100%",
                     maxWidth: 380,
                   },
-                ]}
-              >
+                ]}>
                 <Text
-                  style={tw`text-xl font-bold text-center mb-5 ${TW.textPrimary}`}
-                >
+                  style={tw`text-xl font-bold text-center mb-5 ${TW.textPrimary}`}>
                   Add New User
                 </Text>
 
                 <ScrollView
                   keyboardShouldPersistTaps="handled"
                   showsVerticalScrollIndicator={false}
-                  contentContainerStyle={{ paddingBottom: 4 }}
-                >
+                  contentContainerStyle={{ paddingBottom: 4 }}>
                   <Controller
                     control={control}
                     name="first_name"
@@ -104,8 +101,7 @@ export default function AddUserModal({
                     }) => (
                       <View style={tw`mb-3`}>
                         <Text
-                          style={tw`text-sm font-semibold mb-1 ${TW.textSecondary}`}
-                        >
+                          style={tw`text-sm font-semibold mb-1 ${TW.textSecondary}`}>
                           First Name
                         </Text>
 
@@ -136,8 +132,7 @@ export default function AddUserModal({
                     }) => (
                       <View style={tw`mb-3`}>
                         <Text
-                          style={tw`text-sm font-semibold mb-1 ${TW.textSecondary}`}
-                        >
+                          style={tw`text-sm font-semibold mb-1 ${TW.textSecondary}`}>
                           Last Name
                         </Text>
 
@@ -168,8 +163,7 @@ export default function AddUserModal({
                     }) => (
                       <View style={tw`mb-3`}>
                         <Text
-                          style={tw`text-sm font-semibold mb-1 ${TW.textSecondary}`}
-                        >
+                          style={tw`text-sm font-semibold mb-1 ${TW.textSecondary}`}>
                           Email
                         </Text>
 
@@ -199,41 +193,29 @@ export default function AddUserModal({
                     render={({ field: { value, onChange } }) => (
                       <View style={tw`mb-2`}>
                         <Text
-                          style={tw`text-sm font-semibold mb-2 ${TW.textSecondary}`}
-                        >
+                          style={tw`text-sm font-semibold mb-2 ${TW.textSecondary}`}>
                           Supervisor
                         </Text>
 
-                        <ScrollView
-                          horizontal
-                          showsHorizontalScrollIndicator={false}
-                          contentContainerStyle={{ paddingRight: 4 }}
-                        >
-                          {supervisors.map((sup) => {
-                            const selected = value === sup.id;
+                        <View
+                          style={tw`border border-gray-300 rounded-xl bg-white overflow-hidden`}>
+                          <Picker
+                            selectedValue={value}
+                            onValueChange={(itemValue) => onChange(itemValue)}>
+                            <Picker.Item
+                              label="Select Supervisor"
+                              value={null}
+                            />
 
-                            return (
-                              <Pressable
+                            {supervisors.map((sup) => (
+                              <Picker.Item
                                 key={sup.id}
-                                onPress={() => onChange(sup.id)}
-                                style={[
-                                  tw`px-4 py-2 rounded-full mr-2 border`,
-                                  selected
-                                    ? tw`border-[#1B4A5A] bg-[#E6F1F3]`
-                                    : tw`border-gray-300 bg-white`,
-                                ]}
-                              >
-                                <Text
-                                  style={tw`text-sm ${
-                                    selected ? TW.textPrimary : TW.textSecondary
-                                  }`}
-                                >
-                                  {sup.first_name} {sup.last_name}
-                                </Text>
-                              </Pressable>
-                            );
-                          })}
-                        </ScrollView>
+                                label={`${sup.first_name} ${sup.last_name}`}
+                                value={sup.id}
+                              />
+                            ))}
+                          </Picker>
+                        </View>
                       </View>
                     )}
                   />
@@ -242,8 +224,7 @@ export default function AddUserModal({
                 <View style={tw`flex-row gap-3 mt-5`}>
                   <Pressable
                     onPress={onClose}
-                    style={tw`flex-1 h-12 rounded-xl justify-center items-center bg-gray-100`}
-                  >
+                    style={tw`flex-1 h-12 rounded-xl justify-center items-center bg-gray-100`}>
                     <Text style={tw`${TW.textSecondary} font-semibold`}>
                       Cancel
                     </Text>
@@ -256,8 +237,7 @@ export default function AddUserModal({
                       tw`flex-1 h-12 rounded-xl items-center justify-center flex-row`,
                       tw`${TW.bgAction}`,
                       isSubmitting && tw`opacity-70`,
-                    ]}
-                  >
+                    ]}>
                     {isSubmitting && (
                       <ActivityIndicator
                         size="small"

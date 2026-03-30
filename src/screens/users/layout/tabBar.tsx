@@ -1,5 +1,3 @@
-import { PlatformPressable } from "@react-navigation/elements";
-import { useLinkBuilder } from "@react-navigation/native";
 import {
   CalendarDays,
   House,
@@ -9,6 +7,9 @@ import {
 } from "lucide-react-native";
 import React, { useMemo } from "react";
 import { Platform, Text, View, useWindowDimensions } from "react-native";
+
+import { PlatformPressable } from "@react-navigation/elements";
+import { useLinkBuilder } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const ACTIVE_COLOR = "#1B4A5A";
@@ -75,8 +76,7 @@ export function MyTabBar({ state, descriptors, navigation }: any) {
         paddingTop: 8,
         paddingBottom: bottomPad,
         alignItems: "center",
-      }}
-    >
+      }}>
       <View
         style={[
           {
@@ -90,8 +90,7 @@ export function MyTabBar({ state, descriptors, navigation }: any) {
             justifyContent: "center",
           },
           trayShadow,
-        ]}
-      >
+        ]}>
         {visibleRoutes.map((route: any) => {
           const isFocused = state.routes[state.index]?.key === route.key;
 
@@ -107,9 +106,12 @@ export function MyTabBar({ state, descriptors, navigation }: any) {
               canPreventDefault: true,
             });
 
-            if (!isFocused && !event.defaultPrevented) {
-              navigation.navigate(route.name, route.params);
-            }
+            if (!event.defaultPrevented) {
+              navigation.reset({
+                index: 0,
+                routes: [{ name: route.name }],
+              });
+            } //to go to default index route when another tab opens
           };
 
           const onLongPress = () => {
@@ -135,15 +137,13 @@ export function MyTabBar({ state, descriptors, navigation }: any) {
                 justifyContent: "center",
                 borderRadius: 18,
                 backgroundColor: "transparent",
-              }}
-            >
+              }}>
               <View
                 style={{
                   alignItems: "center",
                   justifyContent: "center",
                   gap: 3,
-                }}
-              >
+                }}>
                 <IconToRender
                   size={ICON_SIZE}
                   color={isFocused ? ACTIVE_COLOR : INACTIVE_COLOR}
@@ -155,8 +155,7 @@ export function MyTabBar({ state, descriptors, navigation }: any) {
                     fontSize: FONT_SIZE,
                     color: isFocused ? ACTIVE_COLOR : INACTIVE_COLOR,
                     fontWeight: isFocused ? "700" : "600",
-                  }}
-                >
+                  }}>
                   {cfg.label}
                 </Text>
               </View>

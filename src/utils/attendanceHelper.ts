@@ -1,7 +1,7 @@
 // utils/attendanceHelper.ts
 
 import { AttendanceRow } from "@/src/types/attendance";
-import { getAttendanceRulesService } from "../services/attendance.service";
+import { getAttendanceRulesService } from "../services/users/attendance.service";
 
 export const CHECKIN_NOTIFICATION_ID = "attendance-checkin";
 export const CHECKOUT_NOTIFICATION_ID = "attendance-checkout";
@@ -93,7 +93,8 @@ export function pad2(n: number) {
   return n.toString().padStart(2, "0");
 }
 
-export function formatSinceTime(d: Date) {
+export function formatSinceTime(d: Date | null | undefined) {
+  if (!d) return "";
   return d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
 }
 

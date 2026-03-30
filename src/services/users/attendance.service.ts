@@ -1,6 +1,6 @@
 import { AttendanceRow } from "@/src/types/attendance";
-import { getUserLocationOrThrow } from "../utils/locationHelper";
-import { nepalDateYYYYMMDD } from "../utils/getDate";
+import { getUserLocationOrThrow } from "../../utils/locationHelper";
+import { nepalDateYYYYMMDD } from "../../utils/getDate";
 import { parseDate } from "@/src/utils/attendanceHelper";
 import { supabase } from "@/src/supabase/supabaseClient";
 

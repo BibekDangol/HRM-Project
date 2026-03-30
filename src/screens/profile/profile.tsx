@@ -1,13 +1,14 @@
-import LoadingIndicator from "@/src/components/LoadingIndicator";
-import EditProfileModal from "@/src/components/profile/EditProfileModal";
-import InfoRow from "@/src/components/profile/InfoRow";
-import ProfileHero from "@/src/components/profile/ProfileHero";
-import Section from "@/src/components/profile/Section";
-import { useProfile } from "@/src/hooks/useProfile";
-import { useAuthStore } from "@/src/store/useAuthStore";
-import { TW } from "@/theme/twStyles";
 import { Mail, User } from "lucide-react-native";
 import { ScrollView, View } from "react-native";
+
+import EditProfileModal from "@/src/components/profile/EditProfileModal";
+import InfoRow from "@/src/components/profile/InfoRow";
+import LoadingIndicator from "@/src/components/LoadingIndicator";
+import ProfileHero from "@/src/components/profile/ProfileHero";
+import Section from "@/src/components/profile/Section";
+import { TW } from "@/theme/twStyles";
+import { useAuthStore } from "@/src/store/useAuthStore";
+import { useProfile } from "@/src/hooks/useProfile";
 
 export default function ProfileScreen() {
   const user = useAuthStore((s) => s.user);
@@ -36,8 +37,7 @@ export default function ProfileScreen() {
           backgroundColor: TW.bgPrimary,
           alignItems: "center",
           justifyContent: "center",
-        }}
-      >
+        }}>
         <LoadingIndicator />
       </View>
     );
@@ -52,8 +52,7 @@ export default function ProfileScreen() {
       <ScrollView
         style={{ flex: 1, backgroundColor: "#ffffff" }}
         contentContainerStyle={{ paddingBottom: 48 }}
-        showsVerticalScrollIndicator={false}
-      >
+        showsVerticalScrollIndicator={false}>
         <ProfileHero
           fullName={fullName}
           // role={role}
@@ -67,8 +66,7 @@ export default function ProfileScreen() {
           <Section
             title="Personal Info"
             rightText="Edit"
-            onRightPress={openEdit}
-          >
+            onRightPress={openEdit}>
             <InfoRow
               icon={<User size={16} color={TW.bgSecondary} strokeWidth={1.8} />}
               label="First Name"

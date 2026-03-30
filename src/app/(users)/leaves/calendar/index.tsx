@@ -1,3 +1,3 @@
-import ApplyLeaveScreen from "./apply";
+import ApplyLeaveScreen from "./applyLeave";
 
 export default ApplyLeaveScreen;

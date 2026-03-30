@@ -1,17 +1,32 @@
 import { supabase } from "../supabase/supabaseClient";
 
 export const signIn = async (email: string, password: string) => {
-  const { data, error } = await supabase.functions.invoke("login", {
-    body: { email, password },
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
   });
-  if (error) {
-    throw new Error(error.message);
+
+  if (error || !data?.session) {
+    throw new Error(error?.message || "Invalid credentials");
   }
-  if (!data.success) {
-    throw new Error(data.error);
+
+  // ✅ Fetch profile
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("role, status")
+    .eq("id", data.user.id)
+    .single();
+
+  if (profileError) {
+    throw new Error("Failed to fetch user profile");
   }
-  await supabase.auth.setSession(data.session);
-  return data;
+
+  return {
+    session: data.session,
+    user: data.user,
+    role: profile.role,
+    status: profile.status,
+  };
 };
 export const signUp = async (payload: any) => {
   const { email, password, firstName, lastName, organizationName } = payload;

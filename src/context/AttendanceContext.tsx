@@ -1,5 +1,6 @@
-import { useAttendanceToggle } from "@/src/hooks/useAttendanceToggle";
 import React, { createContext, useContext } from "react";
+
+import { useAttendanceToggle } from "@/src/hooks/users/useAttendanceToggle";
 
 type AttendanceContextType = ReturnType<typeof useAttendanceToggle>;
 

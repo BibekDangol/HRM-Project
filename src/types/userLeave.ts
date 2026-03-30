@@ -29,11 +29,11 @@ export type LeaveRow = {
   leave_type_id: number | string;
   start_date: string;
   end_date: string;
-  day_type?: "FULL" | "MORNING" | "EVENING" | string | null;
+  day_type?: DayType | string | null;
   days_count?: number | null;
   status?: string | null;
 };
-
+export type DayType = "FULL" | "FIRST_SHIFT" | "SECOND_SHIFT";
 // Full leave details (from database)
 export type LeaveDetailsRow = {
   id: string;
@@ -43,7 +43,7 @@ export type LeaveDetailsRow = {
   start_date: string;
   end_date: string;
   days_count: number | null;
-  day_type: string | null;
+  day_type: DayType | null;
   created_at: string | null;
 };
 

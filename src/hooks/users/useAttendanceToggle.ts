@@ -1,22 +1,23 @@
-import { useAttendanceNotifications } from "@/src/hooks/useAttendanceNotifications";
 import {
-    checkInService,
-    checkOutService,
-    fetchLatestAttendanceService,
-    getAttendanceRulesService,
-    getOpenAttendanceService,
-} from "@/src/services/attendance.service";
-import { supabase } from "@/src/supabase/supabaseClient";
-import { AttendanceRow } from "@/src/types/attendance";
+  checkInService,
+  checkOutService,
+  fetchLatestAttendanceService,
+  getAttendanceRulesService,
+  getOpenAttendanceService,
+} from "@/src/services/users/attendance.service";
 import {
-    getAttendanceStatus,
-    getErrorMessage,
-    needsCheckInCommentNepal,
-    needsCheckOutCommentNepal,
-    parseDate,
+  getAttendanceStatus,
+  getErrorMessage,
+  needsCheckInCommentNepal,
+  needsCheckOutCommentNepal,
+  parseDate,
 } from "@/src/utils/attendanceHelper";
 import { useCallback, useEffect, useState } from "react";
+
+import { useAttendanceNotifications } from "@/src/hooks/users/useAttendanceNotifications";
+import { AttendanceRow } from "@/src/types/attendance";
 import { Alert } from "react-native";
+import { useAuthStore } from "../../store/useAuthStore";
 
 export const useAttendanceToggle = () => {
   const { attendanceRules } = useAttendanceNotifications();
@@ -25,7 +26,7 @@ export const useAttendanceToggle = () => {
   const [attendance, setAttendance] = useState<AttendanceRow | null>(null);
   const [checkedInAt, setCheckedInAt] = useState<Date | null>(null);
   const [now, setNow] = useState(() => Date.now());
-
+  const { user } = useAuthStore();
   const [commentModalOpen, setCommentModalOpen] = useState(false);
   const [commentText, setCommentText] = useState("");
   const [commentMode, setCommentMode] = useState<"checkin" | "checkout" | null>(
@@ -97,13 +98,7 @@ export const useAttendanceToggle = () => {
   const onToggleCheck = useCallback(async () => {
     if (isLocked) return;
     try {
-      const {
-        data: { user },
-        error: userErr,
-      } = await supabase.auth.getUser();
-      if (userErr) throw userErr;
       if (!user) throw new Error("Not authenticated.");
-
       if (!isCheckedIn) {
         const anyOpen = await getOpenAttendanceService(user.id);
         if (anyOpen?.status === "incomplete") {
@@ -139,6 +134,7 @@ export const useAttendanceToggle = () => {
       setLoadingAttendance(false);
     }
   }, [
+    user,
     isLocked,
     isCheckedIn,
     checkIn,

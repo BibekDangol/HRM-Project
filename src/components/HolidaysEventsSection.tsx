@@ -1,7 +1,8 @@
-import { TW } from "@/theme/twStyles";
-import React, { useMemo, useState } from "react";
 import { Pressable, Text, View, useWindowDimensions } from "react-native";
+import React, { useMemo, useState } from "react";
+
 import Carousel from "react-native-reanimated-carousel";
+import { TW } from "@/theme/twStyles";
 import tw from "twrnc";
 
 export type CalendarItem = {
@@ -39,7 +40,7 @@ export const HolidaysEventsSection = ({
 }: Props) => {
   const { width: screenWidth } = useWindowDimensions();
   const itemWidth = screenWidth - 44;
-
+  //ask aayush dai calendarItems, loading console garda kina back to back
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const today = useMemo(() => {
@@ -52,18 +53,18 @@ export const HolidaysEventsSection = ({
     return calendarItems
       .filter((item) => {
         const start = parseLocalDate(item.start_date);
+        const end = item.end_date ? parseLocalDate(item.end_date) : start;
         start.setHours(0, 0, 0, 0);
-
-        // if date has passed, do not show on dashboard
-        return start >= today;
+        end.setHours(23, 59, 59, 999);
+        return end >= today;
       })
       .sort((a, b) => {
-        const aStart = parseLocalDate(a.start_date).getTime();
-        const bStart = parseLocalDate(b.start_date).getTime();
-        return aStart - bStart;
+        return (
+          parseLocalDate(a.start_date).getTime() -
+          parseLocalDate(b.start_date).getTime()
+        );
       });
   }, [calendarItems, today]);
-
   const visibleItems = upcomingItems.slice(0, MAX_VISIBLE);
   const total = visibleItems.length;
 
@@ -113,8 +114,7 @@ export const HolidaysEventsSection = ({
           shadowRadius: 6,
           shadowOffset: { width: 0, height: 2 },
           elevation: 1,
-        }}
-      >
+        }}>
         <View
           style={{
             alignItems: "center",
@@ -123,8 +123,7 @@ export const HolidaysEventsSection = ({
             borderRadius: 8,
             paddingVertical: 6,
             paddingHorizontal: 4,
-          }}
-        >
+          }}>
           <Text
             style={{
               color: "#94A3B8",
@@ -132,8 +131,7 @@ export const HolidaysEventsSection = ({
               fontWeight: "600",
               letterSpacing: 0.5,
               textTransform: "uppercase",
-            }}
-          >
+            }}>
             {month}
           </Text>
 
@@ -143,8 +141,7 @@ export const HolidaysEventsSection = ({
               fontSize: 20,
               fontWeight: "700",
               lineHeight: 24,
-            }}
-          >
+            }}>
             {day}
           </Text>
 
@@ -153,8 +150,7 @@ export const HolidaysEventsSection = ({
               color: "#94A3B8",
               fontSize: 9,
               fontWeight: "500",
-            }}
-          >
+            }}>
             {dayName}
           </Text>
         </View>
@@ -176,8 +172,7 @@ export const HolidaysEventsSection = ({
                 fontSize: 9,
                 fontWeight: "700",
                 letterSpacing: 0.6,
-              }}
-            >
+              }}>
               UPCOMING
             </Text>
           )}
@@ -188,8 +183,7 @@ export const HolidaysEventsSection = ({
               fontSize: 14,
               fontWeight: "600",
             }}
-            numberOfLines={1}
-          >
+            numberOfLines={1}>
             {item.title}
           </Text>
 
@@ -198,8 +192,7 @@ export const HolidaysEventsSection = ({
               color: "#94A3B8",
               fontSize: 12,
             }}
-            numberOfLines={1}
-          >
+            numberOfLines={1}>
             {formatWeekday(item.start_date)}
           </Text>
         </View>
@@ -214,8 +207,7 @@ export const HolidaysEventsSection = ({
             paddingVertical: 4,
             borderRadius: 999,
             alignSelf: "center",
-          }}
-        >
+          }}>
           <View
             style={{
               width: 6,
@@ -229,8 +221,7 @@ export const HolidaysEventsSection = ({
               fontSize: 11,
               fontWeight: "600",
               color: badgeText,
-            }}
-          >
+            }}>
             {isHoliday ? "Holiday" : "Event"}
           </Text>
         </View>
@@ -241,8 +232,7 @@ export const HolidaysEventsSection = ({
       return (
         <Pressable
           onPress={() => onCardPress(item)}
-          style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
-        >
+          style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}>
           {card}
         </Pressable>
       );
@@ -264,8 +254,7 @@ export const HolidaysEventsSection = ({
         gap: 12,
         borderWidth: 0.5,
         borderColor: "#E2E8F0",
-      }}
-    >
+      }}>
       <View
         style={{
           alignItems: "center",
@@ -275,8 +264,7 @@ export const HolidaysEventsSection = ({
           paddingVertical: 6,
           paddingHorizontal: 4,
           gap: 3,
-        }}
-      >
+        }}>
         <View
           style={{
             width: 22,
@@ -350,8 +338,7 @@ export const HolidaysEventsSection = ({
           alignItems: "center",
           justifyContent: "space-between",
           marginBottom: 16,
-        }}
-      >
+        }}>
         <Text style={tw`font-semibold ${TW.textPrimary} text-lg`}>
           Holidays &amp; Events
         </Text>
@@ -362,15 +349,13 @@ export const HolidaysEventsSection = ({
             opacity: pressed ? 0.6 : 1,
             paddingVertical: 4,
             paddingHorizontal: 10,
-          })}
-        >
+          })}>
           <Text
             style={{
               color: "#475569",
               fontSize: 12,
               fontWeight: "600",
-            }}
-          >
+            }}>
             View All
           </Text>
         </Pressable>
@@ -388,15 +373,13 @@ export const HolidaysEventsSection = ({
             borderColor: "#E2E8F0",
             backgroundColor: "#FFFFFF",
             gap: 6,
-          }}
-        >
+          }}>
           <Text
             style={{
               color: "#CBD5E1",
               fontWeight: "600",
               fontSize: 14,
-            }}
-          >
+            }}>
             No upcoming events
           </Text>
 
@@ -404,8 +387,7 @@ export const HolidaysEventsSection = ({
             style={{
               color: "#E2E8F0",
               fontSize: 12,
-            }}
-          >
+            }}>
             No holidays or events scheduled
           </Text>
         </View>
@@ -438,8 +420,7 @@ export const HolidaysEventsSection = ({
                 alignItems: "center",
                 gap: 6,
                 marginTop: 12,
-              }}
-            >
+              }}>
               {visibleItems.map((_, i) => (
                 <View
                   key={i}

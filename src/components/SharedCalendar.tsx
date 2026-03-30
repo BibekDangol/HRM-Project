@@ -1,6 +1,7 @@
-import { DayCell } from "@/src/components/Calendar/DayCell";
 import React, { useMemo, useState } from "react";
 import { Pressable, Text, View } from "react-native";
+
+import { DayCell } from "@/src/components/Calendar/DayCell";
 import { Calendar } from "react-native-calendars";
 
 interface SharedCalendarProps {
@@ -12,6 +13,7 @@ interface SharedCalendarProps {
   onMonthChange: (m: { year: number; month: number }) => void;
   dayComponent?: any;
   minDate?: string;
+  showLegend?: boolean;
 }
 
 const todayStr = new Date().toISOString().split("T")[0];
@@ -122,8 +124,9 @@ export function SharedCalendar({
   return (
     <View
       style={{
-        width: "100%",
-        maxWidth: 350,
+        alignSelf: "center",
+        width: "92%",
+        marginVertical: 16,
         backgroundColor: "#FFFFFF",
         borderRadius: 20,
         overflow: "hidden",
@@ -132,23 +135,20 @@ export function SharedCalendar({
         shadowRadius: 10,
         shadowOffset: { width: 0, height: 4 },
         elevation: 6,
-      }}
-    >
+      }}>
       <View
         style={{
           backgroundColor: "#1B4A5A",
           paddingHorizontal: 18,
           paddingTop: 18,
           paddingBottom: 16,
-        }}
-      >
+        }}>
         <Text
           style={{
             color: "#DDE7EB",
             fontSize: 14,
             fontWeight: "500",
-          }}
-        >
+          }}>
           {new Date(selectedDate).getFullYear()}
         </Text>
 
@@ -158,8 +158,7 @@ export function SharedCalendar({
             fontSize: 22,
             fontWeight: "700",
             marginTop: 4,
-          }}
-        >
+          }}>
           {formatDisplayDate(selectedDate)}
         </Text>
       </View>
@@ -172,8 +171,7 @@ export function SharedCalendar({
           paddingHorizontal: 16,
           paddingTop: 14,
           paddingBottom: 8,
-        }}
-      >
+        }}>
         <Pressable
           onPress={goToPrevMonth}
           style={({ pressed }) => ({
@@ -182,8 +180,7 @@ export function SharedCalendar({
             alignItems: "center",
             justifyContent: "center",
             opacity: pressed ? 0.7 : 1,
-          })}
-        >
+          })}>
           <Text style={{ fontSize: 24, color: "#0F172A", fontWeight: "600" }}>
             ‹
           </Text>
@@ -194,8 +191,7 @@ export function SharedCalendar({
             fontSize: 18,
             fontWeight: "700",
             color: "#0F172A",
-          }}
-        >
+          }}>
           {formatMonthYear(visibleMonth.year, visibleMonth.month)}
         </Text>
 
@@ -207,8 +203,7 @@ export function SharedCalendar({
             alignItems: "center",
             justifyContent: "center",
             opacity: pressed ? 0.7 : 1,
-          })}
-        >
+          })}>
           <Text style={{ fontSize: 24, color: "#0F172A", fontWeight: "600" }}>
             ›
           </Text>
@@ -221,23 +216,20 @@ export function SharedCalendar({
           justifyContent: "space-between",
           paddingHorizontal: 14,
           paddingBottom: 6,
-        }}
-      >
+        }}>
         {weekDays.map((item) => (
           <View
             key={item}
             style={{
               width: 36,
               alignItems: "center",
-            }}
-          >
+            }}>
             <Text
               style={{
                 fontSize: 12,
                 fontWeight: "600",
                 color: "#64748B",
-              }}
-            >
+              }}>
               {item}
             </Text>
           </View>

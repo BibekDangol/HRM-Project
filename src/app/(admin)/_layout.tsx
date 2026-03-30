@@ -1,3 +1,8 @@
+import { Tabs, usePathname, useRouter } from "expo-router";
+import { ArrowLeft, LucideIcon, User } from "lucide-react-native";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { BackHandler, Pressable, StatusBar, Text, View } from "react-native";
+
 import { adminTabs } from "@/src/config/adminTabs";
 import { useAdminHeaderMenu } from "@/src/hooks/useAdminHeaderMenu";
 import { useDimension } from "@/src/hooks/useDimension";
@@ -7,11 +12,6 @@ import { fetchCurrentUserProfleService } from "@/src/services/currentuser.servic
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { useUsersStore } from "@/src/store/useUsersStore";
 import { TW } from "@/theme/twStyles";
-import { Tabs, usePathname, useRouter } from "expo-router";
-import { ArrowLeft, LucideIcon, User } from "lucide-react-native";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { Pressable, StatusBar, Text, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type AdminTabItem = {
   name: string;
@@ -24,26 +24,15 @@ export default function AdminLayout() {
   const pathname = usePathname();
   const menu = useAdminHeaderMenu();
 
-  const { user, loading } = useAuthStore();
+  const { user } = useAuthStore();
   const { userProfile, setUserProfile } = useUsersStore();
-
   const [checkOpen, setCheckOpen] = useState(false);
-  const [loadingAttendance, setLoadingAttendance] = useState(false);
+  const { isTablet, isSmallPhone } = useDimension();
 
-  const checkActionLockRef = useRef(false);
-
-  const {
-    width: screenWidth,
-    height: screenHeight,
-    isTablet,
-    isSmallPhone,
-  } = useDimension();
-
-  const insets = useSafeAreaInsets();
-  const isLandscape = screenWidth > screenHeight;
   const buttonSize = isTablet ? 42 : isSmallPhone ? 32 : 36;
-
   const typedAdminTabs = adminTabs as readonly AdminTabItem[];
+  const checkActionLockRef = useRef(false);
+  const [loadingAttendance] = useState(false);
 
   const fetchUserProfile = useCallback(async () => {
     if (!user?.id || userProfile) return;
@@ -54,44 +43,60 @@ export default function AdminLayout() {
 
   useEffect(() => {
     fetchUserProfile();
-  }, [fetchUserProfile, loading]);
+  }, [fetchUserProfile]);
+
+  /**
+   * BACK HANDLER
+   */
+  useEffect(() => {
+    const TAB_ROOTS = ["/dashboard", "/manage-users", "/leave", "/more"];
+    const onBackPress = () => {
+      const isTabRoot = TAB_ROOTS.includes(pathname);
+      if (router.canGoBack()) {
+        router.back();
+        return true;
+      }
+
+      if (isTabRoot && !pathname.includes("dashboard")) {
+        router.replace("/(admin)/dashboard");
+        return true;
+      }
+
+      return false;
+    };
+
+    const sub = BackHandler.addEventListener("hardwareBackPress", onBackPress);
+
+    return () => sub.remove();
+  }, [pathname, router]);
 
   const showBackButton = !typedAdminTabs.some((tab) =>
-    pathname?.includes(tab.name),
+    pathname.includes(tab.name),
   );
 
   const isLocked = loadingAttendance || checkActionLockRef.current;
 
-  const handleBack = () => {
-    if (router.canGoBack()) {
-      router.back();
-    } else {
-      router.replace("/(admin)/dashboard");
-    }
-  };
-
   return (
     <>
-      <StatusBar
-        barStyle="light-content"
-        backgroundColor={TW.bgSecondary}
-        translucent={false}
-      />
-
+      <StatusBar barStyle="light-content" backgroundColor={TW.bgSecondary} />
       <Tabs
         screenOptions={{
           headerShown: true,
           headerShadowVisible: false,
           headerTitleAlign: "left",
+          headerTitleStyle: {
+            color: "#fff", // ✅ title white
+            fontWeight: "600",
+          },
 
           sceneStyle: {
-            backgroundColor: pathname?.includes("/profile")
+            backgroundColor: pathname.includes("/profile")
               ? TW.bgSecondary
-              : "#ffffff",
+              : "#fff",
           },
 
           tabBarStyle: {
-            backgroundColor: "#ffffff",
+            backgroundColor: "#fff",
           },
 
           headerStyle: {
@@ -104,7 +109,6 @@ export default function AdminLayout() {
           headerLeft: showBackButton
             ? () => (
                 <Pressable
-                  onPress={handleBack}
                   style={{
                     marginLeft: 16,
                     height: 36,
@@ -113,54 +117,11 @@ export default function AdminLayout() {
                     backgroundColor: "rgba(255,255,255,0.2)",
                     alignItems: "center",
                     justifyContent: "center",
-                  }}
-                >
-                  <ArrowLeft size={20} color="#ffffff" />
+                  }}>
+                  <ArrowLeft size={20} color="#fff" />
                 </Pressable>
               )
             : () => null,
-
-          headerTitle: () => (
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 10,
-              }}
-            >
-              <View
-                style={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: 12,
-                  backgroundColor: "rgba(255,255,255,0.2)",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Text
-                  style={{
-                    color: "#ffffff",
-                    fontSize: 13,
-                    fontWeight: "700",
-                  }}
-                >
-                  {userProfile?.first_name?.charAt(0)?.toUpperCase() ?? "A"}
-                </Text>
-              </View>
-
-              <Text
-                style={{
-                  color: "#ffffff",
-                  fontSize: 16,
-                  fontWeight: "700",
-                }}
-              >
-                {userProfile?.first_name ?? "Admin"}
-              </Text>
-            </View>
-          ),
-
           headerRight: () => (
             <View style={{ marginRight: 16 }}>
               <Pressable
@@ -180,8 +141,7 @@ export default function AdminLayout() {
                   alignItems: "center",
                   justifyContent: "center",
                   opacity: pressed ? 0.75 : 1,
-                })}
-              >
+                })}>
                 <User size={17} color="#ffffff" />
               </Pressable>
 
@@ -205,12 +165,11 @@ export default function AdminLayout() {
                       right: 0,
                       zIndex: 9999,
                       elevation: 20,
-                    }}
-                  >
+                    }}>
                     <ProfileMenu
                       open={menu.open}
                       onProfile={() => {
-                        menu.close?.();
+                        menu.close();
                         router.push("/(admin)/profile");
                       }}
                       onLogout={menu.logout}
@@ -221,17 +180,60 @@ export default function AdminLayout() {
             </View>
           ),
         }}
-        tabBar={(props) => <AdminTabBar {...props} />}
-      >
-        {typedAdminTabs.map((tab) => (
-          <Tabs.Screen
-            key={tab.name}
-            name={tab.name}
-            options={{
-              title: tab.title,
-            }}
-          />
-        ))}
+        tabBar={(props) => <AdminTabBar {...props} />}>
+        <Tabs.Screen
+          name="dashboard"
+          options={{
+            title: "Dashboard",
+            headerTitle: () => (
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 10,
+                }}>
+                <View
+                  style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: 12,
+                    backgroundColor: "rgba(255,255,255,0.2)",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}>
+                  <Text
+                    style={{
+                      color: "#fff",
+                      fontSize: 13,
+                      fontWeight: "700",
+                    }}>
+                    {userProfile?.first_name?.charAt(0)?.toUpperCase() ?? "A"}
+                  </Text>
+                </View>
+
+                <Text
+                  style={{
+                    color: "#fff",
+                    fontSize: 16,
+                    fontWeight: "700",
+                  }}>
+                  {userProfile?.first_name ?? "Admin"}
+                </Text>
+              </View>
+            ),
+          }}
+        />
+        {typedAdminTabs
+          .filter((tab) => tab.name !== "dashboard")
+          .map((tab) => (
+            <Tabs.Screen
+              key={tab.name}
+              name={tab.name}
+              options={{
+                title: tab.title,
+              }}
+            />
+          ))}
       </Tabs>
     </>
   );
