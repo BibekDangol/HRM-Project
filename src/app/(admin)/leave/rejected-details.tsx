@@ -1,3 +1,3 @@
-import RejectedDetails from "@/src/screens/admin/more/leave/RejectedDetails";
+import RejectedDetails from "@/src/screens/admin/leave/RejectedDetails";
 
-export default RejectedDetails
+export default RejectedDetails;

@@ -3,31 +3,41 @@ import { Stack } from "expo-router";
 export default function LeaveLayout() {
   return (
     <Stack>
-      <Stack.Screen name="index"
+      <Stack.Screen
+        name="index"
         options={{
           headerShown: false,
-          title: "Leave Requests"
-        }} />
-      <Stack.Screen name="leave-details"
+          title: "Leave Requests",
+        }}
+      />
+      <Stack.Screen
+        name="pending-details"
         options={{
           headerShown: false,
-          title: "Leave Details"
-        }} />
-      <Stack.Screen name="leave-approved"
+          title: "Pending",
+        }}
+      />
+      <Stack.Screen
+        name="leave-approved"
         options={{
           headerShown: false,
-          title: "Approval"
-        }} />
-      <Stack.Screen name="approved-details"
+          title: "Approval",
+        }}
+      />
+      <Stack.Screen
+        name="approved-details"
         options={{
           headerShown: false,
-          title: "Approval Details"
-        }} />
-      <Stack.Screen name="rejected-details"
+          title: "Approval Details",
+        }}
+      />
+      <Stack.Screen
+        name="rejected-details"
         options={{
           headerShown: false,
-          title: "Rejected Details"
-        }} />
+          title: "Rejected Details",
+        }}
+      />
     </Stack>
-  )
+  );
 }

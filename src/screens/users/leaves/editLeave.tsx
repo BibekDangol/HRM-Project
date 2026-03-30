@@ -308,8 +308,7 @@ export default function EditLeaveScreen() {
         const dayType = String(data.day_type ?? "").toUpperCase();
         const isHalf = dayType === "FIRST_SHIFT" || dayType === "SECOND_SHIFT";
         const session =
-          dayType === "second_shift" ? "first_shift" : "second_shift";
-
+          dayType === "SECOND_SHIFT" ? "second_shift" : "first_shift";
         reset({
           reason: data.reason ?? "",
           isHalfDay: isHalf,
@@ -375,6 +374,7 @@ export default function EditLeaveScreen() {
       dayType =
         values.halfSession === "first_shift" ? "FIRST_SHIFT" : "SECOND_SHIFT";
     }
+    console.log("selected day type", dayType);
 
     try {
       setSubmitting(true);
@@ -438,7 +438,8 @@ export default function EditLeaveScreen() {
           paddingHorizontal: SPACING.screenX,
           paddingTop: SPACING.top,
           paddingBottom: 36,
-        }}>
+        }}
+      >
         <BackButton
           color={TW.bgSecondary}
           backgroundColor="rgba(27,74,90,0.08)"
@@ -460,7 +461,8 @@ export default function EditLeaveScreen() {
             style={[
               tw`text-base font-semibold`,
               { color: TW.bgSecondary, marginBottom: SPACING.labelBottom },
-            ]}>
+            ]}
+          >
             Leave Type
           </Text>
 
@@ -480,7 +482,8 @@ export default function EditLeaveScreen() {
             style={[
               tw`text-base font-semibold`,
               { color: TW.bgSecondary, marginBottom: SPACING.labelBottom },
-            ]}>
+            ]}
+          >
             Duration
           </Text>
 
@@ -531,7 +534,8 @@ export default function EditLeaveScreen() {
                   alignSelf: "flex-start",
                   opacity: pressed ? 0.85 : 1,
                   marginBottom: value ? 14 : 0,
-                })}>
+                })}
+              >
                 <View
                   style={{
                     width: 20,
@@ -542,7 +546,8 @@ export default function EditLeaveScreen() {
                     backgroundColor: value ? TW.bgSecondary : "#ffffff",
                     alignItems: "center",
                     justifyContent: "center",
-                  }}>
+                  }}
+                >
                   {value ? (
                     <Check color="#ffffff" size={12} strokeWidth={3} />
                   ) : null}
@@ -553,7 +558,8 @@ export default function EditLeaveScreen() {
                     fontSize: 13,
                     fontWeight: "600",
                     color: TW.bgSecondary,
-                  }}>
+                  }}
+                >
                   Half Day
                 </Text>
               </Pressable>
@@ -569,7 +575,8 @@ export default function EditLeaveScreen() {
                     color: TW.bgSecondary,
                     marginBottom: SPACING.labelBottom,
                   },
-                ]}>
+                ]}
+              >
                 Session
               </Text>
 
@@ -595,14 +602,16 @@ export default function EditLeaveScreen() {
                               value === session ? TW.bgSecondary : "#ffffff",
                             alignItems: "center",
                             opacity: pressed ? 0.85 : 1,
-                          })}>
+                          })}
+                        >
                           <Text
                             style={{
                               fontSize: 12,
                               fontWeight: "500",
                               color:
                                 value === session ? "#ffffff" : TW.bgSecondary,
-                            }}>
+                            }}
+                          >
                             {session.charAt(0).toUpperCase() + session.slice(1)}
                           </Text>
                         </Pressable>
@@ -620,7 +629,8 @@ export default function EditLeaveScreen() {
             style={[
               tw`text-base font-semibold`,
               { color: TW.bgSecondary, marginBottom: SPACING.labelBottom },
-            ]}>
+            ]}
+          >
             Reason / Description
           </Text>
 
@@ -675,13 +685,15 @@ export default function EditLeaveScreen() {
               alignItems: "center",
               backgroundColor: "#ffffff",
               opacity: pressed || submitting ? 0.6 : 1,
-            })}>
+            })}
+          >
             <Text
               style={{
                 fontSize: 14,
                 fontWeight: "600",
                 color: "#64748B",
-              }}>
+              }}
+            >
               Cancel
             </Text>
           </Pressable>
@@ -699,14 +711,16 @@ export default function EditLeaveScreen() {
               justifyContent: "center",
               gap: 8,
               opacity: submitting ? 0.55 : pressed ? 0.8 : 1,
-            })}>
+            })}
+          >
             {submitting && <ActivityIndicator size="small" color="#ffffff" />}
             <Text
               style={{
                 fontSize: 14,
                 fontWeight: "700",
                 color: "#ffffff",
-              }}>
+              }}
+            >
               {submitting ? "Saving" : "Save Changes"}
             </Text>
           </Pressable>
@@ -720,7 +734,8 @@ export default function EditLeaveScreen() {
         onRequestClose={() => {
           setCalendarVisible(false);
           setActiveDateField(null);
-        }}>
+        }}
+      >
         <View style={tw`flex-1 bg-black/25 justify-center items-center px-4`}>
           <Pressable
             style={tw`absolute inset-0`}

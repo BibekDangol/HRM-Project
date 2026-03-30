@@ -1,9 +1,7 @@
 {
   "deno.enable": true,
   "deno.lint": true,
-  "deno.enablePaths": [
-    "supabase/functions"
-  ],
+  "deno.enablePaths": ["supabase/functions"],
   "deno.importMap": "./supabase/functions/deno.json",
   "deno.unstable": false,
   "[typescript]": {
@@ -13,7 +11,5 @@
     "source.fixAll": "explicit",
     "source.organizeImports": "explicit"
   },
-  "cSpell.words": [
-    "Pressable"
-  ]
+  "cSpell.words": ["Pressable"]
 }

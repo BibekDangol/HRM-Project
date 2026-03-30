@@ -13,7 +13,7 @@ import { useForm } from "react-hook-form";
 import { Alert } from "react-native";
 import { ProfileData } from "../../types/profile.types";
 
-export function useProfile(userId?: string) {
+export function useProfile(userId?: string ) {
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [profile, setProfile] = useState<ProfileData | null>(null);

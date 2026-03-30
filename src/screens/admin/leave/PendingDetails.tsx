@@ -1,4 +1,3 @@
-import { ActivityIndicator, Alert, Text, View } from "react-native";
 import {
   Leave,
   LeaveStatus,
@@ -6,13 +5,14 @@ import {
   sumUserLeaveDaysByType,
   updateLeaveStatus,
 } from "@/src/services/leave.service";
-import { useEffect, useState } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect, useState } from "react";
+import { ActivityIndicator, Alert, Text, View } from "react-native";
 
-import LeaveDeatilsView from "@/src/components/Leave/LeaveDeatilsView";
-import tw from "twrnc";
+import AdminPendingView from "@/src/components/Leave/AdminPendingView";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { useLeaveStore } from "@/src/store/useLeaveStore";
+import tw from "twrnc";
 
 // Helper component: Label + Value (full control)
 export function LabelValue({
@@ -34,7 +34,8 @@ export function LabelValue({
         {label}
       </Text>
       <Text
-        style={[tw`text-sm font-semibold`, { color: "#111827" }, valueStyle]}>
+        style={[tw`text-sm font-semibold`, { color: "#111827" }, valueStyle]}
+      >
         {value}
       </Text>
     </View>
@@ -51,7 +52,7 @@ const statusConfig: StatusConfig = {
   rejected: { bg: "#fee2e2", text: "#ef4444", label: "REJECTED" },
 };
 
-export default function LeaveDetailScreen() {
+export default function PendingDetails() {
   const { id } = useLocalSearchParams();
   const [leave, setLeave] = useState<Leave | null>(null);
   const [usedDays, setUsedDays] = useState<number | null>(null);
@@ -151,7 +152,7 @@ export default function LeaveDetailScreen() {
   const cfg = statusConfig[leave.status] ?? statusConfig.pending;
 
   return (
-    <LeaveDeatilsView
+    <AdminPendingView
       leave={leave}
       cfg={cfg}
       handleStatusChange={handleStatusChange}

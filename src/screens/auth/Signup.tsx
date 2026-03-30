@@ -53,9 +53,9 @@ export default function SignupScreen() {
   });
 
   const inputVerticalPadding = isTablet ? 18 : isSmallPhone ? 12 : 15;
+  const horizontalPadding = isTablet ? 40 : isSmallPhone ? 16 : 24;
   const labelFontSize = isTablet ? 16 : 14;
   const inputFontSize = isTablet ? 16 : 14;
-  const horizontalPadding = isTablet ? 40 : isSmallPhone ? 16 : 24;
   const fieldGap = isTablet ? 20 : isSmallPhone ? 14 : 16;
   const handleSignup = async (data: FormData) => {
     try {
@@ -117,7 +117,7 @@ export default function SignupScreen() {
                     { fontSize: isTablet ? 34 : 28 },
                   ]}
                 >
-                  Create Organization
+                  Get Started
                 </Text>
                 <Text
                   style={[
@@ -128,7 +128,7 @@ export default function SignupScreen() {
                     },
                   ]}
                 >
-                  Register your organization to get started
+                  Set up your organization in a few simple steps
                 </Text>
               </View>
 
@@ -266,7 +266,7 @@ export default function SignupScreen() {
                         Email *
                       </Text>
                       <TextInput
-                        placeholder="Enter your email"
+                        placeholder="info@company.com"
                         keyboardType="email-address"
                         autoCapitalize="none"
                         autoCorrect={false}
@@ -443,7 +443,7 @@ export default function SignupScreen() {
                           { fontSize: isTablet ? 18 : 14 },
                         ]}
                       >
-                        {loading ? "Creating..." : "Create Organization"}
+                        {loading ? "Creating..." : "Register"}
                       </Text>
                     </View>
                   </TouchableOpacity>

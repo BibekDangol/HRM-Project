@@ -1,4 +1,6 @@
+import { formatElapsed, formatSinceTime } from "@/src/utils/attendanceHelper";
 import { MAX_YEAR, MONTHS } from "@/src/utils/userDashboard";
+import React, { useMemo, useState } from "react";
 import {
   Pressable,
   RefreshControl,
@@ -6,22 +8,20 @@ import {
   Text,
   View,
 } from "react-native";
-import React, { useMemo, useState } from "react";
-import { formatElapsed, formatSinceTime } from "@/src/utils/attendanceHelper";
 
 import { ActivityLogSection } from "@/src/components/ActivityLog";
-import { AttendanceStatsCard } from "@/src/components/Home/AttendanceStatsCard";
-import { CalendarDays } from "lucide-react-native";
-import { CheckInCard } from "@/src/components/Home/CheckInCard";
 import { HolidaysEventsSection } from "@/src/components/HolidaysEventsSection";
+import { AttendanceStatsCard } from "@/src/components/Home/AttendanceStatsCard";
+import { CheckInCard } from "@/src/components/Home/CheckInCard";
 import { MonthPickerModal } from "@/src/components/Home/MonthPickerModal";
-import { router } from "expo-router";
-import tw from "twrnc";
 import { useAttendanceContext } from "@/src/context/AttendanceContext";
 import { useAttendanceStats } from "@/src/hooks/users/useAttendanceStats";
-import { useAuthStore } from "@/src/store/useAuthStore";
 import { useCalendar } from "@/src/hooks/users/useCalendar";
 import { useProfile } from "@/src/hooks/users/useProfile";
+import { useAuthStore } from "@/src/store/useAuthStore";
+import { router } from "expo-router";
+import { CalendarDays } from "lucide-react-native";
+import tw from "twrnc";
 
 export default function HomeScreen() {
   const user = useAuthStore((s) => s.user);
@@ -35,7 +35,7 @@ export default function HomeScreen() {
   const [selectedMonth, setSelectedMonth] = useState(now.getMonth());
   const [monthModalOpen, setMonthModalOpen] = useState(false);
 
-  const { profile, loading, fetchProfile } = useProfile(user?.id);
+  const { profile, fetchProfile } = useProfile(user?.id);
   //ask ayush dai why its fetching non stop, not only on page refresh.????
   const {
     stats,
@@ -67,10 +67,11 @@ export default function HomeScreen() {
       contentContainerStyle={{ paddingVertical: 16 }}
       refreshControl={
         <RefreshControl
-          refreshing={refreshing || loading || statsLoading}
+          refreshing={refreshing || calendarLoading || statsLoading}
           onRefresh={onRefresh}
         />
-      }>
+      }
+    >
       <View style={{ paddingHorizontal: 16 }}>
         <CheckInCard
           isCheckedIn={att.isCheckedIn}
@@ -94,7 +95,8 @@ export default function HomeScreen() {
             style={({ pressed }) => [
               tw`px-3 py-2 rounded-full`,
               pressed && { opacity: 0.7 },
-            ]}>
+            ]}
+          >
             <CalendarDays size={20} color="#475569" />
           </Pressable>
         </View>

@@ -1,7 +1,7 @@
 import {
   LabelValue,
   StatusConfigValue,
-} from "@/src/screens/admin/more/leave/LeaveDetailsScreen";
+} from "@/src/screens/admin/leave/PendingDetails";
 import { Leave, LeaveStatus } from "@/src/services/leave.service";
 import { CheckCircle, XCircle } from "lucide-react-native";
 import { Pressable, Text, View } from "react-native";
@@ -18,7 +18,7 @@ interface Props {
   remainingDays: number | null;
   usedDays: number | null;
 }
-const LeaveDeatilsView = ({
+const AdminPendingView = ({
   leave,
   cfg,
   handleStatusChange,
@@ -29,10 +29,12 @@ const LeaveDeatilsView = ({
     <View style={tw`flex-1 bg-white`}>
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={tw`pb-32`}>
+        contentContainerStyle={tw`pb-32`}
+      >
         {/* Profile Card */}
         <View
-          style={tw`mx-5 mt-5 rounded-3xl bg-slate-50 border border-slate-100 px-5 py-6 items-center`}>
+          style={tw`mx-5 mt-5 rounded-3xl bg-slate-50 border border-slate-100 px-5 py-6 items-center`}
+        >
           {/* Avatar */}
 
           {/* Name */}
@@ -50,7 +52,8 @@ const LeaveDeatilsView = ({
             style={[
               tw`mt-3 px-4 py-1.5 rounded-full`,
               { backgroundColor: cfg.bg },
-            ]}>
+            ]}
+          >
             <Text style={[tw`text-xs font-bold`, { color: cfg.text }]}>
               {cfg.label}
             </Text>
@@ -75,7 +78,8 @@ const LeaveDeatilsView = ({
                       remainingDays <= 0
                         ? tw`text-red-500`
                         : tw`text-emerald-600`,
-                    ]}>
+                    ]}
+                  >
                     {remainingDays}
                   </Text>
                   <Text style={tw`text-xs text-slate-400`}>Remaining</Text>
@@ -96,7 +100,8 @@ const LeaveDeatilsView = ({
         {/* Details Section */}
         <View style={tw`px-5 mt-6 border-t border-slate-100`}>
           <Text
-            style={tw`text-xs font-bold text-slate-400 uppercase tracking-wider mb-2`}>
+            style={tw`text-xs font-bold text-slate-400 uppercase tracking-wider mb-2`}
+          >
             Details
           </Text>
 
@@ -131,7 +136,8 @@ const LeaveDeatilsView = ({
         {usedDays !== null && remainingDays !== null && (
           <View style={tw`px-5 mt-6`}>
             <Text
-              style={tw`text-xs font-bold text-slate-400 uppercase tracking-wider mb-2`}>
+              style={tw`text-xs font-bold text-slate-400 uppercase tracking-wider mb-2`}
+            >
               Leave Balance
             </Text>
 
@@ -179,13 +185,15 @@ const LeaveDeatilsView = ({
 
       {/* Action Buttons */}
       <View
-        style={tw`absolute bottom-0 left-0 right-0 bg-white border-t border-slate-100 px-5 py-4 flex-row gap-3`}>
+        style={tw`absolute bottom-0 left-0 right-0 bg-white border-t border-slate-100 px-5 py-4 flex-row gap-3`}
+      >
         <Pressable
           onPress={() => handleStatusChange("rejected")}
           style={({ pressed }) => [
             tw`flex-1 flex-row items-center justify-center py-4 rounded-2xl ${TW.bgRejected}`,
             pressed && tw`opacity-70`,
-          ]}>
+          ]}
+        >
           <XCircle size={18} color="#ffffff" />
           <Text style={tw`text-white font-bold ml-2`}>Reject</Text>
         </Pressable>
@@ -197,7 +205,8 @@ const LeaveDeatilsView = ({
           }}
           style={({ pressed }) => [
             tw`flex-1 flex-row items-center justify-center py-4 rounded-2xl ${TW.bgAction}`,
-          ]}>
+          ]}
+        >
           <CheckCircle size={18} color={"#ffffff"} />
           <Text style={[tw`font-bold ml-2`, tw`text-white`]}>Approve</Text>
         </Pressable>
@@ -206,4 +215,4 @@ const LeaveDeatilsView = ({
   );
 };
 
-export default LeaveDeatilsView;
+export default AdminPendingView;

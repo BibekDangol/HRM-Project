@@ -59,7 +59,7 @@ const statusConfig: Record<
   rejected: { bg: "#fee2e2", text: "#ef4444", label: "REJECTED" },
 };
 
-export default function LeaveDetailScreen() {
+export default function UserPendingView() {
   const { id } = useLocalSearchParams();
   const [leave, setLeave] = useState<Leave | null>(null);
   const [usedDays, setUsedDays] = useState<number | null>(null);

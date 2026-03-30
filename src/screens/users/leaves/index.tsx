@@ -6,8 +6,8 @@ import LoadingIndicator from "@/src/components/LoadingIndicator";
 import { useLeavePagination } from "@/src/hooks/users/useLeavePagination";
 import { useLeaves } from "@/src/hooks/users/useLeaves";
 import { useRouter } from "expo-router";
+import { Plus } from "lucide-react-native";
 import tw from "twrnc";
-import { FAB } from "./components/FAB";
 import { LeaveCard } from "./components/LeaveCard";
 
 export default function LeavesScreen() {
@@ -75,7 +75,8 @@ export default function LeavesScreen() {
           <View style={tw`flex-row items-center justify-center gap-2 py-4`}>
             <Pressable
               onPress={() => setPage((p) => Math.max(1, p - 1))}
-              style={tw`px-3 py-2 border border-slate-200 rounded-lg`}>
+              style={tw`px-3 py-2 border border-slate-200 rounded-lg`}
+            >
               <Text style={tw`text-slate-700 font-medium`}>Prev</Text>
             </Pressable>
 
@@ -83,14 +84,16 @@ export default function LeavesScreen() {
               <Pressable
                 key={p}
                 onPress={() => setPage(p)}
-                style={tw`px-3 py-2 rounded-lg border border-slate-200`}>
+                style={tw`px-3 py-2 rounded-lg border border-slate-200`}
+              >
                 <Text
                   style={[
                     tw`font-medium`,
                     p === page
                       ? tw`text-white bg-[#1B4A5A] px-2 py-1 rounded`
                       : tw`text-slate-700`,
-                  ]}>
+                  ]}
+                >
                   {p}
                 </Text>
               </Pressable>
@@ -98,7 +101,8 @@ export default function LeavesScreen() {
 
             <Pressable
               onPress={() => setPage((p) => Math.min(totalPages, p + 1))}
-              style={tw`px-3 py-2 border border-slate-200 rounded-lg`}>
+              style={tw`px-3 py-2 border border-slate-200 rounded-lg`}
+            >
               <Text style={tw`text-slate-700 font-medium`}>Next</Text>
             </Pressable>
           </View>
@@ -106,9 +110,12 @@ export default function LeavesScreen() {
       />
 
       {/* FAB */}
-      <View style={tw`absolute bottom-2 right-6`}>
-        <FAB onPress={() => router.push("/(users)/leaves/calendar")} />
-      </View>
+      <Pressable
+        onPress={() => router.push("/(users)/leaves/calendar")}
+        style={tw`absolute bottom-6 right-6 bg-[#1B4A5A] w-14 h-14 rounded-full items-center justify-center shadow-lg`}
+      >
+        <Plus color="#fff" size={28} />
+      </Pressable>
     </View>
   );
 }
