@@ -1,3 +1,3 @@
-import Settings from "@/src/screens/admin/more/leave";
+import Settings from "@/src/screens/admin/leave";
 
-export default Settings
+export default Settings;

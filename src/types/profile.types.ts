@@ -4,7 +4,7 @@ export interface ProfileData {
   last_name: string | null;
   email: string | null;
   avatar?: string | null;
-  organization_id: number | null;
+  organization_id: number;
   organization?: { name: string | null } | null;
   role: string | null;
 }

@@ -1,3 +1,3 @@
-import ApprovedDetails from "@/src/screens/admin/more/leave/ApprovedDetails"
+import ApprovedDetails from "@/src/screens/admin/leave/ApprovedDetails";
 
-export default ApprovedDetails
+export default ApprovedDetails;

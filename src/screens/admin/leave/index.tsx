@@ -5,7 +5,7 @@ export default function AdminLeaveScreen() {
   return (
     <AdminLeaveView
       approvedPath="/(admin)/leave/approved-details"
-      pendingPath="/(admin)/leave/leave-details"
+      pendingPath="/(admin)/leave/pending-details"
       rejectedPath="/(admin)/leave/rejected-details"
       fetchLeaves={fetchLeaveRequests}
     />

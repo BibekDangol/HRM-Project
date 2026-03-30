@@ -1,6 +1,7 @@
 import { CircleCheck, LogOut } from "lucide-react-native";
 import { Pressable, Text, View } from "react-native";
 
+import { TW } from "@/theme/twStyles";
 import React from "react";
 
 type Props = {
@@ -28,12 +29,13 @@ export function CheckInCard({
     <View
       style={{
         borderRadius: 20,
-        backgroundColor: "#0F172A",
+        backgroundColor: TW.bgSecondary,
         padding: 16,
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
-      }}>
+      }}
+    >
       {/* LEFT SIDE */}
       <View style={{ gap: 4 }}>
         <Text style={{ color: "#94A3B8", fontSize: 12 }}>
@@ -47,7 +49,8 @@ export function CheckInCard({
                 fontSize: 28,
                 fontWeight: "800",
                 color: "white",
-              }}>
+              }}
+            >
               {formatElapsed(elapsedMs)}
             </Text>
 
@@ -74,7 +77,8 @@ export function CheckInCard({
           backgroundColor: "#FFC107",
           opacity: isLocked || pressed ? 0.5 : 1,
           transform: [{ scale: pressed ? 0.98 : 1 }],
-        })}>
+        })}
+      >
         {isCheckedIn ? (
           <LogOut size={16} color="#1F2937" />
         ) : (

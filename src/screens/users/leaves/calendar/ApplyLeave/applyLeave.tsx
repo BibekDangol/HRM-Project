@@ -1,4 +1,13 @@
 import {
+  FormValues,
+  LeaveTypeRow,
+  LeaveTypeWithStats,
+} from "@/src/types/userLeave";
+import { calcLeaveDays, diffDaysInclusive } from "@/src/utils/leaveUtils";
+import { useFocusEffect, useRouter } from "expo-router";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import {
   ActivityIndicator,
   Alert,
   Modal,
@@ -7,28 +16,18 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { Controller, useForm } from "react-hook-form";
-import {
-  FormValues,
-  LeaveTypeRow,
-  LeaveTypeWithStats,
-} from "@/src/types/userLeave";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { calcLeaveDays, diffDaysInclusive } from "@/src/utils/leaveUtils";
-import { useFocusEffect, useRouter } from "expo-router";
 
-import { BackButton } from "@/src/components/BackButton";
-import { Check } from "lucide-react-native";
-import { DateField } from "@/src/components/userLeave/DateField";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import { LeaveTypeDropdown } from "@/src/components/userLeave/LeaveTypeDropdown";
 import { SharedCalendar } from "@/src/components/SharedCalendar";
-import { TW } from "@/theme/twStyles";
-import { supabase } from "@/src/supabase/supabaseClient";
-import tw from "twrnc";
-import { useAuthStore } from "@/src/store/useAuthStore";
+import { DateField } from "@/src/components/userLeave/DateField";
+import { LeaveTypeDropdown } from "@/src/components/userLeave/LeaveTypeDropdown";
 import { userLeaveSchema } from "@/src/schema/users/userLeaveApply.schema";
+import { useAuthStore } from "@/src/store/useAuthStore";
+import { supabase } from "@/src/supabase/supabaseClient";
+import { TW } from "@/theme/twStyles";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Check } from "lucide-react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import tw from "twrnc";
 
 async function getOrganizationIdByUserId(userId: string) {
   const { data, error } = await supabase
@@ -412,10 +411,9 @@ export default function ApplyLeaveScreen() {
     const dayType =
       isHalfDay && localStartDate === localEndDate
         ? values.halfSession === "second_shift"
-          ? "second_shift"
-          : "first_shift"
+          ? "SECOND_SHIFT"
+          : "FIRST_SHIFT"
         : "FULL";
-
     try {
       setSubmitting(true);
 
@@ -474,7 +472,8 @@ export default function ApplyLeaveScreen() {
           flexGrow: 1,
           gap: 18,
           paddingBottom: 16,
-        }}>
+        }}
+      >
         {/* <BackButton
           color={TW.bgSecondary}
           backgroundColor="rgba(27,74,90,0.08)"
@@ -496,7 +495,8 @@ export default function ApplyLeaveScreen() {
             style={[
               tw`text-base font-semibold`,
               { color: TW.bgSecondary, marginBottom: SPACING.labelBottom },
-            ]}>
+            ]}
+          >
             Leave Type
           </Text>
 
@@ -516,7 +516,8 @@ export default function ApplyLeaveScreen() {
             style={[
               tw`text-base font-semibold`,
               { color: TW.bgSecondary, marginBottom: SPACING.labelBottom },
-            ]}>
+            ]}
+          >
             Duration
           </Text>
 
@@ -548,7 +549,8 @@ export default function ApplyLeaveScreen() {
             style={[
               tw`text-base font-semibold`,
               { color: TW.bgSecondary, marginBottom: SPACING.labelBottom },
-            ]}>
+            ]}
+          >
             Day Option
           </Text>
 
@@ -575,7 +577,8 @@ export default function ApplyLeaveScreen() {
                   alignSelf: "flex-start",
                   opacity: pressed ? 0.85 : 1,
                   marginBottom: value ? 14 : 0,
-                })}>
+                })}
+              >
                 <View
                   style={{
                     width: 20,
@@ -586,7 +589,8 @@ export default function ApplyLeaveScreen() {
                     backgroundColor: value ? TW.bgSecondary : "#ffffff",
                     alignItems: "center",
                     justifyContent: "center",
-                  }}>
+                  }}
+                >
                   {value ? (
                     <Check color="#ffffff" size={12} strokeWidth={3} />
                   ) : null}
@@ -597,7 +601,8 @@ export default function ApplyLeaveScreen() {
                     fontSize: 13,
                     fontWeight: "600",
                     color: TW.bgSecondary,
-                  }}>
+                  }}
+                >
                   Half Day
                 </Text>
               </Pressable>
@@ -613,7 +618,8 @@ export default function ApplyLeaveScreen() {
                     color: TW.bgSecondary,
                     marginBottom: SPACING.labelBottom,
                   },
-                ]}>
+                ]}
+              >
                 Session
               </Text>
 
@@ -638,14 +644,16 @@ export default function ApplyLeaveScreen() {
                               value === session ? TW.bgSecondary : "#ffffff",
                             alignItems: "center",
                             opacity: pressed ? 0.85 : 1,
-                          })}>
+                          })}
+                        >
                           <Text
                             style={{
                               fontSize: 12,
                               fontWeight: "500",
                               color:
                                 value === session ? "#ffffff" : TW.bgSecondary,
-                            }}>
+                            }}
+                          >
                             {session.charAt(0).toUpperCase() + session.slice(1)}
                           </Text>
                         </Pressable>
@@ -663,7 +671,8 @@ export default function ApplyLeaveScreen() {
             style={[
               tw`text-base font-semibold`,
               { color: TW.bgSecondary, marginBottom: SPACING.labelBottom },
-            ]}>
+            ]}
+          >
             Reason / Description
           </Text>
 
@@ -713,13 +722,15 @@ export default function ApplyLeaveScreen() {
               alignItems: "center",
               backgroundColor: "#ffffff",
               opacity: pressed || submitting ? 0.6 : 1,
-            })}>
+            })}
+          >
             <Text
               style={{
                 fontSize: 14,
                 fontWeight: "600",
                 color: "#64748B",
-              }}>
+              }}
+            >
               Cancel
             </Text>
           </Pressable>
@@ -737,14 +748,16 @@ export default function ApplyLeaveScreen() {
               justifyContent: "center",
               gap: 8,
               opacity: submitting ? 0.55 : pressed ? 0.8 : 1,
-            })}>
+            })}
+          >
             {submitting && <ActivityIndicator size="small" color="#ffffff" />}
             <Text
               style={{
                 fontSize: 14,
                 fontWeight: "700",
                 color: "#ffffff",
-              }}>
+              }}
+            >
               {submitting ? "Submitting" : "Submit"}
             </Text>
           </Pressable>
@@ -758,7 +771,8 @@ export default function ApplyLeaveScreen() {
         onRequestClose={() => {
           setCalendarVisible(false);
           setActiveDateField(null);
-        }}>
+        }}
+      >
         <View style={tw`flex-1 bg-black/25 justify-center items-center px-4`}>
           <Pressable
             style={tw`absolute inset-0`}

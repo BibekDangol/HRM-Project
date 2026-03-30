@@ -29,7 +29,7 @@ type Props = {
   fetchLeaves: (orgId: number, userId: string) => Promise<any[]>;
 };
 
-export default function AdminLeaveView({
+export default function LeaveView({
   approvedPath,
   pendingPath,
   rejectedPath,
