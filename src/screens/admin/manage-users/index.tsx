@@ -1,146 +1,297 @@
-import React, { useState } from "react";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import * as Clipboard from "expo-clipboard";
 
-import { BackButton } from "@/src/components/BackButton";
-import { CalendarHeader } from "@/src/components/Calendar/CalendarHeader";
-import { DayCell } from "@/src/components/Calendar/DayCell";
-import { HolidayRangeModal } from "@/src/components/Calendar/HolidayRangeModal";
-import { SharedCalendar } from "@/src/components/SharedCalendar";
-import useAdminCalendarActions from "@/src/hooks/admin/useAdminCalendarActions";
-import useAdminCalendarMarks from "@/src/hooks/admin/useAdminCalendarMarks";
-import useCalendarRange from "@/src/hooks/admin/useCalendarRange";
+import { Copy, Plus, Search } from "lucide-react-native";
+import React, { useEffect } from "react";
+import {
+  Alert,
+  FlatList,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  Text,
+  View,
+} from "react-native";
+
+import HeaderWithSearch from "@/src/components/HeaderWithSearch";
+import LoadingIndicator from "@/src/components/LoadingIndicator";
+import { useManageUsers } from "@/src/hooks/admin/useManageUsers";
 import { TW } from "@/theme/twStyles";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import tw from "twrnc";
+import { UserCard } from "../components/UserCard";
+import AddUserModal from "./AddUserModal";
+import EditUserModal from "./EditUserModal";
 
-interface Props {
-  currentUserId: string;
-  currentOrgId: string;
-}
+const ManageUsers = () => {
+  const router = useRouter();
 
-function getCurrentMonthYear() {
-  const now = new Date();
-  return {
-    month: now.getMonth() + 1,
-    year: now.getFullYear(),
-  };
-}
+  const {
+    // state
+    search,
+    setSearch,
+    activeTab,
+    setActiveTab,
+    currentPage,
+    setCurrentPage,
 
-export default function AdminCalendarScreen({
-  currentUserId,
-  currentOrgId,
-}: Props) {
-  const { month: initialMonth, year: initialYear } = getCurrentMonthYear();
+    loading,
+    refreshing,
 
-  const [month, setMonth] = useState(initialMonth);
-  const [year, setYear] = useState(initialYear);
-  const [showSettings, setShowSettings] = useState(false);
+    showAddModal,
+    setShowAddModal,
+    showEditModal,
+    setShowEditModal,
 
-  const { rangeStart, rangeEnd, showModal, handleDayPress, clearRange } =
-    useCalendarRange();
+    user,
+    users,
+    editingUser,
+    editRole,
+    setEditRole,
+    editSupervisor,
+    setEditSupervisor,
+    getSupervisorName,
 
-  const { saveRange } = useAdminCalendarActions();
+    // data
+    pagedUsers,
+    filteredUsers,
+    totalPages,
+    getPageNumbers,
+    tabs,
 
-  const markedDates = useAdminCalendarMarks(year, month, rangeStart, rangeEnd);
-
-  const handleRangeConfirm = async (
-    type: "holiday" | "event",
-    label: string,
-    color?: string,
-  ): Promise<void> => {
-    await saveRange({
-      rangeStart,
-      rangeEnd,
-      type,
-      label,
-      color,
-    });
-
-    clearRange();
-  };
-
+    // actions
+    onRefresh,
+    handleAddUser,
+    handleEditUser,
+    handleSubmitEdit,
+    handleDeleteUser,
+    tempPassword,
+    setTempPassword,
+  } = useManageUsers();
+  const insets = useSafeAreaInsets();
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab, setCurrentPage]);
+  //ask aayush dai search garda paila page milirako chaina
   return (
-    <SafeAreaView
-      edges={["bottom", "left", "right"]}
-      style={tw`flex-1 bg-white`}>
-      {/* Header */}
-      <View style={tw`px-4 pt-3`}>
-        <BackButton />
-      </View>
-
-      <CalendarHeader onSettingsPress={() => setShowSettings(true)} />
-
-      {/* Calendar */}
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <SharedCalendar
-          year={year}
-          month={month}
-          markedDates={markedDates}
-          markingType="period"
-          onDayPress={(day) => handleDayPress(day.dateString)}
-          onMonthChange={(m: { year: number; month: number }) => {
-            setYear(m.year);
-            setMonth(m.month);
-          }}
-          dayComponent={({ date, state, marking }: any) => {
-            if (!date) return null;
-
-            return (
-              <DayCell
-                date={date}
-                state={state}
-                marking={marking}
-                onPress={() => handleDayPress(date.dateString)}
-              />
-            );
-          }}
-          showLegend={true}
+    <View style={tw`flex-1 bg-white`}>
+      <KeyboardAvoidingView
+        style={tw`flex-1`}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}>
+        {/* HEADER */}
+        <HeaderWithSearch
+          search={search}
+          onSearchChange={setSearch}
+          onBack={() => router.back()}
         />
 
-        {/* Range helper */}
-        {rangeStart && !rangeEnd && (
-          <View
-            style={{
-              marginHorizontal: 16,
-              marginBottom: 8,
-              paddingHorizontal: 16,
-              paddingVertical: 10,
-              backgroundColor: "rgba(27,74,90,0.08)",
-              borderRadius: 12,
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "space-between",
-            }}>
-            <Text
-              style={{
-                color: TW.bgSecondary,
-                fontSize: 13,
-                fontWeight: "500",
-              }}>
-              Start: {rangeStart} — tap an end date
-            </Text>
-
-            <TouchableOpacity onPress={clearRange}>
-              <Text style={{ color: "#EF4444", fontSize: 13 }}>Cancel</Text>
-            </TouchableOpacity>
+        <View style={tw`flex-row items-center gap-2 px-4 pt-3 pb-2`}>
+          {/* Tabs — take remaining space */}
+          <View style={tw`flex-1 flex-row rounded-2xl p-1 bg-slate-100`}>
+            {tabs.map((tab) => {
+              const isActive = activeTab === tab.key;
+              return (
+                <Pressable
+                  key={tab.key}
+                  onPress={() => setActiveTab(tab.key)}
+                  style={({ pressed }) => [
+                    tw`flex-1 py-3 rounded-xl items-center`,
+                    isActive ? tw`${TW.bgAction}` : null,
+                    pressed && !isActive && tw`opacity-70`,
+                  ]}>
+                  <Text
+                    style={[
+                      tw`text-sm font-bold`,
+                      isActive ? tw`${TW.textButton}` : tw`${TW.textPrimary}`,
+                    ]}>
+                    {tab.label.toUpperCase()}{" "}
+                    {tab.count > 0 && (
+                      <Text style={tw`${TW.textTertiary}`}></Text>
+                    )}
+                  </Text>
+                </Pressable>
+              );
+            })}
           </View>
-        )}
-      </ScrollView>
 
-      {/* Modal */}
-      <HolidayRangeModal
-        visible={showModal}
-        startDate={rangeStart ?? ""}
-        endDate={rangeEnd ?? ""}
-        onClose={clearRange}
-        onConfirm={handleRangeConfirm}
+          {/* Add User button — same height as tab bar */}
+          <Pressable
+            onPress={() => setShowAddModal(true)}
+            style={({ pressed }) => [
+              tw`h-12 w-12 rounded-full ${TW.bgAction}/90 items-center justify-center`,
+              pressed && tw`opacity-85`,
+            ]}>
+            <Plus size={22} color="white" strokeWidth={2.5} />
+          </Pressable>
+        </View>
+
+        {/* LIST */}
+        <FlatList
+          data={pagedUsers}
+          keyExtractor={(item) => item.id}
+          style={tw`px-4`}
+          renderItem={({ item }) => (
+            <UserCard
+              user={item}
+              onEdit={handleEditUser}
+              onDelete={handleDeleteUser}
+              getSupervisorName={getSupervisorName}
+            />
+          )}
+          ItemSeparatorComponent={() => <View style={tw`h-3`} />}
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          ListEmptyComponent={
+            loading ? (
+              <LoadingIndicator message="Loading..." />
+            ) : (
+              <View style={tw`items-center mt-20`}>
+                <Search size={30} color="gray" />
+                <Text>No users found</Text>
+              </View>
+            )
+          }
+          ListFooterComponent={
+            pagedUsers.length > 0 ? (
+              <View style={tw`pt-4 pb-2`}>
+                {/* Pagination Row */}
+                <View style={tw`flex-row items-center gap-2 mb-2`}>
+                  {/* Prev Button */}
+                  <Pressable
+                    onPress={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                    style={[
+                      tw`flex-1 h-10 rounded-xl items-center justify-center border ${TW.BORDER}`,
+                      currentPage === 1 && tw`opacity-30`,
+                    ]}>
+                    <Text style={tw`${TW.textPrimary} font-bold text-base`}>
+                      ‹ Prev
+                    </Text>
+                  </Pressable>
+
+                  {/* Page Numbers */}
+                  {getPageNumbers().map((page) => (
+                    <Pressable
+                      key={page}
+                      onPress={() => setCurrentPage(page)}
+                      style={[
+                        tw`h-10 w-10 rounded-xl items-center justify-center`,
+                        currentPage === page
+                          ? tw`${TW.bgAction}`
+                          : tw`border ${TW.BORDER}`,
+                      ]}>
+                      <Text
+                        style={[
+                          tw`text-sm font-semibold`,
+                          currentPage === page
+                            ? tw`${TW.textButton}`
+                            : tw`${TW.textPrimary}`,
+                        ]}>
+                        {page}
+                      </Text>
+                    </Pressable>
+                  ))}
+
+                  {/* Next Button */}
+                  <Pressable
+                    onPress={() =>
+                      setCurrentPage((p) => Math.min(totalPages, p + 1))
+                    }
+                    disabled={currentPage === totalPages}
+                    style={[
+                      tw`flex-1 h-10 rounded-xl items-center justify-center border ${TW.BORDER}`,
+                      currentPage === totalPages && tw`opacity-30`,
+                    ]}>
+                    <Text style={tw`${TW.textPrimary} font-bold text-base`}>
+                      Next ›
+                    </Text>
+                  </Pressable>
+                </View>
+              </View>
+            ) : null
+          }
+        />
+      </KeyboardAvoidingView>
+
+      {/* ADD MODAL */}
+      <AddUserModal
+        visible={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onSubmit={handleAddUser}
+        isSubmitting={false}
+        supervisors={users}
+        currentUserId={user?.id ?? ""}
       />
 
-      {/* Settings (disabled for now) */}
-      {/* <SettingsModal
-        visible={showSettings}
-        onClose={() => setShowSettings(false)}
-      /> */}
-    </SafeAreaView>
+      {/* EDIT MODAL */}
+      <EditUserModal
+        visible={showEditModal}
+        user={editingUser}
+        role={editRole}
+        supervisor={editSupervisor}
+        setRole={setEditRole}
+        setSupervisor={setEditSupervisor}
+        users={users}
+        onClose={() => setShowEditModal(false)}
+        onSave={() => handleSubmitEdit(editingUser?.id)}
+        isChanged={
+          editRole !== editingUser?.role ||
+          editSupervisor !== editingUser?.supervisor_id
+        }
+      />
+
+      {tempPassword && (
+        <View style={tw`absolute inset-0 bg-black/50 items-center justify-end`}>
+          <View
+            style={[
+              tw`bg-white w-full rounded-t-3xl px-6 pt-4`,
+              { paddingBottom: insets.bottom + 16 },
+            ]}>
+            <View style={tw`items-center mb-5`}>
+              <View style={tw`h-1 w-10 rounded-full bg-slate-200`} />
+            </View>
+            <Text style={tw`text-xl font-bold ${TW.textPrimary} mb-1`}>
+              User Created
+            </Text>
+            <Text style={tw`text-sm ${TW.textSecondary} mb-5`}>
+              Save this temporary password — it won`&apos;`t be shown again.
+            </Text>
+            <View
+              style={tw`bg-slate-50 border ${TW.BORDER} rounded-2xl px-4 py-4 mb-5`}>
+              <Text style={tw`text-xs ${TW.textSecondary} mb-1`}>
+                Temporary Password
+              </Text>
+              <Text
+                selectable
+                style={tw`text-lg font-bold ${TW.textPrimary} tracking-widest`}>
+                {tempPassword}
+              </Text>
+            </View>
+            <Pressable
+              onPress={async () => {
+                await Clipboard.setStringAsync(tempPassword);
+                Alert.alert("Copied", "Temporary password copied to clipboard");
+              }}
+              style={({ pressed }) => [
+                tw`flex-row items-center justify-center ${TW.bgSecondary} py-4 rounded-2xl mb-3`,
+                pressed && tw`opacity-85`,
+              ]}>
+              <Copy size={18} color="white" />
+              <Text style={tw`text-white font-bold ml-2`}>Copy Password</Text>
+            </Pressable>
+            <Pressable
+              onPress={() => setTempPassword(null)}
+              style={({ pressed }) => [
+                tw`py-4 rounded-2xl border ${TW.BORDER} items-center`,
+                pressed && tw`opacity-80`,
+              ]}>
+              <Text style={tw`font-semibold ${TW.textPrimary}`}>Done</Text>
+            </Pressable>
+          </View>
+        </View>
+      )}
+    </View>
   );
-}
+};
+
+export default ManageUsers;
