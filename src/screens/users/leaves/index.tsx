@@ -37,20 +37,7 @@ export default function LeavesScreen() {
     totalPages,
     shouldShowPagination,
   } = usePagination(filteredLeaves);
-  // page=1 , setPage is a function, pagedData=> fetch gareko list haru,  filteredLeaves ma pani fetch gareko data cha , pagenumbers [],
-  console.log("filteredLeaves", filteredLeaves);
-  console.log("page", page);
-  console.log("setPage", setPage);
-  console.log(
-    "pagedData",
-    pagedData,
-    "pageNumbers",
-    pageNumbers,
-    "totalPages",
-    totalPages,
-    "shouldShowPagination",
-    shouldShowPagination,
-  );
+
   const leaveTypeName = useCallback(
     (id: number | null) => leaveTypes.find((t) => t.id === id)?.name ?? "Leave",
     [leaveTypes],
@@ -103,7 +90,6 @@ export default function LeavesScreen() {
                 style={tw`px-3 py-2 border border-slate-200 rounded-lg`}>
                 <Text style={tw`text-slate-700 font-medium`}>Prev</Text>
               </Pressable>
-
               {pageNumbers.map((p) => (
                 <Pressable
                   key={p}
