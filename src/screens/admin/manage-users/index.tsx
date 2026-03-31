@@ -1,7 +1,6 @@
-import * as Clipboard from "expo-clipboard";
-
+import { Plus, Search } from "lucide-react-native";
+import React, { useEffect, useRef } from "react";
 import {
-  Alert,
   FlatList,
   KeyboardAvoidingView,
   Platform,
@@ -9,20 +8,18 @@ import {
   Text,
   View,
 } from "react-native";
-import { Copy, Plus, Search } from "lucide-react-native";
-import React, { useEffect, useRef } from "react";
 
-import AddUserModal from "./AddUserModal";
-import EditUserModal from "./EditUserModal";
 import HeaderWithSearch from "@/src/components/HeaderWithSearch";
 import LoadingIndicator from "@/src/components/LoadingIndicator";
-import { TW } from "@/theme/twStyles";
-import { UserCard } from "../components/UserCard";
-import tw from "twrnc";
 import { useManageUsers } from "@/src/hooks/admin/useManageUsers";
 import { usePagination } from "@/src/hooks/usePagination";
+import { TW } from "@/theme/twStyles";
 import { useRouter } from "expo-router";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import tw from "twrnc";
+import { UserCard } from "../components/UserCard";
+import AddUserModal from "./AddUserModal";
+import EditUserModal from "./EditUserModal";
+import TempPasswordModal from "./TempPasswordModal";
 
 const ManageUsers = () => {
   const router = useRouter();
@@ -72,9 +69,8 @@ const ManageUsers = () => {
     pagedData,
     pageNumbers,
   } = usePagination(filteredUsers);
-
-  const insets = useSafeAreaInsets();
   const flatListRef = useRef<FlatList>(null);
+
   useEffect(() => {
     flatListRef.current?.scrollToOffset({
       offset: 0,
@@ -247,8 +243,13 @@ const ManageUsers = () => {
           editSupervisor !== editingUser?.supervisor_id
         }
       />
-
       {tempPassword && (
+        <TempPasswordModal
+          tempPassword={tempPassword}
+          setTempPassword={setTempPassword}
+        />
+      )}
+      {/* {tempPassword && (
         <View style={tw`absolute inset-0 bg-black/50 items-center justify-end`}>
           <View
             style={[
@@ -297,7 +298,7 @@ const ManageUsers = () => {
             </Pressable>
           </View>
         </View>
-      )}
+      )} */}
     </View>
   );
 };

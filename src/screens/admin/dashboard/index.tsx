@@ -15,6 +15,7 @@ import { useRouter } from "expo-router";
 import { User } from "lucide-react-native";
 import tw from "twrnc";
 import QuickAction from "../components/QuickAction";
+import TempPasswordModal from "../manage-users/TempPasswordModal";
 
 export default function DashboardScreen() {
   const router = useRouter();
@@ -33,7 +34,7 @@ export default function DashboardScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [addUserModalVisible, setAddUserModalVisible] = useState(false);
   const [isSubmittingUser, setIsSubmittingUser] = useState(false);
-
+  const [tempPassword, setTempPassword] = useState<string | null>(null);
   const totalusers = users.length;
 
   const supervisors = useMemo(() => {
@@ -77,13 +78,16 @@ export default function DashboardScreen() {
     }
     try {
       setIsSubmittingUser(true);
-      await adminAddUserService({
+      const res = await adminAddUserService({
         email: data.email,
         firstName: data.first_name,
         lastName: data.last_name,
         orgId: userProfile.organization_id,
         supervisor_id: data.supervisor_id,
       });
+      if (res.tempPassword) {
+        setTempPassword(res.tempPassword);
+      }
       const updatedUsers = await fetchUsersService(userProfile.organization_id);
       setUsers(updatedUsers);
       Alert.alert("Success", "User added successfully.");
@@ -138,6 +142,12 @@ export default function DashboardScreen() {
         currentUserId={""}
         isSubmitting={isSubmittingUser}
       />
+      {tempPassword && (
+        <TempPasswordModal
+          tempPassword={tempPassword}
+          setTempPassword={setTempPassword}
+        />
+      )}
     </View>
   );
 }

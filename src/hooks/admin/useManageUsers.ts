@@ -86,13 +86,13 @@ export const useManageUsers = () => {
       ? `${supervisor.first_name} ${supervisor.last_name}`.trim()
       : "Unknown Supervisor";
   };
+
   // ---------------- ADD USER ----------------
   const handleAddUser = async (data: any) => {
     if (!userProfile) {
       Alert.alert("Error", "Profile not ready");
       return;
     }
-
     try {
       const response = await adminAddUserService({
         email: data.email,
@@ -104,7 +104,6 @@ export const useManageUsers = () => {
       if (response.tempPassword) {
         setTempPassword(response.tempPassword);
       }
-
       // 2. refresh users
       const updatedUsers = await fetchUsersService(userProfile.organization_id);
       setUsers(updatedUsers);
