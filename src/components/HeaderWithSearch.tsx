@@ -1,6 +1,7 @@
-import { ChevronLeft, Search, X } from "lucide-react-native";
-import React from "react";
+import { Search, X } from "lucide-react-native";
 import { Pressable, TextInput, View } from "react-native";
+
+import React from "react";
 import tw from "twrnc";
 
 type HeaderWithSearchProps = {
@@ -16,12 +17,12 @@ export default function HeaderWithSearch({
 }: HeaderWithSearchProps) {
   return (
     <View style={tw`flex-row items-center px-4 py-3 bg-white`}>
-      <Pressable
+      {/* <Pressable
         onPress={onBack}
         style={tw`w-10 h-10 items-center justify-center mr-2`}
       >
         <ChevronLeft size={22} color="#1B4A5A" />
-      </Pressable>
+      </Pressable> */}
 
       <View
         style={[
@@ -31,8 +32,7 @@ export default function HeaderWithSearch({
             borderWidth: 1,
             borderColor: "#D9E2E8",
           },
-        ]}
-      >
+        ]}>
         <Search size={18} color="#7AA5B2" />
 
         <TextInput

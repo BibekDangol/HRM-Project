@@ -1,15 +1,15 @@
-import { RelativePathString, useFocusEffect, useRouter } from "expo-router";
 import { CalendarClock, ChevronRight } from "lucide-react-native";
-import { useCallback, useEffect, useRef, useState } from "react";
 import { FlatList, Pressable, Text, View } from "react-native";
+import { RelativePathString, useFocusEffect, useRouter } from "expo-router";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-import LoadingIndicator from "@/src/components/LoadingIndicator";
 import { LeaveStatus } from "@/src/services/leave.service";
+import LoadingIndicator from "@/src/components/LoadingIndicator";
+import { TW } from "@/theme/twStyles";
+import tw from "twrnc";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { useLeaveStore } from "@/src/store/useLeaveStore";
 import { useUsersStore } from "@/src/store/useUsersStore";
-import { TW } from "@/theme/twStyles";
-import tw from "twrnc";
 
 const statusConfig: Record<string, { bg: string; text: string; dot: string }> =
   {
@@ -49,11 +49,12 @@ export default function LeaveView({
   useFocusEffect(
     useCallback(() => {
       setActiveTab("pending");
-      requestAnimationFrame(() => {
-        listRef.current?.scrollToOffset({ offset: 0, animated: false });
-      });
     }, []),
   );
+
+  useEffect(() => {
+    listRef.current?.scrollToOffset({ offset: 0, animated: true });
+  }, [activeTab]);
 
   const loadLeaves = useCallback(async () => {
     if (!userProfile || !user) return;

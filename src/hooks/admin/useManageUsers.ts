@@ -9,8 +9,6 @@ import { useAuthStore } from "@/src/store/useAuthStore";
 import { useDebounce } from "@/src/hooks/useDebounce";
 import { useUsersStore } from "@/src/store/useUsersStore";
 
-const PAGE_SIZE = 10;
-
 export const useManageUsers = () => {
   const { user } = useAuthStore();
   const { users, setUsers, setUserProfile, userProfile } = useUsersStore();
@@ -21,8 +19,6 @@ export const useManageUsers = () => {
 
   const [activeTab, setActiveTab] = useState<"pending" | "active">("pending");
 
-  const [currentPage, setCurrentPage] = useState(1);
-
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -32,11 +28,6 @@ export const useManageUsers = () => {
   const [editingUser, setEditingUser] = useState<any>(null);
   const [editRole, setEditRole] = useState("user");
   const [editSupervisor, setEditSupervisor] = useState<string | null>(null);
-
-  // ---------------- RESET PAGINATION ----------------
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [activeTab, debouncedSearch]);
 
   // ---------------- LOAD USERS ----------------
   const loadUsers = useCallback(async () => {
@@ -85,39 +76,6 @@ export const useManageUsers = () => {
     { key: "pending", label: "Pending", count: pendingCount },
     { key: "active", label: "Active", count: activeCount },
   ];
-  // ---------------- PAGINATION ----------------
-  const totalPages = Math.max(1, Math.ceil(filteredUsers.length / PAGE_SIZE));
-
-  const pagedUsers = useMemo(() => {
-    return filteredUsers.slice(
-      (currentPage - 1) * PAGE_SIZE,
-      currentPage * PAGE_SIZE,
-    );
-  }, [filteredUsers, currentPage]);
-
-  const getPageNumbers = () => {
-    if (totalPages <= 5)
-      return Array.from({ length: totalPages }, (_, i) => i + 1);
-
-    if (currentPage <= 3) return [1, 2, 3, 4, 5];
-
-    if (currentPage >= totalPages - 2)
-      return [
-        totalPages - 4,
-        totalPages - 3,
-        totalPages - 2,
-        totalPages - 1,
-        totalPages,
-      ];
-
-    return [
-      currentPage - 2,
-      currentPage - 1,
-      currentPage,
-      currentPage + 1,
-      currentPage + 2,
-    ];
-  };
 
   const getSupervisorName = (supervisorId?: string | null) => {
     if (!supervisorId) return "No supervisor yet";
@@ -153,7 +111,6 @@ export const useManageUsers = () => {
 
       // 3. close modal (if needed)
       setShowAddModal(false);
-      setCurrentPage(1);
 
       // 4. SUCCESS ALERT (important)
       Alert.alert("Success", "User added successfully");
@@ -219,8 +176,6 @@ export const useManageUsers = () => {
     setSearch,
     activeTab,
     setActiveTab,
-    currentPage,
-    setCurrentPage,
 
     loading,
     refreshing,
@@ -240,12 +195,8 @@ export const useManageUsers = () => {
     getSupervisorName,
 
     // data
-    pagedUsers,
     filteredUsers,
-    totalPages,
-    getPageNumbers,
     tabs,
-
     // actions
     onRefresh,
     handleAddUser,

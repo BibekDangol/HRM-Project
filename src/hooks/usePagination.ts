@@ -2,9 +2,10 @@ import { useMemo, useState } from "react";
 
 const PAGE_SIZE = 10;
 
-export function useLeavePagination<T>(data: T[]) {
+export function usePagination<T>(data: T[]) {
   const [page, setPage] = useState(1);
-  const totalPages = Math.max(1, Math.ceil(data.length / PAGE_SIZE));
+  const totalPages = Math.ceil(data.length / PAGE_SIZE);
+  const shouldShowPagination = totalPages > 1;
   const pagedData = useMemo(() => {
     return data.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
   }, [data, page]);
@@ -29,6 +30,7 @@ export function useLeavePagination<T>(data: T[]) {
     page,
     setPage,
     totalPages,
+    shouldShowPagination,
     pagedData,
     pageNumbers,
   };

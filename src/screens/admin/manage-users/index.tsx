@@ -1,7 +1,5 @@
 import * as Clipboard from "expo-clipboard";
 
-import { Copy, Plus, Search } from "lucide-react-native";
-import React, { useEffect } from "react";
 import {
   Alert,
   FlatList,
@@ -11,17 +9,20 @@ import {
   Text,
   View,
 } from "react-native";
+import { Copy, Plus, Search } from "lucide-react-native";
+import React, { useEffect, useRef } from "react";
 
-import HeaderWithSearch from "@/src/components/HeaderWithSearch";
-import LoadingIndicator from "@/src/components/LoadingIndicator";
-import { useManageUsers } from "@/src/hooks/admin/useManageUsers";
-import { TW } from "@/theme/twStyles";
-import { useRouter } from "expo-router";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import tw from "twrnc";
-import { UserCard } from "../components/UserCard";
 import AddUserModal from "./AddUserModal";
 import EditUserModal from "./EditUserModal";
+import HeaderWithSearch from "@/src/components/HeaderWithSearch";
+import LoadingIndicator from "@/src/components/LoadingIndicator";
+import { TW } from "@/theme/twStyles";
+import { UserCard } from "../components/UserCard";
+import tw from "twrnc";
+import { useManageUsers } from "@/src/hooks/admin/useManageUsers";
+import { usePagination } from "@/src/hooks/usePagination";
+import { useRouter } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const ManageUsers = () => {
   const router = useRouter();
@@ -32,9 +33,6 @@ const ManageUsers = () => {
     setSearch,
     activeTab,
     setActiveTab,
-    currentPage,
-    setCurrentPage,
-
     loading,
     refreshing,
 
@@ -53,10 +51,7 @@ const ManageUsers = () => {
     getSupervisorName,
 
     // data
-    pagedUsers,
     filteredUsers,
-    totalPages,
-    getPageNumbers,
     tabs,
 
     // actions
@@ -68,10 +63,25 @@ const ManageUsers = () => {
     tempPassword,
     setTempPassword,
   } = useManageUsers();
+
+  const {
+    page,
+    setPage,
+    totalPages,
+    shouldShowPagination,
+    pagedData,
+    pageNumbers,
+  } = usePagination(filteredUsers);
+
   const insets = useSafeAreaInsets();
+  const flatListRef = useRef<FlatList>(null);
   useEffect(() => {
-    setCurrentPage(1);
-  }, [activeTab, setCurrentPage]);
+    flatListRef.current?.scrollToOffset({
+      offset: 0,
+      animated: true,
+    });
+    setPage(1);
+  }, [activeTab, setPage]);
   //ask aayush dai search garda paila page milirako chaina
   return (
     <View style={tw`flex-1 bg-white`}>
@@ -82,7 +92,7 @@ const ManageUsers = () => {
         <HeaderWithSearch
           search={search}
           onSearchChange={setSearch}
-          onBack={() => router.back()}
+          // onBack={() => router.back()}
         />
 
         <View style={tw`flex-row items-center gap-2 px-4 pt-3 pb-2`}>
@@ -127,7 +137,8 @@ const ManageUsers = () => {
 
         {/* LIST */}
         <FlatList
-          data={pagedUsers}
+          ref={flatListRef}
+          data={pagedData}
           keyExtractor={(item) => item.id}
           style={tw`px-4`}
           renderItem={({ item }) => (
@@ -152,17 +163,17 @@ const ManageUsers = () => {
             )
           }
           ListFooterComponent={
-            pagedUsers.length > 0 ? (
+            shouldShowPagination ? (
               <View style={tw`pt-4 pb-2`}>
                 {/* Pagination Row */}
                 <View style={tw`flex-row items-center gap-2 mb-2`}>
                   {/* Prev Button */}
                   <Pressable
-                    onPress={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                    disabled={currentPage === 1}
+                    onPress={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={page === 1}
                     style={[
                       tw`flex-1 h-10 rounded-xl items-center justify-center border ${TW.BORDER}`,
-                      currentPage === 1 && tw`opacity-30`,
+                      page === 1 && tw`opacity-30`,
                     ]}>
                     <Text style={tw`${TW.textPrimary} font-bold text-base`}>
                       ‹ Prev
@@ -170,37 +181,34 @@ const ManageUsers = () => {
                   </Pressable>
 
                   {/* Page Numbers */}
-                  {getPageNumbers().map((page) => (
+                  {pageNumbers.map((p) => (
                     <Pressable
-                      key={page}
-                      onPress={() => setCurrentPage(page)}
+                      key={p}
+                      onPress={() => setPage(p)}
                       style={[
                         tw`h-10 w-10 rounded-xl items-center justify-center`,
-                        currentPage === page
+                        p === page
                           ? tw`${TW.bgAction}`
                           : tw`border ${TW.BORDER}`,
                       ]}>
                       <Text
                         style={[
                           tw`text-sm font-semibold`,
-                          currentPage === page
+                          p === page
                             ? tw`${TW.textButton}`
                             : tw`${TW.textPrimary}`,
                         ]}>
-                        {page}
+                        {p}
                       </Text>
                     </Pressable>
                   ))}
-
                   {/* Next Button */}
                   <Pressable
-                    onPress={() =>
-                      setCurrentPage((p) => Math.min(totalPages, p + 1))
-                    }
-                    disabled={currentPage === totalPages}
+                    onPress={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={page === totalPages}
                     style={[
                       tw`flex-1 h-10 rounded-xl items-center justify-center border ${TW.BORDER}`,
-                      currentPage === totalPages && tw`opacity-30`,
+                      page === totalPages && tw`opacity-30`,
                     ]}>
                     <Text style={tw`${TW.textPrimary} font-bold text-base`}>
                       Next ›
