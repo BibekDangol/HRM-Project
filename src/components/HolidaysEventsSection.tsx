@@ -25,11 +25,29 @@ type Props = {
 
 const CARD_RADIUS = 12;
 const MAX_VISIBLE = 5;
-const CARD_HEIGHT = 80;
+const CARD_HEIGHT = 86;
+const CARD_GAP = 12;
 
 const parseLocalDate = (dateString: string) => {
   const [year, month, day] = dateString.split("-").map(Number);
   return new Date(year, month - 1, day);
+};
+
+// Nepal-safe today key in YYYY-MM-DD
+const getNepalTodayKey = () => {
+  const now = new Date();
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Kathmandu",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(now);
+
+  const year = parts.find((p) => p.type === "year")?.value ?? "0000";
+  const month = parts.find((p) => p.type === "month")?.value ?? "00";
+  const day = parts.find((p) => p.type === "day")?.value ?? "00";
+
+  return `${year}-${month}-${day}`;
 };
 
 export const HolidaysEventsSection = ({
@@ -39,35 +57,41 @@ export const HolidaysEventsSection = ({
   onCardPress,
 }: Props) => {
   const { width: screenWidth } = useWindowDimensions();
-  const itemWidth = screenWidth - 44;
+
+  // keep full card size
+  const cardWidth = screenWidth - 44;
+
+  // use page width only to create spacing between cards
+  const pageWidth = cardWidth + CARD_GAP;
+
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  const today = useMemo(() => {
-    const d = new Date();
-    d.setHours(0, 0, 0, 0);
-    return d;
-  }, []);
+  const todayKey = useMemo(() => getNepalTodayKey(), []);
 
   const upcomingItems = useMemo(() => {
     return calendarItems
       .filter((item) => {
-        const start = parseLocalDate(item.start_date);
-        const end = item.end_date ? parseLocalDate(item.end_date) : start;
-        start.setHours(0, 0, 0, 0);
-        end.setHours(23, 59, 59, 999);
-        return end >= today;
+        const endKey = item.end_date ?? item.start_date;
+        return endKey >= todayKey;
       })
       .sort((a, b) => {
-        return (
-          parseLocalDate(a.start_date).getTime() -
-          parseLocalDate(b.start_date).getTime()
-        );
+        // Clamp start to today so ongoing events don't float above future ones
+        const aKey = a.start_date >= todayKey ? a.start_date : todayKey;
+        const bKey = b.start_date >= todayKey ? b.start_date : todayKey;
+        return aKey.localeCompare(bKey);
       });
-  }, [calendarItems, today]);
+  }, [calendarItems, todayKey]);
+
   const visibleItems = upcomingItems.slice(0, MAX_VISIBLE);
   const total = visibleItems.length;
 
-  const highlightedItemId = visibleItems.length > 0 ? visibleItems[0].id : null;
+  // highlight only the nearest upcoming valid card
+  const highlightedItemId = useMemo(() => {
+    const todayOrFuture = visibleItems.find(
+      (item) => item.start_date >= todayKey,
+    );
+    return (todayOrFuture ?? visibleItems[0])?.id ?? null;
+  }, [visibleItems, todayKey]);
 
   const formatMonthDay = (d: string) => {
     const date = parseLocalDate(d);
@@ -98,7 +122,7 @@ export const HolidaysEventsSection = ({
     const card = (
       <View
         style={{
-          width: itemWidth,
+          width: cardWidth,
           height: CARD_HEIGHT,
           borderRadius: CARD_RADIUS,
           backgroundColor: isHighlighted ? "#F0F9FF" : "#FFFFFF",
@@ -106,14 +130,10 @@ export const HolidaysEventsSection = ({
           alignItems: "center",
           paddingHorizontal: 12,
           gap: 12,
-          borderWidth: 0.5,
+          borderWidth: 1,
           borderColor: isHighlighted ? "#BAE6FD" : "#E2E8F0",
-          shadowColor: "#000",
-          shadowOpacity: 0.04,
-          shadowRadius: 6,
-          shadowOffset: { width: 0, height: 2 },
-          elevation: 1,
-        }}>
+        }}
+      >
         <View
           style={{
             alignItems: "center",
@@ -122,7 +142,8 @@ export const HolidaysEventsSection = ({
             borderRadius: 8,
             paddingVertical: 6,
             paddingHorizontal: 4,
-          }}>
+          }}
+        >
           <Text
             style={{
               color: "#94A3B8",
@@ -130,7 +151,8 @@ export const HolidaysEventsSection = ({
               fontWeight: "600",
               letterSpacing: 0.5,
               textTransform: "uppercase",
-            }}>
+            }}
+          >
             {month}
           </Text>
 
@@ -140,7 +162,8 @@ export const HolidaysEventsSection = ({
               fontSize: 20,
               fontWeight: "700",
               lineHeight: 24,
-            }}>
+            }}
+          >
             {day}
           </Text>
 
@@ -149,14 +172,15 @@ export const HolidaysEventsSection = ({
               color: "#94A3B8",
               fontSize: 9,
               fontWeight: "500",
-            }}>
+            }}
+          >
             {dayName}
           </Text>
         </View>
 
         <View
           style={{
-            width: 0.5,
+            width: 1,
             alignSelf: "stretch",
             backgroundColor: isHighlighted ? "#BAE6FD" : "#E2E8F0",
             marginVertical: 10,
@@ -171,7 +195,8 @@ export const HolidaysEventsSection = ({
                 fontSize: 9,
                 fontWeight: "700",
                 letterSpacing: 0.6,
-              }}>
+              }}
+            >
               UPCOMING
             </Text>
           )}
@@ -182,7 +207,8 @@ export const HolidaysEventsSection = ({
               fontSize: 14,
               fontWeight: "600",
             }}
-            numberOfLines={1}>
+            numberOfLines={1}
+          >
             {item.title}
           </Text>
 
@@ -191,7 +217,8 @@ export const HolidaysEventsSection = ({
               color: "#94A3B8",
               fontSize: 12,
             }}
-            numberOfLines={1}>
+            numberOfLines={1}
+          >
             {formatWeekday(item.start_date)}
           </Text>
         </View>
@@ -206,12 +233,13 @@ export const HolidaysEventsSection = ({
             paddingVertical: 4,
             borderRadius: 999,
             alignSelf: "center",
-          }}>
+          }}
+        >
           <View
             style={{
               width: 6,
               height: 6,
-              borderRadius: 3,
+              borderRadius: 999,
               backgroundColor: badgeDot,
             }}
           />
@@ -220,10 +248,25 @@ export const HolidaysEventsSection = ({
               fontSize: 11,
               fontWeight: "600",
               color: badgeText,
-            }}>
+            }}
+          >
             {isHoliday ? "Holiday" : "Event"}
           </Text>
         </View>
+      </View>
+    );
+
+    const wrappedCard = (
+      <View
+        style={{
+          width: pageWidth,
+          height: CARD_HEIGHT,
+          justifyContent: "center",
+          alignItems: "flex-start",
+          paddingRight: CARD_GAP,
+        }}
+      >
+        {card}
       </View>
     );
 
@@ -231,19 +274,22 @@ export const HolidaysEventsSection = ({
       return (
         <Pressable
           onPress={() => onCardPress(item)}
-          style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}>
-          {card}
+          style={({ pressed }) => ({
+            opacity: pressed ? 0.75 : 1,
+          })}
+        >
+          {wrappedCard}
         </Pressable>
       );
     }
 
-    return card;
+    return wrappedCard;
   };
 
   const SkeletonCard = () => (
     <View
       style={{
-        width: "100%",
+        width: cardWidth,
         height: CARD_HEIGHT,
         borderRadius: CARD_RADIUS,
         backgroundColor: "#F8FAFC",
@@ -251,9 +297,10 @@ export const HolidaysEventsSection = ({
         alignItems: "center",
         paddingHorizontal: 12,
         gap: 12,
-        borderWidth: 0.5,
+        borderWidth: 1,
         borderColor: "#E2E8F0",
-      }}>
+      }}
+    >
       <View
         style={{
           alignItems: "center",
@@ -263,7 +310,8 @@ export const HolidaysEventsSection = ({
           paddingVertical: 6,
           paddingHorizontal: 4,
           gap: 3,
-        }}>
+        }}
+      >
         <View
           style={{
             width: 22,
@@ -292,7 +340,7 @@ export const HolidaysEventsSection = ({
 
       <View
         style={{
-          width: 0.5,
+          width: 1,
           alignSelf: "stretch",
           backgroundColor: "#E2E8F0",
           marginVertical: 10,
@@ -337,7 +385,8 @@ export const HolidaysEventsSection = ({
           alignItems: "center",
           justifyContent: "space-between",
           marginBottom: 16,
-        }}>
+        }}
+      >
         <Text style={tw`font-semibold ${TW.textPrimary} text-lg`}>
           Holidays &amp; Events
         </Text>
@@ -348,13 +397,15 @@ export const HolidaysEventsSection = ({
             opacity: pressed ? 0.6 : 1,
             paddingVertical: 4,
             paddingHorizontal: 10,
-          })}>
+          })}
+        >
           <Text
             style={{
               color: "#475569",
               fontSize: 12,
               fontWeight: "600",
-            }}>
+            }}
+          >
             View All
           </Text>
         </Pressable>
@@ -368,17 +419,19 @@ export const HolidaysEventsSection = ({
             alignItems: "center",
             paddingVertical: 32,
             borderRadius: CARD_RADIUS,
-            borderWidth: 0.5,
+            borderWidth: 1,
             borderColor: "#E2E8F0",
             backgroundColor: "#FFFFFF",
             gap: 6,
-          }}>
+          }}
+        >
           <Text
             style={{
               color: "#CBD5E1",
               fontWeight: "600",
               fontSize: 14,
-            }}>
+            }}
+          >
             No upcoming events
           </Text>
 
@@ -386,7 +439,8 @@ export const HolidaysEventsSection = ({
             style={{
               color: "#E2E8F0",
               fontSize: 12,
-            }}>
+            }}
+          >
             No holidays or events scheduled
           </Text>
         </View>
@@ -394,17 +448,21 @@ export const HolidaysEventsSection = ({
         <>
           <Carousel
             loop={false}
-            width={itemWidth}
+            width={pageWidth}
             height={CARD_HEIGHT}
             data={visibleItems}
-            pagingEnabled
-            snapEnabled
+            pagingEnabled={true}
+            snapEnabled={true}
             overscrollEnabled={false}
             autoPlay={false}
-            style={{ width: itemWidth }}
+            enabled={total > 1}
+            scrollAnimationDuration={280}
+            style={{
+              width: cardWidth,
+            }}
             onProgressChange={(_, absoluteProgress) => {
               const index = Math.round(absoluteProgress);
-              if (index !== currentIndex && index >= 0 && index < total) {
+              if (index >= 0 && index < total && index !== currentIndex) {
                 setCurrentIndex(index);
               }
             }}
@@ -419,7 +477,8 @@ export const HolidaysEventsSection = ({
                 alignItems: "center",
                 gap: 6,
                 marginTop: 12,
-              }}>
+              }}
+            >
               {visibleItems.map((_, i) => (
                 <View
                   key={i}

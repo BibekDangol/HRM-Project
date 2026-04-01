@@ -59,8 +59,13 @@ export default function EditLeaveScreen() {
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
 
-  const params = useLocalSearchParams<{ leaveId?: string | string[] }>();
+  const params = useLocalSearchParams<{
+    leaveId?: string | string[];
+    fromTab?: string | string[];
+  }>();
+
   const leaveId = firstParam(params.leaveId);
+  const fromTab = firstParam(params.fromTab) || "all";
 
   const [screenLoading, setScreenLoading] = useState(false);
   const [localStartDate, setLocalStartDate] = useState("");
@@ -167,7 +172,6 @@ export default function EditLeaveScreen() {
   const onDayPress = (day: { dateString: string }) => {
     const selectedDate = day.dateString;
 
-    // Block past dates
     if (selectedDate < todayStr) return;
 
     if (activeDateField === "start") {
@@ -309,6 +313,7 @@ export default function EditLeaveScreen() {
         const isHalf = dayType === "FIRST_SHIFT" || dayType === "SECOND_SHIFT";
         const session =
           dayType === "SECOND_SHIFT" ? "second_shift" : "first_shift";
+
         reset({
           reason: data.reason ?? "",
           isHalfDay: isHalf,
@@ -374,7 +379,6 @@ export default function EditLeaveScreen() {
       dayType =
         values.halfSession === "first_shift" ? "FIRST_SHIFT" : "SECOND_SHIFT";
     }
-    console.log("selected day type", dayType);
 
     try {
       setSubmitting(true);
@@ -399,7 +403,7 @@ export default function EditLeaveScreen() {
       Alert.alert("Success", "Leave updated successfully.");
       router.replace({
         pathname: "/(users)/leaves/(tabs)",
-        params: { tab: "pending" },
+        params: { tab: fromTab },
       });
     } catch (e: any) {
       Alert.alert("Error", e?.message ?? "Failed to update leave.");
@@ -444,7 +448,12 @@ export default function EditLeaveScreen() {
           color={TW.bgSecondary}
           backgroundColor="rgba(27,74,90,0.08)"
           style={{ marginBottom: 18 }}
-          onPress={() => router.replace("/(users)/leaves/(tabs)")}
+          onPress={() =>
+            router.replace({
+              pathname: "/(users)/leaves/(tabs)",
+              params: { tab: fromTab },
+            })
+          }
         />
 
         <View style={tw`mb-7`}>
@@ -594,7 +603,6 @@ export default function EditLeaveScreen() {
                             flex: 1,
                             paddingVertical: 13,
                             borderWidth: 1.5,
-
                             borderRadius: 10,
                             borderColor:
                               value === session ? TW.bgSecondary : "#E2E8F0",
@@ -673,7 +681,7 @@ export default function EditLeaveScreen() {
             onPress={() =>
               router.replace({
                 pathname: "/(users)/leaves/(tabs)",
-                params: { tab: "pending" },
+                params: { tab: fromTab },
               })
             }
             style={({ pressed }) => ({
