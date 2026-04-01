@@ -1,18 +1,16 @@
-import { useEffect, useState } from "react";
-import { Alert } from "react-native";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-
-import { usersProfileSchema } from "@/src/schema/users/userprofiles.schema";
-import { supabase } from "@/src/supabase/supabaseClient";
-
 import { FormInput, FormOutput } from "@/src/types/user";
+import { useEffect, useState } from "react";
 import {
   fetchProfileService,
   removeAvatarService,
   updateAvatarService,
   updateProfileService,
 } from "../services/profile.service";
+
+import { usersProfileSchema } from "@/src/schema/users/userprofiles.schema";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { Alert } from "react-native";
 import { ProfileData } from "../types/profile.types";
 
 export function useProfile(userId?: string) {
@@ -42,10 +40,8 @@ export function useProfile(userId?: string) {
     try {
       setIsLoading(true);
       const pd = await fetchProfileService(userId);
-
       setProfile(pd);
       setAvatarUrl(pd.avatar ?? null);
-
       reset({
         firstName: pd.first_name ?? "",
         lastName: pd.last_name ?? "",

@@ -1,5 +1,5 @@
-import { supabase } from "@/src/supabase/supabaseClient";
 import { UserProfile } from "../types/admin";
+import { supabase } from "@/src/supabase/supabaseClient";
 
 export async function fetchUsersService(orgId: number, searchQuery = "") {
   let query = supabase
@@ -28,7 +28,7 @@ export async function fetchSupervisorUnderUsersService(
   let query = supabase
     .from("profiles")
     .select(
-      "id, first_name, last_name, email, role, status, organization_id, supervisor_id, organization(name)",
+      "id, first_name, last_name, email, role, status, organization_id, supervisor_id, organization(name), avatar",
     )
     .eq("organization_id", orgId)
     .eq("supervisor_id", supervisorId)
