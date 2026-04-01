@@ -61,11 +61,9 @@ export default function EditLeaveScreen() {
 
   const params = useLocalSearchParams<{
     leaveId?: string | string[];
-    fromTab?: string | string[];
   }>();
 
   const leaveId = firstParam(params.leaveId);
-  const fromTab = firstParam(params.fromTab) || "all";
 
   const [screenLoading, setScreenLoading] = useState(false);
   const [localStartDate, setLocalStartDate] = useState("");
@@ -291,13 +289,19 @@ export default function EditLeaveScreen() {
 
         if (!data || data.user_id !== user.id) {
           Alert.alert("Not allowed", "You can't edit this leave.");
-          router.back();
+          router.replace({
+            pathname: "/(users)/leaves/(tabs)",
+            params: { tab: "pending" },
+          });
           return;
         }
 
         if (String(data.status).toLowerCase() !== "pending") {
           Alert.alert("Not editable", "Only pending leaves can be edited.");
-          router.back();
+          router.replace({
+            pathname: "/(users)/leaves/(tabs)",
+            params: { tab: "pending" },
+          });
           return;
         }
 
@@ -325,12 +329,15 @@ export default function EditLeaveScreen() {
         setCalMonth(parts.month);
       } catch (e: any) {
         Alert.alert("Error", e?.message ?? "Failed to load leave.");
-        router.back();
+        router.replace({
+          pathname: "/(users)/leaves/(tabs)",
+          params: { tab: "pending" },
+        });
       } finally {
         setScreenLoading(false);
       }
     })();
-  }, [leaveId, user?.id]);
+  }, [leaveId, user?.id, reset, router]);
 
   const handleLeaveTypeChange = (id: number | null) => {
     setSelectedLeaveType(id);
@@ -403,7 +410,7 @@ export default function EditLeaveScreen() {
       Alert.alert("Success", "Leave updated successfully.");
       router.replace({
         pathname: "/(users)/leaves/(tabs)",
-        params: { tab: fromTab },
+        params: { tab: "pending" },
       });
     } catch (e: any) {
       Alert.alert("Error", e?.message ?? "Failed to update leave.");
@@ -414,9 +421,9 @@ export default function EditLeaveScreen() {
 
   const handleSavePress = async () => {
     const manualHasError = validateManualFields();
-    await trigger();
+    const isValid = await trigger();
 
-    if (!manualHasError) {
+    if (!manualHasError && isValid) {
       handleSubmit(onSubmit)();
     }
   };
@@ -451,7 +458,7 @@ export default function EditLeaveScreen() {
           onPress={() =>
             router.replace({
               pathname: "/(users)/leaves/(tabs)",
-              params: { tab: fromTab },
+              params: { tab: "pending" },
             })
           }
         />
@@ -681,7 +688,7 @@ export default function EditLeaveScreen() {
             onPress={() =>
               router.replace({
                 pathname: "/(users)/leaves/(tabs)",
-                params: { tab: fromTab },
+                params: { tab: "pending" },
               })
             }
             style={({ pressed }) => ({
