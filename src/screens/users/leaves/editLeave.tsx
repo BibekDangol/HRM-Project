@@ -59,7 +59,10 @@ export default function EditLeaveScreen() {
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
 
-  const params = useLocalSearchParams<{ leaveId?: string | string[] }>();
+  const params = useLocalSearchParams<{
+    leaveId?: string | string[];
+  }>();
+
   const leaveId = firstParam(params.leaveId);
 
   const [screenLoading, setScreenLoading] = useState(false);
@@ -167,7 +170,6 @@ export default function EditLeaveScreen() {
   const onDayPress = (day: { dateString: string }) => {
     const selectedDate = day.dateString;
 
-    // Block past dates
     if (selectedDate < todayStr) return;
 
     if (activeDateField === "start") {
@@ -287,13 +289,19 @@ export default function EditLeaveScreen() {
 
         if (!data || data.user_id !== user.id) {
           Alert.alert("Not allowed", "You can't edit this leave.");
-          router.back();
+          router.replace({
+            pathname: "/(users)/leaves/(tabs)",
+            params: { tab: "pending" },
+          });
           return;
         }
 
         if (String(data.status).toLowerCase() !== "pending") {
           Alert.alert("Not editable", "Only pending leaves can be edited.");
-          router.back();
+          router.replace({
+            pathname: "/(users)/leaves/(tabs)",
+            params: { tab: "pending" },
+          });
           return;
         }
 
@@ -309,6 +317,7 @@ export default function EditLeaveScreen() {
         const isHalf = dayType === "FIRST_SHIFT" || dayType === "SECOND_SHIFT";
         const session =
           dayType === "SECOND_SHIFT" ? "second_shift" : "first_shift";
+
         reset({
           reason: data.reason ?? "",
           isHalfDay: isHalf,
@@ -320,12 +329,15 @@ export default function EditLeaveScreen() {
         setCalMonth(parts.month);
       } catch (e: any) {
         Alert.alert("Error", e?.message ?? "Failed to load leave.");
-        router.back();
+        router.replace({
+          pathname: "/(users)/leaves/(tabs)",
+          params: { tab: "pending" },
+        });
       } finally {
         setScreenLoading(false);
       }
     })();
-  }, [leaveId, user?.id]);
+  }, [leaveId, user?.id, reset, router]);
 
   const handleLeaveTypeChange = (id: number | null) => {
     setSelectedLeaveType(id);
@@ -374,7 +386,6 @@ export default function EditLeaveScreen() {
       dayType =
         values.halfSession === "first_shift" ? "FIRST_SHIFT" : "SECOND_SHIFT";
     }
-    console.log("selected day type", dayType);
 
     try {
       setSubmitting(true);
@@ -410,9 +421,9 @@ export default function EditLeaveScreen() {
 
   const handleSavePress = async () => {
     const manualHasError = validateManualFields();
-    await trigger();
+    const isValid = await trigger();
 
-    if (!manualHasError) {
+    if (!manualHasError && isValid) {
       handleSubmit(onSubmit)();
     }
   };
@@ -444,7 +455,12 @@ export default function EditLeaveScreen() {
           color={TW.bgSecondary}
           backgroundColor="rgba(27,74,90,0.08)"
           style={{ marginBottom: 18 }}
-          onPress={() => router.replace("/(users)/leaves/(tabs)")}
+          onPress={() =>
+            router.replace({
+              pathname: "/(users)/leaves/(tabs)",
+              params: { tab: "pending" },
+            })
+          }
         />
 
         <View style={tw`mb-7`}>
@@ -594,7 +610,6 @@ export default function EditLeaveScreen() {
                             flex: 1,
                             paddingVertical: 13,
                             borderWidth: 1.5,
-
                             borderRadius: 10,
                             borderColor:
                               value === session ? TW.bgSecondary : "#E2E8F0",

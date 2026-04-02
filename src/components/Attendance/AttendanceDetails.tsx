@@ -181,7 +181,8 @@ const StatusBadge = ({ status }: { status: string }) => {
   };
   return (
     <View
-      style={tw`flex-row items-center gap-1 px-2 py-0.5 rounded-full ${cfg.bg}`}>
+      style={tw`flex-row items-center gap-1 px-2 py-0.5 rounded-full ${cfg.bg}`}
+    >
       <View
         style={[tw`w-1.5 h-1.5 rounded-full`, { backgroundColor: cfg.dot }]}
       />
@@ -196,7 +197,8 @@ const SectionLabel = ({ children }: { children: string }) => (
       style={[
         tw`text-xs uppercase tracking-widest`,
         { color: TW.BRAND_MUTED, letterSpacing: 1.5 },
-      ]}>
+      ]}
+    >
       {children}
     </Text>
     <View style={tw`flex-1 h-px bg-slate-200`} />
@@ -220,7 +222,8 @@ const StatBox = ({
         borderWidth: 1,
         borderColor: accent + "28",
       },
-    ]}>
+    ]}
+  >
     <Text style={[tw`text-2xl font-bold mb-0.5`, { color: accent }]}>
       {value}
     </Text>
@@ -232,7 +235,8 @@ const StatBox = ({
         letterSpacing: 0.4,
         textTransform: "uppercase",
         lineHeight: 14,
-      }}>
+      }}
+    >
       {label}
     </Text>
   </View>
@@ -297,14 +301,17 @@ const AttendanceView: React.FC<Props> = ({ userId, name }) => {
       <ScrollView
         style={tw`flex-1 bg-white`}
         contentContainerStyle={tw`p-4 pb-14`}
-        showsVerticalScrollIndicator={false}>
+        showsVerticalScrollIndicator={false}
+      >
         {/* Top padding so content clears the floating button */}
         <View style={tw`pt-12`}>
           <View
-            style={tw`bg-white rounded-2xl overflow-hidden border border-slate-200`}>
+            style={tw`bg-white rounded-2xl overflow-hidden border border-slate-200`}
+          >
             {/* ── Header ─────────────────────────────────────────────────── */}
             <View
-              style={[tw`px-5 pt-6 pb-5`, { backgroundColor: TW.bgSecondary }]}>
+              style={[tw`px-5 pt-6 pb-5`, { backgroundColor: TW.bgSecondary }]}
+            >
               {/* Title + meta */}
               <View style={tw`flex-row justify-between items-start mb-4`}>
                 <View style={tw`flex-1 pr-4`}>
@@ -312,7 +319,8 @@ const AttendanceView: React.FC<Props> = ({ userId, name }) => {
                     style={[
                       tw`text-xs mb-1`,
                       { color: TW.BRAND_MUTED, letterSpacing: 1.2 },
-                    ]}>
+                    ]}
+                  >
                     ATTENDANCE REPORT
                   </Text>
                   <Text style={[tw`text-2xl font-bold`, { color: "#fff" }]}>
@@ -326,10 +334,12 @@ const AttendanceView: React.FC<Props> = ({ userId, name }) => {
                   ].map(([lbl, val]) => (
                     <Text
                       key={lbl}
-                      style={[tw`text-xs mb-0.5`, { color: TW.BRAND_MUTED }]}>
+                      style={[tw`text-xs mb-0.5`, { color: TW.BRAND_MUTED }]}
+                    >
                       {lbl}:{" "}
                       <Text
-                        style={{ color: TW.BRAND_LIGHT, fontWeight: "500" }}>
+                        style={{ color: TW.BRAND_LIGHT, fontWeight: "500" }}
+                      >
                         {val}
                       </Text>
                     </Text>
@@ -346,13 +356,15 @@ const AttendanceView: React.FC<Props> = ({ userId, name }) => {
                     borderWidth: 1,
                     borderColor: "rgba(255,255,255,0.15)",
                   },
-                ]}>
+                ]}
+              >
                 <Text
                   style={{
                     color: TW.BRAND_LIGHT,
                     fontSize: 13,
                     fontWeight: "600",
-                  }}>
+                  }}
+                >
                   {name}
                 </Text>
               </View>
@@ -368,14 +380,16 @@ const AttendanceView: React.FC<Props> = ({ userId, name }) => {
                       borderWidth: 1,
                       borderColor: "rgba(255,255,255,0.18)",
                     },
-                  ]}>
+                  ]}
+                >
                   <Calendar size={13} color={TW.BRAND_LIGHT} />
                   <Text
                     style={{
                       color: TW.BRAND_LIGHT,
                       fontSize: 12,
                       fontWeight: "500",
-                    }}>
+                    }}
+                  >
                     Change Month
                   </Text>
                 </Pressable>
@@ -389,14 +403,16 @@ const AttendanceView: React.FC<Props> = ({ userId, name }) => {
                       borderWidth: 1,
                       borderColor: "rgba(255,255,255,0.18)",
                     },
-                  ]}>
+                  ]}
+                >
                   <Download size={13} color={TW.BRAND_LIGHT} />
                   <Text
                     style={{
                       color: TW.BRAND_LIGHT,
                       fontSize: 12,
                       fontWeight: "500",
-                    }}>
+                    }}
+                  >
                     Export CSV
                   </Text>
                 </Pressable>
@@ -432,16 +448,19 @@ const AttendanceView: React.FC<Props> = ({ userId, name }) => {
           visible={showMonthPicker}
           transparent
           animationType="none"
-          onRequestClose={() => setShowMonthPicker(false)}>
+          onRequestClose={() => setShowMonthPicker(false)}
+        >
           <Pressable
             style={tw`flex-1 bg-black/50 justify-end`}
-            onPress={() => setShowMonthPicker(false)}>
+            onPress={() => setShowMonthPicker(false)}
+          >
             <Pressable
               style={[
                 tw`rounded-t-3xl px-5 pt-3 pb-8`,
                 { backgroundColor: "#ffffff" },
               ]}
-              onPress={() => {}}>
+              onPress={() => {}}
+            >
               {/* Handle */}
               <View style={tw`items-center mb-4`}>
                 <View
@@ -463,7 +482,8 @@ const AttendanceView: React.FC<Props> = ({ userId, name }) => {
                     tw`h-9 w-9 rounded-full items-center justify-center border`,
                     { borderColor: "#e2e8f0", backgroundColor: "#fff" },
                     (!canDecYear || pressed) && { opacity: 0.4 },
-                  ]}>
+                  ]}
+                >
                   <Text style={[tw`font-bold text-base`, { color: "#1F2937" }]}>
                     ‹
                   </Text>
@@ -473,7 +493,8 @@ const AttendanceView: React.FC<Props> = ({ userId, name }) => {
                   style={[
                     tw`text-lg font-bold w-16 text-center`,
                     { color: "#1F2937" },
-                  ]}>
+                  ]}
+                >
                   {pickerYear}
                 </Text>
 
@@ -486,7 +507,8 @@ const AttendanceView: React.FC<Props> = ({ userId, name }) => {
                     tw`h-9 w-9 rounded-full items-center justify-center border`,
                     { borderColor: "#e2e8f0", backgroundColor: "#fff" },
                     (!canIncYear || pressed) && { opacity: 0.4 },
-                  ]}>
+                  ]}
+                >
                   <Text style={[tw`font-bold text-base`, { color: "#1F2937" }]}>
                     ›
                   </Text>
@@ -531,7 +553,8 @@ const AttendanceView: React.FC<Props> = ({ userId, name }) => {
                               ? { backgroundColor: "#F9FAFB" }
                               : { backgroundColor: "#F3F4F6" },
                         pressed && !isFuture && { opacity: 0.8 },
-                      ]}>
+                      ]}
+                    >
                       <Text
                         style={[
                           tw`text-sm font-semibold text-center`,
@@ -540,7 +563,8 @@ const AttendanceView: React.FC<Props> = ({ userId, name }) => {
                             : isFuture
                               ? { color: "#CBD5E1" }
                               : { color: "#1F2937" },
-                        ]}>
+                        ]}
+                      >
                         {m}
                       </Text>
                     </Pressable>
@@ -555,7 +579,8 @@ const AttendanceView: React.FC<Props> = ({ userId, name }) => {
                   tw`py-4 rounded-full items-center`,
                   { backgroundColor: TW.bgSecondary },
                   pressed && { opacity: 0.85 },
-                ]}>
+                ]}
+              >
                 <Text style={[tw`font-bold text-base`, { color: "#ffffff" }]}>
                   Done
                 </Text>

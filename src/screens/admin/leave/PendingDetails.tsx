@@ -9,7 +9,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Alert, Text, View } from "react-native";
 
-import AdminPendingView from "@/src/components/Leave/AdminPendingView";
+import PendingLeaveView from "@/src/components/Leave/PendingLeaveView";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { useLeaveStore } from "@/src/store/useLeaveStore";
 import tw from "twrnc";
@@ -152,7 +152,7 @@ export default function PendingDetails() {
   const cfg = statusConfig[leave.status] ?? statusConfig.pending;
 
   return (
-    <AdminPendingView
+    <PendingLeaveView
       leave={leave}
       cfg={cfg}
       handleStatusChange={handleStatusChange}
