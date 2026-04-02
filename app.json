@@ -21,11 +21,16 @@
         "backgroundImage": "./src/./assets/images/android-icon-background.png",
         "monochromeImage": "./src/./assets/images/android-icon-monochrome.png",
         "softwareKeyboardLayoutMode": "resize",
-        "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"]
+        "permissions": [
+          "ACCESS_FINE_LOCATION",
+          "ACCESS_COARSE_LOCATION"
+        ]
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "permissions": ["android.permission.RECORD_AUDIO"],
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ],
       "package": "com.satyabhattarai.techhaushrm"
     },
     "web": {
@@ -62,9 +67,8 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "bf3b97c2-a926-48cd-8ae1-e8cc6d2ca391"
+        "projectId": "678b2ac5-10dc-4db1-bf02-405e815b7a05"
       }
-    },
-    "owner": "satyabhattarai"
+    }
   }
 }

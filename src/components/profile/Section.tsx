@@ -14,7 +14,7 @@ export default function Section({
   rightText,
 }: Props) {
   return (
-    <View style={{ marginBottom: 20 }}>
+    <View style={{ marginBottom: 5 }}>
       {/* Header */}
       <View
         style={{
@@ -26,7 +26,7 @@ export default function Section({
       >
         <Text
           style={{
-            fontSize: 13,
+            fontSize: 14,
             fontWeight: "600",
             letterSpacing: 1,
             color: "#6B7280",
@@ -39,7 +39,7 @@ export default function Section({
           <Pressable onPress={onRightPress}>
             <Text
               style={{
-                fontSize: 13,
+                fontSize: 14,
                 fontWeight: "600",
                 color: "#6B7280",
               }}
