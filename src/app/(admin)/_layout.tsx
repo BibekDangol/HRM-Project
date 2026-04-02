@@ -140,7 +140,7 @@ export default function AdminLayout() {
                   borderColor: "rgba(255,255,255,0.5)",
                   alignItems: "center",
                   justifyContent: "center",
-                  opacity: pressed ? 0.75 : 1,
+                  // opacity: pressed ? 0.75 : 1,
                 })}>
                 <User size={17} color="#ffffff" />
               </Pressable>

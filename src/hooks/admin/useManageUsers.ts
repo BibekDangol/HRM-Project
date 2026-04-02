@@ -1,15 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Alert } from "react-native";
-import { adminAddUserService } from "@/src/services/admin/AddUser.service";
+import { adminAddUserService } from "@/src/services/admin/add-user-service";
 import { apiClient } from "@/src/api/apiClient";
 import { fetchCurrentUserProfleService } from "@/src/services/currentuser.service";
 import { fetchUsersService } from "@/src/services/admin.service";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { useDebounce } from "@/src/hooks/useDebounce";
 import { useUsersStore } from "@/src/store/useUsersStore";
-
-const PAGE_SIZE = 10;
 
 export const useManageUsers = () => {
   const { user } = useAuthStore();
@@ -21,8 +19,6 @@ export const useManageUsers = () => {
 
   const [activeTab, setActiveTab] = useState<"pending" | "active">("pending");
 
-  const [currentPage, setCurrentPage] = useState(1);
-
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -33,18 +29,12 @@ export const useManageUsers = () => {
   const [editRole, setEditRole] = useState("user");
   const [editSupervisor, setEditSupervisor] = useState<string | null>(null);
 
-  // ---------------- RESET PAGINATION ----------------
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [activeTab, debouncedSearch]);
-
   // ---------------- LOAD USERS ----------------
   const loadUsers = useCallback(async () => {
     if (!user?.id) return;
 
     try {
       setLoading(true);
-
       const profile = await fetchCurrentUserProfleService(user.id);
       setUserProfile(profile);
 
@@ -52,7 +42,6 @@ export const useManageUsers = () => {
         profile.organization_id,
         debouncedSearch,
       );
-
       setUsers(data);
     } finally {
       setLoading(false);
@@ -63,14 +52,12 @@ export const useManageUsers = () => {
     loadUsers();
   }, [loadUsers]);
 
-  // ---------------- REFRESH ----------------
   const onRefresh = async () => {
     setRefreshing(true);
     await loadUsers();
     setRefreshing(false);
   };
 
-  // ---------------- FILTER USERS ----------------
   const filteredUsers = useMemo(() => {
     return users.filter((u) =>
       activeTab === "pending" ? u.status === "pending" : u.status === "active",
@@ -81,43 +68,11 @@ export const useManageUsers = () => {
   const pendingCount = pendingUsers.length;
   const activeCount = activeUsers.length;
   const [tempPassword, setTempPassword] = useState<string | null>(null);
+
   const tabs: { key: "pending" | "active"; label: string; count: number }[] = [
     { key: "pending", label: "Pending", count: pendingCount },
     { key: "active", label: "Active", count: activeCount },
   ];
-  // ---------------- PAGINATION ----------------
-  const totalPages = Math.max(1, Math.ceil(filteredUsers.length / PAGE_SIZE));
-
-  const pagedUsers = useMemo(() => {
-    return filteredUsers.slice(
-      (currentPage - 1) * PAGE_SIZE,
-      currentPage * PAGE_SIZE,
-    );
-  }, [filteredUsers, currentPage]);
-
-  const getPageNumbers = () => {
-    if (totalPages <= 5)
-      return Array.from({ length: totalPages }, (_, i) => i + 1);
-
-    if (currentPage <= 3) return [1, 2, 3, 4, 5];
-
-    if (currentPage >= totalPages - 2)
-      return [
-        totalPages - 4,
-        totalPages - 3,
-        totalPages - 2,
-        totalPages - 1,
-        totalPages,
-      ];
-
-    return [
-      currentPage - 2,
-      currentPage - 1,
-      currentPage,
-      currentPage + 1,
-      currentPage + 2,
-    ];
-  };
 
   const getSupervisorName = (supervisorId?: string | null) => {
     if (!supervisorId) return "No supervisor yet";
@@ -128,13 +83,13 @@ export const useManageUsers = () => {
       ? `${supervisor.first_name} ${supervisor.last_name}`.trim()
       : "Unknown Supervisor";
   };
-  // ---------------- ADD USER ----------------
+
   const handleAddUser = async (data: any) => {
+    console.log("handle add user samma pugirako cha kinai", data);
     if (!userProfile) {
       Alert.alert("Error", "Profile not ready");
       return;
     }
-
     try {
       const response = await adminAddUserService({
         email: data.email,
@@ -143,17 +98,16 @@ export const useManageUsers = () => {
         orgId: userProfile.organization_id,
         supervisor_id: data.supervisor_id,
       });
+      console.log("handleadduser", response);
       if (response.tempPassword) {
         setTempPassword(response.tempPassword);
       }
-
       // 2. refresh users
       const updatedUsers = await fetchUsersService(userProfile.organization_id);
       setUsers(updatedUsers);
 
       // 3. close modal (if needed)
       setShowAddModal(false);
-      setCurrentPage(1);
 
       // 4. SUCCESS ALERT (important)
       Alert.alert("Success", "User added successfully");
@@ -162,7 +116,6 @@ export const useManageUsers = () => {
     }
   };
 
-  // ---------------- EDIT USER ----------------
   const handleEditUser = (user: any) => {
     setEditingUser(user);
     setEditRole(user.role);
@@ -219,8 +172,6 @@ export const useManageUsers = () => {
     setSearch,
     activeTab,
     setActiveTab,
-    currentPage,
-    setCurrentPage,
 
     loading,
     refreshing,
@@ -238,14 +189,9 @@ export const useManageUsers = () => {
     editSupervisor,
     setEditSupervisor,
     getSupervisorName,
-
     // data
-    pagedUsers,
     filteredUsers,
-    totalPages,
-    getPageNumbers,
     tabs,
-
     // actions
     onRefresh,
     handleAddUser,

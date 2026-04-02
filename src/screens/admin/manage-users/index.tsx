@@ -1,9 +1,6 @@
-import * as Clipboard from "expo-clipboard";
-
-import { Copy, Plus, Search } from "lucide-react-native";
-import React, { useEffect } from "react";
+import { Plus, Search } from "lucide-react-native";
+import { default as React, useCallback, useRef } from "react";
 import {
-  Alert,
   FlatList,
   KeyboardAvoidingView,
   Platform,
@@ -15,26 +12,25 @@ import {
 import HeaderWithSearch from "@/src/components/HeaderWithSearch";
 import LoadingIndicator from "@/src/components/LoadingIndicator";
 import { useManageUsers } from "@/src/hooks/admin/useManageUsers";
+import { usePagination } from "@/src/hooks/usePagination";
+import { useAuthStore } from "@/src/store/useAuthStore";
 import { TW } from "@/theme/twStyles";
-import { useRouter } from "expo-router";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useFocusEffect } from "expo-router";
 import tw from "twrnc";
 import { UserCard } from "../components/UserCard";
 import AddUserModal from "./AddUserModal";
 import EditUserModal from "./EditUserModal";
+import TempPasswordModal from "./TempPasswordModal";
 
 const ManageUsers = () => {
-  const router = useRouter();
-
+  const { session } = useAuthStore();
+  console.log("Index to send props session", session);
   const {
     // state
     search,
     setSearch,
     activeTab,
     setActiveTab,
-    currentPage,
-    setCurrentPage,
-
     loading,
     refreshing,
 
@@ -53,10 +49,7 @@ const ManageUsers = () => {
     getSupervisorName,
 
     // data
-    pagedUsers,
     filteredUsers,
-    totalPages,
-    getPageNumbers,
     tabs,
 
     // actions
@@ -68,22 +61,35 @@ const ManageUsers = () => {
     tempPassword,
     setTempPassword,
   } = useManageUsers();
-  const insets = useSafeAreaInsets();
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [activeTab, setCurrentPage]);
-  //ask aayush dai search garda paila page milirako chaina
+
+  const {
+    page,
+    setPage,
+    totalPages,
+    shouldShowPagination,
+    pagedData,
+    pageNumbers,
+  } = usePagination(filteredUsers);
+  const flatListRef = useRef<FlatList>(null);
+
+  useFocusEffect(
+    useCallback(() => {
+      setActiveTab("pending");
+      setPage(1);
+
+      flatListRef.current?.scrollToOffset({
+        offset: 0,
+        animated: true,
+      });
+    }, [setActiveTab, setPage]),
+  );
+
   return (
     <View style={tw`flex-1 bg-white`}>
       <KeyboardAvoidingView
         style={tw`flex-1`}
         behavior={Platform.OS === "ios" ? "padding" : undefined}>
-        {/* HEADER */}
-        <HeaderWithSearch
-          search={search}
-          onSearchChange={setSearch}
-          onBack={() => router.back()}
-        />
+        <HeaderWithSearch search={search} onSearchChange={setSearch} />
 
         <View style={tw`flex-row items-center gap-2 px-4 pt-3 pb-2`}>
           {/* Tabs — take remaining space */}
@@ -106,7 +112,15 @@ const ManageUsers = () => {
                     ]}>
                     {tab.label.toUpperCase()}{" "}
                     {tab.count > 0 && (
-                      <Text style={tw`${TW.textTertiary}`}></Text>
+                      <Text
+                        style={[
+                          tw``,
+                          isActive
+                            ? tw`${TW.textButton}`
+                            : tw`${TW.textPrimary}`,
+                        ]}>
+                        ({tab.count})
+                      </Text>
                     )}
                   </Text>
                 </Pressable>
@@ -114,7 +128,6 @@ const ManageUsers = () => {
             })}
           </View>
 
-          {/* Add User button — same height as tab bar */}
           <Pressable
             onPress={() => setShowAddModal(true)}
             style={({ pressed }) => [
@@ -125,9 +138,9 @@ const ManageUsers = () => {
           </Pressable>
         </View>
 
-        {/* LIST */}
         <FlatList
-          data={pagedUsers}
+          ref={flatListRef}
+          data={pagedData}
           keyExtractor={(item) => item.id}
           style={tw`px-4`}
           renderItem={({ item }) => (
@@ -152,17 +165,17 @@ const ManageUsers = () => {
             )
           }
           ListFooterComponent={
-            pagedUsers.length > 0 ? (
+            shouldShowPagination ? (
               <View style={tw`pt-4 pb-2`}>
                 {/* Pagination Row */}
                 <View style={tw`flex-row items-center gap-2 mb-2`}>
                   {/* Prev Button */}
                   <Pressable
-                    onPress={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                    disabled={currentPage === 1}
+                    onPress={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={page === 1}
                     style={[
                       tw`flex-1 h-10 rounded-xl items-center justify-center border ${TW.BORDER}`,
-                      currentPage === 1 && tw`opacity-30`,
+                      page === 1 && tw`opacity-30`,
                     ]}>
                     <Text style={tw`${TW.textPrimary} font-bold text-base`}>
                       ‹ Prev
@@ -170,37 +183,34 @@ const ManageUsers = () => {
                   </Pressable>
 
                   {/* Page Numbers */}
-                  {getPageNumbers().map((page) => (
+                  {pageNumbers.map((p) => (
                     <Pressable
-                      key={page}
-                      onPress={() => setCurrentPage(page)}
+                      key={p}
+                      onPress={() => setPage(p)}
                       style={[
                         tw`h-10 w-10 rounded-xl items-center justify-center`,
-                        currentPage === page
+                        p === page
                           ? tw`${TW.bgAction}`
                           : tw`border ${TW.BORDER}`,
                       ]}>
                       <Text
                         style={[
                           tw`text-sm font-semibold`,
-                          currentPage === page
+                          p === page
                             ? tw`${TW.textButton}`
                             : tw`${TW.textPrimary}`,
                         ]}>
-                        {page}
+                        {p}
                       </Text>
                     </Pressable>
                   ))}
-
                   {/* Next Button */}
                   <Pressable
-                    onPress={() =>
-                      setCurrentPage((p) => Math.min(totalPages, p + 1))
-                    }
-                    disabled={currentPage === totalPages}
+                    onPress={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={page === totalPages}
                     style={[
                       tw`flex-1 h-10 rounded-xl items-center justify-center border ${TW.BORDER}`,
-                      currentPage === totalPages && tw`opacity-30`,
+                      page === totalPages && tw`opacity-30`,
                     ]}>
                     <Text style={tw`${TW.textPrimary} font-bold text-base`}>
                       Next ›
@@ -213,7 +223,6 @@ const ManageUsers = () => {
         />
       </KeyboardAvoidingView>
 
-      {/* ADD MODAL */}
       <AddUserModal
         visible={showAddModal}
         onClose={() => setShowAddModal(false)}
@@ -222,7 +231,6 @@ const ManageUsers = () => {
         supervisors={users}
         currentUserId={user?.id ?? ""}
       />
-
       {/* EDIT MODAL */}
       <EditUserModal
         visible={showEditModal}
@@ -239,8 +247,13 @@ const ManageUsers = () => {
           editSupervisor !== editingUser?.supervisor_id
         }
       />
-
       {tempPassword && (
+        <TempPasswordModal
+          tempPassword={tempPassword}
+          setTempPassword={setTempPassword}
+        />
+      )}
+      {/* {tempPassword && (
         <View style={tw`absolute inset-0 bg-black/50 items-center justify-end`}>
           <View
             style={[
@@ -289,7 +302,7 @@ const ManageUsers = () => {
             </Pressable>
           </View>
         </View>
-      )}
+      )} */}
     </View>
   );
 };

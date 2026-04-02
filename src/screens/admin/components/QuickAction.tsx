@@ -1,7 +1,8 @@
-import { TW } from "@/theme/twStyles";
-import { useRouter } from "expo-router";
 import { CalendarPlus, Clock, FileText, UserPlus } from "lucide-react-native";
 import { Text, TouchableOpacity, View } from "react-native";
+
+import { TW } from "@/theme/twStyles";
+import { useRouter } from "expo-router";
 import tw from "twrnc";
 
 type QuickActionsProps = {
@@ -21,8 +22,7 @@ const QuickActions = ({ onOpenAddUserModal }: QuickActionsProps) => {
         {/* Add Employee */}
         <TouchableOpacity
           onPress={onOpenAddUserModal}
-          style={tw`w-[48%] ${TW.bgCards} p-4 rounded-xl mb-3 items-center`}
-        >
+          style={tw`w-[48%] ${TW.bgCards} p-4 rounded-xl mb-3 items-center`}>
           <UserPlus size={24} color="#1B4A5A" />
           <Text style={tw`${TW.textPrimary} mt-2 font-medium`}>
             Add Employee
@@ -32,34 +32,27 @@ const QuickActions = ({ onOpenAddUserModal }: QuickActionsProps) => {
         {/* Request Leave */}
         <TouchableOpacity
           onPress={() => router.replace("/(admin)/leave")}
-          style={tw`w-[48%] ${TW.bgCards} p-4 rounded-xl mb-3 items-center`}
-        >
+          style={tw`w-[48%] ${TW.bgCards} p-4 rounded-xl mb-3 items-center`}>
           <CalendarPlus size={24} color="#1B4A5A" />
           <Text style={tw`${TW.textPrimary} mt-2 font-medium`}>
-            Request Leave
+            Manage Leave
           </Text>
         </TouchableOpacity>
 
         {/* Attendance */}
         <TouchableOpacity
           onPress={() => router.replace("/(admin)/more/attendance-list")}
-          style={tw`w-[48%] ${TW.bgCards} p-4 rounded-xl mb-3 items-center`}
-        >
+          style={tw`w-[48%] ${TW.bgCards} p-4 rounded-xl mb-3 items-center`}>
           <Clock size={24} color="#1B4A5A" />
-          <Text style={tw`${TW.textPrimary} mt-2 font-medium`}>
-            Attendance
-          </Text>
+          <Text style={tw`${TW.textPrimary} mt-2 font-medium`}>Attendance</Text>
         </TouchableOpacity>
 
         {/* Holidays */}
         <TouchableOpacity
           onPress={() => router.replace("/(admin)/more/holidays")}
-          style={tw`w-[48%] ${TW.bgCards} p-4 rounded-xl mb-3 items-center`}
-        >
+          style={tw`w-[48%] ${TW.bgCards} p-4 rounded-xl mb-3 items-center`}>
           <FileText size={24} color="#1B4A5A" />
-          <Text style={tw`${TW.textPrimary} mt-2 font-medium`}>
-            Holidays
-          </Text>
+          <Text style={tw`${TW.textPrimary} mt-2 font-medium`}>Holidays</Text>
         </TouchableOpacity>
       </View>
     </View>
