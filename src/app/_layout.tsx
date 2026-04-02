@@ -1,12 +1,12 @@
 import * as Linking from "expo-linking";
 
-import { Stack } from "expo-router";
-import { StatusBar } from "expo-status-bar";
-import { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { useAuthStore } from "../store/useAuthStore";
+import { Stack } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import { supabase } from "../supabase/supabaseClient";
+import { useAuthStore } from "../store/useAuthStore";
+import { useEffect } from "react";
 
 export default function Layout() {
   const { restoreSession } = useAuthStore();
@@ -24,10 +24,6 @@ export default function Layout() {
           refresh_token: params.refresh_token,
         });
       }
-      console.log(
-        "recovery session found access token in layout",
-        params.access_token,
-      );
     };
     restoreSession();
     const subscription = Linking.addEventListener("url", handleDeepLink);

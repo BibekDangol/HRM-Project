@@ -1,15 +1,20 @@
-import { CalendarClock, ChevronRight } from "lucide-react-native";
-import { FlatList, Pressable, Text, View } from "react-native";
 import { RelativePathString, useFocusEffect, useRouter } from "expo-router";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { CalendarClock, ChevronRight } from "lucide-react-native";
+import { useCallback, useRef } from "react";
+import { FlatList, Pressable, Text, View } from "react-native";
 
-import { LeaveStatus } from "@/src/services/leave.service";
 import LoadingIndicator from "@/src/components/LoadingIndicator";
+import { useLeaveView } from "@/src/hooks/admin/useLeaveView";
+import { LeaveStatus } from "@/src/services/leave.service";
 import { TW } from "@/theme/twStyles";
 import tw from "twrnc";
-import { useAuthStore } from "@/src/store/useAuthStore";
-import { useLeaveStore } from "@/src/store/useLeaveStore";
-import { useUsersStore } from "@/src/store/useUsersStore";
+
+type Props = {
+  approvedPath: string;
+  pendingPath: string;
+  rejectedPath: string;
+  fetchLeaves: (orgId: number, userId: string) => Promise<any[]>;
+};
 
 const statusConfig: Record<string, { bg: string; text: string; dot: string }> =
   {
@@ -22,12 +27,7 @@ const statusConfig: Record<string, { bg: string; text: string; dot: string }> =
     rejected: { bg: "bg-red-50", text: "text-red-500", dot: "bg-red-400" },
   };
 
-type Props = {
-  approvedPath: string;
-  pendingPath: string;
-  rejectedPath: string;
-  fetchLeaves: (orgId: number, userId: string) => Promise<any[]>;
-};
+const TABS: LeaveStatus[] = ["pending", "approved", "rejected"];
 
 export default function LeaveView({
   approvedPath,
@@ -36,59 +36,42 @@ export default function LeaveView({
   fetchLeaves,
 }: Props) {
   const router = useRouter();
-  const { userProfile } = useUsersStore();
-  const { leaves, setLeaves } = useLeaveStore();
-  const { user } = useAuthStore();
-  const [activeTab, setActiveTab] = useState<LeaveStatus>("pending");
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-
-  const filteredLeaves = leaves.filter((leave) => leave.status === activeTab);
   const listRef = useRef<FlatList>(null);
-
+  const {
+    paginatedLeaves,
+    counts,
+    activeTab,
+    setActiveTab,
+    loading,
+    refreshing,
+    onRefresh,
+    page,
+    setPage,
+    totalPages,
+    shouldShowPagination,
+    pageNumbers,
+  } = useLeaveView({ fetchLeaves, scrollRef: listRef });
   useFocusEffect(
     useCallback(() => {
       setActiveTab("pending");
-    }, []),
+      setPage(1);
+
+      listRef.current?.scrollToOffset({
+        offset: 0,
+        animated: true,
+      });
+    }, [setActiveTab, setPage]),
   );
-
-  useEffect(() => {
-    listRef.current?.scrollToOffset({ offset: 0, animated: true });
-  }, [activeTab]);
-
-  const loadLeaves = useCallback(async () => {
-    if (!userProfile || !user) return;
-    try {
-      setLoading(true);
-      const data = await fetchLeaves(userProfile.organization_id, user.id);
-      setLeaves(data);
-    } catch {
-    } finally {
-      setLoading(false);
-    }
-  }, [userProfile, user, setLeaves, fetchLeaves]);
-
-  useEffect(() => {
-    loadLeaves();
-  }, [loadLeaves]);
-
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await loadLeaves();
-    setRefreshing(false);
-  };
-
   const goToDetails = (leave: any) => {
-    let pathname = "";
-    if (leave.status === "approved") {
-      pathname = approvedPath;
-    } else if (leave.status === "pending") {
-      pathname = pendingPath;
-    } else {
-      pathname = rejectedPath;
-    }
+    const path =
+      leave.status === "approved"
+        ? approvedPath
+        : leave.status === "pending"
+          ? pendingPath
+          : rejectedPath;
+
     router.push({
-      pathname: pathname as RelativePathString,
+      pathname: path as RelativePathString,
       params: { id: leave.id },
     });
   };
@@ -98,10 +81,10 @@ export default function LeaveView({
   return (
     <View style={tw`flex-1 bg-white`}>
       {/* Tabs */}
-      <View style={tw`px-4 pt-3`}>{/* <BackButton /> */}</View>
       <View style={tw`flex-row mx-2 mt-2 rounded-2xl p-1 bg-slate-100`}>
-        {(["pending", "approved", "rejected"] as LeaveStatus[]).map((tab) => {
+        {TABS.map((tab) => {
           const isActive = activeTab === tab;
+
           return (
             <Pressable
               key={tab}
@@ -112,18 +95,26 @@ export default function LeaveView({
                 pressed && !isActive && tw`opacity-70`,
               ]}>
               <Text
-                style={tw`text-sm font-bold ${isActive ? TW.textButton : TW.textPrimary}`}>
-                {tab.toUpperCase()}
+                style={tw`text-sm font-bold ${
+                  isActive ? TW.textButton : TW.textPrimary
+                }`}>
+                {tab.toUpperCase()}{" "}
+                <Text
+                  style={tw`text-xs ${
+                    isActive ? TW.textButton : TW.textPrimary
+                  }`}>
+                  ({counts[tab]})
+                </Text>
               </Text>
             </Pressable>
           );
         })}
       </View>
 
-      {/* Leave List */}
+      {/* List */}
       <FlatList
         ref={listRef}
-        data={filteredLeaves}
+        data={paginatedLeaves}
         keyExtractor={(item) => item.id.toString()}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={tw`px-4 pt-3 pb-10`}
@@ -159,7 +150,7 @@ export default function LeaveView({
                 </Text>
               </View>
 
-              {/* Status Badge */}
+              {/* Status */}
               <View
                 style={tw`flex-row items-center px-3 py-1.5 rounded-xl mr-3 ${cfg.bg}`}>
                 <View style={tw`h-1.5 w-1.5 rounded-full mr-1.5 ${cfg.dot}`} />
@@ -187,6 +178,30 @@ export default function LeaveView({
           </View>
         }
       />
+
+      {/* Pagination */}
+      {shouldShowPagination && (
+        <View style={tw`flex-row justify-center items-center py-4`}>
+          {pageNumbers.map((p) => {
+            const active = p === page;
+            return (
+              <Pressable
+                key={p}
+                onPress={() => setPage(p)}
+                style={tw`mx-1 px-3 py-1 rounded-lg ${
+                  active ? TW.bgAction : "bg-slate-200"
+                }`}>
+                <Text
+                  style={tw`text-xs font-bold ${
+                    active ? TW.textButton : TW.textPrimary
+                  }`}>
+                  {p}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+      )}
     </View>
   );
 }

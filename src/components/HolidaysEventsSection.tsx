@@ -1,8 +1,8 @@
-import { Pressable, Text, View, useWindowDimensions } from "react-native";
 import React, { useMemo, useState } from "react";
+import { Pressable, Text, View, useWindowDimensions } from "react-native";
 
-import Carousel from "react-native-reanimated-carousel";
 import { TW } from "@/theme/twStyles";
+import Carousel from "react-native-reanimated-carousel";
 import tw from "twrnc";
 
 export type CalendarItem = {
@@ -40,7 +40,6 @@ export const HolidaysEventsSection = ({
 }: Props) => {
   const { width: screenWidth } = useWindowDimensions();
   const itemWidth = screenWidth - 44;
-  //ask aayush dai calendarItems, loading console garda kina back to back
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const today = useMemo(() => {

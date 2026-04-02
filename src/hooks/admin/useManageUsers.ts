@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Alert } from "react-native";
-import { adminAddUserService } from "@/src/services/admin/AddUser.service";
+import { adminAddUserService } from "@/src/services/admin/add-user-service";
 import { apiClient } from "@/src/api/apiClient";
 import { fetchCurrentUserProfleService } from "@/src/services/currentuser.service";
 import { fetchUsersService } from "@/src/services/admin.service";
@@ -35,7 +35,6 @@ export const useManageUsers = () => {
 
     try {
       setLoading(true);
-
       const profile = await fetchCurrentUserProfleService(user.id);
       setUserProfile(profile);
 
@@ -43,7 +42,6 @@ export const useManageUsers = () => {
         profile.organization_id,
         debouncedSearch,
       );
-
       setUsers(data);
     } finally {
       setLoading(false);
@@ -54,14 +52,12 @@ export const useManageUsers = () => {
     loadUsers();
   }, [loadUsers]);
 
-  // ---------------- REFRESH ----------------
   const onRefresh = async () => {
     setRefreshing(true);
     await loadUsers();
     setRefreshing(false);
   };
 
-  // ---------------- FILTER USERS ----------------
   const filteredUsers = useMemo(() => {
     return users.filter((u) =>
       activeTab === "pending" ? u.status === "pending" : u.status === "active",
@@ -72,6 +68,7 @@ export const useManageUsers = () => {
   const pendingCount = pendingUsers.length;
   const activeCount = activeUsers.length;
   const [tempPassword, setTempPassword] = useState<string | null>(null);
+
   const tabs: { key: "pending" | "active"; label: string; count: number }[] = [
     { key: "pending", label: "Pending", count: pendingCount },
     { key: "active", label: "Active", count: activeCount },
@@ -87,8 +84,8 @@ export const useManageUsers = () => {
       : "Unknown Supervisor";
   };
 
-  // ---------------- ADD USER ----------------
   const handleAddUser = async (data: any) => {
+    console.log("handle add user samma pugirako cha kinai", data);
     if (!userProfile) {
       Alert.alert("Error", "Profile not ready");
       return;
@@ -101,6 +98,7 @@ export const useManageUsers = () => {
         orgId: userProfile.organization_id,
         supervisor_id: data.supervisor_id,
       });
+      console.log("handleadduser", response);
       if (response.tempPassword) {
         setTempPassword(response.tempPassword);
       }
@@ -118,7 +116,6 @@ export const useManageUsers = () => {
     }
   };
 
-  // ---------------- EDIT USER ----------------
   const handleEditUser = (user: any) => {
     setEditingUser(user);
     setEditRole(user.role);
@@ -192,7 +189,6 @@ export const useManageUsers = () => {
     editSupervisor,
     setEditSupervisor,
     getSupervisorName,
-
     // data
     filteredUsers,
     tabs,

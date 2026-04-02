@@ -1,10 +1,10 @@
-import { Alert, Image, Pressable, Text, View } from "react-native";
 import { Pencil, Trash2 } from "lucide-react-native";
+import { Alert, Image, Pressable, Text, View } from "react-native";
 
-import Capsule from "../../../components/Capsule";
-import { TW } from "@/theme/twStyles";
 import { UserProfile } from "@/src/types/admin";
+import { TW } from "@/theme/twStyles";
 import tw from "twrnc";
+import Capsule from "../../../components/Capsule";
 
 type Props = {
   user: UserProfile;
@@ -26,7 +26,12 @@ export const UserCard = ({ user, onEdit, onDelete }: Props) => {
                 style={tw`w-12 h-12 rounded-full`}
               />
             ) : (
-              <View style={tw`w-12 h-12 rounded-full bg-gray-300`} />
+              <View
+                style={tw`w-12 h-12 rounded-full bg-gray-300 items-center justify-center`}>
+                <Text style={tw`text-sm font-bold text-white`}>
+                  {`${user.first_name?.[0] ?? ""}${user.last_name?.[0] ?? ""}`.toUpperCase()}
+                </Text>
+              </View>
             )}
           </View>
 

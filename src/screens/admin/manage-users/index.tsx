@@ -1,5 +1,5 @@
 import { Plus, Search } from "lucide-react-native";
-import React, { useEffect, useRef } from "react";
+import { default as React, useCallback, useRef } from "react";
 import {
   FlatList,
   KeyboardAvoidingView,
@@ -13,19 +13,18 @@ import HeaderWithSearch from "@/src/components/HeaderWithSearch";
 import LoadingIndicator from "@/src/components/LoadingIndicator";
 import { useManageUsers } from "@/src/hooks/admin/useManageUsers";
 import { usePagination } from "@/src/hooks/usePagination";
+import { useAuthStore } from "@/src/store/useAuthStore";
 import { TW } from "@/theme/twStyles";
+import { useFocusEffect } from "expo-router";
 import tw from "twrnc";
 import { UserCard } from "../components/UserCard";
 import AddUserModal from "./AddUserModal";
 import EditUserModal from "./EditUserModal";
-
-import { useRouter } from "expo-router";
-
 import TempPasswordModal from "./TempPasswordModal";
 
 const ManageUsers = () => {
-  const router = useRouter();
-
+  const { session } = useAuthStore();
+  console.log("Index to send props session", session);
   const {
     // state
     search,
@@ -73,25 +72,24 @@ const ManageUsers = () => {
   } = usePagination(filteredUsers);
   const flatListRef = useRef<FlatList>(null);
 
-  useEffect(() => {
-    flatListRef.current?.scrollToOffset({
-      offset: 0,
-      animated: true,
-    });
-    setPage(1);
-  }, [activeTab, setPage]);
-  //ask aayush dai search garda paila page milirako chaina
+  useFocusEffect(
+    useCallback(() => {
+      setActiveTab("pending");
+      setPage(1);
+
+      flatListRef.current?.scrollToOffset({
+        offset: 0,
+        animated: true,
+      });
+    }, [setActiveTab, setPage]),
+  );
+
   return (
     <View style={tw`flex-1 bg-white`}>
       <KeyboardAvoidingView
         style={tw`flex-1`}
         behavior={Platform.OS === "ios" ? "padding" : undefined}>
-        {/* HEADER */}
-        <HeaderWithSearch
-          search={search}
-          onSearchChange={setSearch}
-          // onBack={() => router.back()}
-        />
+        <HeaderWithSearch search={search} onSearchChange={setSearch} />
 
         <View style={tw`flex-row items-center gap-2 px-4 pt-3 pb-2`}>
           {/* Tabs — take remaining space */}
@@ -114,7 +112,15 @@ const ManageUsers = () => {
                     ]}>
                     {tab.label.toUpperCase()}{" "}
                     {tab.count > 0 && (
-                      <Text style={tw`${TW.textTertiary}`}></Text>
+                      <Text
+                        style={[
+                          tw``,
+                          isActive
+                            ? tw`${TW.textButton}`
+                            : tw`${TW.textPrimary}`,
+                        ]}>
+                        ({tab.count})
+                      </Text>
                     )}
                   </Text>
                 </Pressable>
@@ -122,7 +128,6 @@ const ManageUsers = () => {
             })}
           </View>
 
-          {/* Add User button — same height as tab bar */}
           <Pressable
             onPress={() => setShowAddModal(true)}
             style={({ pressed }) => [
@@ -133,7 +138,6 @@ const ManageUsers = () => {
           </Pressable>
         </View>
 
-        {/* LIST */}
         <FlatList
           ref={flatListRef}
           data={pagedData}
@@ -219,7 +223,6 @@ const ManageUsers = () => {
         />
       </KeyboardAvoidingView>
 
-      {/* ADD MODAL */}
       <AddUserModal
         visible={showAddModal}
         onClose={() => setShowAddModal(false)}
@@ -228,7 +231,6 @@ const ManageUsers = () => {
         supervisors={users}
         currentUserId={user?.id ?? ""}
       />
-
       {/* EDIT MODAL */}
       <EditUserModal
         visible={showEditModal}
