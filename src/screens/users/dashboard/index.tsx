@@ -9,11 +9,11 @@ import {
   View,
 } from "react-native";
 
-import { ActivityLogSection } from "@/src/components/ActivityLog";
 import { HolidaysEventsSection } from "@/src/components/HolidaysEventsSection";
 import { AttendanceStatsCard } from "@/src/components/Home/AttendanceStatsCard";
 import { CheckInCard } from "@/src/components/Home/CheckInCard";
 import { MonthPickerModal } from "@/src/components/Home/MonthPickerModal";
+import { ActivityLogSection } from "@/src/components/RecentActivity";
 import { useAttendanceContext } from "@/src/context/AttendanceContext";
 import { useAttendanceStats } from "@/src/hooks/users/useAttendanceStats";
 import { useCalendar } from "@/src/hooks/users/useCalendar";
@@ -33,10 +33,10 @@ export default function HomeScreen() {
     Math.min(now.getFullYear(), MAX_YEAR),
   );
   const [selectedMonth, setSelectedMonth] = useState(now.getMonth());
-  const [monthModalOpen, setMonthModalOpen] = useState(false);
+  const [showMonthPicker, setShowMonthPicker] = useState(false);
 
   const { profile, fetchProfile } = useProfile(user?.id);
-  //ask ayush dai why its fetching non stop, not only on page refresh.????
+
   const {
     stats,
     loading: statsLoading,
@@ -48,6 +48,7 @@ export default function HomeScreen() {
     loading: calendarLoading,
     fetch: fetchCalendar,
   } = useCalendar(profile?.organization_id, selectedYear, selectedMonth);
+
   const [refreshing, setRefreshing] = useState(false);
 
   const onRefresh = async () => {
@@ -65,6 +66,7 @@ export default function HomeScreen() {
     <ScrollView
       style={tw`bg-white flex-1`}
       contentContainerStyle={{ paddingVertical: 16 }}
+      showsVerticalScrollIndicator={false}
       refreshControl={
         <RefreshControl
           refreshing={refreshing || calendarLoading || statsLoading}
@@ -85,13 +87,13 @@ export default function HomeScreen() {
       </View>
 
       <View style={{ paddingHorizontal: 16, marginTop: 16 }}>
-        {/* Header */}
         <View style={tw`flex-row items-center justify-between mb-4`}>
           <Text style={tw`font-semibold text-lg text-gray-800`}>
             For {monthTitle} {selectedYear}
           </Text>
+
           <Pressable
-            onPress={() => setMonthModalOpen(true)}
+            onPress={() => setShowMonthPicker(true)}
             style={({ pressed }) => [
               tw`px-3 py-2 rounded-full`,
               pressed && { opacity: 0.7 },
@@ -100,8 +102,10 @@ export default function HomeScreen() {
             <CalendarDays size={20} color="#475569" />
           </Pressable>
         </View>
+
         <AttendanceStatsCard stats={stats} loading={statsLoading} />
       </View>
+
       <View style={{ paddingHorizontal: 16, marginTop: 16 }}>
         <HolidaysEventsSection
           calendarItems={calendarItems}
@@ -119,12 +123,12 @@ export default function HomeScreen() {
       </View>
 
       <MonthPickerModal
-        visible={monthModalOpen}
+        visible={showMonthPicker}
         selectedYear={selectedYear}
         selectedMonth={selectedMonth}
         setSelectedYear={setSelectedYear}
         setSelectedMonth={setSelectedMonth}
-        onClose={() => setMonthModalOpen(false)}
+        onClose={() => setShowMonthPicker(false)}
       />
     </ScrollView>
   );

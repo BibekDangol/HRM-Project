@@ -8,12 +8,15 @@ import {
 } from "../services/profile.service";
 
 import { usersProfileSchema } from "@/src/schema/users/userprofiles.schema";
+import { useUsersStore } from "@/src/store/useUsersStore";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Alert } from "react-native";
 import { ProfileData } from "../types/profile.types";
 
 export function useProfile(userId?: string) {
+  const { userProfile, setUserProfile } = useUsersStore();
+
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [profile, setProfile] = useState<ProfileData | null>(null);
@@ -81,6 +84,15 @@ export function useProfile(userId?: string) {
     try {
       setIsSaving(true);
       await updateProfileService(userId, profile.organization_id, values);
+
+      if (userProfile) {
+        setUserProfile({
+          ...userProfile,
+          first_name: values.firstName,
+          last_name: values.lastName,
+        });
+      }
+
       setEditOpen(false);
       await fetchProfile();
       Alert.alert("Saved", "Profile updated successfully.");

@@ -1,6 +1,6 @@
 import { ScrollView, View } from "react-native";
 
-import { ActivityLogSection } from "@/src/components/ActivityLog";
+import { ActivityLogSection } from "@/src/components/RecentActivity";
 import React from "react";
 
 export default function ActivityLogPage() {
@@ -21,7 +21,8 @@ export default function ActivityLogPage() {
           paddingTop: 24,
           paddingBottom: 40,
         }}
-        showsVerticalScrollIndicator={false}>
+        showsVerticalScrollIndicator={false}
+      >
         <ActivityLogSection hideTitle />
       </ScrollView>
     </View>

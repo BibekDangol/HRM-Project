@@ -12,23 +12,25 @@ import {
 } from "react-native";
 
 import { apiClient } from "@/src/api/apiClient";
+import { useDimension } from "@/src/hooks/useDimension";
 import { changePasswordSchema } from "@/src/schema/auth";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { FormData } from "@/src/types/changePassword";
 import { TW } from "@/theme/twStyles";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
+import { Eye, EyeClosed } from "lucide-react-native";
 import tw from "twrnc";
 
 const ChangePasswordScreen = () => {
   const router = useRouter();
   const { user, updateStatus } = useAuthStore();
-
+  const [showPassword, setShowPassword] = useState(false);
+  const toggleShowPassword = () => setShowPassword((p) => !p);
   const [showOld, setShowOld] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-
+  const { isSmallPhone, isTablet, width } = useDimension();
   const {
     control,
     handleSubmit,
@@ -145,19 +147,23 @@ const ChangePasswordScreen = () => {
                           secureTextEntry={!showToggle}
                           value={value}
                           onChangeText={onChange}
-                          placeholder="••••••••"
+                          placeholder="•••••••••••••"
                           placeholderTextColor="#7e7e7e"
                         />
 
                         <TouchableOpacity
-                          onPress={() => setShowToggle(!showToggle)}
+                          onPress={toggleShowPassword}
+                          hitSlop={10}
                           style={tw`pr-3`}
                         >
-                          <MaterialCommunityIcons
-                            name={showToggle ? "eye-off" : "eye"}
-                            size={22}
-                            color="#7e7e7e"
-                          />
+                          {showPassword ? (
+                            <Eye size={isTablet ? 24 : 22} color="#7e7e7e" />
+                          ) : (
+                            <EyeClosed
+                              size={isTablet ? 24 : 22}
+                              color="#7e7e7e"
+                            />
+                          )}
                         </TouchableOpacity>
                       </View>
 

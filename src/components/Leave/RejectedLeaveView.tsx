@@ -11,7 +11,10 @@ interface Props {
 const RejectedLeaveView = ({ leave, leaveDuration }: Props) => {
   console.log("leave", leave);
   return (
-    <ScrollView style={tw`flex-1 bg-gray-100`}>
+    <ScrollView
+      showsVerticalScrollIndicator={false}
+      style={tw`flex-1 bg-gray-100`}
+    >
       <View style={tw`bg-white m-4 rounded-xl p-4 shadow`}>
         {/* Header */}
         <Text style={tw`text-lg font-bold text-gray-900 mb-1`}>

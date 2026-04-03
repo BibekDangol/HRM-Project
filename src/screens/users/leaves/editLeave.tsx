@@ -44,6 +44,11 @@ const ERROR_TEXT = {
   fontWeight: "500" as const,
 };
 
+const sessionOptions = [
+  { value: "first_shift", label: "First Half" },
+  { value: "second_shift", label: "Second Half" },
+] as const;
+
 type ActiveDateField = "start" | "end" | null;
 
 function getDateParts(dateStr?: string) {
@@ -61,9 +66,11 @@ export default function EditLeaveScreen() {
 
   const params = useLocalSearchParams<{
     leaveId?: string | string[];
+    returnTab?: string | string[];
   }>();
 
   const leaveId = firstParam(params.leaveId);
+  const returnTab = firstParam(params.returnTab) || "pending";
 
   const [screenLoading, setScreenLoading] = useState(false);
   const [localStartDate, setLocalStartDate] = useState("");
@@ -95,11 +102,22 @@ export default function EditLeaveScreen() {
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(userLeaveSchema),
-    defaultValues: { reason: "", isHalfDay: false, halfSession: "first_shift" },
+    defaultValues: {
+      reason: "",
+      isHalfDay: false,
+      halfSession: "first_shift",
+    },
     mode: "all",
   });
 
   const isHalfDay = watch("isHalfDay") ?? false;
+
+  const goBackToLeaves = () => {
+    router.replace({
+      pathname: "/leaves",
+      params: { tab: returnTab },
+    });
+  };
 
   useEffect(() => {
     if (isHalfDay && localStartDate) {
@@ -289,19 +307,13 @@ export default function EditLeaveScreen() {
 
         if (!data || data.user_id !== user.id) {
           Alert.alert("Not allowed", "You can't edit this leave.");
-          router.replace({
-            pathname: "/(users)/leaves/(tabs)",
-            params: { tab: "pending" },
-          });
+          goBackToLeaves();
           return;
         }
 
         if (String(data.status).toLowerCase() !== "pending") {
           Alert.alert("Not editable", "Only pending leaves can be edited.");
-          router.replace({
-            pathname: "/(users)/leaves/(tabs)",
-            params: { tab: "pending" },
-          });
+          goBackToLeaves();
           return;
         }
 
@@ -329,15 +341,12 @@ export default function EditLeaveScreen() {
         setCalMonth(parts.month);
       } catch (e: any) {
         Alert.alert("Error", e?.message ?? "Failed to load leave.");
-        router.replace({
-          pathname: "/(users)/leaves/(tabs)",
-          params: { tab: "pending" },
-        });
+        goBackToLeaves();
       } finally {
         setScreenLoading(false);
       }
     })();
-  }, [leaveId, user?.id, reset, router]);
+  }, [leaveId, user?.id, reset]);
 
   const handleLeaveTypeChange = (id: number | null) => {
     setSelectedLeaveType(id);
@@ -408,10 +417,7 @@ export default function EditLeaveScreen() {
       if (error) throw error;
 
       Alert.alert("Success", "Leave updated successfully.");
-      router.replace({
-        pathname: "/(users)/leaves/(tabs)",
-        params: { tab: "pending" },
-      });
+      goBackToLeaves();
     } catch (e: any) {
       Alert.alert("Error", e?.message ?? "Failed to update leave.");
     } finally {
@@ -455,12 +461,7 @@ export default function EditLeaveScreen() {
           color={TW.bgSecondary}
           backgroundColor="rgba(27,74,90,0.08)"
           style={{ marginBottom: 18 }}
-          onPress={() =>
-            router.replace({
-              pathname: "/(users)/leaves/(tabs)",
-              params: { tab: "pending" },
-            })
-          }
+          onPress={goBackToLeaves}
         />
 
         <View style={tw`mb-7`}>
@@ -601,20 +602,24 @@ export default function EditLeaveScreen() {
                 name="halfSession"
                 render={({ field: { value, onChange } }) => (
                   <View style={tw`flex-row gap-2.5`}>
-                    {(["first_shift", "second_shift"] as const).map(
-                      (session) => (
+                    {sessionOptions.map((session) => {
+                      const isSelected = value === session.value;
+
+                      return (
                         <Pressable
-                          key={session}
-                          onPress={() => onChange(session)}
+                          key={session.value}
+                          onPress={() => onChange(session.value)}
                           style={({ pressed }) => ({
                             flex: 1,
                             paddingVertical: 13,
                             borderWidth: 1.5,
                             borderRadius: 10,
-                            borderColor:
-                              value === session ? TW.bgSecondary : "#E2E8F0",
-                            backgroundColor:
-                              value === session ? TW.bgSecondary : "#ffffff",
+                            borderColor: isSelected
+                              ? TW.bgSecondary
+                              : "#E2E8F0",
+                            backgroundColor: isSelected
+                              ? TW.bgSecondary
+                              : "#ffffff",
                             alignItems: "center",
                             opacity: pressed ? 0.85 : 1,
                           })}
@@ -622,16 +627,15 @@ export default function EditLeaveScreen() {
                           <Text
                             style={{
                               fontSize: 12,
-                              fontWeight: "500",
-                              color:
-                                value === session ? "#ffffff" : TW.bgSecondary,
+                              fontWeight: "600",
+                              color: isSelected ? "#ffffff" : TW.bgSecondary,
                             }}
                           >
-                            {session.charAt(0).toUpperCase() + session.slice(1)}
+                            {session.label}
                           </Text>
                         </Pressable>
-                      ),
-                    )}
+                      );
+                    })}
                   </View>
                 )}
               />
@@ -685,12 +689,7 @@ export default function EditLeaveScreen() {
         <View style={tw`mt-1 flex-row gap-3`}>
           <Pressable
             disabled={submitting}
-            onPress={() =>
-              router.replace({
-                pathname: "/(users)/leaves/(tabs)",
-                params: { tab: "pending" },
-              })
-            }
+            onPress={goBackToLeaves}
             style={({ pressed }) => ({
               flex: 1,
               borderWidth: 1.5,

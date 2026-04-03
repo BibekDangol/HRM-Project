@@ -1,5 +1,7 @@
 import { Tabs, usePathname, useRouter } from "expo-router";
+import { ChevronLeft } from "lucide-react-native";
 import { useCallback, useEffect, useState } from "react";
+import { Alert, BackHandler, Pressable } from "react-native";
 
 import { useAttendanceContext } from "@/src/context/AttendanceContext";
 import { useAdminHeaderMenu } from "@/src/hooks/useAdminHeaderMenu";
@@ -9,7 +11,6 @@ import { useUsersStore } from "@/src/store/useUsersStore";
 import { supabase } from "@/src/supabase/supabaseClient";
 import { getErrorMessage } from "@/src/utils/attendanceHelper";
 import { TW } from "@/theme/twStyles";
-import { Alert } from "react-native";
 import { MyTabBar } from "../../tabBar";
 import HeaderRight from "./HeaderRight";
 import ReasonModel from "./ReasonModel";
@@ -31,7 +32,6 @@ function HeaderRightWrapper({
   onToggleCheck: () => void;
   onProfileMenuClick: () => void;
 }) {
-  // ← Subscribes to context directly — re-renders instantly on check-in/out
   const { isCheckedIn, isLocked, checkedInAt, elapsedMs } =
     useAttendanceContext();
 
@@ -61,6 +61,27 @@ export default function LayoutInner() {
   const menu = useAdminHeaderMenu();
   const { setUserProfile } = useUsersStore();
 
+  // Cover both /(users)/xxx and /xxx forms since Expo Router
+  // may or may not include the group prefix in usePathname()
+  const ROOT_TAB_PATHS = [
+    "/(users)/dashboard",
+    "/dashboard",
+    "/(users)/leaves",
+    "/leaves",
+    "/(users)/profile",
+    "/profile",
+    "/(users)/profile/index",
+    "/profile/index",
+    "/(users)/more",
+    "/more",
+  ];
+
+  const isRootTab = ROOT_TAB_PATHS.some(
+    (path) => pathname === path || pathname === `${path}/index`,
+  );
+
+  const showBackButton = !isRootTab;
+
   useEffect(() => {
     const loadCurrentUser = async () => {
       const {
@@ -72,6 +93,23 @@ export default function LayoutInner() {
     };
     loadCurrentUser();
   }, [setUserProfile]);
+
+  useEffect(() => {
+    const onBackPress = () => {
+      if (router.canGoBack()) {
+        router.back();
+        return true;
+      }
+      if (!isRootTab) {
+        router.replace("/(users)/dashboard");
+        return true;
+      }
+      return false;
+    };
+
+    const sub = BackHandler.addEventListener("hardwareBackPress", onBackPress);
+    return () => sub.remove();
+  }, [pathname, router, isRootTab]);
 
   const closeAllMenus = useCallback(() => {
     setCheckOpen(false);
@@ -144,6 +182,26 @@ export default function LayoutInner() {
             paddingBottom: 8,
           },
           headerShadowVisible: false,
+
+          // ✅ Back button — hidden on root tabs, shown on inner screens
+          headerLeft: showBackButton
+            ? () => (
+                <Pressable
+                  onPress={() => router.back()}
+                  hitSlop={10}
+                  style={({ pressed }) => ({
+                    marginLeft: 12,
+                    padding: 6,
+                    justifyContent: "center",
+                    alignItems: "center",
+                    opacity: pressed ? 0.6 : 1,
+                  })}
+                >
+                  <ChevronLeft size={26} color="#fff" />
+                </Pressable>
+              )
+            : () => null,
+
           headerRight: () => (
             <HeaderRightWrapper
               checkOpen={checkOpen}
@@ -156,18 +214,30 @@ export default function LayoutInner() {
             />
           ),
         }}
-        tabBar={(props) => <MyTabBar {...props} />}>
+        tabBar={(props) => <MyTabBar {...props} />}
+      >
+        {/* ── Main tab screens ── */}
         <Tabs.Screen name="dashboard" options={{ title: "Dashboard" }} />
         <Tabs.Screen name="leaves" options={{ title: "Leaves" }} />
         <Tabs.Screen name="profile/index" options={{ title: "Profile" }} />
         <Tabs.Screen name="more" options={{ title: "Settings" }} />
+
+        {/* ── Inner / detail screens (no bottom tab) ── */}
         <Tabs.Screen
           name="holidays"
-          options={{ title: "Holidays and Events" }}
+          options={{
+            title: "Holidays and Events",
+            href: null,
+            headerTitleAlign: "center",
+          }}
         />
         <Tabs.Screen
           name="activity-log"
-          options={{ title: "Recent Activity" }}
+          options={{
+            title: "Recent Activity",
+            href: null,
+            headerTitleAlign: "center",
+          }}
         />
       </Tabs>
     </>

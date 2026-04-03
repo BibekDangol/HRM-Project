@@ -10,7 +10,6 @@ export const signIn = async (email: string, password: string) => {
     throw new Error(error?.message || "Invalid credentials");
   }
 
-  // ✅ Fetch profile
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
     .select("role, status")

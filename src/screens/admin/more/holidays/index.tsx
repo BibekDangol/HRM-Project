@@ -1,16 +1,15 @@
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 
-import { BackButton } from "@/src/components/BackButton";
 import { DayCell } from "@/src/components/Calendar/DayCell";
 import { HolidayRangeModal } from "@/src/components/Calendar/HolidayRangeModal";
-import React from "react";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { SharedCalendar } from "@/src/components/SharedCalendar";
-import { TW } from "@/theme/twStyles";
-import tw from "twrnc";
 import useAdminCalendarActions from "@/src/hooks/admin/useAdminCalendarActions";
 import useAdminCalendarMarks from "@/src/hooks/admin/useAdminCalendarMarks";
 import useCalendarRange from "@/src/hooks/admin/useCalendarRange";
+import { TW } from "@/theme/twStyles";
+import React from "react";
+import { SafeAreaView } from "react-native-safe-area-context";
+import tw from "twrnc";
 
 interface Props {
   currentUserId: string;
@@ -50,13 +49,7 @@ export default function AdminCalendarScreen({
 
   return (
     <SafeAreaView style={tw`flex-1 bg-white`}>
-      <View style={tw`px-4 pt-3`}>
-        <BackButton />
-      </View>
-
-      {/* <CalendarHeader /> */}
-
-      <ScrollView>
+      <ScrollView showsVerticalScrollIndicator={false}>
         <SharedCalendar
           year={year}
           month={month}
@@ -86,7 +79,8 @@ export default function AdminCalendarScreen({
               borderRadius: 12,
               flexDirection: "row",
               justifyContent: "space-between",
-            }}>
+            }}
+          >
             <Text style={{ color: TW.bgSecondary }}>
               Start: {rangeStart} — tap end date
             </Text>

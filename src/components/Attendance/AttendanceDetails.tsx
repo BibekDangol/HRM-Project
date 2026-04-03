@@ -18,7 +18,6 @@ import { useAttendance } from "@/src/hooks/supervisor/useAttendanceDetails";
 import { TW } from "@/theme/twStyles";
 import { useState } from "react";
 import tw from "twrnc";
-import { BackButton } from "../BackButton";
 
 type Props = {
   userId: string;
@@ -172,24 +171,24 @@ const exportCSV = async (csvString: string, filename: string) => {
 };
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
-const StatusBadge = ({ status }: { status: string }) => {
-  const cfg = STATUS_CONFIG[status] ?? {
-    label: status,
-    bg: "bg-slate-100",
-    text: "text-slate-500",
-    dot: "#94a3b8",
-  };
-  return (
-    <View
-      style={tw`flex-row items-center gap-1 px-2 py-0.5 rounded-full ${cfg.bg}`}
-    >
-      <View
-        style={[tw`w-1.5 h-1.5 rounded-full`, { backgroundColor: cfg.dot }]}
-      />
-      <Text style={tw`text-sm font-medium ${cfg.text}`}>{cfg.label}</Text>
-    </View>
-  );
-};
+// const StatusBadge = ({ status }: { status: string }) => {
+//   const cfg = STATUS_CONFIG[status] ?? {
+//     label: status,
+//     bg: "bg-slate-100",
+//     text: "text-slate-500",
+//     dot: "#94a3b8",
+//   };
+//   return (
+//     <View
+//       style={tw`flex-row items-center gap-1 px-2 py-0.5 rounded-full ${cfg.bg}`}
+//     >
+//       <View
+//         style={[tw`w-1.5 h-1.5 rounded-full`, { backgroundColor: cfg.dot }]}
+//       />
+//       <Text style={tw`text-sm font-medium ${cfg.text}`}>{cfg.label}</Text>
+//     </View>
+//   );
+// };
 
 const SectionLabel = ({ children }: { children: string }) => (
   <View style={tw`flex-row items-center gap-2 mb-4`}>
@@ -293,10 +292,6 @@ const AttendanceView: React.FC<Props> = ({ userId, name }) => {
 
   return (
     <View style={tw`flex-1 bg-white`}>
-      {/* ── Floating back button ── */}
-      <View style={tw`absolute top-4 left-4 z-50`}>
-        <BackButton />
-      </View>
 
       <ScrollView
         style={tw`flex-1 bg-white`}
