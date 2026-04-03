@@ -37,7 +37,8 @@ export default function SupervisorSettings() {
           colors={["#1B4A5A"]}
           tintColor="#1B4A5A"
         />
-      }>
+      }
+    >
       <View style={tw`px-1`}>
         <View style={tw`mb-4`}>
           <Text style={tw`text-lg font-semibold ${TW.textPrimary}`}>
@@ -58,13 +59,15 @@ export default function SupervisorSettings() {
               borderWidth: 1,
               borderColor: "#E3EDF0",
             },
-          ]}>
+          ]}
+        >
           <View style={tw`flex-1 flex-row items-center`}>
             <View
               style={[
                 tw`mr-4 h-12 w-12 items-center justify-center rounded-xl`,
                 { backgroundColor: "#EEF6F8" },
-              ]}>
+              ]}
+            >
               <BookUser size={22} color="#1B4A5A" />
             </View>
 
@@ -94,13 +97,15 @@ export default function SupervisorSettings() {
               borderWidth: 1,
               borderColor: "#E3EDF0",
             },
-          ]}>
+          ]}
+        >
           <View style={tw`flex-1 flex-row items-center`}>
             <View
               style={[
                 tw`mr-4 h-12 w-12 items-center justify-center rounded-xl`,
                 { backgroundColor: "#EEF6F8" },
-              ]}>
+              ]}
+            >
               <CalendarX size={22} color="#1B4A5A" />
             </View>
 

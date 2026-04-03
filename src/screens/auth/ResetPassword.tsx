@@ -80,10 +80,12 @@ const ResetPassword = () => {
     <View style={tw`flex-1 ${TW.bgPrimary} justify-center`}>
       <KeyboardAvoidingView
         style={tw`flex-1`}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}>
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      >
         <ScrollView
           contentContainerStyle={tw`flex-grow justify-center px-6`}
-          keyboardShouldPersistTaps="handled">
+          keyboardShouldPersistTaps="handled"
+        >
           {/* Header */}
           <View style={tw`items-center mb-6`}>
             <Text style={tw`text-2xl font-bold ${TW.textPrimary}`}>
@@ -106,13 +108,14 @@ const ResetPassword = () => {
                 secureTextEntry={!showPassword}
                 value={password}
                 onChangeText={setPassword}
-                placeholder="••••••••"
+                placeholder="•••••••••••••"
                 placeholderTextColor="#7e7e7e"
               />
 
               <TouchableOpacity
                 onPress={() => setShowPassword(!showPassword)}
-                style={tw`pr-3`}>
+                style={tw`pr-3`}
+              >
                 {showPassword ? (
                   <Eye size={isTablet ? 24 : 22} color="#7e7e7e" />
                 ) : (
@@ -134,14 +137,15 @@ const ResetPassword = () => {
                 secureTextEntry={!showConfirm}
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
-                placeholder="••••••••"
+                placeholder="•••••••••••••"
                 placeholderTextColor="#7e7e7e"
               />
 
               <TouchableOpacity
                 onPress={() => setShowConfirm(!showConfirm)}
-                style={tw`pr-3`}>
-                {showPassword ? (
+                style={tw`pr-3`}
+              >
+                {showConfirm ? (
                   <Eye size={isTablet ? 24 : 22} color="#7e7e7e" />
                 ) : (
                   <EyeClosed size={isTablet ? 24 : 22} color="#7e7e7e" />
@@ -158,7 +162,8 @@ const ResetPassword = () => {
               { paddingVertical: 16 },
             ]}
             onPress={handleReset}
-            disabled={loading}>
+            disabled={loading}
+          >
             <Text style={tw`text-white font-semibold text-[16px]`}>
               {loading ? "Updating..." : "Update Password"}
             </Text>

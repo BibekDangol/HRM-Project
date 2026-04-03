@@ -21,5 +21,6 @@ export const adminTabs = [
     title: "More",
     icon: Menu,
   },
+
 ] as const;
 export type AdminTabName = (typeof adminTabs)[number]["name"];

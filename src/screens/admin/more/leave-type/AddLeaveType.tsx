@@ -1,15 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
-import {
-  Alert,
-  FlatList,
-  Pressable,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Alert, FlatList, Pressable, Text, View } from "react-native";
 
 import { apiClient } from "@/src/api/apiClient";
-import { BackButton } from "@/src/components/BackButton";
 import LoadingIndicator from "@/src/components/LoadingIndicator";
 import { fetchLeaveTypesService } from "@/src/services/leave.type.service";
 import { useLeaveTypeStore } from "@/src/store/useLeaveTypeStore";
@@ -124,9 +116,7 @@ export default function LeaveTypeSettings() {
       edges={["bottom", "left", "right"]}
       style={tw`flex-1 bg-white px-4`}
     >
-      <View style={tw`pt-3`}>
-        <BackButton />
-      </View>
+      <View style={tw`pt-3`}></View>
       {/* Header */}
       <View style={tw`flex-row items-center justify-between mb-5`}>
         <Text style={tw`text-xl font-bold ${TW.textPrimary}`}>Leave Types</Text>

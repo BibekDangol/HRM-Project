@@ -154,7 +154,8 @@ export const ActivityLogSection = ({ onViewAll, hideTitle }: Props) => {
         borderWidth: 0.5,
         borderColor: "#E2E8F0",
         marginBottom: 8,
-      }}>
+      }}
+    >
       <View
         style={{
           alignItems: "center",
@@ -164,7 +165,8 @@ export const ActivityLogSection = ({ onViewAll, hideTitle }: Props) => {
           paddingVertical: 6,
           paddingHorizontal: 4,
           gap: 3,
-        }}>
+        }}
+      >
         <View
           style={{
             width: 22,
@@ -248,7 +250,8 @@ export const ActivityLogSection = ({ onViewAll, hideTitle }: Props) => {
             alignItems: "center",
             justifyContent: "space-between",
             marginBottom: 16,
-          }}>
+          }}
+        >
           <Text style={tw`font-semibold ${TW.textPrimary} text-lg`}>
             Recent Activity
           </Text>
@@ -260,9 +263,11 @@ export const ActivityLogSection = ({ onViewAll, hideTitle }: Props) => {
                 opacity: pressed ? 0.6 : 1,
                 paddingVertical: 4,
                 paddingHorizontal: 10,
-              })}>
+              })}
+            >
               <Text
-                style={{ color: "#475569", fontSize: 13, fontWeight: "600" }}>
+                style={{ color: "#475569", fontSize: 13, fontWeight: "600" }}
+              >
                 View All
               </Text>
             </Pressable>
@@ -308,7 +313,8 @@ export const ActivityLogSection = ({ onViewAll, hideTitle }: Props) => {
                   borderWidth: 0.5,
                   borderColor: "#E2E8F0",
                   padding: 12,
-                }}>
+                }}
+              >
                 <View
                   style={{
                     alignItems: "center",
@@ -316,7 +322,8 @@ export const ActivityLogSection = ({ onViewAll, hideTitle }: Props) => {
                     borderRadius: 8,
                     paddingVertical: 6,
                     paddingHorizontal: 4,
-                  }}>
+                  }}
+                >
                   <Text
                     style={{
                       color: "#94A3B8",
@@ -324,7 +331,8 @@ export const ActivityLogSection = ({ onViewAll, hideTitle }: Props) => {
                       fontWeight: "600",
                       letterSpacing: 0.5,
                       textTransform: "uppercase",
-                    }}>
+                    }}
+                  >
                     {month}
                   </Text>
 
@@ -334,7 +342,8 @@ export const ActivityLogSection = ({ onViewAll, hideTitle }: Props) => {
                       fontSize: 20,
                       fontWeight: "700",
                       lineHeight: 24,
-                    }}>
+                    }}
+                  >
                     {dayNum}
                   </Text>
 
@@ -343,7 +352,8 @@ export const ActivityLogSection = ({ onViewAll, hideTitle }: Props) => {
                       color: "#94A3B8",
                       fontSize: 9,
                       fontWeight: "500",
-                    }}>
+                    }}
+                  >
                     {dayName}
                   </Text>
                 </View>
@@ -367,7 +377,8 @@ export const ActivityLogSection = ({ onViewAll, hideTitle }: Props) => {
                       paddingVertical: 3,
                       borderRadius: 999,
                       alignSelf: "flex-start",
-                    }}>
+                    }}
+                  >
                     <View
                       style={{
                         width: 6,
@@ -381,7 +392,8 @@ export const ActivityLogSection = ({ onViewAll, hideTitle }: Props) => {
                         fontSize: 12,
                         fontWeight: "600",
                         color: status.badgeText,
-                      }}>
+                      }}
+                    >
                       {status.label}
                     </Text>
                   </View>
@@ -393,7 +405,8 @@ export const ActivityLogSection = ({ onViewAll, hideTitle }: Props) => {
                         fontSize: 11,
                         lineHeight: 16,
                       }}
-                      numberOfLines={2}>
+                      numberOfLines={2}
+                    >
                       {record.check_in_comment}
                     </Text>
                   ) : (
@@ -402,7 +415,8 @@ export const ActivityLogSection = ({ onViewAll, hideTitle }: Props) => {
                         color: "#94A3B8",
                         fontSize: 11,
                         lineHeight: 16,
-                      }}>
+                      }}
+                    >
                       {record.check_in_time && record.check_out_time
                         ? "Attendance recorded successfully"
                         : "Partial attendance record"}
@@ -416,7 +430,8 @@ export const ActivityLogSection = ({ onViewAll, hideTitle }: Props) => {
                       color: "#0F172A",
                       fontSize: 12,
                       fontWeight: "600",
-                    }}>
+                    }}
+                  >
                     {fmtTime(record.check_in_time)} -{" "}
                     {fmtTime(record.check_out_time)}
                   </Text>
@@ -426,7 +441,8 @@ export const ActivityLogSection = ({ onViewAll, hideTitle }: Props) => {
                       color: "#94A3B8",
                       fontSize: 11,
                       fontWeight: "500",
-                    }}>
+                    }}
+                  >
                     {duration}
                   </Text>
                 </View>

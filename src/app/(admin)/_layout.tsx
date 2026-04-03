@@ -1,5 +1,5 @@
 import { Tabs, usePathname, useRouter } from "expo-router";
-import { ArrowLeft, LucideIcon, User } from "lucide-react-native";
+import { ChevronLeft, LucideIcon, User } from "lucide-react-native";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { BackHandler, Pressable, StatusBar, Text, View } from "react-native";
 
@@ -34,9 +34,27 @@ export default function AdminLayout() {
   const checkActionLockRef = useRef(false);
   const [loadingAttendance] = useState(false);
 
+  const ROOT_TAB_PATHS = [
+    "/(admin)/dashboard",
+    "/dashboard",
+    "/(admin)/manage-users",
+    "/manage-users",
+    "/(admin)/more",
+    "/more",
+    "/(admin)/leave",
+    "/leave",
+    "/(admin)/profile",
+    "/profile",
+  ];
+
+  const isRootTab = ROOT_TAB_PATHS.some(
+    (path) => pathname === path || pathname === `${path}/index`,
+  );
+
+  const showBackButton = !isRootTab;
+
   const fetchUserProfile = useCallback(async () => {
     if (!user?.id || userProfile) return;
-
     const profile = await fetchCurrentUserProfleService(user.id);
     setUserProfile(profile);
   }, [user?.id, userProfile, setUserProfile]);
@@ -45,47 +63,38 @@ export default function AdminLayout() {
     fetchUserProfile();
   }, [fetchUserProfile]);
 
-  /**
-   * BACK HANDLER
-   */
   useEffect(() => {
-    const TAB_ROOTS = ["/dashboard", "/manage-users", "/leave", "/more"];
     const onBackPress = () => {
-      const isTabRoot = TAB_ROOTS.includes(pathname);
       if (router.canGoBack()) {
         router.back();
         return true;
       }
-
-      if (isTabRoot && !pathname.includes("dashboard")) {
+      if (!isRootTab) {
         router.replace("/(admin)/dashboard");
         return true;
       }
-
       return false;
     };
 
     const sub = BackHandler.addEventListener("hardwareBackPress", onBackPress);
-
     return () => sub.remove();
-  }, [pathname, router]);
-
-  const showBackButton = !typedAdminTabs.some((tab) =>
-    pathname.includes(tab.name),
-  );
+  }, [pathname, router, isRootTab]);
 
   const isLocked = loadingAttendance || checkActionLockRef.current;
 
   return (
     <>
       <StatusBar barStyle="light-content" backgroundColor={TW.bgSecondary} />
+
       <Tabs
         screenOptions={{
           headerShown: true,
           headerShadowVisible: false,
-          headerTitleAlign: "left",
+          headerTitleAlign: "center",
           headerTitleStyle: {
-            color: "#fff", // ✅ title white
+            color: "#fff",
+            textAlign: "center",
+            fontSize: 16,
             fontWeight: "600",
           },
 
@@ -106,22 +115,36 @@ export default function AdminLayout() {
             height: 100,
           },
 
+          headerTitleContainerStyle: {
+            justifyContent: "center",
+          },
+
+          headerLeftContainerStyle: {
+            justifyContent: "flex-start",
+          },
+
+          headerRightContainerStyle: {
+            justifyContent: "flex-end",
+          },
+
           headerLeft: showBackButton
             ? () => (
                 <Pressable
-                  style={{
-                    marginLeft: 16,
-                    height: 36,
-                    width: 36,
-                    borderRadius: 12,
-                    backgroundColor: "rgba(255,255,255,0.2)",
-                    alignItems: "center",
+                  onPress={() => router.back()}
+                  hitSlop={10}
+                  style={({ pressed }) => ({
+                    marginLeft: 12,
+                    padding: 6,
                     justifyContent: "center",
-                  }}>
-                  <ArrowLeft size={20} color="#fff" />
+                    alignItems: "center",
+                    opacity: pressed ? 0.6 : 1,
+                  })}
+                >
+                  <ChevronLeft size={26} color="#fff" />
                 </Pressable>
               )
             : () => null,
+
           headerRight: () => (
             <View style={{ marginRight: 16 }}>
               <Pressable
@@ -140,8 +163,9 @@ export default function AdminLayout() {
                   borderColor: "rgba(255,255,255,0.5)",
                   alignItems: "center",
                   justifyContent: "center",
-                  // opacity: pressed ? 0.75 : 1,
-                })}>
+                  // opacity: pressed ? 0.85 : 1,
+                })}
+              >
                 <User size={17} color="#ffffff" />
               </Pressable>
 
@@ -157,7 +181,6 @@ export default function AdminLayout() {
                       bottom: -1000,
                     }}
                   />
-
                   <View
                     style={{
                       position: "absolute",
@@ -165,7 +188,8 @@ export default function AdminLayout() {
                       right: 0,
                       zIndex: 9999,
                       elevation: 20,
-                    }}>
+                    }}
+                  >
                     <ProfileMenu
                       open={menu.open}
                       onProfile={() => {
@@ -180,18 +204,17 @@ export default function AdminLayout() {
             </View>
           ),
         }}
-        tabBar={(props) => <AdminTabBar {...props} />}>
+        tabBar={(props) => <AdminTabBar {...props} />}
+      >
+        {/* ── Main tab screens ── */}
         <Tabs.Screen
           name="dashboard"
           options={{
             title: "Dashboard",
             headerTitle: () => (
               <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  gap: 10,
-                }}>
+                style={{ flexDirection: "row", alignItems: "center", gap: 10 }}
+              >
                 <View
                   style={{
                     width: 32,
@@ -200,40 +223,76 @@ export default function AdminLayout() {
                     backgroundColor: "rgba(255,255,255,0.2)",
                     alignItems: "center",
                     justifyContent: "center",
-                  }}>
+                  }}
+                >
                   <Text
-                    style={{
-                      color: "#fff",
-                      fontSize: 13,
-                      fontWeight: "700",
-                    }}>
+                    style={{ color: "#fff", fontSize: 13, fontWeight: "700" }}
+                  >
                     {userProfile?.first_name?.charAt(0)?.toUpperCase() ?? "A"}
                   </Text>
                 </View>
-
                 <Text
-                  style={{
-                    color: "#fff",
-                    fontSize: 16,
-                    fontWeight: "700",
-                  }}>
+                  style={{ color: "#fff", fontSize: 16, fontWeight: "700" }}
+                >
                   {userProfile?.first_name ?? "Admin"}
                 </Text>
               </View>
             ),
+            headerTitleAlign: "left",
           }}
         />
+
         {typedAdminTabs
           .filter((tab) => tab.name !== "dashboard")
           .map((tab) => (
             <Tabs.Screen
               key={tab.name}
               name={tab.name}
-              options={{
-                title: tab.title,
-              }}
+              options={{ title: tab.title }}
             />
           ))}
+
+        {/* ── Inner / detail screens (no bottom tab) ── */}
+        <Tabs.Screen
+          name="holidays"
+          options={{
+            title: "Holidays and Events",
+            headerTitleAlign: "center",
+          }}
+        />
+
+        <Tabs.Screen
+          name="leave/add-leave-type"
+          options={{
+            title: "Add Leave Type",
+
+            headerTitleAlign: "center",
+          }}
+        />
+
+        <Tabs.Screen
+          name="more/attendance-list/index"
+          options={{
+            title: "Attendance List",
+            headerTitleAlign: "center",
+          }}
+        />
+
+        <Tabs.Screen
+          name="more/attendance-list/attendance-details"
+          options={{
+            title: "Attendance Details",
+            headerTitleAlign: "center",
+          }}
+        />
+
+        <Tabs.Screen
+          name="more/holidays/index"
+          options={{
+            title: "Holidays and Events",
+            headerTitleAlign: "center",
+          }}
+        />
       </Tabs>
     </>
   );
