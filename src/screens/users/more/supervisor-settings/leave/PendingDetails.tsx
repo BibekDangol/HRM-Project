@@ -1,15 +1,14 @@
-import { useEffect, useState } from "react";
-import { ActivityIndicator, Alert, View } from "react-native";
-import { useLocalSearchParams } from "expo-router";
-import tw from "twrnc";
-
-
 import {
   Leave,
   fetchLeaveById,
   sumUserLeaveDaysByType,
 } from "@/src/services/leave.service";
+import { useEffect, useState } from "react";
+import { ActivityIndicator, Alert, View } from "react-native";
+
 import PendingLeaveView from "@/src/components/Leave/PendingLeaveView";
+import { useLocalSearchParams } from "expo-router";
+import tw from "twrnc";
 
 const statusConfig = {
   pending: { bg: "#fef3c7", text: "#d97706", label: "PENDING" },
@@ -79,6 +78,7 @@ export default function PendingDetails() {
       cfg={cfg}
       usedDays={usedDays}
       remainingDays={remainingDays}
+      showActions={leave.status === "pending"}
     />
   );
 }

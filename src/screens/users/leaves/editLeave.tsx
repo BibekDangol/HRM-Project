@@ -1,8 +1,3 @@
-import { FormValues, LeaveTypeWithStats } from "@/src/types/userLeave";
-import { diffDaysInclusive, firstParam } from "@/src/utils/leaveUtils";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useEffect, useMemo, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
 import {
   ActivityIndicator,
   Alert,
@@ -12,19 +7,26 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { Controller, useForm } from "react-hook-form";
+import { FormValues, LeaveTypeWithStats } from "@/src/types/userLeave";
+import React, { useEffect, useMemo, useState } from "react";
+import { diffDaysInclusive, firstParam } from "@/src/utils/leaveUtils";
+import { useLocalSearchParams, useRouter } from "expo-router";
 
 import BackButton from "@/src/components/BackButton";
-import { SharedCalendar } from "@/src/components/SharedCalendar";
-import { DateField } from "@/src/components/userLeave/DateField";
-import { LeaveTypeDropdown } from "@/src/components/userLeave/LeaveTypeDropdown";
-import { userLeaveSchema } from "@/src/schema/users/userLeaveApply.schema";
-import { useAuthStore } from "@/src/store/useAuthStore";
-import { supabase } from "@/src/supabase/supabaseClient";
-import { TW } from "@/theme/twStyles";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Check } from "lucide-react-native";
+import { DateField } from "@/src/components/userLeave/DateField";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { LeaveTypeDropdown } from "@/src/components/userLeave/LeaveTypeDropdown";
+import { SharedCalendar } from "@/src/components/SharedCalendar";
+import { TW } from "@/theme/twStyles";
+import { fetchLeaveTypesService } from "@/src/services/leave.type.service";
+import { supabase } from "@/src/supabase/supabaseClient";
 import tw from "twrnc";
+import { useAuthStore } from "@/src/store/useAuthStore";
+import { useUsersStore } from "@/src/store/useUsersStore";
+import { userLeaveSchema } from "@/src/schema/users/userLeaveApply.schema";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 const SPACING = {
   screenX: 20,
@@ -63,7 +65,8 @@ function getDateParts(dateStr?: string) {
 export default function EditLeaveScreen() {
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
-
+  const { userProfile } = useUsersStore();
+  const orgId = userProfile?.organization_id;
   const params = useLocalSearchParams<{
     leaveId?: string | string[];
     returnTab?: string | string[];
@@ -223,62 +226,12 @@ export default function EditLeaveScreen() {
 
     try {
       setLoadingTypes(true);
-
-      const { data: types, error: typesError } = await supabase
-        .from("leave_types")
-        .select("id,name,leave_limit")
-        .order("name", { ascending: true });
-
-      if (typesError) throw typesError;
-
-      const { data: usedData, error: usedError } = await supabase
-        .from("leaves")
-        .select("leave_type_id, days_count")
-        .eq("user_id", user.id)
-        .eq("status", "approved");
-
-      if (usedError) throw usedError;
-
-      const { data: pendingData, error: pendingError } = await supabase
-        .from("leaves")
-        .select("leave_type_id, days_count")
-        .eq("user_id", user.id)
-        .eq("status", "pending");
-
-      if (pendingError) throw pendingError;
-
-      const usedMap: Record<number, number> = {};
-      for (const row of usedData ?? []) {
-        const id = Number(row.leave_type_id);
-        usedMap[id] = (usedMap[id] ?? 0) + Number(row.days_count ?? 0);
-      }
-
-      const pendingMap: Record<number, number> = {};
-      for (const row of pendingData ?? []) {
-        const id = Number(row.leave_type_id);
-        pendingMap[id] = (pendingMap[id] ?? 0) + Number(row.days_count ?? 0);
-      }
-
-      const withStats: LeaveTypeWithStats[] = (types ?? []).map((r) => {
-        const id = Number(r.id);
-        const limit = Number(r.leave_limit ?? 0);
-        const approvedUsed = usedMap[id] ?? 0;
-        const pending = pendingMap[id] ?? 0;
-        const remaining = Math.max(0, limit - approvedUsed);
-
-        return {
-          id,
-          name: r.name ?? "",
-          leave_limit: limit,
-          approvedUsed,
-          pending,
-          remaining,
-        };
-      });
-
-      setLeaveTypes(withStats);
+      if (!orgId) throw new Error("Organization not found");
+      const typeData = await fetchLeaveTypesService(orgId);
+      setLeaveTypes(typeData ?? []);
+      console.log("tyoedata", typeData);
     } catch (e: any) {
-      Alert.alert("Error", e?.message ?? "Failed to load leave types.");
+      Alert.alert("Error", e.message);
     } finally {
       setLoadingTypes(false);
     }
@@ -455,8 +408,7 @@ export default function EditLeaveScreen() {
           paddingHorizontal: SPACING.screenX,
           paddingTop: SPACING.top,
           paddingBottom: 36,
-        }}
-      >
+        }}>
         <BackButton
           color={TW.bgSecondary}
           backgroundColor="rgba(27,74,90,0.08)"
@@ -478,8 +430,7 @@ export default function EditLeaveScreen() {
             style={[
               tw`text-base font-semibold`,
               { color: TW.bgSecondary, marginBottom: SPACING.labelBottom },
-            ]}
-          >
+            ]}>
             Leave Type
           </Text>
 
@@ -499,8 +450,7 @@ export default function EditLeaveScreen() {
             style={[
               tw`text-base font-semibold`,
               { color: TW.bgSecondary, marginBottom: SPACING.labelBottom },
-            ]}
-          >
+            ]}>
             Duration
           </Text>
 
@@ -551,8 +501,7 @@ export default function EditLeaveScreen() {
                   alignSelf: "flex-start",
                   opacity: pressed ? 0.85 : 1,
                   marginBottom: value ? 14 : 0,
-                })}
-              >
+                })}>
                 <View
                   style={{
                     width: 20,
@@ -563,8 +512,7 @@ export default function EditLeaveScreen() {
                     backgroundColor: value ? TW.bgSecondary : "#ffffff",
                     alignItems: "center",
                     justifyContent: "center",
-                  }}
-                >
+                  }}>
                   {value ? (
                     <Check color="#ffffff" size={12} strokeWidth={3} />
                   ) : null}
@@ -575,8 +523,7 @@ export default function EditLeaveScreen() {
                     fontSize: 13,
                     fontWeight: "600",
                     color: TW.bgSecondary,
-                  }}
-                >
+                  }}>
                   Half Day
                 </Text>
               </Pressable>
@@ -592,8 +539,7 @@ export default function EditLeaveScreen() {
                     color: TW.bgSecondary,
                     marginBottom: SPACING.labelBottom,
                   },
-                ]}
-              >
+                ]}>
                 Session
               </Text>
 
@@ -622,16 +568,15 @@ export default function EditLeaveScreen() {
                               : "#ffffff",
                             alignItems: "center",
                             opacity: pressed ? 0.85 : 1,
-                          })}
-                        >
+                          })}>
                           <Text
                             style={{
                               fontSize: 12,
-                              fontWeight: "600",
-                              color: isSelected ? "#ffffff" : TW.bgSecondary,
-                            }}
-                          >
-                            {session.label}
+                              fontWeight: "500",
+                              color:
+                                value === session ? "#ffffff" : TW.bgSecondary,
+                            }}>
+                            {session.charAt(0).toUpperCase() + session.slice(1)}
                           </Text>
                         </Pressable>
                       );
@@ -648,8 +593,7 @@ export default function EditLeaveScreen() {
             style={[
               tw`text-base font-semibold`,
               { color: TW.bgSecondary, marginBottom: SPACING.labelBottom },
-            ]}
-          >
+            ]}>
             Reason / Description
           </Text>
 
@@ -699,15 +643,13 @@ export default function EditLeaveScreen() {
               alignItems: "center",
               backgroundColor: "#ffffff",
               opacity: pressed || submitting ? 0.6 : 1,
-            })}
-          >
+            })}>
             <Text
               style={{
                 fontSize: 14,
                 fontWeight: "600",
                 color: "#64748B",
-              }}
-            >
+              }}>
               Cancel
             </Text>
           </Pressable>
@@ -725,16 +667,14 @@ export default function EditLeaveScreen() {
               justifyContent: "center",
               gap: 8,
               opacity: submitting ? 0.55 : pressed ? 0.8 : 1,
-            })}
-          >
+            })}>
             {submitting && <ActivityIndicator size="small" color="#ffffff" />}
             <Text
               style={{
                 fontSize: 14,
                 fontWeight: "700",
                 color: "#ffffff",
-              }}
-            >
+              }}>
               {submitting ? "Saving" : "Save Changes"}
             </Text>
           </Pressable>
@@ -748,8 +688,7 @@ export default function EditLeaveScreen() {
         onRequestClose={() => {
           setCalendarVisible(false);
           setActiveDateField(null);
-        }}
-      >
+        }}>
         <View style={tw`flex-1 bg-black/25 justify-center items-center px-4`}>
           <Pressable
             style={tw`absolute inset-0`}

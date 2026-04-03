@@ -1,5 +1,5 @@
 import { Eye, EyeClosed } from "lucide-react-native";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   Alert,
   KeyboardAvoidingView,
@@ -22,22 +22,10 @@ const ResetPassword = () => {
   const { isTablet } = useDimension();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [recoverySession, setRecoverySession] = useState<any>(null);
-  console.log("recoverySession", recoverySession);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // ✅ Listen for recovery session
-  useEffect(() => {
-    const loadSession = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      setRecoverySession(session?.access_token);
-    };
-    loadSession();
-  }, []);
   const handleReset = async () => {
     if (!password || !confirmPassword) {
       Alert.alert("Error", "All fields are required");
@@ -47,26 +35,13 @@ const ResetPassword = () => {
       Alert.alert("Error", "Passwords do not match");
       return;
     }
-    if (!recoverySession) {
-      Alert.alert(
-        "Error",
-        "Recovery session not found. Please open the reset link again.",
-      );
-      return;
-    }
-
     try {
       setLoading(true);
-
-      const { error } = await supabase.auth.updateUser(
-        { password },
-        recoverySession,
-      );
-
+      const { error } = await supabase.auth.updateUser({
+        password,
+      });
       if (error) throw error;
-
       Alert.alert("Success", "Password updated successfully");
-
       await supabase.auth.signOut();
       router.replace("/(auth)/login");
     } catch (err: any) {

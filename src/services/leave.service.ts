@@ -1,6 +1,7 @@
 // src/services/leave.service.ts
 
 import { apiClient } from "../api/apiClient";
+import { supabase } from "../supabase/supabaseClient";
 
 export type LeaveStatus = "pending" | "approved" | "rejected";
 
@@ -90,4 +91,28 @@ export async function fetchLeaveBySupervisor(
     payload: { orgId: orgId, supervisorId: supervisorId },
   });
   return res.data?.leaves ?? [];
+}
+export async function fetchUserLeavesByYear(
+  userId: string,
+  from: string,
+  to: string,
+) {
+  const { data, error } = await supabase
+    .from("leaves")
+    .select("leave_type_id,start_date,end_date,day_type,days_count,status")
+    .eq("user_id", userId)
+    .gte("start_date", from)
+    .lte("start_date", to);
+
+  if (error) throw error;
+  return data ?? [];
+}
+export async function updateLeaveService(payload: any) {
+  const { error } = await supabase
+    .from("leaves")
+    .update(payload.data)
+    .eq("id", payload.leaveId)
+    .eq("user_id", payload.userId);
+
+  if (error) throw error;
 }

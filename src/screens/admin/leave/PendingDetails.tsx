@@ -34,8 +34,7 @@ export function LabelValue({
         {label}
       </Text>
       <Text
-        style={[tw`text-sm font-semibold`, { color: "#111827" }, valueStyle]}
-      >
+        style={[tw`text-sm font-semibold`, { color: "#111827" }, valueStyle]}>
         {value}
       </Text>
     </View>
@@ -158,6 +157,7 @@ export default function PendingDetails() {
       handleStatusChange={handleStatusChange}
       remainingDays={remainingDays}
       usedDays={usedDays}
+      showActions={leave.status === "pending"}
     />
   );
 }

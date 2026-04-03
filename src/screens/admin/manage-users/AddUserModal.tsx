@@ -16,7 +16,7 @@ import {
 import { UserProfile } from "@/src/types/admin";
 import { TW } from "@/theme/twStyles";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Picker } from "@react-native-picker/picker";
+import { useState } from "react";
 import tw from "twrnc";
 import { z } from "zod";
 
@@ -33,7 +33,7 @@ const addUserSchema = z.object({
   first_name: z.string().min(1, "First name is required"),
   last_name: z.string().min(1, "Last name is required"),
   email: z.string().email("Invalid email"),
-  supervisor_id: z.string(),
+  supervisor_id: z.string().nullable(),
 });
 
 export type AddUserFormData = z.infer<typeof addUserSchema>;
@@ -52,10 +52,10 @@ export default function AddUserModal({
       first_name: "",
       last_name: "",
       email: "",
-      supervisor_id: currentUserId,
+      supervisor_id: null,
     },
   });
-
+  const [showOptions, setShowOptions] = useState(false);
   const submit = async (data: AddUserFormData) => {
     await onSubmit(data);
     reset();
@@ -153,7 +153,6 @@ export default function AddUserModal({
                       </View>
                     )}
                   />
-
                   <Controller
                     control={control}
                     name="email"
@@ -190,34 +189,77 @@ export default function AddUserModal({
                   <Controller
                     control={control}
                     name="supervisor_id"
-                    render={({ field: { value, onChange } }) => (
-                      <View style={tw`mb-2`}>
-                        <Text
-                          style={tw`text-sm font-semibold mb-2 ${TW.textSecondary}`}>
-                          Supervisor
-                        </Text>
+                    render={({ field: { value, onChange } }) => {
+                      console.log("supervisor value", value);
+                      const selected =
+                        value === null
+                          ? "Self"
+                          : supervisors.find((s) => s.id === value);
+                      return (
+                        <View style={tw`mb-3`}>
+                          <Text
+                            style={tw`text-sm font-semibold mb-2 ${TW.textSecondary}`}>
+                            Supervisor
+                          </Text>
 
-                        <View
-                          style={tw`border border-gray-300 rounded-xl bg-white overflow-hidden`}>
-                          <Picker
-                            selectedValue={value}
-                            onValueChange={(itemValue) => onChange(itemValue)}>
-                            <Picker.Item
-                              label="Select Supervisor"
-                              value={null}
-                            />
+                          {/* Select Box */}
+                          <Pressable
+                            onPress={() => setShowOptions((prev) => !prev)}
+                            style={tw`h-12 px-4 rounded-xl bg-gray-100 justify-center`}>
+                            <Text style={tw`${TW.textPrimary}`}>
+                              {typeof selected === "string"
+                                ? selected
+                                : selected
+                                  ? `${selected.first_name} ${selected.last_name}`
+                                  : "Select Supervisor"}
+                            </Text>
+                          </Pressable>
 
-                            {supervisors.map((sup) => (
-                              <Picker.Item
-                                key={sup.id}
-                                label={`${sup.first_name} ${sup.last_name}`}
-                                value={sup.id}
-                              />
-                            ))}
-                          </Picker>
+                          {showOptions && (
+                            <View
+                              style={tw`mt-2 border border-gray-200 rounded-xl bg-white overflow-hidden`}>
+                              <ScrollView style={tw`max-h-48`}>
+                                {/* Self Option */}
+                                <Pressable
+                                  onPress={() => {
+                                    onChange(null);
+                                    setShowOptions(false);
+                                  }}
+                                  style={tw`px-4 py-3 border-b border-gray-100`}>
+                                  <Text
+                                    style={tw`${TW.textPrimary} font-semibold`}>
+                                    Self
+                                  </Text>
+                                </Pressable>
+
+                                {/* Other Supervisors */}
+                                {supervisors.map((sup, index) => (
+                                  <Pressable
+                                    key={sup.id}
+                                    onPress={() => {
+                                      console.log(
+                                        "select vairako cha kinai",
+                                        sup.first_name,
+                                      );
+                                      onChange(sup.id);
+                                      setShowOptions(false);
+                                    }}
+                                    style={tw`px-4 py-3 ${
+                                      index !== supervisors.length - 1
+                                        ? "border-b border-gray-100"
+                                        : ""
+                                    }`}>
+                                    <Text style={tw`${TW.textPrimary}`}>
+                                      {sup.first_name} {sup.last_name}
+                                    </Text>
+                                  </Pressable>
+                                ))}
+                              </ScrollView>
+                            </View>
+                          )}
                         </View>
-                      </View>
-                    )}
+                      );
+                    }}
                   />
                 </ScrollView>
 
