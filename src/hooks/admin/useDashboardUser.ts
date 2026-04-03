@@ -9,7 +9,7 @@ import { Alert } from "react-native";
 export function useDashboardUsers() {
   const { user } = useAuthStore();
   const { setUsers, setUserProfile, users, userProfile } = useUsersStore();
-
+  console.log("userprofile ma k aaucha", userProfile);
   const [loadingUsers, setLoadingUsers] = useState(false);
 
   const loadUsers = useCallback(async () => {

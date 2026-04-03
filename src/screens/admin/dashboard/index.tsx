@@ -19,7 +19,7 @@ import TempPasswordModal from "../manage-users/TempPasswordModal";
 
 export default function DashboardScreen() {
   const router = useRouter();
-  const { session } = useAuthStore();
+  const { session, user } = useAuthStore();
   const token = session?.access_token;
   const { users, userProfile, setUsers } = useUsersStore();
   const {
@@ -35,12 +35,6 @@ export default function DashboardScreen() {
   const [isSubmittingUser, setIsSubmittingUser] = useState(false);
   const [tempPassword, setTempPassword] = useState<string | null>(null);
   const totalusers = users.length;
-
-  const supervisors = useMemo(() => {
-    return users.filter((u) =>
-      ["admin", "hr", "supervisor"].includes(String(u.role).toLowerCase()),
-    );
-  }, [users]);
 
   const monthTitle = useMemo(
     () => MONTHS[selectedMonthIndex],
@@ -69,7 +63,7 @@ export default function DashboardScreen() {
     }
     if (!token) {
       Alert.alert("Error", "No token");
-      return; //  DO NOT return string on submit kura haru
+      return; //  DO NOT return string on submit
     }
     try {
       setIsSubmittingUser(true);
@@ -134,8 +128,8 @@ export default function DashboardScreen() {
         visible={addUserModalVisible}
         onClose={() => setAddUserModalVisible(false)}
         onSubmit={handleAddUser}
-        supervisors={supervisors}
-        currentUserId={""}
+        supervisors={users}
+        currentUserId={user?.id ?? ""}
         isSubmitting={isSubmittingUser}
       />
       {tempPassword && (

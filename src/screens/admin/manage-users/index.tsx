@@ -13,7 +13,6 @@ import HeaderWithSearch from "@/src/components/HeaderWithSearch";
 import LoadingIndicator from "@/src/components/LoadingIndicator";
 import { useManageUsers } from "@/src/hooks/admin/useManageUsers";
 import { usePagination } from "@/src/hooks/usePagination";
-import { useAuthStore } from "@/src/store/useAuthStore";
 import { TW } from "@/theme/twStyles";
 import { useFocusEffect } from "expo-router";
 import tw from "twrnc";
@@ -23,8 +22,6 @@ import EditUserModal from "./EditUserModal";
 import TempPasswordModal from "./TempPasswordModal";
 
 const ManageUsers = () => {
-  const { session } = useAuthStore();
-  console.log("Index to send props session", session);
   const {
     // state
     search,
@@ -47,7 +44,6 @@ const ManageUsers = () => {
     editSupervisor,
     setEditSupervisor,
     getSupervisorName,
-
     // data
     filteredUsers,
     tabs,
@@ -229,9 +225,9 @@ const ManageUsers = () => {
         onSubmit={handleAddUser}
         isSubmitting={false}
         supervisors={users}
-        currentUserId={user?.id ?? ""}
+        currentUserId={"self"}
       />
-      {/* EDIT MODAL */}
+
       <EditUserModal
         visible={showEditModal}
         user={editingUser}

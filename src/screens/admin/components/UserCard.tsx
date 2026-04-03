@@ -13,7 +13,12 @@ type Props = {
   getSupervisorName: (supervisorId: string | null) => string;
 };
 
-export const UserCard = ({ user, onEdit, onDelete }: Props) => {
+export const UserCard = ({
+  user,
+  onEdit,
+  onDelete,
+  getSupervisorName,
+}: Props) => {
   return (
     <View style={tw` gap-4 bg-white border ${TW.BORDER} rounded-2xl px-4 py-4`}>
       <View style={tw`flex-row justify-between`}>
@@ -51,9 +56,9 @@ export const UserCard = ({ user, onEdit, onDelete }: Props) => {
                 {user.email}
               </Text>
             </View>
-            {/* <Text style={tw`text-xs ${TW.textTertiary}`}>
-          Supervisor: {getSupervisorName(user.supervisor_id)}
-        </Text> */}
+            <Text style={tw`text-xs ${TW.textTertiary}`}>
+              Supervisor: {getSupervisorName(user.supervisor_id)}
+            </Text>
           </View>
         </View>
         {/* Action Buttons */}

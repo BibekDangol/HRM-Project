@@ -26,10 +26,10 @@ export default function AdminLayout() {
 
   const { user } = useAuthStore();
   const { userProfile, setUserProfile } = useUsersStore();
-  const [checkOpen, setCheckOpen] = useState(false);
-  const { isTablet, isSmallPhone } = useDimension();
 
+  const { isTablet, isSmallPhone } = useDimension();
   const buttonSize = isTablet ? 42 : isSmallPhone ? 32 : 36;
+
   const typedAdminTabs = adminTabs as readonly AdminTabItem[];
   const checkActionLockRef = useRef(false);
   const [loadingAttendance] = useState(false);
@@ -138,8 +138,7 @@ export default function AdminLayout() {
                     justifyContent: "center",
                     alignItems: "center",
                     opacity: pressed ? 0.6 : 1,
-                  })}
-                >
+                  })}>
                   <ChevronLeft size={26} color="#fff" />
                 </Pressable>
               )
@@ -148,13 +147,8 @@ export default function AdminLayout() {
           headerRight: () => (
             <View style={{ marginRight: 16 }}>
               <Pressable
-                disabled={isLocked}
-                onPress={() => {
-                  if (isLocked) return;
-                  setCheckOpen(false);
-                  menu.toggle();
-                }}
-                style={({ pressed }) => ({
+                onPress={menu.toggle}
+                style={{
                   height: buttonSize,
                   width: buttonSize,
                   borderRadius: buttonSize / 2,
@@ -164,8 +158,7 @@ export default function AdminLayout() {
                   alignItems: "center",
                   justifyContent: "center",
                   // opacity: pressed ? 0.85 : 1,
-                })}
-              >
+                }}>
                 <User size={17} color="#ffffff" />
               </Pressable>
 
@@ -188,8 +181,7 @@ export default function AdminLayout() {
                       right: 0,
                       zIndex: 9999,
                       elevation: 20,
-                    }}
-                  >
+                    }}>
                     <ProfileMenu
                       open={menu.open}
                       onProfile={() => {
@@ -204,8 +196,7 @@ export default function AdminLayout() {
             </View>
           ),
         }}
-        tabBar={(props) => <AdminTabBar {...props} />}
-      >
+        tabBar={(props) => <AdminTabBar {...props} />}>
         {/* ── Main tab screens ── */}
         <Tabs.Screen
           name="dashboard"
@@ -213,8 +204,7 @@ export default function AdminLayout() {
             title: "Dashboard",
             headerTitle: () => (
               <View
-                style={{ flexDirection: "row", alignItems: "center", gap: 10 }}
-              >
+                style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
                 <View
                   style={{
                     width: 32,
@@ -223,17 +213,14 @@ export default function AdminLayout() {
                     backgroundColor: "rgba(255,255,255,0.2)",
                     alignItems: "center",
                     justifyContent: "center",
-                  }}
-                >
+                  }}>
                   <Text
-                    style={{ color: "#fff", fontSize: 13, fontWeight: "700" }}
-                  >
+                    style={{ color: "#fff", fontSize: 13, fontWeight: "700" }}>
                     {userProfile?.first_name?.charAt(0)?.toUpperCase() ?? "A"}
                   </Text>
                 </View>
                 <Text
-                  style={{ color: "#fff", fontSize: 16, fontWeight: "700" }}
-                >
+                  style={{ color: "#fff", fontSize: 16, fontWeight: "700" }}>
                   {userProfile?.first_name ?? "Admin"}
                 </Text>
               </View>
@@ -294,6 +281,46 @@ export default function AdminLayout() {
           }}
         />
       </Tabs>
+
+      {/* ===================== */}
+      {/* PROFILE MENU OVERLAY */}
+      {/* ===================== */}
+
+      {menu.open && (
+        <>
+          {/* BACKDROP */}
+          <Pressable
+            onPress={menu.close}
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              zIndex: 999,
+            }}
+          />
+
+          {/* DROPDOWN */}
+          <View
+            style={{
+              position: "absolute",
+              top: 65, // aligns under header
+              right: 16,
+              zIndex: 1000,
+              elevation: 50,
+            }}>
+            <ProfileMenu
+              open={menu.open}
+              onProfile={() => {
+                menu.close();
+                router.push("/(admin)/profile");
+              }}
+              onLogout={menu.logout}
+            />
+          </View>
+        </>
+      )}
     </>
   );
 }
