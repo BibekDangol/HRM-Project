@@ -19,7 +19,6 @@ export async function fetchUsersService(orgId: number, searchQuery = "") {
       org_id: orgId,
     });
     if (error) throw error;
-    console.log("search data", data);
     return data as UserProfile[];
   }
 

@@ -1,21 +1,21 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { Alert, RefreshControl, ScrollView, Text, View } from "react-native";
 import AddUserModal, { AddUserFormData } from "../manage-users/AddUserModal";
+import { Alert, RefreshControl, ScrollView, Text, View } from "react-native";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { HolidaysEventsSection } from "@/src/components/HolidaysEventsSection";
-import { useAdminCalendar } from "@/src/hooks/admin/useAdminCalendar";
-import StatCard from "@/src/screens/admin/components/StatCard";
-import { fetchUsersService } from "@/src/services/admin.service";
-import { adminAddUserService } from "@/src/services/admin/add-user-service";
-import { useAuthStore } from "@/src/store/useAuthStore";
-import { useUsersStore } from "@/src/store/useUsersStore";
 import { MONTHS } from "@/src/utils/userDashboard";
-import { TW } from "@/theme/twStyles";
-import { useRouter } from "expo-router";
-import { User } from "lucide-react-native";
-import tw from "twrnc";
 import QuickAction from "../components/QuickAction";
+import StatCard from "@/src/screens/admin/components/StatCard";
+import { TW } from "@/theme/twStyles";
 import TempPasswordModal from "../manage-users/TempPasswordModal";
+import { User } from "lucide-react-native";
+import { adminAddUserService } from "@/src/services/admin/add-user-service";
+import { fetchUsersService } from "@/src/services/admin.service";
+import tw from "twrnc";
+import { useAdminCalendar } from "@/src/hooks/admin/useAdminCalendar";
+import { useAuthStore } from "@/src/store/useAuthStore";
+import { useRouter } from "expo-router";
+import { useUsersStore } from "@/src/store/useUsersStore";
 
 export default function DashboardScreen() {
   const router = useRouter();
@@ -101,8 +101,7 @@ export default function DashboardScreen() {
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-      >
+        }>
         <Text style={tw`font-semibold ${TW.textPrimary} py-2 text-lg`}>
           High-Level Metrics
         </Text>

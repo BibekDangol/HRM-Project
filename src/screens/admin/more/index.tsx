@@ -1,5 +1,3 @@
-import { TW } from "@/theme/twStyles";
-import { useRouter } from "expo-router";
 import {
   BookUser,
   CalendarFold,
@@ -7,7 +5,10 @@ import {
   ChevronRight,
 } from "lucide-react-native";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+
+import { TW } from "@/theme/twStyles";
 import tw from "twrnc";
+import { useRouter } from "expo-router";
 
 export default function MoreScreen() {
   const router = useRouter();
@@ -23,7 +24,7 @@ export default function MoreScreen() {
       title: "Leave Management",
       description: "Add, Update",
       icon: CalendarFold,
-      path: "/(admin)/more/settings/leave/add-leave-type",
+      path: "/(admin)/more//leave-type",
     },
     {
       title: "Holidays",
@@ -31,20 +32,13 @@ export default function MoreScreen() {
       icon: CalendarX,
       path: "/(admin)/more/holidays",
     },
-    // {
-    //   title: "Others",
-    //   description: "Additional admin tools",
-    //   icon: Layers,
-    //   path: "",
-    // },
   ];
 
   return (
     <View style={tw`flex-1 bg-white`}>
       <ScrollView
         contentContainerStyle={tw`p-4`}
-        showsVerticalScrollIndicator={false}
-      >
+        showsVerticalScrollIndicator={false}>
         {menuItems.map((item, index) => {
           const Icon = item.icon;
 
@@ -53,13 +47,11 @@ export default function MoreScreen() {
               key={index}
               activeOpacity={0.85}
               onPress={() => item.path && router.push(item.path as any)}
-              style={tw`flex-row items-center justify-between bg-white rounded-2xl px-4 py-4 mb-4 border ${TW.BORDER}`}
-            >
+              style={tw`flex-row items-center justify-between bg-white rounded-2xl px-4 py-4 mb-4 border ${TW.BORDER}`}>
               {/* Left Section */}
               <View style={tw`flex-row items-center`}>
                 <View
-                  style={tw`h-12 w-12 rounded-xl items-center justify-center mr-4 bg-[#E6F1F3]`}
-                >
+                  style={tw`h-12 w-12 rounded-xl items-center justify-center mr-4 bg-[#E6F1F3]`}>
                   <Icon size={22} color="#1B4A5A" />
                 </View>
 

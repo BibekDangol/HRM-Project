@@ -13,6 +13,7 @@ import {
   View,
 } from "react-native";
 
+import { addUserSchema } from "@/src/schema/admin/addUserSchema";
 import { UserProfile } from "@/src/types/admin";
 import { TW } from "@/theme/twStyles";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -29,15 +30,7 @@ interface Props {
   isSubmitting: boolean;
 }
 
-const addUserSchema = z.object({
-  first_name: z.string().min(1, "First name is required"),
-  last_name: z.string().min(1, "Last name is required"),
-  email: z.string().email("Invalid email"),
-  supervisor_id: z.string().nullable(),
-});
-
 export type AddUserFormData = z.infer<typeof addUserSchema>;
-
 export default function AddUserModal({
   visible,
   onClose,
@@ -186,86 +179,89 @@ export default function AddUserModal({
                     )}
                   />
 
-                  <Controller
-                    control={control}
-                    name="supervisor_id"
-                    render={({ field: { value, onChange } }) => {
-                      console.log("supervisor value", value);
-                      const selected =
-                        value === null
-                          ? "Self"
-                          : supervisors.find((s) => s.id === value);
-                      return (
-                        <View style={tw`mb-3`}>
-                          <Text
-                            style={tw`text-sm font-semibold mb-2 ${TW.textSecondary}`}>
-                            Supervisor
-                          </Text>
+                  <Pressable onPress={() => setShowOptions(false)}>
+                    <View>
+                      <Controller
+                        control={control}
+                        name="supervisor_id"
+                        render={({ field: { value, onChange } }) => {
+                          const selected =
+                            value === null
+                              ? "Self"
+                              : supervisors.find((s) => s.id === value);
 
-                          {/* Select Box */}
-                          <Pressable
-                            onPress={() => setShowOptions((prev) => !prev)}
-                            style={tw`h-12 px-4 rounded-xl bg-gray-100 justify-center`}>
-                            <Text style={tw`${TW.textPrimary}`}>
-                              {typeof selected === "string"
-                                ? selected
-                                : selected
-                                  ? `${selected.first_name} ${selected.last_name}`
-                                  : "Select Supervisor"}
-                            </Text>
-                          </Pressable>
+                          return (
+                            <View style={tw`mb-8`}>
+                              <Text
+                                style={tw`text-sm font-semibold mb-2 ${TW.textSecondary}`}>
+                                Supervisor
+                              </Text>
+                              {/* Select Box */}
+                              <Pressable
+                                onPress={() => setShowOptions((prev) => !prev)}
+                                style={tw`h-12 px-4 rounded-xl bg-gray-100 justify-center`}>
+                                <Text style={tw`${TW.textPrimary}`}>
+                                  {typeof selected === "string"
+                                    ? selected
+                                    : selected
+                                      ? `${selected.first_name} ${selected.last_name}`
+                                      : "Select Supervisor"}
+                                </Text>
+                              </Pressable>
 
-                          {showOptions && (
-                            <View
-                              style={tw`mt-2 border border-gray-200 rounded-xl bg-white overflow-hidden`}>
-                              <ScrollView style={tw`max-h-48`}>
-                                {/* Self Option */}
-                                <Pressable
-                                  onPress={() => {
-                                    onChange(null);
-                                    setShowOptions(false);
-                                  }}
-                                  style={tw`px-4 py-3 border-b border-gray-100`}>
-                                  <Text
-                                    style={tw`${TW.textPrimary} font-semibold`}>
-                                    Self
-                                  </Text>
-                                </Pressable>
+                              {/* Dropdown */}
+                              {showOptions && (
+                                <View
+                                  style={tw`mt-2 border border-gray-200 rounded-xl bg-white overflow-hidden`}>
+                                  <ScrollView style={tw`max-h-36`}>
+                                    {/* Self */}
+                                    <Pressable
+                                      onPress={() => {
+                                        onChange(null);
+                                        setShowOptions(false);
+                                      }}
+                                      style={tw`px-4 py-3 border-b border-gray-100`}>
+                                      <Text
+                                        style={tw`${TW.textPrimary} font-semibold`}>
+                                        Self
+                                      </Text>
+                                    </Pressable>
 
-                                {/* Other Supervisors */}
-                                {supervisors.map((sup, index) => (
-                                  <Pressable
-                                    key={sup.id}
-                                    onPress={() => {
-                                      console.log(
-                                        "select vairako cha kinai",
-                                        sup.first_name,
-                                      );
-                                      onChange(sup.id);
-                                      setShowOptions(false);
-                                    }}
-                                    style={tw`px-4 py-3 ${
-                                      index !== supervisors.length - 1
-                                        ? "border-b border-gray-100"
-                                        : ""
-                                    }`}>
-                                    <Text style={tw`${TW.textPrimary}`}>
-                                      {sup.first_name} {sup.last_name}
-                                    </Text>
-                                  </Pressable>
-                                ))}
-                              </ScrollView>
+                                    {/* Supervisors */}
+                                    {supervisors.map((sup, index) => (
+                                      <Pressable
+                                        key={sup.id}
+                                        onPress={() => {
+                                          onChange(sup.id);
+                                          setShowOptions(false);
+                                        }}
+                                        style={tw`px-4 py-3 ${
+                                          index !== supervisors.length - 1
+                                            ? "border-b border-gray-100"
+                                            : ""
+                                        }`}>
+                                        <Text style={tw`${TW.textPrimary}`}>
+                                          {sup.first_name} {sup.last_name}
+                                        </Text>
+                                      </Pressable>
+                                    ))}
+                                  </ScrollView>
+                                </View>
+                              )}
                             </View>
-                          )}
-                        </View>
-                      );
-                    }}
-                  />
+                          );
+                        }}
+                      />
+                    </View>
+                  </Pressable>
                 </ScrollView>
 
                 <View style={tw`flex-row gap-3 mt-5`}>
                   <Pressable
-                    onPress={onClose}
+                    onPress={() => {
+                      setShowOptions(false);
+                      onClose();
+                    }}
                     style={tw`flex-1 h-12 rounded-xl justify-center items-center bg-gray-100`}>
                     <Text style={tw`${TW.textSecondary} font-semibold`}>
                       Cancel

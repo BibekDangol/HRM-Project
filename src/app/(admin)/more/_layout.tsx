@@ -18,9 +18,8 @@ export default function MoreLayout() {
         name="attendance-list/attendance-details"
         options={{ headerShown: false, title: "Attendance Details" }}
       />
-
       <Stack.Screen
-        name="/leave/add-leave-type"
+        name="leave-type/index"
         options={{ headerShown: false, title: "Add Leave Type" }}
       />
       <Stack.Screen

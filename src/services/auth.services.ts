@@ -5,9 +5,8 @@ export const signIn = async (email: string, password: string) => {
     email,
     password,
   });
-
-  if (error || !data?.session) {
-    throw new Error(error?.message || "Invalid credentials");
+  if (error) {
+    throw new Error("Incorrect Email or Password");
   }
 
   const { data: profile, error: profileError } = await supabase

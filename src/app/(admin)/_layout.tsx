@@ -1,6 +1,6 @@
 import { Tabs, usePathname, useRouter } from "expo-router";
 import { ChevronLeft, LucideIcon, User } from "lucide-react-native";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect } from "react";
 import { BackHandler, Pressable, StatusBar, Text, View } from "react-native";
 
 import { adminTabs } from "@/src/config/adminTabs";
@@ -29,10 +29,7 @@ export default function AdminLayout() {
 
   const { isTablet, isSmallPhone } = useDimension();
   const buttonSize = isTablet ? 42 : isSmallPhone ? 32 : 36;
-
   const typedAdminTabs = adminTabs as readonly AdminTabItem[];
-  const checkActionLockRef = useRef(false);
-  const [loadingAttendance] = useState(false);
 
   const ROOT_TAB_PATHS = [
     "/(admin)/dashboard",
@@ -52,7 +49,6 @@ export default function AdminLayout() {
   );
 
   const showBackButton = !isRootTab;
-
   const fetchUserProfile = useCallback(async () => {
     if (!user?.id || userProfile) return;
     const profile = await fetchCurrentUserProfleService(user.id);
@@ -65,22 +61,26 @@ export default function AdminLayout() {
 
   useEffect(() => {
     const onBackPress = () => {
-      if (router.canGoBack()) {
+      // 🧠 If NOT root → go back normally
+      if (!isRootTab) {
         router.back();
         return true;
       }
-      if (!isRootTab) {
+
+      // 🧠 If root BUT not dashboard → go to dashboard
+      if (pathname !== "/(admin)/dashboard") {
         router.replace("/(admin)/dashboard");
         return true;
       }
+
+      // 🧠 If already on dashboard → exit app
       return false;
     };
 
     const sub = BackHandler.addEventListener("hardwareBackPress", onBackPress);
-    return () => sub.remove();
-  }, [pathname, router, isRootTab]);
 
-  const isLocked = loadingAttendance || checkActionLockRef.current;
+    return () => sub.remove();
+  }, [pathname, isRootTab, router]);
 
   return (
     <>
@@ -161,43 +161,10 @@ export default function AdminLayout() {
                 }}>
                 <User size={17} color="#ffffff" />
               </Pressable>
-
-              {menu.open && (
-                <>
-                  <Pressable
-                    onPress={menu.close}
-                    style={{
-                      position: "absolute",
-                      top: -1000,
-                      left: -1000,
-                      right: -1000,
-                      bottom: -1000,
-                    }}
-                  />
-                  <View
-                    style={{
-                      position: "absolute",
-                      top: 6,
-                      right: 0,
-                      zIndex: 9999,
-                      elevation: 20,
-                    }}>
-                    <ProfileMenu
-                      open={menu.open}
-                      onProfile={() => {
-                        menu.close();
-                        router.push("/(admin)/profile");
-                      }}
-                      onLogout={menu.logout}
-                    />
-                  </View>
-                </>
-              )}
             </View>
           ),
         }}
         tabBar={(props) => <AdminTabBar {...props} />}>
-        {/* ── Main tab screens ── */}
         <Tabs.Screen
           name="dashboard"
           options={{
@@ -238,8 +205,6 @@ export default function AdminLayout() {
               options={{ title: tab.title }}
             />
           ))}
-
-        {/* ── Inner / detail screens (no bottom tab) ── */}
         <Tabs.Screen
           name="holidays"
           options={{
@@ -247,65 +212,25 @@ export default function AdminLayout() {
             headerTitleAlign: "center",
           }}
         />
-
-        <Tabs.Screen
-          name="leave/add-leave-type"
-          options={{
-            title: "Add Leave Type",
-
-            headerTitleAlign: "center",
-          }}
-        />
-
-        <Tabs.Screen
-          name="more/attendance-list/index"
-          options={{
-            title: "Attendance List",
-            headerTitleAlign: "center",
-          }}
-        />
-
-        <Tabs.Screen
-          name="more/attendance-list/attendance-details"
-          options={{
-            title: "Attendance Details",
-            headerTitleAlign: "center",
-          }}
-        />
-
-        <Tabs.Screen
-          name="more/holidays/index"
-          options={{
-            title: "Holidays and Events",
-            headerTitleAlign: "center",
-          }}
-        />
       </Tabs>
-
-      {/* ===================== */}
-      {/* PROFILE MENU OVERLAY */}
-      {/* ===================== */}
 
       {menu.open && (
         <>
-          {/* BACKDROP */}
           <Pressable
             onPress={menu.close}
             style={{
               position: "absolute",
-              top: 0,
+              top: 100,
               left: 0,
               right: 0,
               bottom: 0,
               zIndex: 999,
             }}
           />
-
-          {/* DROPDOWN */}
           <View
             style={{
               position: "absolute",
-              top: 65, // aligns under header
+              top: 65,
               right: 16,
               zIndex: 1000,
               elevation: 50,

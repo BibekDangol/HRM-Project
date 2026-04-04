@@ -17,13 +17,7 @@ export default function LeaveLayout() {
           title: "Pending",
         }}
       />
-      <Stack.Screen
-        name="leave-approved"
-        options={{
-          headerShown: false,
-          title: "Approval",
-        }}
-      />
+
       <Stack.Screen
         name="approved-details"
         options={{
