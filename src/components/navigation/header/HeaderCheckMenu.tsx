@@ -2,22 +2,28 @@ import { formatElapsed, formatSinceTime } from "@/src/utils/attendanceHelper";
 import { CircleCheck, LogOut } from "lucide-react-native";
 import React, { useEffect, useRef, useState } from "react";
 import {
-    Animated,
-    Dimensions,
-    Modal,
-    Pressable,
-    Text,
-    TouchableWithoutFeedback,
-    View,
+  Animated,
+  Dimensions,
+  Modal,
+  Platform,
+  Pressable,
+  Text,
+  TouchableWithoutFeedback,
+  View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import {
-    getDropdownPosition,
-    type AnchorLayout,
+  getDropdownPosition,
+  type AnchorLayout,
 } from "../common/getDropdownPosition";
 
-const SCREEN_WIDTH = Dimensions.get("window").width;
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
+
 const CHECK_MENU_WIDTH = 150;
+const CHECK_MENU_HEIGHT_CHECKED_OUT = 72;
+const CHECK_MENU_HEIGHT_CHECKED_IN = 118;
+const ANDROID_HEADER_PUSH_DOWN = Platform.OS === "android" ? 10 : 0;
 
 const DEFAULT_LAYOUT: AnchorLayout = {
   pageX: 0,
@@ -89,7 +95,12 @@ const AnimatedDropdown: React.FC<{
   }, [visible, opacity, scale, translateY]);
 
   return (
-    <Animated.View style={{ opacity, transform: [{ translateY }, { scale }] }}>
+    <Animated.View
+      style={{
+        opacity,
+        transform: [{ translateY }, { scale }],
+      }}
+    >
       {children}
     </Animated.View>
   );
@@ -105,6 +116,8 @@ const HeaderCheckMenu: React.FC<Props> = ({
   onTogglePress,
 }) => {
   const btnRef = useRef<View>(null);
+  const insets = useSafeAreaInsets();
+
   const [layout, setLayout] = useState<AnchorLayout>(DEFAULT_LAYOUT);
 
   const measure = (callback?: () => void) => {
@@ -119,13 +132,16 @@ const HeaderCheckMenu: React.FC<Props> = ({
           height,
         });
 
-        // callback?.();
+        callback?.();
       });
     });
   };
 
   useEffect(() => {
-    const timer = setTimeout(() => measure(), 250);
+    const timer = setTimeout(() => {
+      measure();
+    }, 200);
+
     return () => clearTimeout(timer);
   }, []);
 
@@ -137,12 +153,28 @@ const HeaderCheckMenu: React.FC<Props> = ({
 
   const hasValidLayout = layout.width > 0 && layout.height > 0;
 
-  const menuPosition = getDropdownPosition(
-    layout,
-    SCREEN_WIDTH,
-    CHECK_MENU_WIDTH,
-    "center",
-  );
+  const estimatedMenuHeight = isCheckedIn
+    ? CHECK_MENU_HEIGHT_CHECKED_IN
+    : CHECK_MENU_HEIGHT_CHECKED_OUT;
+
+  const menuPosition = getDropdownPosition({
+    anchorLayout: layout,
+    screenWidth: SCREEN_WIDTH,
+    screenHeight: SCREEN_HEIGHT,
+    menuWidth: CHECK_MENU_WIDTH,
+    menuHeight: estimatedMenuHeight,
+    insets: {
+      top: insets.top,
+      bottom: insets.bottom,
+      left: insets.left,
+      right: insets.right,
+    },
+    align: "center",
+    gap: 8,
+    sidePadding: 12,
+  });
+
+  const finalTop = menuPosition.top + ANDROID_HEADER_PUSH_DOWN;
 
   const handleTriggerPress = () => {
     if (isLocked) return;
@@ -183,7 +215,7 @@ const HeaderCheckMenu: React.FC<Props> = ({
         visible={isOpen && hasValidLayout}
         transparent
         animationType="none"
-        statusBarTranslucent
+        statusBarTranslucent={false}
         onRequestClose={onTriggerPress}
       >
         <TouchableWithoutFeedback onPress={onTriggerPress}>
@@ -192,7 +224,7 @@ const HeaderCheckMenu: React.FC<Props> = ({
               <View
                 style={{
                   position: "absolute",
-                  top: menuPosition.top,
+                  top: finalTop,
                   left: menuPosition.left,
                   width: CHECK_MENU_WIDTH,
                 }}
@@ -200,7 +232,7 @@ const HeaderCheckMenu: React.FC<Props> = ({
                 <AnimatedDropdown visible={isOpen && hasValidLayout}>
                   <View
                     style={{
-                      borderRadius: 14,
+                      borderRadius: 18,
                       backgroundColor: "#FFFFFF",
                       borderWidth: 1,
                       borderColor: "#E2E8F0",
@@ -222,8 +254,7 @@ const HeaderCheckMenu: React.FC<Props> = ({
                             marginBottom: 2,
                           }}
                         >
-                          Since{" "}
-                          {checkedInAt ? formatSinceTime(checkedInAt) : "--"}
+                          Since {checkedInAt ? formatSinceTime(checkedInAt) : "--"}
                         </Text>
 
                         <Text
@@ -246,7 +277,7 @@ const HeaderCheckMenu: React.FC<Props> = ({
                             justifyContent: "center",
                             gap: 6,
                             paddingVertical: 8,
-                            borderRadius: 10,
+                            borderRadius: 12,
                             backgroundColor: "#FFB300",
                             opacity: pressed ? 0.8 : 1,
                           })}
@@ -272,7 +303,7 @@ const HeaderCheckMenu: React.FC<Props> = ({
                           justifyContent: "center",
                           gap: 6,
                           paddingVertical: 10,
-                          borderRadius: 10,
+                          borderRadius: 12,
                           backgroundColor: "#FFB300",
                           opacity: pressed ? 0.8 : 1,
                         })}

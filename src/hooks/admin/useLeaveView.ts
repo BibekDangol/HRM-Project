@@ -12,7 +12,7 @@ type Props = {
   activeTab: LeaveStatus;
 };
 
-export function useLeaveView({ fetchLeaves, scrollRef }: Props) {
+export function useLeaveView({ fetchLeaves, scrollRef, activeTab }: Props) {
   const { currentUserProfile } = useUsersStore();
   const { user } = useAuthStore();
   const { leaves, setLeaves } = useLeaveStore();

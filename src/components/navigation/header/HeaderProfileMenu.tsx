@@ -1,14 +1,16 @@
 import { LogOut, UserCircle } from "lucide-react-native";
 import React, { useEffect, useRef } from "react";
 import {
-    Animated,
-    Dimensions,
-    Modal,
-    Pressable,
-    Text,
-    TouchableWithoutFeedback,
-    View,
+  Animated,
+  Dimensions,
+  Modal,
+  Platform,
+  Pressable,
+  Text,
+  TouchableWithoutFeedback,
+  View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type AnchorLayout = {
   pageX: number;
@@ -26,13 +28,48 @@ type Props = {
   width?: number;
 };
 
-const SCREEN = Dimensions.get("window");
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
-function getDropdownPosition(anchor: AnchorLayout, menuWidth: number) {
-  const top = anchor.pageY + anchor.height + 8 + 20;
+const MENU_HEIGHT = 126;
+const SIDE_PADDING = 12;
+const DROPDOWN_GAP = 8;
+
+// adjust this to match your curved header height visually
+const ANDROID_HEADER_PUSH_DOWN = 14;
+
+function getDropdownPosition(
+  anchor: AnchorLayout,
+  menuWidth: number,
+  menuHeight: number,
+  insets: { top: number; bottom: number; left: number; right: number }
+) {
   let left = anchor.pageX + anchor.width - menuWidth;
 
-  left = Math.min(Math.max(left, 12), SCREEN.width - menuWidth - 12);
+  const minLeft = SIDE_PADDING + insets.left;
+  const maxLeft = SCREEN_WIDTH - menuWidth - SIDE_PADDING - insets.right;
+
+  left = Math.max(minLeft, Math.min(left, maxLeft));
+
+  const androidExtraOffset = Platform.OS === "android" ? ANDROID_HEADER_PUSH_DOWN : 0;
+
+  const preferredTop =
+    anchor.pageY + anchor.height + DROPDOWN_GAP + androidExtraOffset;
+
+  const spaceBelow =
+    SCREEN_HEIGHT - preferredTop - insets.bottom - SIDE_PADDING;
+
+  const spaceAbove = anchor.pageY - insets.top - SIDE_PADDING;
+
+  const openBelow = spaceBelow >= menuHeight || spaceBelow >= spaceAbove;
+
+  let top = openBelow
+    ? preferredTop
+    : anchor.pageY - menuHeight - DROPDOWN_GAP;
+
+  const minTop = insets.top + SIDE_PADDING;
+  const maxTop = SCREEN_HEIGHT - menuHeight - insets.bottom - SIDE_PADDING;
+
+  top = Math.max(minTop, Math.min(top, maxTop));
 
   return { top, left };
 }
@@ -45,6 +82,8 @@ const HeaderProfileMenu: React.FC<Props> = ({
   onLogoutPress,
   width = 140,
 }) => {
+  const insets = useSafeAreaInsets();
+
   const opacity = useRef(new Animated.Value(0)).current;
   const translateY = useRef(new Animated.Value(-8)).current;
   const scale = useRef(new Animated.Value(0.96)).current;
@@ -98,14 +137,19 @@ const HeaderProfileMenu: React.FC<Props> = ({
 
   if (!hasValidLayout || !anchorLayout) return null;
 
-  const position = getDropdownPosition(anchorLayout, width);
+  const position = getDropdownPosition(anchorLayout, width, MENU_HEIGHT, {
+    top: insets.top,
+    bottom: insets.bottom,
+    left: insets.left,
+    right: insets.right,
+  });
 
   return (
     <Modal
       visible={open && hasValidLayout}
       transparent
       animationType="none"
-      statusBarTranslucent
+      statusBarTranslucent={false}
       onRequestClose={onClose}
     >
       <TouchableWithoutFeedback onPress={onClose}>
@@ -128,11 +172,11 @@ const HeaderProfileMenu: React.FC<Props> = ({
                 <View
                   style={{
                     width,
-                    borderRadius: 14,
+                    borderRadius: 18,
                     backgroundColor: "#FFFFFF",
                     borderWidth: 1,
                     borderColor: "#E5E7EB",
-                    paddingVertical: 4,
+                    paddingVertical: 6,
                     paddingHorizontal: 6,
                     shadowColor: "#000",
                     shadowOffset: { width: 0, height: 4 },
@@ -150,6 +194,7 @@ const HeaderProfileMenu: React.FC<Props> = ({
                       gap: 10,
                       paddingHorizontal: 12,
                       paddingVertical: 12,
+                      borderRadius: 12,
                       opacity: pressed ? 0.75 : 1,
                     })}
                   >
@@ -182,6 +227,7 @@ const HeaderProfileMenu: React.FC<Props> = ({
                       gap: 10,
                       paddingHorizontal: 12,
                       paddingVertical: 12,
+                      borderRadius: 12,
                       opacity: pressed ? 0.75 : 1,
                     })}
                   >

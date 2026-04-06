@@ -21,7 +21,7 @@ export default function DashboardScreen() {
   const router = useRouter();
   const { session, user } = useAuthStore();
   const token = session?.access_token;
-  const { users, userProfile, setUsers } = useUsersStore();
+  const { users, currentUserProfile, setUsers } = useUsersStore();
   const {
     calendarItems,
     calendarLoading,
@@ -43,21 +43,21 @@ export default function DashboardScreen() {
 
   const loadAll = useCallback(async () => {
     try {
-      if (!userProfile?.organization_id) return;
-      const updatedUsers = await fetchUsersService(userProfile.organization_id);
+      if (!currentUserProfile?.organization_id) return;
+      const updatedUsers = await fetchUsersService(currentUserProfile.organization_id);
       setUsers(updatedUsers);
-      await fetchCalendarItems(userProfile.organization_id);
+      await fetchCalendarItems(currentUserProfile.organization_id);
     } catch {
       Alert.alert("Error", "Failed to load dashboard data.");
     }
-  }, [userProfile?.organization_id, setUsers, fetchCalendarItems]);
+  }, [currentUserProfile?.organization_id, setUsers, fetchCalendarItems]);
 
   useEffect(() => {
     loadAll();
   }, [loadAll]);
 
   const handleAddUser = async (data: AddUserFormData) => {
-    if (!userProfile?.organization_id) {
+    if (!currentUserProfile?.organization_id) {
       Alert.alert("Error", "Organization or user information is missing.");
       return;
     }
@@ -71,13 +71,13 @@ export default function DashboardScreen() {
         email: data.email,
         firstName: data.first_name,
         lastName: data.last_name,
-        orgId: userProfile.organization_id,
+        orgId: currentUserProfile.organization_id,
         supervisor_id: data.supervisor_id,
       });
       if (res.tempPassword) {
         setTempPassword(res.tempPassword);
       }
-      const updatedUsers = await fetchUsersService(userProfile.organization_id);
+      const updatedUsers = await fetchUsersService(currentUserProfile.organization_id);
       setUsers(updatedUsers);
       Alert.alert("Success", "User added successfully.");
       setAddUserModalVisible(false);
