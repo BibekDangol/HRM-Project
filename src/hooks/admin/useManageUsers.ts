@@ -53,7 +53,6 @@ export const useManageUsers = () => {
         debouncedSearch,
       );
 
-
       setUsers(data);
     } finally {
       setLoading(false);
@@ -140,7 +139,6 @@ export const useManageUsers = () => {
       return;
     }
 
-
     try {
       setIsAddingUser(true);
 
@@ -151,7 +149,6 @@ export const useManageUsers = () => {
         orgId: currentUserProfile.organization_id,
         supervisor_id: data.supervisor_id,
       });
-
 
       if (response.tempPassword) {
         setTempPassword(response.tempPassword);
@@ -268,17 +265,11 @@ export const useManageUsers = () => {
     setEditRole,
     editSupervisor,
     setEditSupervisor,
-    getSupervisorName,
 
-    filteredUsers,
-    tabs,
-
-    onRefresh,
     handleAddUser,
     handleEditUser,
     handleSubmitEdit,
     handleDeleteUser,
-
 
     tempPassword,
     setTempPassword,

@@ -42,7 +42,7 @@ export default function LeaveView({
   const { setActiveTab } = useLeaveTabStore();
   //renrenders if any of these changes
   const activeTab = useLeaveTabStore((s) => s.activeTab);
-  console.log("store", activeTab);
+  // console.log("store", activeTab);
   //zustand subscribes to any tab I click
 
   const {
