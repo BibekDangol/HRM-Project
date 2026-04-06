@@ -1,8 +1,8 @@
 import { ChevronLeft } from "lucide-react-native";
 import React from "react";
 import { Pressable } from "react-native";
-
 import { AppHeaderLeftProps } from "./types";
+
 
 const AppHeaderLeft: React.FC<AppHeaderLeftProps> = ({
   visible = true,
