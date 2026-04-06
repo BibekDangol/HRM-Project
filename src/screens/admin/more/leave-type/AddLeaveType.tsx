@@ -13,7 +13,7 @@ import tw from "twrnc";
 import AddLeaveTypeModal from "./AddLeaveTypeModal";
 
 export default function LeaveTypeSettings() {
-  const { userProfile } = useUsersStore();
+  const { currentUserProfile } = useUsersStore();
   const {
     leaveTypes,
     setLeaveTypes,
@@ -28,11 +28,13 @@ export default function LeaveTypeSettings() {
   const [refreshing, setRefreshing] = useState(false);
 
   const loadLeaveTypes = useCallback(async () => {
-    if (!userProfile?.organization_id) return;
+    if (!currentUserProfile?.organization_id) return;
 
     try {
       setLoading(true);
-      const result = await fetchLeaveTypesService(userProfile.organization_id);
+      const result = await fetchLeaveTypesService(
+        currentUserProfile.organization_id,
+      );
 
       setLeaveTypes(result || []);
     } catch (err: any) {
@@ -40,7 +42,7 @@ export default function LeaveTypeSettings() {
     } finally {
       setLoading(false);
     }
-  }, [userProfile]);
+  }, [currentUserProfile]);
 
   useEffect(() => {
     loadLeaveTypes();
@@ -57,7 +59,7 @@ export default function LeaveTypeSettings() {
       const res = await apiClient.post("/add-leave-type", {
         name,
         leave_limit: limit,
-        organization_id: userProfile?.organization_id,
+        organization_id: currentUserProfile?.organization_id,
       });
 
       addLeaveType(res.data);

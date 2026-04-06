@@ -11,20 +11,20 @@ import tw from "twrnc";
 
 const AttendanceUserList = () => {
   const router = useRouter();
-  const { userProfile } = useUsersStore();
+  const { currentUserProfile  } = useUsersStore();
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const getSupervisorName = () => "No supervisor";
 
   const loadUsers = useCallback(async () => {
-    if (!userProfile?.id || !userProfile?.organization_id) return;
+    if (!currentUserProfile ?.id || !currentUserProfile ?.organization_id) return;
     try {
       setLoading(true);
       const data = await fetchSupervisorUnderUsersService(
-        userProfile.organization_id,
+        currentUserProfile .organization_id,
         search,
-        userProfile.id,
+        currentUserProfile .id,
       );
       setUsers(data);
     } catch (err) {
@@ -32,7 +32,7 @@ const AttendanceUserList = () => {
     } finally {
       setLoading(false);
     }
-  }, [userProfile?.id, userProfile?.organization_id, search]);
+  }, [currentUserProfile ?.id, currentUserProfile ?.organization_id, search]);
 
   useEffect(() => {
     loadUsers();

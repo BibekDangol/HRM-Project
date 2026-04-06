@@ -13,17 +13,17 @@ type LeaveType = {
 };
 
 export function useLeaves() {
-  const { userProfile } = useUsersStore();
+  const { currentUserProfile } = useUsersStore();
   const [leaves, setLeaves] = useState<Leave[]>([]);
   const [leaveTypes, setLeaveTypes] = useState<LeaveType[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
   const loadLeaves = useCallback(async () => {
-    if (!userProfile) return;
+    if (!currentUserProfile) return;
     try {
       setLoading(true);
-      const data = await fetchLeaveRequests(userProfile.organization_id);
+      const data = await fetchLeaveRequests(currentUserProfile.organization_id);
       setLeaves(data);
       setLeaveTypes([]);
     } catch (err) {
@@ -31,7 +31,7 @@ export function useLeaves() {
     } finally {
       setLoading(false);
     }
-  }, [userProfile]);
+  }, [currentUserProfile]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);

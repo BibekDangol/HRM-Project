@@ -1,26 +1,25 @@
-import { LayoutDashboard, MoreHorizontal, Users } from "lucide-react-native";
+import {
+  CalendarDays,
+  House,
+  HouseIcon,
+  Menu,
+} from "lucide-react-native";
 
 export const userTabs = [
   {
     name: "dashboard",
-    title: "Dashboard",
-    icon: LayoutDashboard,
+    title: "Home",
+    icon: House,
+    activeIcon: HouseIcon,
   },
   {
-    name: "leaves",        // ✅ was "leaves/index"
+    name: "leaves",
     title: "Leaves",
-    icon: Users,
-  },
-  {
-    name: "profile/index",
-    title: "Profile",
-    icon: Users,
+    icon: CalendarDays,
   },
   {
     name: "more",
-    title: "Setting",
-    icon: MoreHorizontal,
+    title: "More",
+    icon: Menu,
   },
 ] as const;
-
-export type UserTabName = (typeof userTabs)[number]["name"];
