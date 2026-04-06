@@ -1,6 +1,13 @@
-import { Check, ChevronDown, X } from "lucide-react-native";
+import { ChevronDown, X } from "lucide-react-native";
 import React, { useState } from "react";
-import { Modal, Pressable, ScrollView, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Modal,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
+} from "react-native";
 
 import { UserProfile } from "@/src/types/admin";
 import { TW } from "@/theme/twStyles";
@@ -17,6 +24,7 @@ interface Props {
   onClose: () => void;
   onSave: () => void;
   isChanged: boolean;
+  isSubmitting: boolean;
 }
 
 const roles = ["user", "admin"];
@@ -32,6 +40,7 @@ const EditUserModal = ({
   onClose,
   onSave,
   isChanged,
+  isSubmitting,
 }: Props) => {
   const [showSupervisorPicker, setShowSupervisorPicker] = useState(false);
 
@@ -48,6 +57,19 @@ const EditUserModal = ({
   return (
     <Modal visible={visible} transparent animationType="fade">
       <View style={tw`flex-1 bg-black/40 justify-end`}>
+        {/* 🔵 LOADING OVERLAY */}
+        {isSubmitting && (
+          <View
+            style={tw`absolute inset-0 bg-black/30 items-center justify-center z-50`}>
+            <View style={tw`bg-white p-6 rounded-2xl items-center`}>
+              <ActivityIndicator size="large" color="#1B4A5A" />
+              <Text style={tw`mt-3 font-semibold ${TW.textPrimary}`}>
+                Saving changes...
+              </Text>
+            </View>
+          </View>
+        )}
+
         {/* Modal Sheet */}
         <View style={tw`${TW.bgWhite} rounded-t-3xl px-6 pt-4 pb-10`}>
           {/* Drag Handle */}
@@ -57,16 +79,16 @@ const EditUserModal = ({
 
           {/* Header */}
           <View style={tw`flex-row items-center justify-between mb-6`}>
-            <View>
-              <Text style={tw`text-xl font-bold ${TW.textPrimary}`}>
-                Edit User
-              </Text>
-            </View>
+            <Text style={tw`text-xl font-bold ${TW.textPrimary}`}>
+              Edit User
+            </Text>
+
             <Pressable
+              disabled={isSubmitting}
               onPress={onClose}
               style={({ pressed }) => [
                 tw`h-9 w-9 rounded-full bg-gray-100 items-center justify-center`,
-                pressed && tw`opacity-70`,
+                (pressed || isSubmitting) && tw`opacity-60`,
               ]}>
               <X size={18} color="#475569" />
             </Pressable>
@@ -77,22 +99,22 @@ const EditUserModal = ({
             <Text style={tw`text-sm font-semibold ${TW.textSecondary} mb-2`}>
               Role
             </Text>
-            <Text style={tw`text-xs text-gray-400 mb-2`}>
-              Assign a role to this user. Roles determine access level.
-            </Text>
 
             <View style={tw`flex-row gap-2`}>
               {roles.map((roleProfile) => {
                 const selected = roleProfile === role;
+
                 return (
                   <Pressable
                     key={roleProfile}
+                    disabled={isSubmitting}
                     onPress={() => setRole(roleProfile)}
                     style={[
                       tw`flex-1 py-3 rounded-xl border items-center`,
                       selected
                         ? tw`${TW.bgAction} border-[#1B4A5A]`
                         : tw`bg-white border-gray-200`,
+                      isSubmitting && tw`opacity-60`,
                     ]}>
                     <Text
                       style={[
@@ -114,53 +136,32 @@ const EditUserModal = ({
             <Text style={tw`text-sm font-semibold ${TW.textSecondary} mb-2`}>
               Supervisor
             </Text>
-            <Text style={tw`text-xs text-gray-400 mb-2`}>
-              Select the supervisor for this user. If you select Self, the user
-              reports to themselves.
-            </Text>
 
             <Pressable
+              disabled={isSubmitting}
               onPress={() => setShowSupervisorPicker(!showSupervisorPicker)}
               style={({ pressed }) => [
                 tw`flex-row items-center justify-between px-4 py-3.5 rounded-2xl border border-gray-200 bg-gray-50 mb-2`,
-                pressed && tw`opacity-80`,
+                (pressed || isSubmitting) && tw`opacity-60`,
               ]}>
               <Text style={tw`text-sm font-medium ${TW.textPrimary}`}>
                 {supervisorName()}
               </Text>
-              <ChevronDown
-                size={18}
-                color="#94a3b8"
-                style={{
-                  transform: [
-                    { rotate: showSupervisorPicker ? "180deg" : "0deg" },
-                  ],
-                }}
-              />
+              <ChevronDown size={18} color="#94a3b8" />
             </Pressable>
 
             {showSupervisorPicker && (
               <View
                 style={tw`border border-gray-200 rounded-2xl overflow-hidden`}>
-                <ScrollView
-                  style={{ maxHeight: 180 }}
-                  showsVerticalScrollIndicator={false}>
-                  {/* Self */}
+                <ScrollView style={{ maxHeight: 180 }}>
                   <Pressable
+                    disabled={isSubmitting}
                     onPress={() => {
                       setSupervisor(user.id);
                       setShowSupervisorPicker(false);
                     }}
-                    style={({ pressed }) => [
-                      tw`flex-row items-center justify-between px-4 py-3.5 border-b border-gray-100`,
-                      pressed && tw`bg-gray-50`,
-                    ]}>
-                    <Text style={tw`text-sm font-medium ${TW.textPrimary}`}>
-                      Self
-                    </Text>
-                    {supervisor === user.id && (
-                      <Check size={16} color="#1B4A5A" />
-                    )}
+                    style={tw`flex-row items-center justify-between px-4 py-3.5 border-b border-gray-100`}>
+                    <Text>Self</Text>
                   </Pressable>
 
                   {users
@@ -168,26 +169,15 @@ const EditUserModal = ({
                     .map((u) => (
                       <Pressable
                         key={u.id}
+                        disabled={isSubmitting}
                         onPress={() => {
                           setSupervisor(u.id);
                           setShowSupervisorPicker(false);
                         }}
-                        style={({ pressed }) => [
-                          tw`flex-row items-center justify-between px-4 py-3.5 border-b border-gray-100`,
-                          pressed && tw`bg-gray-50`,
-                        ]}>
-                        <View>
-                          <Text
-                            style={tw`text-sm font-medium ${TW.textPrimary}`}>
-                            {`${u.first_name ?? ""} ${u.last_name ?? ""}`.trim()}
-                          </Text>
-                          <Text style={tw`text-xs ${TW.textTertiary}`}>
-                            {u.email}
-                          </Text>
-                        </View>
-                        {supervisor === u.id && (
-                          <Check size={16} color="#1B4A5A" />
-                        )}
+                        style={tw`flex-row items-center justify-between px-4 py-3.5 border-b border-gray-100`}>
+                        <Text>
+                          {`${u.first_name ?? ""} ${u.last_name ?? ""}`}
+                        </Text>
                       </Pressable>
                     ))}
                 </ScrollView>
@@ -195,24 +185,25 @@ const EditUserModal = ({
             )}
           </View>
 
-          {/* Action Buttons */}
+          {/* Actions */}
           <View style={tw`flex-row gap-3 mt-2`}>
             <Pressable
+              disabled={isSubmitting}
               onPress={onClose}
               style={({ pressed }) => [
                 tw`flex-1 py-4 rounded-2xl border border-gray-200 items-center`,
-                pressed && tw`opacity-80`,
+                (pressed || isSubmitting) && tw`opacity-60`,
               ]}>
               <Text style={tw`${TW.textSecondary} font-semibold`}>Cancel</Text>
             </Pressable>
 
             <Pressable
-              disabled={!isChanged}
+              disabled={!isChanged || isSubmitting}
               onPress={onSave}
               style={({ pressed }) => [
                 tw`flex-1 py-4 rounded-2xl items-center`,
                 isChanged ? tw`${TW.bgAction}` : tw`bg-gray-200`,
-                pressed && isChanged && tw`opacity-85`,
+                (pressed || isSubmitting) && isChanged && tw`opacity-85`,
               ]}>
               <Text
                 style={[

@@ -21,6 +21,7 @@ import { useAuthStore } from "@/src/store/useAuthStore";
 import { TW } from "@/theme/twStyles";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
+import Toast from "react-native-toast-message";
 import tw from "twrnc";
 import { z } from "zod";
 
@@ -47,12 +48,12 @@ const LoginScreen = () => {
     defaultValues: { email: "", password: "" },
   });
   const handleLogin = async () => {
-    setLoginError(null); // clear old error
+    setLoginError(null);
 
     const result = await signIn(email, password);
-
     if ("error" in result) {
-      setLoginError(result.error); // 👈 show in UI instead of Alert
+      Toast.show({ type: "error", text1: "Incorrect Email or Password" });
+      setLoginError(result.error);
       return;
     }
 
@@ -75,8 +76,7 @@ const LoginScreen = () => {
       <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
         <KeyboardAvoidingView
           style={tw`flex-1`}
-          behavior={Platform.OS === "ios" ? "padding" : "padding"}
-        >
+          behavior={Platform.OS === "ios" ? "padding" : "padding"}>
           <ScrollView
             contentContainerStyle={[
               tw`flex-grow justify-center`,
@@ -86,24 +86,21 @@ const LoginScreen = () => {
               },
             ]}
             keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator={false}
-          >
+            showsVerticalScrollIndicator={false}>
             <View
               style={[
                 tw`self-center w-full`,
                 {
                   maxWidth: isTablet ? 500 : width,
                 },
-              ]}
-            >
+              ]}>
               <Logo />
               <View style={tw`items-center flex flex-col`}>
                 <Text
                   style={[
                     tw`font-bold ${TW.textPrimary} -mt-6`,
                     { fontSize: 24 },
-                  ]}
-                >
+                  ]}>
                   TechHaus
                 </Text>
 
@@ -111,17 +108,13 @@ const LoginScreen = () => {
                   style={[
                     tw`${TW.textSecondary} text-center`,
                     { fontSize: isTablet ? 18 : isSmallPhone ? 14 : 16 },
-                  ]}
-                >
+                  ]}>
                   Streamlining your workforce management
                 </Text>
               </View>
 
-              {/* Form Fields */}
               <View
-                style={[tw`flex flex-col w-full`, { gap: 16, marginTop: 16 }]}
-              >
-                {/* EMAIL */}
+                style={[tw`flex flex-col w-full`, { gap: 16, marginTop: 16 }]}>
                 <Controller
                   control={control}
                   name="email"
@@ -131,8 +124,7 @@ const LoginScreen = () => {
                         style={[
                           tw`${TW.textSecondary} font-semibold mb-2`,
                           { fontSize: isTablet ? 16 : 14 },
-                        ]}
-                      >
+                        ]}>
                         Email
                       </Text>
 
@@ -146,6 +138,10 @@ const LoginScreen = () => {
                                 ? 12
                                 : 16,
                             fontSize: isTablet ? 16 : 14,
+                          },
+                          loginError && {
+                            borderWidth: 1.5,
+                            borderColor: "#FF6B6B",
                           },
                         ]}
                         placeholder="Enter your email address"
@@ -179,14 +175,18 @@ const LoginScreen = () => {
                         style={[
                           tw`${TW.textSecondary} font-semibold mb-2`,
                           { fontSize: isTablet ? 16 : 14 },
-                        ]}
-                      >
+                        ]}>
                         Password
                       </Text>
 
                       <View
-                        style={tw`${TW.bgButton} rounded-lg flex-row items-center`}
-                      >
+                        style={[
+                          tw`${TW.bgButton} rounded-lg flex-row items-center`,
+                          loginError && {
+                            borderWidth: 1.5,
+                            borderColor: "#FF6B6B",
+                          },
+                        ]}>
                         <TextInput
                           style={[
                             tw`flex-1 px-3`,
@@ -213,8 +213,7 @@ const LoginScreen = () => {
                         <TouchableOpacity
                           onPress={toggleShowPassword}
                           hitSlop={10}
-                          style={tw`pr-3`}
-                        >
+                          style={tw`pr-3`}>
                           {showPassword ? (
                             <Eye size={isTablet ? 24 : 22} color="#7e7e7e" />
                           ) : (
@@ -239,26 +238,22 @@ const LoginScreen = () => {
               {/* Forgot Password */}
               <TouchableOpacity
                 style={tw`mt-3`}
-                onPress={() => router.push("/(auth)/forgotPassword")}
-              >
+                onPress={() => router.push("/(auth)/forgotPassword")}>
                 <Text
                   style={[
                     tw`text-right ${TW.textPrimary} font-semibold`,
                     { fontSize: isTablet ? 15 : 14 },
-                  ]}
-                >
+                  ]}>
                   Forgot Password?
                 </Text>
               </TouchableOpacity>
 
-              {/* Bottom Actions */}
               <View style={[tw`flex-col w-full`, { gap: 16, marginTop: 16 }]}>
-                {/* Login Button */}
-                {loginError && (
+                {/* {loginError && (
                   <Text style={tw`text-[#FF6B6B] text-[13px] text-center mb-2`}>
                     {loginError}
                   </Text>
-                )}
+                )} */}
                 <TouchableOpacity
                   style={[
                     tw`rounded-xl items-center justify-center ${TW.bgAction}`,
@@ -268,8 +263,7 @@ const LoginScreen = () => {
                     },
                   ]}
                   onPress={handleSubmit(onValidSubmit)}
-                  disabled={isSubmitting}
-                >
+                  disabled={isSubmitting}>
                   <View style={tw`flex-row items-center gap-2`}>
                     {isSubmitting && (
                       <ActivityIndicator size="small" color="#ffffff" />
@@ -278,33 +272,28 @@ const LoginScreen = () => {
                       style={[
                         tw`font-semibold ${TW.textButton}`,
                         { fontSize: isTablet ? 18 : 14 },
-                      ]}
-                    >
+                      ]}>
                       {isSubmitting ? "Logging in..." : "Login"}
                     </Text>
                   </View>
                 </TouchableOpacity>
 
-                {/* Signup Row */}
                 <View style={tw`flex-row justify-center`}>
                   <Text
                     style={[
                       tw`${TW.textPrimary}`,
                       { fontSize: isTablet ? 15 : 14 },
-                    ]}
-                  >
+                    ]}>
                     Don&apos;t have an account?
                   </Text>
 
                   <TouchableOpacity
-                    onPress={() => router.push("/(auth)/signup")}
-                  >
+                    onPress={() => router.push("/(auth)/signup")}>
                     <Text
                       style={[
                         tw`${TW.textPrimary} font-semibold underline`,
                         { fontSize: isTablet ? 15 : 14 },
-                      ]}
-                    >
+                      ]}>
                       Sign up
                     </Text>
                   </TouchableOpacity>

@@ -1,4 +1,4 @@
-import { Pencil, Trash2 } from "lucide-react-native";
+import { ChevronRight, Pencil, Trash2 } from "lucide-react-native";
 import { Alert, Image, Pressable, Text, View } from "react-native";
 
 import { UserProfile } from "@/src/types/admin";
@@ -11,6 +11,7 @@ type Props = {
   onEdit?: (user: UserProfile) => void;
   onDelete?: (id: string) => void;
   getSupervisorName: (supervisorId: string | null) => string;
+  showRightArrow?: boolean;
 };
 
 export const UserCard = ({
@@ -18,6 +19,7 @@ export const UserCard = ({
   onEdit,
   onDelete,
   getSupervisorName,
+  showRightArrow,
 }: Props) => {
   return (
     <View style={tw` gap-4 bg-white border ${TW.BORDER} rounded-2xl px-4 py-4`}>
@@ -61,6 +63,7 @@ export const UserCard = ({
             </Text>
           </View>
         </View>
+        {showRightArrow && <ChevronRight size={20} color="#9ca3af" />}
         {/* Action Buttons */}
         {(onEdit || onDelete) && (
           <View style={tw`flex-row gap-2`}>

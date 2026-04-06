@@ -94,7 +94,6 @@ const PendingLeaveView = ({
             </View>
           </View>
         </View>
-
         <View style={tw`px-5 mt-6 border-t border-slate-100`}>
           <Text
             style={tw`text-xs font-bold text-slate-400 uppercase tracking-wider mb-2`}>
@@ -124,7 +123,6 @@ const PendingLeaveView = ({
             <LabelValue label="Reason" value={leave.reason ?? "N/A"} />
           </View>
         </View>
-
         {usedDays !== null && remainingDays !== null && (
           <View style={tw`px-5 mt-6`}>
             <Text
@@ -170,8 +168,7 @@ const PendingLeaveView = ({
         )}
       </ScrollView>
       {showActions && handleStatusChange && (
-        <View
-          style={tw`absolute bottom-0 left-0 right-0 bg-white border-t border-slate-100 px-5 py-4 flex-row gap-3`}>
+        <View style={tw`px-5 py-4 flex-row gap-3`}>
           <Pressable
             onPress={() => handleStatusChange("rejected")}
             style={({ pressed }) => [
@@ -181,7 +178,6 @@ const PendingLeaveView = ({
             <XCircle size={18} color="#ffffff" />
             <Text style={tw`text-white font-bold ml-2`}>Reject</Text>
           </Pressable>
-
           <Pressable
             onPress={() => handleStatusChange("approved")}
             style={({ pressed }) => [

@@ -6,8 +6,10 @@ import { FlatList, Pressable, Text, View } from "react-native";
 import LoadingIndicator from "@/src/components/LoadingIndicator";
 import { useLeaveView } from "@/src/hooks/admin/useLeaveView";
 import { LeaveStatus } from "@/src/services/leave.service";
+import { useLeaveTabStore } from "@/src/store/useLeaveTabStore";
 import { TW } from "@/theme/twStyles";
 import tw from "twrnc";
+import { Pagination } from "../PaginationModal";
 
 type Props = {
   approvedPath: string;
@@ -37,31 +39,35 @@ export default function LeaveView({
 }: Props) {
   const router = useRouter();
   const listRef = useRef<FlatList>(null);
+  const { setActiveTab } = useLeaveTabStore();
+  //renrenders if any of these changes
+  const activeTab = useLeaveTabStore((s) => s.activeTab);
+  console.log("store", activeTab);
+  //zustand subscribes to any tab I click
+
   const {
     paginatedLeaves,
     counts,
-    activeTab,
-    setActiveTab,
     loading,
     refreshing,
     onRefresh,
-    page,
-    setPage,
-    totalPages,
     shouldShowPagination,
     pageNumbers,
-  } = useLeaveView({ fetchLeaves, scrollRef: listRef });
+    totalPages,
+    page,
+    setPage,
+  } = useLeaveView({ fetchLeaves, scrollRef: listRef, activeTab });
+
   useFocusEffect(
     useCallback(() => {
-      setActiveTab("pending");
       setPage(1);
-
       listRef.current?.scrollToOffset({
         offset: 0,
         animated: true,
       });
-    }, [setActiveTab, setPage]),
+    }, []),
   );
+
   const goToDetails = (leave: any) => {
     const path =
       leave.status === "approved"
@@ -84,7 +90,6 @@ export default function LeaveView({
       <View style={tw`flex-row mx-2 mt-2 rounded-2xl p-1 bg-slate-100`}>
         {TABS.map((tab) => {
           const isActive = activeTab === tab;
-
           return (
             <Pressable
               key={tab}
@@ -111,7 +116,6 @@ export default function LeaveView({
         })}
       </View>
 
-      {/* List */}
       <FlatList
         ref={listRef}
         data={paginatedLeaves}
@@ -181,26 +185,15 @@ export default function LeaveView({
 
       {/* Pagination */}
       {shouldShowPagination && (
-        <View style={tw`flex-row justify-center items-center py-4`}>
-          {pageNumbers.map((p) => {
-            const active = p === page;
-            return (
-              <Pressable
-                key={p}
-                onPress={() => setPage(p)}
-                style={tw`mx-1 px-3 py-1 rounded-lg ${
-                  active ? TW.bgAction : "bg-slate-200"
-                }`}>
-                <Text
-                  style={tw`text-xs font-bold ${
-                    active ? TW.textButton : TW.textPrimary
-                  }`}>
-                  {p}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </View>
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          pageNumbers={pageNumbers}
+          setPage={setPage}
+          shouldShowPagination={shouldShowPagination}
+          TW={TW}
+          tw={tw}
+        />
       )}
     </View>
   );

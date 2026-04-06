@@ -1,12 +1,13 @@
 import * as Linking from "expo-linking";
 
-import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { supabase } from "../supabase/supabaseClient";
-import { useAuthStore } from "../store/useAuthStore";
 import { useEffect } from "react";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import Toast from "react-native-toast-message";
+import { useAuthStore } from "../store/useAuthStore";
+import { supabase } from "../supabase/supabaseClient";
 
 export default function Layout() {
   const { restoreSession } = useAuthStore();
@@ -34,11 +35,14 @@ export default function Layout() {
   }, []);
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaProvider>
-        <StatusBar style="light" />
-        <Stack screenOptions={{ headerShown: false }} />
-      </SafeAreaProvider>
-    </GestureHandlerRootView>
+    <>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <SafeAreaProvider>
+          <StatusBar style="light" />
+          <Stack screenOptions={{ headerShown: false }} />
+        </SafeAreaProvider>
+        <Toast position="top" topOffset={60} />
+      </GestureHandlerRootView>
+    </>
   );
 }

@@ -18,14 +18,13 @@ const AttendanceUserList = () => {
   const [loading, setLoading] = useState(true); // 👈 loading state
   const { userProfile } = useUsersStore();
   const debouncedSearchQuery = useDebounce(search, 300);
-  const filteredUsers = users.filter((u) =>
-    u.first_name?.toLowerCase().includes(debouncedSearchQuery.toLowerCase()),
-  );
+  // const filteredUsers = users.filter((u) =>
+  //   u.first_name?.toLowerCase().includes(debouncedSearchQuery.toLowerCase()),
+  // );
   const getSupervisorName = () => "No supervisor";
 
   const loadUsers = useCallback(async () => {
     if (!userProfile?.id) return;
-
     setLoading(true); // start loading
     try {
       const usersData = await fetchUsersService(
@@ -36,7 +35,7 @@ const AttendanceUserList = () => {
     } catch (err) {
       console.error(err);
     } finally {
-      setLoading(false); // stop loading
+      setLoading(false);
     }
   }, [userProfile?.id, userProfile?.organization_id, debouncedSearchQuery]);
 
@@ -53,7 +52,6 @@ const AttendanceUserList = () => {
         onBack={() => router.back()}
       />
 
-      {/* Users List */}
       {loading ? (
         <View style={tw`flex-1 justify-center items-center`}>
           <LoadingIndicator message="Loading Users..." />
@@ -61,7 +59,7 @@ const AttendanceUserList = () => {
       ) : (
         <FlatList
           contentContainerStyle={tw`px-4 pb-6 flex gap-4`}
-          data={filteredUsers}
+          data={users}
           keyExtractor={(item) => item.id}
           ListEmptyComponent={
             <Text style={tw`text-center text-gray-500 mt-10`}>
@@ -79,7 +77,12 @@ const AttendanceUserList = () => {
                   },
                 })
               }>
-              <UserCard user={item} getSupervisorName={getSupervisorName} />
+              <UserCard
+                user={item}
+                getSupervisorName={getSupervisorName}
+                showRightArrow
+              />
+              {/* <ChevronRight size={20} color="#9ca3af" /> show right arrow in user card onnly from this page*/}
             </Pressable>
           )}
         />
