@@ -1,15 +1,16 @@
 import { useCallback, useState } from "react";
+import { Alert } from "react-native";
 
 import { fetchUsersService } from "@/src/services/admin.service";
 import { fetchCurrentUserProfleService } from "@/src/services/currentuser.service";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { useUsersStore } from "@/src/store/useUsersStore";
-import { Alert } from "react-native";
 
 export function useDashboardUsers() {
   const { user } = useAuthStore();
-  const { setUsers, setUserProfile, users, userProfile } = useUsersStore();
-  console.log("userprofile ma k aaucha", userProfile);
+  const { setUsers, setCurrentUserProfile, users, currentUserProfile } =
+    useUsersStore();
+
   const [loadingUsers, setLoadingUsers] = useState(false);
 
   const loadUsers = useCallback(async () => {
@@ -18,8 +19,12 @@ export function useDashboardUsers() {
     try {
       setLoadingUsers(true);
 
-      const profile = await fetchCurrentUserProfleService(user.id);
-      setUserProfile(profile);
+      let profile = currentUserProfile;
+
+      if (!profile) {
+        profile = await fetchCurrentUserProfleService(user.id);
+        setCurrentUserProfile(profile);
+      }
 
       const res = await fetchUsersService(profile.organization_id);
       setUsers(res);
@@ -28,11 +33,11 @@ export function useDashboardUsers() {
     } finally {
       setLoadingUsers(false);
     }
-  }, [user]);
+  }, [user, currentUserProfile, setCurrentUserProfile, setUsers]);
 
   return {
     users,
-    userProfile,
+    currentUserProfile,
     loadingUsers,
     loadUsers,
   };

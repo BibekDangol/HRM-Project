@@ -46,7 +46,7 @@ export const UserCard = ({
           <View style={tw`flex-col gap-1`}>
             <View style={tw`flex-row gap-4`}>
               <Text style={tw`text-base font-bold ${TW.textPrimary}`}>
-                {user.first_name} {user.last_name}
+                {user.first_name}  {user.last_name}
               </Text>
               <Capsule
                 text={user.role}

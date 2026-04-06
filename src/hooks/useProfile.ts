@@ -15,7 +15,7 @@ import { Alert } from "react-native";
 import { ProfileData } from "../types/profile.types";
 
 export function useProfile(userId?: string) {
-  const { userProfile, setUserProfile } = useUsersStore();
+  const { currentUserProfile, setCurrentUserProfile } = useUsersStore();
 
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -40,11 +40,14 @@ export function useProfile(userId?: string) {
 
   const fetchProfile = async () => {
     if (!userId) return;
+
     try {
       setIsLoading(true);
       const pd = await fetchProfileService(userId);
+
       setProfile(pd);
       setAvatarUrl(pd.avatar ?? null);
+
       reset({
         firstName: pd.first_name ?? "",
         lastName: pd.last_name ?? "",
@@ -85,9 +88,9 @@ export function useProfile(userId?: string) {
       setIsSaving(true);
       await updateProfileService(userId, profile.organization_id, values);
 
-      if (userProfile) {
-        setUserProfile({
-          ...userProfile,
+      if (currentUserProfile && currentUserProfile.id === userId) {
+        setCurrentUserProfile({
+          ...currentUserProfile,
           first_name: values.firstName,
           last_name: values.lastName,
         });
@@ -105,9 +108,18 @@ export function useProfile(userId?: string) {
 
   const onAvatarUpload = async (url: string) => {
     if (!userId) return;
+
     setAvatarUrl(url);
+
     try {
       await updateAvatarService(userId, url);
+
+      if (currentUserProfile && currentUserProfile.id === userId) {
+        setCurrentUserProfile({
+          ...currentUserProfile,
+          avatar: url,
+        });
+      }
     } catch {
       Alert.alert("Error", "Failed to save avatar.");
     }
@@ -115,9 +127,17 @@ export function useProfile(userId?: string) {
 
   const onAvatarRemove = async () => {
     if (!userId) return;
+
     try {
       await removeAvatarService(userId);
       setAvatarUrl(null);
+
+      if (currentUserProfile && currentUserProfile.id === userId) {
+        setCurrentUserProfile({
+          ...currentUserProfile,
+          avatar: null,
+        });
+      }
     } catch {
       Alert.alert("Error", "Failed to remove avatar.");
     }

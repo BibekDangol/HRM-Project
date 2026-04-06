@@ -12,23 +12,24 @@ type Props = {
   activeTab: LeaveStatus;
 };
 
-export function useLeaveView({ fetchLeaves, scrollRef, activeTab }: Props) {
-  const { userProfile } = useUsersStore();
+export function useLeaveView({ fetchLeaves, scrollRef }: Props) {
+  const { currentUserProfile } = useUsersStore();
   const { user } = useAuthStore();
   const { leaves, setLeaves } = useLeaveStore();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
   const loadLeaves = useCallback(async () => {
-    if (!userProfile || !user) return;
+    if (!currentUserProfile || !user) return;
+
     try {
       setLoading(true);
-      const data = await fetchLeaves(userProfile.organization_id, user.id);
+      const data = await fetchLeaves(currentUserProfile.organization_id, user.id);
       setLeaves(data);
     } finally {
       setLoading(false);
     }
-  }, [userProfile, user, fetchLeaves, setLeaves]);
+  }, [currentUserProfile, user, fetchLeaves, setLeaves]);
 
   useEffect(() => {
     loadLeaves();

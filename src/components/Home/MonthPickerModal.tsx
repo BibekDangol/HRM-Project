@@ -1,6 +1,16 @@
 import { MAX_YEAR, MIN_YEAR, MONTHS } from "@/src/utils/userDashboard";
-import React, { memo, useCallback, useEffect, useRef, useState } from "react";
+import { TW } from "@/theme/twStyles";
+import React, {
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
+  Animated,
+  Easing,
   Modal,
   Pressable,
   ScrollView,
@@ -10,18 +20,6 @@ import {
   View,
 } from "react-native";
 
-// ── Brand colours ─────────────────────────────────────────────
-const C = {
-  teal: "#1B4A5A",
-  yellow: "#FFB300",
-  surface: "#F0F4F5",
-  divider: "#C9D4D7",
-  textPrimary: "#0D2B35",
-  white: "#FFFFFF",
-  overlay: "rgba(0,0,0,0.45)",
-};
-
-// Row height = paddingVertical (7) * 2 + cellPill height (40)
 const ROW_HEIGHT = 54;
 
 type Mode = "year" | "month";
@@ -44,14 +42,15 @@ const YEARS: number[] = Array.from(
 
 function chunk<T>(arr: T[], size: number): T[][] {
   const rows: T[][] = [];
-  for (let i = 0; i < arr.length; i += size) rows.push(arr.slice(i, i + size));
+  for (let i = 0; i < arr.length; i += size) {
+    rows.push(arr.slice(i, i + size));
+  }
   return rows;
 }
 
 const YEAR_ROWS = chunk(YEARS, 3);
 const MONTH_ROWS = chunk(MONTHS, 3);
 
-// ── Grid cell ─────────────────────────────────────────────────
 const GridCell = memo(function GridCell({
   label,
   isSelected,
@@ -76,7 +75,6 @@ const GridCell = memo(function GridCell({
   );
 });
 
-// ── Main component ────────────────────────────────────────────
 export function MonthPickerModal({
   visible,
   selectedYear,
@@ -90,14 +88,59 @@ export function MonthPickerModal({
   const [mode, setMode] = useState<Mode>("year");
   const scrollRef = useRef<ScrollView>(null);
 
-  // Auto-scroll to the selected year/month row when the modal opens or mode changes
+  const overlayOpacity = useRef(new Animated.Value(0)).current;
+  const cardOpacity = useRef(new Animated.Value(0)).current;
+  const cardScale = useRef(new Animated.Value(0.96)).current;
+  const cardTranslateY = useRef(new Animated.Value(18)).current;
+
+  const shortMonth = useMemo(
+    () => MONTHS[selectedMonth]?.slice(0, 3) ?? "",
+    [selectedMonth],
+  );
+
+  useEffect(() => {
+    if (!visible) {
+      overlayOpacity.setValue(0);
+      cardOpacity.setValue(0);
+      cardScale.setValue(0.96);
+      cardTranslateY.setValue(18);
+      return;
+    }
+
+    Animated.parallel([
+      Animated.timing(overlayOpacity, {
+        toValue: 1,
+        duration: 180,
+        easing: Easing.out(Easing.ease),
+        useNativeDriver: true,
+      }),
+      Animated.timing(cardOpacity, {
+        toValue: 1,
+        duration: 180,
+        easing: Easing.out(Easing.ease),
+        useNativeDriver: true,
+      }),
+      Animated.timing(cardScale, {
+        toValue: 1,
+        duration: 220,
+        easing: Easing.out(Easing.ease),
+        useNativeDriver: true,
+      }),
+      Animated.timing(cardTranslateY, {
+        toValue: 0,
+        duration: 220,
+        easing: Easing.out(Easing.ease),
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [visible, overlayOpacity, cardOpacity, cardScale, cardTranslateY]);
+
   useEffect(() => {
     if (!visible) return;
 
-    const timeout = setTimeout(() => {
+    const frame = requestAnimationFrame(() => {
       if (mode === "year") {
         const rowIndex = Math.floor((selectedYear - MIN_YEAR) / 3);
-        // Centre the selected row in the 280px viewport (≈ 5 visible rows)
         const y = Math.max(0, rowIndex * ROW_HEIGHT - ROW_HEIGHT * 2);
         scrollRef.current?.scrollTo({ y, animated: false });
       } else {
@@ -105,17 +148,25 @@ export function MonthPickerModal({
         const y = Math.max(0, rowIndex * ROW_HEIGHT - ROW_HEIGHT);
         scrollRef.current?.scrollTo({ y, animated: false });
       }
-    }, 50); // small delay so the ScrollView has laid out
+    });
 
-    return () => clearTimeout(timeout);
+    return () => cancelAnimationFrame(frame);
   }, [visible, mode, selectedYear, selectedMonth]);
 
   const switchToYear = useCallback(() => setMode("year"), []);
   const switchToMonth = useCallback(() => setMode("month"), []);
 
   const handleClear = useCallback(() => {
-    onClear?.();
-  }, [onClear]);
+    if (onClear) {
+      onClear();
+      return;
+    }
+
+    const today = new Date();
+    setSelectedYear(today.getFullYear());
+    setSelectedMonth(today.getMonth());
+    setMode("year");
+  }, [onClear, setSelectedMonth, setSelectedYear]);
 
   const handleConfirm = useCallback(() => {
     onConfirm?.();
@@ -124,123 +175,130 @@ export function MonthPickerModal({
 
   if (!visible) return null;
 
-  const shortMonth = MONTHS[selectedMonth]?.slice(0, 3) ?? "";
-
   return (
     <Modal
       visible={visible}
       transparent
-      animationType="fade"
+      animationType="none"
       statusBarTranslucent
     >
-      <Pressable style={s.backdrop} onPress={onClose}>
-        <Pressable style={s.card} onPress={() => {}}>
-          {/* ── Header ──────────────────────────────────── */}
-          <View style={s.header}>
-            <Text style={s.headerLabel}>Select date</Text>
-            <Text style={s.headerDate}>
-              {shortMonth}, {selectedYear}
-            </Text>
-          </View>
+      <Animated.View style={[s.backdrop, { opacity: overlayOpacity }]}>
+        <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
 
-          <View style={s.divider} />
-
-          {/* ── Mode toggles ────────────────────────────── */}
-          <View style={s.toggleRow}>
-            <TouchableOpacity
-              onPress={switchToYear}
-              style={s.toggleBtn}
-              activeOpacity={0.7}
-            >
-              <Text style={[s.toggleText, mode === "year" && s.toggleActive]}>
-                {selectedYear}
+        <Animated.View
+          style={[
+            s.card,
+            {
+              opacity: cardOpacity,
+              transform: [{ scale: cardScale }, { translateY: cardTranslateY }],
+            },
+          ]}
+        >
+          <Pressable onPress={() => {}}>
+            <View style={s.header}>
+              <Text style={s.headerLabel}>Select date</Text>
+              <Text style={s.headerDate}>
+                {shortMonth}, {selectedYear}
               </Text>
-              <Text style={s.caret}>▲</Text>
-            </TouchableOpacity>
+            </View>
 
-            <TouchableOpacity
-              onPress={switchToMonth}
-              style={s.toggleBtn}
-              activeOpacity={0.7}
-            >
-              <Text style={[s.toggleText, mode === "month" && s.toggleActive]}>
-                {MONTHS[selectedMonth]}
-              </Text>
-              <Text style={s.caret}>▲</Text>
-            </TouchableOpacity>
-          </View>
+            <View style={s.divider} />
 
-          {/* ── Grid ────────────────────────────────────── */}
-          <ScrollView
-            ref={scrollRef}
-            style={s.grid}
-            contentContainerStyle={s.gridContent}
-            showsVerticalScrollIndicator={false}
-          >
-            {mode === "year"
-              ? YEAR_ROWS.map((row, ri) => (
-                  <View key={ri} style={s.row}>
-                    {row.map((year) => (
-                      <GridCell
-                        key={year}
-                        label={`${year}`}
-                        isSelected={year === selectedYear}
-                        onPress={() => setSelectedYear(year)}
-                      />
-                    ))}
-                  </View>
-                ))
-              : MONTH_ROWS.map((row, ri) => (
-                  <View key={ri} style={s.row}>
-                    {row.map((month, ci) => {
-                      const index = ri * 3 + ci;
-                      return (
-                        <GridCell
-                          key={month}
-                          label={month.slice(0, 3)}
-                          isSelected={index === selectedMonth}
-                          onPress={() => setSelectedMonth(index)}
-                        />
-                      );
-                    })}
-                  </View>
-                ))}
-          </ScrollView>
-
-          <View style={s.divider} />
-
-          {/* ── Actions ─────────────────────────────────── */}
-          <View style={s.actions}>
-            {/* Clear — always shown; calls onClear if provided, else resets */}
-            <TouchableOpacity
-              onPress={handleClear}
-              activeOpacity={0.7}
-              style={s.actionClear}
-            >
-              <Text style={s.actionText}>Clear</Text>
-            </TouchableOpacity>
-
-            {/* Cancel + OK shifted left via paddingRight */}
-            <View style={s.actionRight}>
-              <TouchableOpacity onPress={onClose} activeOpacity={0.7}>
-                <Text style={s.actionText}>Cancel</Text>
+            <View style={s.toggleRow}>
+              <TouchableOpacity
+                onPress={switchToYear}
+                style={s.toggleBtn}
+                activeOpacity={0.7}
+              >
+                <Text style={[s.toggleText, mode === "year" && s.toggleActive]}>
+                  {selectedYear}
+                </Text>
+                <Text style={s.caret}>▲</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={handleConfirm} activeOpacity={0.7}>
-                <Text style={[s.actionText, s.actionOk]}>OK</Text>
+
+              <TouchableOpacity
+                onPress={switchToMonth}
+                style={s.toggleBtn}
+                activeOpacity={0.7}
+              >
+                <Text
+                  style={[s.toggleText, mode === "month" && s.toggleActive]}
+                >
+                  {MONTHS[selectedMonth]}
+                </Text>
+                <Text style={s.caret}>▲</Text>
               </TouchableOpacity>
             </View>
-          </View>
-        </Pressable>
-      </Pressable>
+
+            <ScrollView
+              ref={scrollRef}
+              style={s.grid}
+              contentContainerStyle={s.gridContent}
+              showsVerticalScrollIndicator={false}
+              removeClippedSubviews
+            >
+              {mode === "year"
+                ? YEAR_ROWS.map((row, ri) => (
+                    <View key={ri} style={s.row}>
+                      {row.map((year) => (
+                        <GridCell
+                          key={year}
+                          label={`${year}`}
+                          isSelected={year === selectedYear}
+                          onPress={() => setSelectedYear(year)}
+                        />
+                      ))}
+                    </View>
+                  ))
+                : MONTH_ROWS.map((row, ri) => (
+                    <View key={ri} style={s.row}>
+                      {row.map((month, ci) => {
+                        const index = ri * 3 + ci;
+                        return (
+                          <GridCell
+                            key={month}
+                            label={month.slice(0, 3)}
+                            isSelected={index === selectedMonth}
+                            onPress={() => setSelectedMonth(index)}
+                          />
+                        );
+                      })}
+                    </View>
+                  ))}
+            </ScrollView>
+
+            <View style={s.divider} />
+
+            <View style={s.actions}>
+              <TouchableOpacity
+                onPress={handleClear}
+                activeOpacity={0.7}
+                style={s.actionClear}
+              >
+                <Text style={s.actionText}>Clear</Text>
+              </TouchableOpacity>
+
+              <View style={s.actionRight}>
+                <TouchableOpacity onPress={onClose} activeOpacity={0.7}>
+                  <Text style={s.actionText}>Cancel</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity onPress={handleConfirm} activeOpacity={0.7}>
+                  <Text style={s.actionText}>OK</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Pressable>
+        </Animated.View>
+      </Animated.View>
     </Modal>
   );
 }
 
-// ── StyleSheet ────────────────────────────────────────────────
 const s = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: C.overlay,
+    backgroundColor: "rgba(0,0,0,0.45)",
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 20,
@@ -248,21 +306,20 @@ const s = StyleSheet.create({
   card: {
     width: "100%",
     maxWidth: 380,
-    backgroundColor: C.surface,
+    backgroundColor: TW.bgPrimary,
     borderRadius: 28,
     overflow: "hidden",
-    elevation: 10,
+    elevation: 4,
     shadowColor: "#000",
-    shadowOpacity: 0.22,
-    shadowRadius: 14,
-    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.14,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 3 },
   },
-  // Header
   header: {
     paddingHorizontal: 24,
     paddingTop: 20,
     paddingBottom: 16,
-    backgroundColor: C.teal,
+    backgroundColor: TW.bgSecondary,
   },
   headerLabel: {
     fontSize: 11,
@@ -275,12 +332,13 @@ const s = StyleSheet.create({
   headerDate: {
     fontSize: 30,
     fontWeight: "400",
-    color: C.white,
+    color: "#FFFFFF",
     letterSpacing: -0.3,
   },
-  // Divider
-  divider: { height: 1, backgroundColor: C.divider },
-  // Toggles
+  divider: {
+    height: 1,
+    backgroundColor: "#EEF2F4",
+  },
   toggleRow: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -288,16 +346,38 @@ const s = StyleSheet.create({
     paddingTop: 14,
     paddingBottom: 6,
   },
-  toggleBtn: { flexDirection: "row", alignItems: "center", gap: 6 },
-  toggleText: { fontSize: 15, fontWeight: "700", color: C.textPrimary },
-  toggleActive: { color: C.teal },
-  caret: { color: C.teal, fontSize: 11 },
-  // Grid
-  grid: { maxHeight: 280 },
-  gridContent: { paddingHorizontal: 8, paddingBottom: 8 },
-  row: { flexDirection: "row" },
-  // Cell
-  cellOuter: { flex: 1, alignItems: "center", paddingVertical: 7 },
+  toggleBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  toggleText: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: TW.bgSecondary,
+  },
+  toggleActive: {
+    color: TW.bgSecondary,
+  },
+  caret: {
+    color: TW.bgSecondary,
+    fontSize: 11,
+  },
+  grid: {
+    maxHeight: 280,
+  },
+  gridContent: {
+    paddingHorizontal: 8,
+    paddingBottom: 8,
+  },
+  row: {
+    flexDirection: "row",
+  },
+  cellOuter: {
+    flex: 1,
+    alignItems: "center",
+    paddingVertical: 7,
+  },
   cellPill: {
     height: 40,
     minWidth: 80,
@@ -307,16 +387,24 @@ const s = StyleSheet.create({
     justifyContent: "center",
     paddingHorizontal: 10,
   },
-  cellPillSelected: { backgroundColor: C.yellow },
-  cellText: { fontSize: 16, color: C.textPrimary, fontWeight: "400" },
-  cellTextSelected: { color: C.teal, fontWeight: "800" },
-  // Actions
+  cellPillSelected: {
+    backgroundColor: TW.bgYellow,
+  },
+  cellText: {
+    fontSize: 16,
+    color: TW.bgSecondary,
+    fontWeight: "400",
+  },
+  cellTextSelected: {
+    color: TW.bgSecondary,
+    fontWeight: "800",
+  },
   actions: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     paddingLeft: 16,
-    paddingRight: 8, // tighter right edge → buttons shift left
+    paddingRight: 8,
     paddingVertical: 14,
   },
   actionClear: {
@@ -325,8 +413,13 @@ const s = StyleSheet.create({
   actionRight: {
     flexDirection: "row",
     gap: 20,
-    paddingRight: 8, // nudge Cancel + OK away from the card edge
+    paddingRight: 8,
   },
-  actionText: { color: C.teal, fontWeight: "700", fontSize: 14 },
-  actionOk: { color: C.teal },
+  actionText: {
+    color: TW.bgSecondary,
+    fontWeight: "700",
+    fontSize: 14,
+  },
 });
+
+export default MonthPickerModal;

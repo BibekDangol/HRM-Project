@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { FlatList, Pressable, Text, View } from "react-native";
 
 import HeaderWithSearch from "@/src/components/HeaderWithSearch";
-import LoadingIndicator from "@/src/components/LoadingIndicator"; // 👈 create or import a loading spinner
+import LoadingIndicator from "@/src/components/LoadingIndicator"; 
 import { useDebounce } from "@/src/hooks/useDebounce";
 import { fetchUsersService } from "@/src/services/admin.service";
 import { useUsersStore } from "@/src/store/useUsersStore";
@@ -15,8 +15,8 @@ const AttendanceUserList = () => {
   const router = useRouter();
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(true); // 👈 loading state
-  const { userProfile } = useUsersStore();
+  const [loading, setLoading] = useState(true); 
+  const { currentUserProfile  } = useUsersStore();
   const debouncedSearchQuery = useDebounce(search, 300);
   // const filteredUsers = users.filter((u) =>
   //   u.first_name?.toLowerCase().includes(debouncedSearchQuery.toLowerCase()),
@@ -24,11 +24,12 @@ const AttendanceUserList = () => {
   const getSupervisorName = () => "No supervisor";
 
   const loadUsers = useCallback(async () => {
-    if (!userProfile?.id) return;
+    if (!currentUserProfile ?.id) return;
+
     setLoading(true); // start loading
     try {
       const usersData = await fetchUsersService(
-        userProfile.organization_id,
+        currentUserProfile .organization_id,
         debouncedSearchQuery,
       );
       setUsers(usersData);
@@ -37,7 +38,7 @@ const AttendanceUserList = () => {
     } finally {
       setLoading(false);
     }
-  }, [userProfile?.id, userProfile?.organization_id, debouncedSearchQuery]);
+  }, [currentUserProfile ?.id, currentUserProfile ?.organization_id, debouncedSearchQuery]);
 
   useEffect(() => {
     loadUsers();

@@ -90,7 +90,8 @@ const CalendarRow = ({
         shadowOffset: { width: 0, height: 2 },
         elevation: isPast ? 0 : 2,
         opacity: isPast ? 0.5 : 1,
-      }}>
+      }}
+    >
       {/* Date block */}
       <View
         style={{
@@ -104,14 +105,16 @@ const CalendarRow = ({
           justifyContent: "center",
           marginRight: 14,
           flexShrink: 0,
-        }}>
+        }}
+      >
         <Text
           style={{
             color: "#64748B",
             fontSize: 10,
             fontWeight: "600",
             letterSpacing: 0.5,
-          }}>
+          }}
+        >
           {month}
         </Text>
         <Text
@@ -120,7 +123,8 @@ const CalendarRow = ({
             fontSize: 22,
             fontWeight: "800",
             lineHeight: 26,
-          }}>
+          }}
+        >
           {day}
         </Text>
         <Text style={{ color: "#94A3B8", fontSize: 12, fontWeight: "500" }}>
@@ -138,13 +142,15 @@ const CalendarRow = ({
               fontWeight: "700",
               letterSpacing: 0.6,
               marginBottom: 2,
-            }}>
+            }}
+          >
             {isToday ? "TODAY" : "UPCOMING"}
           </Text>
         )}
         <Text
           style={{ color: "#1B4A5A", fontSize: 15, fontWeight: "700" }}
-          numberOfLines={1}>
+          numberOfLines={1}
+        >
           {item.title}
         </Text>
         <Text style={{ color: "#94A3B8", fontSize: 12, marginTop: 3 }}>
@@ -162,7 +168,8 @@ const CalendarRow = ({
           marginLeft: 8,
           borderWidth: isHighlighted ? 1 : 0,
           borderColor: "#008080",
-        }}>
+        }}
+      >
         <Text
           style={{
             fontSize: 11,
@@ -172,7 +179,8 @@ const CalendarRow = ({
               : item.type === "holiday"
                 ? "#EF4444"
                 : "#3B82F6",
-          }}>
+          }}
+        >
           {item.type === "holiday" ? "Holiday" : "Event"}
         </Text>
       </View>
@@ -187,14 +195,15 @@ const EmptyState = ({ label }: { label: string }) => (
       borderRadius: 16,
       paddingVertical: 40,
       alignItems: "center",
-    }}>
+    }}
+  >
     <Text style={{ color: "#CBD5E1", fontSize: 12 }}>No {label} found</Text>
   </View>
 );
 
 export default function HolidaysEventsScreen() {
   const insets = useSafeAreaInsets();
-  const { userProfile } = useUsersStore();
+  const { currentUserProfile } = useUsersStore();
   const scrollRef = useRef<ScrollView>(null);
   const [items, setItems] = useState<CalendarItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -226,7 +235,7 @@ export default function HolidaysEventsScreen() {
   })();
 
   const fetchItems = useCallback(async () => {
-    const orgId = userProfile?.organization_id;
+    const orgId = currentUserProfile?.organization_id;
     if (!orgId) return;
     setLoading(true);
     try {
@@ -242,7 +251,7 @@ export default function HolidaysEventsScreen() {
     } finally {
       setLoading(false);
     }
-  }, [userProfile?.organization_id]);
+  }, [currentUserProfile?.organization_id]);
 
   useEffect(() => {
     fetchItems();
@@ -290,7 +299,8 @@ export default function HolidaysEventsScreen() {
             colors={["#1B4A5A"]}
             tintColor="#1B4A5A"
           />
-        }>
+        }
+      >
         {/* ── Top bar ── */}
         <View
           style={{
@@ -298,14 +308,16 @@ export default function HolidaysEventsScreen() {
             alignItems: "center",
             justifyContent: "space-between",
             marginBottom: 16,
-          }}>
+          }}
+        >
           {/* <BackButton floating onPress={() => router.back()} /> */}
           <Text
             style={{
               color: "#64748B",
               fontSize: 13,
               flex: 1,
-            }}>
+            }}
+          >
             <Text style={{ color: "#0F172A", fontWeight: "700" }}>
               {filtered.length}
             </Text>
@@ -327,7 +339,8 @@ export default function HolidaysEventsScreen() {
               justifyContent: "center",
               backgroundColor: filter !== "all" ? "#E2E8F0" : "#F1F5F9",
               opacity: pressed ? 0.7 : 1,
-            })}>
+            })}
+          >
             <Filter size={16} color="#64748B" strokeWidth={2.2} />
           </Pressable>
         </View>
@@ -353,14 +366,16 @@ export default function HolidaysEventsScreen() {
         visible={filterModalOpen}
         transparent
         animationType="none"
-        onRequestClose={() => setFilterModalOpen(false)}>
+        onRequestClose={() => setFilterModalOpen(false)}
+      >
         <Pressable
           style={{
             flex: 1,
             backgroundColor: "rgba(0,0,0,0.4)",
             justifyContent: "flex-end",
           }}
-          onPress={() => setFilterModalOpen(false)}>
+          onPress={() => setFilterModalOpen(false)}
+        >
           <Pressable
             onPress={() => {}}
             style={{
@@ -370,7 +385,8 @@ export default function HolidaysEventsScreen() {
               paddingHorizontal: 20,
               paddingTop: 12,
               paddingBottom: insets.bottom + 24,
-            }}>
+            }}
+          >
             <View style={{ alignItems: "center", marginBottom: 20 }}>
               <View
                 style={{
@@ -388,7 +404,8 @@ export default function HolidaysEventsScreen() {
                 fontSize: 16,
                 fontWeight: "700",
                 marginBottom: 16,
-              }}>
+              }}
+            >
               Filter by
             </Text>
 
@@ -410,14 +427,16 @@ export default function HolidaysEventsScreen() {
                     marginBottom: 8,
                     backgroundColor: isActive ? "#F1F5F9" : "#F8FAFC",
                     opacity: pressed ? 0.75 : 1,
-                  })}>
+                  })}
+                >
                   <Text
                     style={{
                       flex: 1,
                       fontSize: 15,
                       fontWeight: isActive ? "700" : "500",
                       color: isActive ? "#0F172A" : "#64748B",
-                    }}>
+                    }}
+                  >
                     {opt.label}
                   </Text>
                   {isActive && (
@@ -429,13 +448,15 @@ export default function HolidaysEventsScreen() {
                         backgroundColor: "#E2E8F0",
                         alignItems: "center",
                         justifyContent: "center",
-                      }}>
+                      }}
+                    >
                       <Text
                         style={{
                           color: "#0F172A",
                           fontSize: 12,
                           fontWeight: "800",
-                        }}>
+                        }}
+                      >
                         ✓
                       </Text>
                     </View>

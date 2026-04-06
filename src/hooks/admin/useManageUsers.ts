@@ -1,17 +1,18 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-
 import { Alert } from "react-native";
-import { adminAddUserService } from "@/src/services/admin/add-user-service";
+
 import { apiClient } from "@/src/api/apiClient";
-import { fetchCurrentUserProfleService } from "@/src/services/currentuser.service";
-import { fetchUsersService } from "@/src/services/admin.service";
-import { useAuthStore } from "@/src/store/useAuthStore";
 import { useDebounce } from "@/src/hooks/useDebounce";
+import { adminAddUserService } from "@/src/services/admin/add-user-service";
+import { fetchUsersService } from "@/src/services/admin.service";
+import { fetchCurrentUserProfleService } from "@/src/services/currentuser.service";
+import { useAuthStore } from "@/src/store/useAuthStore";
 import { useUsersStore } from "@/src/store/useUsersStore";
 
 export const useManageUsers = () => {
   const { user } = useAuthStore();
-  const { users, setUsers, setUserProfile, userProfile } = useUsersStore();
+  const { users, setUsers, currentUserProfile, setCurrentUserProfile } =
+    useUsersStore();
 
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 300);
@@ -31,28 +32,39 @@ export const useManageUsers = () => {
   const [editingUser, setEditingUser] = useState<any>(null);
   const [editRole, setEditRole] = useState("user");
   const [editSupervisor, setEditSupervisor] = useState<string | null>(null);
-
   const [tempPassword, setTempPassword] = useState<string | null>(null);
 
+  // ---------------- LOAD USERS ----------------
   const loadUsers = useCallback(async () => {
     if (!user?.id) return;
 
     try {
       setLoading(true);
 
-      const profile = await fetchCurrentUserProfleService(user.id);
-      setUserProfile(profile);
+      let profile = currentUserProfile;
+
+      if (!profile) {
+        profile = await fetchCurrentUserProfleService(user.id);
+        setCurrentUserProfile(profile);
+      }
 
       const data = await fetchUsersService(
         profile.organization_id,
         debouncedSearch,
       );
 
+
       setUsers(data);
     } finally {
       setLoading(false);
     }
-  }, [user?.id, debouncedSearch]);
+  }, [
+    user?.id,
+    currentUserProfile,
+    debouncedSearch,
+    setCurrentUserProfile,
+    setUsers,
+  ]);
 
   useEffect(() => {
     loadUsers();
@@ -100,10 +112,12 @@ export const useManageUsers = () => {
     );
   }, [users, activeTab]);
 
-  const pendingCount = users.filter((u) => u.status === "pending").length;
-  const activeCount = users.filter((u) => u.status === "active").length;
+  const pendingUsers = users.filter((u) => u.status === "pending");
+  const activeUsers = users.filter((u) => u.status === "active");
+  const pendingCount = pendingUsers.length;
+  const activeCount = activeUsers.length;
 
-  const tabs = [
+  const tabs: { key: "pending" | "active"; label: string; count: number }[] = [
     { key: "pending", label: "Pending", count: pendingCount },
     { key: "active", label: "Active", count: activeCount },
   ];
@@ -121,10 +135,11 @@ export const useManageUsers = () => {
 
   // 🔥 ADD USER
   const handleAddUser = async (data: any) => {
-    if (!userProfile) {
+    if (!currentUserProfile) {
       Alert.alert("Error", "Profile not ready");
       return;
     }
+
 
     try {
       setIsAddingUser(true);
@@ -133,16 +148,19 @@ export const useManageUsers = () => {
         email: data.email,
         firstName: data.first_name,
         lastName: data.last_name,
-        orgId: userProfile.organization_id,
+        orgId: currentUserProfile.organization_id,
         supervisor_id: data.supervisor_id,
       });
+
 
       if (response.tempPassword) {
         setTempPassword(response.tempPassword);
       }
 
-      const updated = await fetchUsersService(userProfile.organization_id);
-      setUsers(updated);
+      const updatedUsers = await fetchUsersService(
+        currentUserProfile.organization_id,
+      );
+      setUsers(updatedUsers);
 
       setShowAddModal(false);
       Alert.alert("Success", "User added successfully");
@@ -162,7 +180,7 @@ export const useManageUsers = () => {
   };
 
   const handleSubmitEdit = async (userId: string) => {
-    if (!userProfile) return;
+    if (!currentUserProfile) return;
 
     try {
       setIsEditingUser(true);
@@ -178,7 +196,12 @@ export const useManageUsers = () => {
         return;
       }
 
-      const updated = await fetchUsersService(userProfile.organization_id);
+      Alert.alert("Success", "User updated successfully");
+
+      const updated = await fetchUsersService(
+        currentUserProfile.organization_id,
+      );
+
       setUsers(updated);
 
       setShowEditModal(false);
@@ -194,7 +217,7 @@ export const useManageUsers = () => {
 
   // 🔥 DELETE USER
   const handleDeleteUser = async (id?: string) => {
-    if (!id || !userProfile) return;
+    if (!id || !currentUserProfile) return;
 
     try {
       setIsDeletingUser(true);
@@ -203,7 +226,10 @@ export const useManageUsers = () => {
         userId: id,
       });
 
-      const updated = await fetchUsersService(userProfile.organization_id);
+      const updated = await fetchUsersService(
+        currentUserProfile.organization_id,
+      );
+
       setUsers(updated);
     } catch (err: any) {
       Alert.alert("Error", err.message);
@@ -242,11 +268,17 @@ export const useManageUsers = () => {
     setEditRole,
     editSupervisor,
     setEditSupervisor,
+    getSupervisorName,
 
+    filteredUsers,
+    tabs,
+
+    onRefresh,
     handleAddUser,
     handleEditUser,
     handleSubmitEdit,
     handleDeleteUser,
+
 
     tempPassword,
     setTempPassword,

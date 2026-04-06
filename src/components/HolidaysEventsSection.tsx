@@ -1,9 +1,16 @@
-import React, { useMemo, useState } from "react";
-import { Pressable, Text, View, useWindowDimensions } from "react-native";
-
-import { TW } from "@/theme/twStyles";
+import React, { useEffect, useMemo, useRef } from "react";
+import { Pressable, Text, useWindowDimensions, View } from "react-native";
+import Animated, {
+  interpolate,
+  interpolateColor,
+  SharedValue,
+  useAnimatedStyle,
+  useSharedValue,
+} from "react-native-reanimated";
 import Carousel from "react-native-reanimated-carousel";
 import tw from "twrnc";
+
+import { TW } from "@/theme/twStyles";
 
 export type CalendarItem = {
   id: string;
@@ -33,7 +40,6 @@ const parseLocalDate = (dateString: string) => {
   return new Date(year, month - 1, day);
 };
 
-// Nepal-safe today key in YYYY-MM-DD
 const getNepalTodayKey = () => {
   const now = new Date();
   const parts = new Intl.DateTimeFormat("en-CA", {
@@ -50,243 +56,145 @@ const getNepalTodayKey = () => {
   return `${year}-${month}-${day}`;
 };
 
-export const HolidaysEventsSection = ({
-  calendarItems,
-  calendarLoading,
-  onViewAll,
-  onCardPress,
-}: Props) => {
-  const { width: screenWidth } = useWindowDimensions();
-
-  // keep full card size
-  const cardWidth = screenWidth - 44;
-
-  // use page width only to create spacing between cards
-  const pageWidth = cardWidth + CARD_GAP;
-
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  const todayKey = useMemo(() => getNepalTodayKey(), []);
-
-  const upcomingItems = useMemo(() => {
-    return calendarItems
-      .filter((item) => {
-        const endKey = item.end_date ?? item.start_date;
-        return endKey >= todayKey;
-      })
-      .sort((a, b) => {
-        // Clamp start to today so ongoing events don't float above future ones
-        const aKey = a.start_date >= todayKey ? a.start_date : todayKey;
-        const bKey = b.start_date >= todayKey ? b.start_date : todayKey;
-        return aKey.localeCompare(bKey);
-      });
-  }, [calendarItems, todayKey]);
-
-  const visibleItems = upcomingItems.slice(0, MAX_VISIBLE);
-  const total = visibleItems.length;
-
-  // highlight only the nearest upcoming valid card
-  const highlightedItemId = useMemo(() => {
-    const todayOrFuture = visibleItems.find(
-      (item) => item.start_date >= todayKey,
-    );
-    return (todayOrFuture ?? visibleItems[0])?.id ?? null;
-  }, [visibleItems, todayKey]);
-
-  const formatMonthDay = (d: string) => {
-    const date = parseLocalDate(d);
-    const month = date
-      .toLocaleDateString("en-US", { month: "short" })
-      .toUpperCase();
-    const day = date.getDate().toString().padStart(2, "0");
-    const dayName = date.toLocaleDateString("en-US", { weekday: "short" });
-
-    return { month, day, dayName };
+const formatMonthDay = (dateString: string) => {
+  const date = parseLocalDate(dateString);
+  return {
+    month: date.toLocaleDateString("en-US", { month: "short" }).toUpperCase(),
+    day: String(date.getDate()).padStart(2, "0"),
+    dayName: date.toLocaleDateString("en-US", { weekday: "short" }),
   };
+};
 
-  const formatWeekday = (d: string) =>
-    parseLocalDate(d).toLocaleDateString("en-US", {
-      weekday: "long",
-    });
+const formatWeekday = (dateString: string) =>
+  parseLocalDate(dateString).toLocaleDateString("en-US", { weekday: "long" });
 
-  const renderCard = ({ item }: { item: CalendarItem; index: number }) => {
-    const { month, day, dayName } = formatMonthDay(item.start_date);
+const isActiveToday = (item: CalendarItem, todayKey: string) => {
+  const endKey = item.end_date ?? item.start_date;
+  return item.start_date <= todayKey && endKey >= todayKey;
+};
 
-    const isHighlighted = item.id === highlightedItemId;
-    const isHoliday = item.type === "holiday";
+const isUpcoming = (item: CalendarItem, todayKey: string) => {
+  const endKey = item.end_date ?? item.start_date;
+  return endKey >= todayKey;
+};
 
-    const badgeBg = isHoliday ? "#FEE2E2" : "#EEF2FF";
-    const badgeText = isHoliday ? "#B91C1C" : "#4338CA";
-    const badgeDot = isHoliday ? "#EF4444" : "#6366F1";
+// ─── Pagination dot ────────────────────────────────────────────────────────────
 
-    const card = (
-      <View
+function PaginationDot({
+  index,
+  progress,
+}: {
+  index: number;
+  progress: SharedValue<number>;
+}) {
+  const animatedStyle = useAnimatedStyle(() => {
+    const distance = Math.abs(progress.value - index);
+    return {
+      width: interpolate(distance, [0, 1], [18, 6], "clamp"),
+      opacity: interpolate(distance, [0, 1], [1, 0.55], "clamp"),
+      transform: [{ scale: interpolate(distance, [0, 1], [1.05, 1], "clamp") }],
+      backgroundColor: interpolateColor(
+        distance,
+        [0, 1],
+        ["#1B4A5A", "#DCE3EA"],
+      ),
+    };
+  });
+
+  return (
+    <Animated.View style={[{ height: 6, borderRadius: 999 }, animatedStyle]} />
+  );
+}
+
+// ─── Date block (static, no highlight dependency) ──────────────────────────────
+
+function CardDateBlock({
+  month,
+  day,
+  dayName,
+}: {
+  month: string;
+  day: string;
+  dayName: string;
+}) {
+  return (
+    <View
+      style={{
+        alignItems: "center",
+        width: 44,
+        backgroundColor: "#F8FAFC",
+        borderRadius: 8,
+        paddingVertical: 6,
+        paddingHorizontal: 4,
+      }}
+    >
+      <Text
         style={{
-          width: cardWidth,
-          height: CARD_HEIGHT,
-          borderRadius: CARD_RADIUS,
-          backgroundColor: isHighlighted ? "#F0F9FF" : "#FFFFFF",
-          flexDirection: "row",
-          alignItems: "center",
-          paddingHorizontal: 12,
-          gap: 12,
-          borderWidth: 1,
-          borderColor: isHighlighted ? "#BAE6FD" : "#E2E8F0",
+          color: "#94A3B8",
+          fontSize: 9,
+          fontWeight: "600",
+          letterSpacing: 0.5,
+          textTransform: "uppercase",
         }}
       >
-        <View
-          style={{
-            alignItems: "center",
-            width: 44,
-            backgroundColor: isHighlighted ? "#FFFFFF" : "#F8FAFC",
-            borderRadius: 8,
-            paddingVertical: 6,
-            paddingHorizontal: 4,
-          }}
-        >
-          <Text
-            style={{
-              color: "#94A3B8",
-              fontSize: 9,
-              fontWeight: "600",
-              letterSpacing: 0.5,
-              textTransform: "uppercase",
-            }}
-          >
-            {month}
-          </Text>
-
-          <Text
-            style={{
-              color: "#0F172A",
-              fontSize: 20,
-              fontWeight: "700",
-              lineHeight: 24,
-            }}
-          >
-            {day}
-          </Text>
-
-          <Text
-            style={{
-              color: "#94A3B8",
-              fontSize: 9,
-              fontWeight: "500",
-            }}
-          >
-            {dayName}
-          </Text>
-        </View>
-
-        <View
-          style={{
-            width: 1,
-            alignSelf: "stretch",
-            backgroundColor: isHighlighted ? "#BAE6FD" : "#E2E8F0",
-            marginVertical: 10,
-          }}
-        />
-
-        <View style={{ flex: 1, gap: 4 }}>
-          {isHighlighted && (
-            <Text
-              style={{
-                color: "#64748B",
-                fontSize: 9,
-                fontWeight: "700",
-                letterSpacing: 0.6,
-              }}
-            >
-              UPCOMING
-            </Text>
-          )}
-
-          <Text
-            style={{
-              color: "#0F172A",
-              fontSize: 14,
-              fontWeight: "600",
-            }}
-            numberOfLines={1}
-          >
-            {item.title}
-          </Text>
-
-          <Text
-            style={{
-              color: "#94A3B8",
-              fontSize: 12,
-            }}
-            numberOfLines={1}
-          >
-            {formatWeekday(item.start_date)}
-          </Text>
-        </View>
-
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 5,
-            backgroundColor: badgeBg,
-            paddingHorizontal: 9,
-            paddingVertical: 4,
-            borderRadius: 999,
-            alignSelf: "center",
-          }}
-        >
-          <View
-            style={{
-              width: 6,
-              height: 6,
-              borderRadius: 999,
-              backgroundColor: badgeDot,
-            }}
-          />
-          <Text
-            style={{
-              fontSize: 11,
-              fontWeight: "600",
-              color: badgeText,
-            }}
-          >
-            {isHoliday ? "Holiday" : "Event"}
-          </Text>
-        </View>
-      </View>
-    );
-
-    const wrappedCard = (
-      <View
+        {month}
+      </Text>
+      <Text
         style={{
-          width: pageWidth,
-          height: CARD_HEIGHT,
-          justifyContent: "center",
-          alignItems: "flex-start",
-          paddingRight: CARD_GAP,
+          color: "#0F172A",
+          fontSize: 20,
+          fontWeight: "700",
+          lineHeight: 24,
         }}
       >
-        {card}
-      </View>
-    );
+        {day}
+      </Text>
+      <Text style={{ color: "#94A3B8", fontSize: 9, fontWeight: "500" }}>
+        {dayName}
+      </Text>
+    </View>
+  );
+}
 
-    if (onCardPress) {
-      return (
-        <Pressable
-          onPress={() => onCardPress(item)}
-          style={({ pressed }) => ({
-            opacity: pressed ? 0.75 : 1,
-          })}
-        >
-          {wrappedCard}
-        </Pressable>
-      );
-    }
+// ─── Type badge ────────────────────────────────────────────────────────────────
 
-    return wrappedCard;
-  };
+function TypeBadge({ isHoliday }: { isHoliday: boolean }) {
+  const badgeBg = isHoliday ? "#FEE2E2" : "#EEF2FF";
+  const badgeText = isHoliday ? "#B91C1C" : "#4338CA";
+  const badgeDot = isHoliday ? "#EF4444" : "#6366F1";
 
-  const SkeletonCard = () => (
+  return (
+    <View
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 5,
+        backgroundColor: badgeBg,
+        paddingHorizontal: 9,
+        paddingVertical: 4,
+        borderRadius: 999,
+        alignSelf: "center",
+      }}
+    >
+      <View
+        style={{
+          width: 6,
+          height: 6,
+          borderRadius: 999,
+          backgroundColor: badgeDot,
+        }}
+      />
+      <Text style={{ fontSize: 11, fontWeight: "600", color: badgeText }}>
+        {isHoliday ? "Holiday" : "Event"}
+      </Text>
+    </View>
+  );
+}
+
+// ─── Skeleton ─────────────────────────────────────────────────────────────────
+
+function SkeletonCard({ cardWidth }: { cardWidth: number }) {
+  return (
     <View
       style={{
         width: cardWidth,
@@ -337,7 +245,6 @@ export const HolidaysEventsSection = ({
           }}
         />
       </View>
-
       <View
         style={{
           width: 1,
@@ -346,7 +253,6 @@ export const HolidaysEventsSection = ({
           marginVertical: 10,
         }}
       />
-
       <View style={{ flex: 1, gap: 6 }}>
         <View
           style={{
@@ -365,7 +271,6 @@ export const HolidaysEventsSection = ({
           }}
         />
       </View>
-
       <View
         style={{
           width: 60,
@@ -376,9 +281,202 @@ export const HolidaysEventsSection = ({
       />
     </View>
   );
+}
+
+function AnimatedCard({
+  item,
+  index,
+  cardWidth,
+  pageWidth,
+  progress,
+  todayKey,
+  onCardPress,
+}: {
+  item: CalendarItem;
+  index: number;
+  cardWidth: number;
+  pageWidth: number;
+  progress: SharedValue<number>;
+  todayKey: string;
+  onCardPress?: (item: CalendarItem) => void;
+}) {
+  const { month, day, dayName } = formatMonthDay(item.start_date);
+  const isHoliday = item.type === "holiday";
+  // ✅ Only today-active cards ever get the highlight colours
+  const activeToday = isActiveToday(item, todayKey);
+
+  const cardShellStyle = useAnimatedStyle(() => {
+    // Upcoming cards: always plain white — skip interpolation entirely
+    if (!activeToday) {
+      return {
+        backgroundColor: "#FFFFFF",
+        borderColor: "#E2E8F0",
+      };
+    }
+    // Today card: fade highlight in when centred
+    const dist = Math.abs(progress.value - index);
+    return {
+      backgroundColor: interpolateColor(dist, [0, 0.6], ["#F0F9FF", "#FFFFFF"]),
+      borderColor: interpolateColor(dist, [0, 0.6], ["#BAE6FD", "#E2E8F0"]),
+    };
+  });
+
+  const dividerStyle = useAnimatedStyle(() => {
+    if (!activeToday) return { backgroundColor: "#E2E8F0" };
+    const dist = Math.abs(progress.value - index);
+    return {
+      backgroundColor: interpolateColor(dist, [0, 0.6], ["#BAE6FD", "#E2E8F0"]),
+    };
+  });
+
+  const inner = (
+    <View
+      style={{
+        width: pageWidth,
+        height: CARD_HEIGHT,
+        justifyContent: "center",
+        alignItems: "flex-start",
+        paddingRight: CARD_GAP,
+      }}
+    >
+      <Animated.View
+        style={[
+          {
+            width: cardWidth,
+            height: CARD_HEIGHT,
+            borderRadius: CARD_RADIUS,
+            flexDirection: "row",
+            alignItems: "center",
+            paddingHorizontal: 12,
+            gap: 12,
+            borderWidth: 1,
+          },
+          cardShellStyle,
+        ]}
+      >
+        <CardDateBlock month={month} day={day} dayName={dayName} />
+
+        <Animated.View
+          style={[
+            { width: 1, alignSelf: "stretch", marginVertical: 10 },
+            dividerStyle,
+          ]}
+        />
+
+        {/* ✅ No label — just title + weekday */}
+        <View style={{ flex: 1, gap: 4 }}>
+          <Text
+            style={{ color: "#0F172A", fontSize: 14, fontWeight: "600" }}
+            numberOfLines={1}
+          >
+            {item.title}
+          </Text>
+          <Text style={{ color: "#94A3B8", fontSize: 12 }} numberOfLines={1}>
+            {formatWeekday(item.start_date)}
+          </Text>
+        </View>
+
+        <TypeBadge isHoliday={isHoliday} />
+      </Animated.View>
+    </View>
+  );
+
+  if (!onCardPress) return inner;
+
+  return (
+    <Pressable
+      onPress={() => onCardPress(item)}
+      style={({ pressed }) => ({ opacity: pressed ? 0.82 : 1 })}
+    >
+      {inner}
+    </Pressable>
+  );
+}
+// ─── Main section ──────────────────────────────────────────────────────────────
+
+export const HolidaysEventsSection = ({
+  calendarItems,
+  calendarLoading,
+  onViewAll,
+  onCardPress,
+}: Props) => {
+  const { width: screenWidth } = useWindowDimensions();
+  const carouselRef = useRef<any>(null);
+
+  const cardWidth = screenWidth - 44;
+  const pageWidth = cardWidth + CARD_GAP;
+
+  const progress = useSharedValue(0);
+
+  const todayKey = useMemo(() => getNepalTodayKey(), []);
+
+  // Keep only upcoming items, today-active ones first, then by nearest date
+  const visibleItems = useMemo(() => {
+    const upcoming = calendarItems
+      .filter((item) => isUpcoming(item, todayKey))
+      .sort((a, b) => {
+        const aToday = isActiveToday(a, todayKey);
+        const bToday = isActiveToday(b, todayKey);
+        if (aToday && !bToday) return -1;
+        if (!aToday && bToday) return 1;
+        // Both upcoming: sort ascending by nearest relevant date
+        const aKey = a.start_date >= todayKey ? a.start_date : todayKey;
+        const bKey = b.start_date >= todayKey ? b.start_date : todayKey;
+        return aKey.localeCompare(bKey);
+      });
+
+    return upcoming.slice(0, MAX_VISIBLE);
+  }, [calendarItems, todayKey]);
+
+  const total = visibleItems.length;
+
+  // Start at today-active card → nearest upcoming card → 0
+  const initialIndex = useMemo(() => {
+    const todayIdx = visibleItems.findIndex((item) =>
+      isActiveToday(item, todayKey),
+    );
+    if (todayIdx !== -1) return todayIdx;
+    const futureIdx = visibleItems.findIndex(
+      (item) => item.start_date >= todayKey,
+    );
+    if (futureIdx !== -1) return futureIdx;
+    return 0;
+  }, [visibleItems, todayKey]);
+
+  // Sync progress + carousel position when the list changes
+  useEffect(() => {
+    if (!total) {
+      progress.value = 0;
+      return;
+    }
+    progress.value = initialIndex;
+    requestAnimationFrame(() => {
+      carouselRef.current?.scrollTo?.({ index: initialIndex, animated: false });
+    });
+  }, [initialIndex, total]);
+
+  const renderItem = ({
+    item,
+    index,
+  }: {
+    item: CalendarItem;
+    index: number;
+  }) => (
+    <AnimatedCard
+      key={item.id}
+      item={item}
+      index={index}
+      cardWidth={cardWidth}
+      pageWidth={pageWidth}
+      progress={progress}
+      todayKey={todayKey}
+      onCardPress={onCardPress}
+    />
+  );
 
   return (
     <View style={{ marginTop: 20 }}>
+      {/* Header */}
       <View
         style={{
           flexDirection: "row",
@@ -390,7 +488,6 @@ export const HolidaysEventsSection = ({
         <Text style={tw`font-semibold ${TW.textPrimary} text-lg`}>
           Holidays &amp; Events
         </Text>
-
         <Pressable
           onPress={onViewAll}
           style={({ pressed }) => ({
@@ -399,20 +496,15 @@ export const HolidaysEventsSection = ({
             paddingHorizontal: 10,
           })}
         >
-          <Text
-            style={{
-              color: "#475569",
-              fontSize: 12,
-              fontWeight: "600",
-            }}
-          >
+          <Text style={{ color: "#475569", fontSize: 12, fontWeight: "600" }}>
             View All
           </Text>
         </Pressable>
       </View>
 
+      {/* Body */}
       {calendarLoading ? (
-        <SkeletonCard />
+        <SkeletonCard cardWidth={cardWidth} />
       ) : total === 0 ? (
         <View
           style={{
@@ -425,48 +517,33 @@ export const HolidaysEventsSection = ({
             gap: 6,
           }}
         >
-          <Text
-            style={{
-              color: "#CBD5E1",
-              fontWeight: "600",
-              fontSize: 14,
-            }}
-          >
+          <Text style={{ color: "#CBD5E1", fontWeight: "600", fontSize: 14 }}>
             No upcoming events
           </Text>
-
-          <Text
-            style={{
-              color: "#E2E8F0",
-              fontSize: 12,
-            }}
-          >
+          <Text style={{ color: "#E2E8F0", fontSize: 12 }}>
             No holidays or events scheduled
           </Text>
         </View>
       ) : (
         <>
           <Carousel
+            ref={carouselRef}
             loop={false}
             width={pageWidth}
             height={CARD_HEIGHT}
             data={visibleItems}
-            pagingEnabled={true}
-            snapEnabled={true}
+            defaultIndex={initialIndex}
+            pagingEnabled
+            snapEnabled
             overscrollEnabled={false}
             autoPlay={false}
             enabled={total > 1}
-            scrollAnimationDuration={280}
-            style={{
-              width: cardWidth,
-            }}
+            scrollAnimationDuration={350}
+            style={{ width: cardWidth }}
             onProgressChange={(_, absoluteProgress) => {
-              const index = Math.round(absoluteProgress);
-              if (index >= 0 && index < total && index !== currentIndex) {
-                setCurrentIndex(index);
-              }
+              progress.value = absoluteProgress; // drives every card + every dot
             }}
-            renderItem={renderCard}
+            renderItem={renderItem}
           />
 
           {total > 1 && (
@@ -480,14 +557,10 @@ export const HolidaysEventsSection = ({
               }}
             >
               {visibleItems.map((_, i) => (
-                <View
-                  key={i}
-                  style={{
-                    width: i === currentIndex ? 16 : 6,
-                    height: 6,
-                    borderRadius: 999,
-                    backgroundColor: i === currentIndex ? "#1B4A5A" : "#DCE3EA",
-                  }}
+                <PaginationDot
+                  key={visibleItems[i].id}
+                  index={i}
+                  progress={progress}
                 />
               ))}
             </View>
