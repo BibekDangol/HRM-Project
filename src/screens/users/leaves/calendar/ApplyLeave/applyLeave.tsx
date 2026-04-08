@@ -75,7 +75,7 @@ function getDateParts(dateStr?: string) {
 export default function ApplyLeaveScreen() {
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
-  const { userProfile } = useUsersStore();
+  const { currentUserProfile } = useUsersStore();
   const todayStr = new Date().toISOString().split("T")[0];
 
   const [selectedLeaveType, setSelectedLeaveType] = useState<number | null>(
@@ -258,7 +258,7 @@ export default function ApplyLeaveScreen() {
       if (!user?.id) return;
 
       setLoadingTypes(true);
-      const orgId = userProfile?.organization_id;
+      const orgId = currentUserProfile?.organization_id;
       if (!orgId) {
         Alert.alert("Error", "Organization not found.");
         return;

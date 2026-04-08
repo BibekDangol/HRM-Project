@@ -184,7 +184,7 @@ export default function LeaveView({
       />
 
       {/* Pagination */}
-      {shouldShowPagination && (
+      {/* {shouldShowPagination && (
         <Pagination
           page={page}
           totalPages={totalPages}
@@ -194,7 +194,7 @@ export default function LeaveView({
           TW={TW}
           tw={tw}
         />
-      )}
+      )} */}
     </View>
   );
 }

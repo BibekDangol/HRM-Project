@@ -11,15 +11,14 @@ import Carousel from "react-native-reanimated-carousel";
 import tw from "twrnc";
 
 import { TW } from "@/theme/twStyles";
-
-export type CalendarItem = {
-  id: string;
-  title: string;
-  type: "holiday" | "event";
-  start_date: string;
-  end_date?: string | null;
-  color: string;
-};
+import {
+  CalendarItem,
+  formatMonthDay,
+  formatWeekday,
+  getNepalTodayKey,
+  getSyncedCalendarItems,
+  isActiveToday,
+} from "@/src/utils/calendar.utils";
 
 type Props = {
   calendarItems: CalendarItem[];
@@ -35,51 +34,6 @@ const MAX_VISIBLE = 5;
 const CARD_HEIGHT = 86;
 const CARD_GAP = 12;
 
-const parseLocalDate = (dateString: string) => {
-  const [year, month, day] = dateString.split("-").map(Number);
-  return new Date(year, month - 1, day);
-};
-
-const getNepalTodayKey = () => {
-  const now = new Date();
-  const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Kathmandu",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).formatToParts(now);
-
-  const year = parts.find((p) => p.type === "year")?.value ?? "0000";
-  const month = parts.find((p) => p.type === "month")?.value ?? "00";
-  const day = parts.find((p) => p.type === "day")?.value ?? "00";
-
-  return `${year}-${month}-${day}`;
-};
-
-const formatMonthDay = (dateString: string) => {
-  const date = parseLocalDate(dateString);
-  return {
-    month: date.toLocaleDateString("en-US", { month: "short" }).toUpperCase(),
-    day: String(date.getDate()).padStart(2, "0"),
-    dayName: date.toLocaleDateString("en-US", { weekday: "short" }),
-  };
-};
-
-const formatWeekday = (dateString: string) =>
-  parseLocalDate(dateString).toLocaleDateString("en-US", { weekday: "long" });
-
-const isActiveToday = (item: CalendarItem, todayKey: string) => {
-  const endKey = item.end_date ?? item.start_date;
-  return item.start_date <= todayKey && endKey >= todayKey;
-};
-
-const isUpcoming = (item: CalendarItem, todayKey: string) => {
-  const endKey = item.end_date ?? item.start_date;
-  return endKey >= todayKey;
-};
-
-// ─── Pagination dot ────────────────────────────────────────────────────────────
-
 function PaginationDot({
   index,
   progress,
@@ -89,6 +43,7 @@ function PaginationDot({
 }) {
   const animatedStyle = useAnimatedStyle(() => {
     const distance = Math.abs(progress.value - index);
+
     return {
       width: interpolate(distance, [0, 1], [18, 6], "clamp"),
       opacity: interpolate(distance, [0, 1], [1, 0.55], "clamp"),
@@ -96,7 +51,7 @@ function PaginationDot({
       backgroundColor: interpolateColor(
         distance,
         [0, 1],
-        ["#1B4A5A", "#DCE3EA"],
+        ["#1B4A5A", "#DCE3EA"]
       ),
     };
   });
@@ -105,8 +60,6 @@ function PaginationDot({
     <Animated.View style={[{ height: 6, borderRadius: 999 }, animatedStyle]} />
   );
 }
-
-// ─── Date block (static, no highlight dependency) ──────────────────────────────
 
 function CardDateBlock({
   month,
@@ -139,6 +92,7 @@ function CardDateBlock({
       >
         {month}
       </Text>
+
       <Text
         style={{
           color: "#0F172A",
@@ -149,14 +103,13 @@ function CardDateBlock({
       >
         {day}
       </Text>
+
       <Text style={{ color: "#94A3B8", fontSize: 9, fontWeight: "500" }}>
         {dayName}
       </Text>
     </View>
   );
 }
-
-// ─── Type badge ────────────────────────────────────────────────────────────────
 
 function TypeBadge({ isHoliday }: { isHoliday: boolean }) {
   const badgeBg = isHoliday ? "#FEE2E2" : "#EEF2FF";
@@ -184,14 +137,13 @@ function TypeBadge({ isHoliday }: { isHoliday: boolean }) {
           backgroundColor: badgeDot,
         }}
       />
+
       <Text style={{ fontSize: 11, fontWeight: "600", color: badgeText }}>
         {isHoliday ? "Holiday" : "Event"}
       </Text>
     </View>
   );
 }
-
-// ─── Skeleton ─────────────────────────────────────────────────────────────────
 
 function SkeletonCard({ cardWidth }: { cardWidth: number }) {
   return (
@@ -245,6 +197,7 @@ function SkeletonCard({ cardWidth }: { cardWidth: number }) {
           }}
         />
       </View>
+
       <View
         style={{
           width: 1,
@@ -253,6 +206,7 @@ function SkeletonCard({ cardWidth }: { cardWidth: number }) {
           marginVertical: 10,
         }}
       />
+
       <View style={{ flex: 1, gap: 6 }}>
         <View
           style={{
@@ -271,6 +225,7 @@ function SkeletonCard({ cardWidth }: { cardWidth: number }) {
           }}
         />
       </View>
+
       <View
         style={{
           width: 60,
@@ -302,19 +257,18 @@ function AnimatedCard({
 }) {
   const { month, day, dayName } = formatMonthDay(item.start_date);
   const isHoliday = item.type === "holiday";
-  // ✅ Only today-active cards ever get the highlight colours
   const activeToday = isActiveToday(item, todayKey);
 
   const cardShellStyle = useAnimatedStyle(() => {
-    // Upcoming cards: always plain white — skip interpolation entirely
     if (!activeToday) {
       return {
         backgroundColor: "#FFFFFF",
         borderColor: "#E2E8F0",
       };
     }
-    // Today card: fade highlight in when centred
+
     const dist = Math.abs(progress.value - index);
+
     return {
       backgroundColor: interpolateColor(dist, [0, 0.6], ["#F0F9FF", "#FFFFFF"]),
       borderColor: interpolateColor(dist, [0, 0.6], ["#BAE6FD", "#E2E8F0"]),
@@ -323,7 +277,9 @@ function AnimatedCard({
 
   const dividerStyle = useAnimatedStyle(() => {
     if (!activeToday) return { backgroundColor: "#E2E8F0" };
+
     const dist = Math.abs(progress.value - index);
+
     return {
       backgroundColor: interpolateColor(dist, [0, 0.6], ["#BAE6FD", "#E2E8F0"]),
     };
@@ -363,7 +319,6 @@ function AnimatedCard({
           ]}
         />
 
-        {/* ✅ No label — just title + weekday */}
         <View style={{ flex: 1, gap: 4 }}>
           <Text
             style={{ color: "#0F172A", fontSize: 14, fontWeight: "600" }}
@@ -371,6 +326,7 @@ function AnimatedCard({
           >
             {item.title}
           </Text>
+
           <Text style={{ color: "#94A3B8", fontSize: 12 }} numberOfLines={1}>
             {formatWeekday(item.start_date)}
           </Text>
@@ -392,7 +348,6 @@ function AnimatedCard({
     </Pressable>
   );
 }
-// ─── Main section ──────────────────────────────────────────────────────────────
 
 export const HolidaysEventsSection = ({
   calendarItems,
@@ -405,55 +360,46 @@ export const HolidaysEventsSection = ({
 
   const cardWidth = screenWidth - 44;
   const pageWidth = cardWidth + CARD_GAP;
-
   const progress = useSharedValue(0);
 
   const todayKey = useMemo(() => getNepalTodayKey(), []);
 
-  // Keep only upcoming items, today-active ones first, then by nearest date
-  const visibleItems = useMemo(() => {
-    const upcoming = calendarItems
-      .filter((item) => isUpcoming(item, todayKey))
-      .sort((a, b) => {
-        const aToday = isActiveToday(a, todayKey);
-        const bToday = isActiveToday(b, todayKey);
-        if (aToday && !bToday) return -1;
-        if (!aToday && bToday) return 1;
-        // Both upcoming: sort ascending by nearest relevant date
-        const aKey = a.start_date >= todayKey ? a.start_date : todayKey;
-        const bKey = b.start_date >= todayKey ? b.start_date : todayKey;
-        return aKey.localeCompare(bKey);
-      });
-
-    return upcoming.slice(0, MAX_VISIBLE);
+  const syncedItems = useMemo(() => {
+    return getSyncedCalendarItems(calendarItems, todayKey, "all");
   }, [calendarItems, todayKey]);
+
+  const visibleItems = useMemo(() => {
+    return syncedItems.slice(0, MAX_VISIBLE);
+  }, [syncedItems]);
 
   const total = visibleItems.length;
 
-  // Start at today-active card → nearest upcoming card → 0
   const initialIndex = useMemo(() => {
     const todayIdx = visibleItems.findIndex((item) =>
-      isActiveToday(item, todayKey),
+      isActiveToday(item, todayKey)
     );
+
     if (todayIdx !== -1) return todayIdx;
-    const futureIdx = visibleItems.findIndex(
-      (item) => item.start_date >= todayKey,
-    );
+
+    const futureIdx = visibleItems.findIndex((item) => item.start_date >= todayKey);
+
     if (futureIdx !== -1) return futureIdx;
+
     return 0;
   }, [visibleItems, todayKey]);
 
-  // Sync progress + carousel position when the list changes
   useEffect(() => {
     if (!total) {
       progress.value = 0;
       return;
     }
+
     progress.value = initialIndex;
+
     requestAnimationFrame(() => {
       carouselRef.current?.scrollTo?.({ index: initialIndex, animated: false });
     });
-  }, [initialIndex, total]);
+  }, [initialIndex, total, progress]);
 
   const renderItem = ({
     item,
@@ -476,7 +422,6 @@ export const HolidaysEventsSection = ({
 
   return (
     <View style={{ marginTop: 20 }}>
-      {/* Header */}
       <View
         style={{
           flexDirection: "row",
@@ -488,6 +433,7 @@ export const HolidaysEventsSection = ({
         <Text style={tw`font-semibold ${TW.textPrimary} text-lg`}>
           Holidays &amp; Events
         </Text>
+
         <Pressable
           onPress={onViewAll}
           style={({ pressed }) => ({
@@ -502,7 +448,6 @@ export const HolidaysEventsSection = ({
         </Pressable>
       </View>
 
-      {/* Body */}
       {calendarLoading ? (
         <SkeletonCard cardWidth={cardWidth} />
       ) : total === 0 ? (
@@ -541,7 +486,7 @@ export const HolidaysEventsSection = ({
             scrollAnimationDuration={350}
             style={{ width: cardWidth }}
             onProgressChange={(_, absoluteProgress) => {
-              progress.value = absoluteProgress; // drives every card + every dot
+              progress.value = absoluteProgress;
             }}
             renderItem={renderItem}
           />

@@ -1,5 +1,4 @@
 import { Tabs, usePathname, useRouter } from "expo-router";
-
 import AppHeaderLeft from "@/src/components/navigation/header/AppHeaderLeft";
 import AppHeaderRight from "@/src/components/navigation/header/AppHeaderRight";
 import HeaderCheckMenu from "@/src/components/navigation/header/HeaderCheckMenu";
@@ -50,6 +49,7 @@ export default function LayoutInner() {
           headerShown: true,
           headerTitleAlign: "center",
           sceneStyle: {
+              flex: 1,  
             backgroundColor: pathname?.includes("/profile")
               ? TW.bgSecondary
               : "#ffffff",

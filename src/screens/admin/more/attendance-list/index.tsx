@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { FlatList, Pressable, Text, View } from "react-native";
 
 import HeaderWithSearch from "@/src/components/HeaderWithSearch";
-import LoadingIndicator from "@/src/components/LoadingIndicator"; 
+import LoadingIndicator from "@/src/components/LoadingIndicator";
 import { useDebounce } from "@/src/hooks/useDebounce";
 import { fetchUsersService } from "@/src/services/admin.service";
 import { useUsersStore } from "@/src/store/useUsersStore";
@@ -15,8 +15,8 @@ const AttendanceUserList = () => {
   const router = useRouter();
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(true); 
-  const { currentUserProfile  } = useUsersStore();
+  const [loading, setLoading] = useState(true);
+  const { currentUserProfile } = useUsersStore();
   const debouncedSearchQuery = useDebounce(search, 300);
   // const filteredUsers = users.filter((u) =>
   //   u.first_name?.toLowerCase().includes(debouncedSearchQuery.toLowerCase()),
@@ -24,12 +24,12 @@ const AttendanceUserList = () => {
   const getSupervisorName = () => "No supervisor";
 
   const loadUsers = useCallback(async () => {
-    if (!currentUserProfile ?.id) return;
+    if (!currentUserProfile?.id) return;
 
     setLoading(true); // start loading
     try {
       const usersData = await fetchUsersService(
-        currentUserProfile .organization_id,
+        currentUserProfile.organization_id,
         debouncedSearchQuery,
       );
       setUsers(usersData);
@@ -38,7 +38,7 @@ const AttendanceUserList = () => {
     } finally {
       setLoading(false);
     }
-  }, [currentUserProfile ?.id, currentUserProfile ?.organization_id, debouncedSearchQuery]);
+  }, [currentUserProfile?.id, currentUserProfile?.organization_id, debouncedSearchQuery]);
 
   useEffect(() => {
     loadUsers();
@@ -55,12 +55,15 @@ const AttendanceUserList = () => {
 
       {loading ? (
         <View style={tw`flex-1 justify-center items-center`}>
-          <LoadingIndicator message="Loading Users..." />
+          <LoadingIndicator />
         </View>
       ) : (
         <FlatList
           contentContainerStyle={tw`px-4 pb-6 flex gap-4`}
           data={users}
+          showsVerticalScrollIndicator={false}
+          persistentScrollbar={false}
+          nestedScrollEnabled={true}
           keyExtractor={(item) => item.id}
           ListEmptyComponent={
             <Text style={tw`text-center text-gray-500 mt-10`}>
@@ -83,7 +86,6 @@ const AttendanceUserList = () => {
                 getSupervisorName={getSupervisorName}
                 showRightArrow
               />
-              {/* <ChevronRight size={20} color="#9ca3af" /> show right arrow in user card onnly from this page*/}
             </Pressable>
           )}
         />

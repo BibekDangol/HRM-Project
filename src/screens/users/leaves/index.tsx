@@ -7,11 +7,13 @@ import { usePagination } from "@/src/hooks/usePagination";
 import { useLeaves } from "@/src/hooks/users/useLeaves";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Plus } from "lucide-react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import tw from "twrnc";
 import { LeaveCard } from "./components/LeaveCard";
 
 export default function LeavesScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const params = useLocalSearchParams<{ tab?: string | string[] }>();
   const flatListRef = useRef<FlatList>(null);
   const { loading, refreshing, leaves, leaveTypes, onRefresh } = useLeaves();
@@ -90,7 +92,9 @@ export default function LeavesScreen() {
         data={pagedData}
         keyExtractor={(i) => String(i.id)}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={tw`pb-24`}
+        contentContainerStyle={{
+          paddingBottom: 150,
+        }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
@@ -156,7 +160,12 @@ export default function LeavesScreen() {
 
       <Pressable
         onPress={() => router.push("/(users)/leaves/calendar")}
-        style={tw`absolute bottom-6 right-6 bg-[#1B4A5A] w-14 h-14 rounded-full items-center justify-center shadow-lg`}
+        style={[
+          tw`absolute right-6 bg-[#1B4A5A] w-14 h-14 rounded-full items-center justify-center shadow-lg`,
+          {
+            bottom: insets.bottom + 78,
+          },
+        ]}
       >
         <Plus color="#fff" size={28} />
       </Pressable>
