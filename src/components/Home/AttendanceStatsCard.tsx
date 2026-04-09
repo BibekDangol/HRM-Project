@@ -5,7 +5,8 @@ import React from "react";
 type Stats = {
   present: number;
   absent: number;
-  late: number;
+  leaveTaken: number;
+  incomplete?: number;
 };
 
 type Props = {
@@ -28,10 +29,10 @@ export function AttendanceStatsCard({ stats, loading }: Props) {
       bg: "#FEE2E2",
     },
     {
-      label: "Late",
-      value: stats.late,
-      color: "#F59E0B",
-      bg: "#FFFBEB",
+      label: "Leave Taken",
+      value: stats.leaveTaken,
+      color: "#7C3AED",
+      bg: "#F3E8FF",
     },
   ];
 
@@ -46,17 +47,21 @@ export function AttendanceStatsCard({ stats, loading }: Props) {
             borderRadius: 16,
             padding: 12,
             alignItems: "center",
-          }}>
+          }}
+        >
           <Text
             style={{
               fontSize: 28,
               fontWeight: "800",
               color: item.color,
-            }}>
+            }}
+          >
             {loading ? "—" : item.value}
           </Text>
 
-          <Text style={{ fontSize: 12, color: "#6B7280" }}>{item.label}</Text>
+          <Text style={{ fontSize: 12, color: "#6B7280", marginTop: 4 }}>
+            {item.label}
+          </Text>
         </View>
       ))}
     </View>

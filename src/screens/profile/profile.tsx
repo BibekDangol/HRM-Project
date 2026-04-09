@@ -34,7 +34,7 @@ export default function ProfileScreen() {
       <View
         style={{
           flex: 1,
-          backgroundColor: TW.bgPrimary,
+          // backgroundColor: TW.bgPrimary,
           alignItems: "center",
           justifyContent: "center",
         }}>

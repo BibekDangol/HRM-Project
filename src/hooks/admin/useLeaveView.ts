@@ -24,8 +24,13 @@ export function useLeaveView({ fetchLeaves, scrollRef, activeTab }: Props) {
 
     try {
       setLoading(true);
-      const data = await fetchLeaves(currentUserProfile.organization_id, user.id);
-      setLeaves(data);
+      const data = await fetchLeaves(
+        currentUserProfile.organization_id,
+        user.id,
+      );
+      console.log("Fetched leaves:", data);
+      setLeaves(data ?? []);
+      console.log("Statuses:", data.map((l) => l.status));
     } finally {
       setLoading(false);
     }
@@ -35,9 +40,18 @@ export function useLeaveView({ fetchLeaves, scrollRef, activeTab }: Props) {
     loadLeaves();
   }, [loadLeaves]);
 
+  const normalizedLeaves = useMemo(() => {
+    return leaves.map((l) => ({
+      ...l,
+      status: String(l.status ?? "")
+        .trim()
+        .toLowerCase(),
+    }));
+  }, [leaves]);
+
   const filteredLeaves = useMemo(() => {
-    return leaves.filter((l) => l.status === activeTab);
-  }, [leaves, activeTab]);
+    return normalizedLeaves.filter((l) => l.status === activeTab);
+  }, [normalizedLeaves, activeTab]);
 
   const {
     page,
@@ -49,14 +63,20 @@ export function useLeaveView({ fetchLeaves, scrollRef, activeTab }: Props) {
   } = usePagination(filteredLeaves);
 
   const counts = useMemo(() => {
-    return leaves.reduce(
+    return normalizedLeaves.reduce(
       (acc, l) => {
-        acc[l.status] = (acc[l.status] || 0) + 1;
+        if (
+          l.status === "pending" ||
+          l.status === "approved" ||
+          l.status === "rejected"
+        ) {
+          acc[l.status] += 1;
+        }
         return acc;
       },
-      { pending: 0, approved: 0, rejected: 0 } as Record<string, number>,
+      { pending: 0, approved: 0, rejected: 0 },
     );
-  }, [leaves]);
+  }, [normalizedLeaves]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -66,20 +86,18 @@ export function useLeaveView({ fetchLeaves, scrollRef, activeTab }: Props) {
   }, [loadLeaves, setPage]);
 
   return {
-    leaves,
+    leaves: normalizedLeaves,
     filteredLeaves,
     paginatedLeaves,
     counts,
     activeTab,
     loading,
     refreshing,
-
     page,
     setPage,
     totalPages,
     shouldShowPagination,
     pageNumbers,
-
     loadLeaves,
     onRefresh,
   };

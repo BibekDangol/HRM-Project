@@ -23,7 +23,7 @@ export const UserCard = ({
 }: Props) => {
   return (
     <View style={tw` gap-4 bg-white border ${TW.BORDER} rounded-2xl px-4 py-4`}>
-      <View style={tw`flex-row justify-between`}>
+      <View style={tw`flex-row justify-between items-center`}>
         <View style={tw`flex-row gap-2`}>
           {/* Image */}
           <View>

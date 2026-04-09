@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { FlatList, Pressable, Text, View } from "react-native";
-
 import HeaderWithSearch from "@/src/components/HeaderWithSearch";
 import { UserCard } from "@/src/screens/admin/components/UserCard";
 import { fetchSupervisorUnderUsersService } from "@/src/services/admin.service";
@@ -11,20 +10,22 @@ import tw from "twrnc";
 
 const AttendanceUserList = () => {
   const router = useRouter();
-  const { currentUserProfile  } = useUsersStore();
+  const { currentUserProfile } = useUsersStore();
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
+
   const getSupervisorName = () => "No supervisor";
 
   const loadUsers = useCallback(async () => {
-    if (!currentUserProfile ?.id || !currentUserProfile ?.organization_id) return;
+    if (!currentUserProfile?.id || !currentUserProfile?.organization_id) return;
+
     try {
       setLoading(true);
       const data = await fetchSupervisorUnderUsersService(
-        currentUserProfile .organization_id,
+        currentUserProfile.organization_id,
         search,
-        currentUserProfile .id,
+        currentUserProfile.id,
       );
       setUsers(data);
     } catch (err) {
@@ -32,24 +33,26 @@ const AttendanceUserList = () => {
     } finally {
       setLoading(false);
     }
-  }, [currentUserProfile ?.id, currentUserProfile ?.organization_id, search]);
+  }, [currentUserProfile?.id, currentUserProfile?.organization_id, search]);
 
   useEffect(() => {
     loadUsers();
   }, [loadUsers]);
+
   return (
     <View style={tw`flex-1 bg-white`}>
-      {/* Search Bar */}
       <HeaderWithSearch
         search={search}
         onSearchChange={setSearch}
         onBack={() => router.back()}
       />
-      {/* Users List */}
+
       <FlatList
         data={users}
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
+        persistentScrollbar={false}
+        overScrollMode="never"
         contentContainerStyle={[
           tw`px-4 pt-2 pb-6`,
           users.length === 0 ? tw`flex-grow justify-center` : undefined,
@@ -74,8 +77,13 @@ const AttendanceUserList = () => {
                 },
               })
             }
-            style={tw`rounded-2xl overflow-hidden`}>
-            <UserCard user={item} getSupervisorName={getSupervisorName} />
+            style={tw`rounded-2xl overflow-hidden`}
+          >
+            <UserCard
+              user={item}
+              getSupervisorName={getSupervisorName}
+              showRightArrow
+            />
           </Pressable>
         )}
       />

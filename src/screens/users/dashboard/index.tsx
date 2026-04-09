@@ -65,7 +65,7 @@ export default function HomeScreen() {
   return (
     <ScrollView
       style={tw`bg-white flex-1`}
-      contentContainerStyle={{ paddingVertical: 16 }}
+      contentContainerStyle={{ paddingVertical: 16, flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
       refreshControl={
         <RefreshControl

@@ -1,13 +1,15 @@
 import { PlatformPressable } from "@react-navigation/elements";
-import { useLinkBuilder, useNavigationState } from "@react-navigation/native";
+import { useLinkBuilder } from "@react-navigation/native";
 import { RelativePathString, usePathname, useRouter } from "expo-router";
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useRef, useEffect, useMemo } from "react";
 import {
   Animated,
+  Easing,
   Platform,
   Text,
   View,
   useWindowDimensions,
+  StyleSheet,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -22,11 +24,116 @@ type Props = {
   routeGroup: "(users)" | "(admin)";
   activeColor?: string;
   inactiveColor?: string;
+  activePillColor?: string;
+  closeAllOverlays?: () => void;
 };
 
-const H_PADDING = 16;
-const TRAY_PADDING_SIMPLE = 8;
-const TRAY_PADDING_PILL = 4;
+function TabItem({
+  route,
+  cfg,
+  isFocused,
+  tabWidth,
+  iconSize,
+  fontSize,
+  activeColor,
+  inactiveColor,
+  onPress,
+  onLongPress,
+  buildHref,
+}: {
+  route: any;
+  cfg: TabBarItemConfig;
+  isFocused: boolean;
+  tabWidth: number;
+  iconSize: number;
+  fontSize: number;
+  activeColor: string;
+  inactiveColor: string;
+  onPress: () => void;
+  onLongPress: () => void;
+  buildHref: (name: string, params?: object) => string | undefined;
+}) {
+  const scaleAnim = useRef(new Animated.Value(isFocused ? 1 : 0.96)).current;
+  const opacityAnim = useRef(new Animated.Value(isFocused ? 1 : 0.75)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.spring(scaleAnim, {
+        toValue: isFocused ? 1 : 0.96,
+        useNativeDriver: true,
+        damping: 16,
+        stiffness: 220,
+        mass: 0.8,
+      }),
+      Animated.timing(opacityAnim, {
+        toValue: isFocused ? 1 : 0.75,
+        duration: 180,
+        easing: Easing.out(Easing.ease),
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [isFocused, scaleAnim, opacityAnim]);
+
+  const IconToRender = isFocused ? (cfg.activeIcon ?? cfg.icon) : cfg.icon;
+  const iconColor = isFocused ? "#FFFFFF" : inactiveColor;
+  const badge = (cfg as any).badge as number | string | undefined;
+
+  return (
+    <PlatformPressable
+      href={buildHref(route.name, route.params)}
+      accessibilityRole="button"
+      accessibilityState={isFocused ? { selected: true } : {}}
+      accessibilityLabel={cfg.title}
+      onPress={onPress}
+      onLongPress={onLongPress}
+      style={[styles.pressable, { width: tabWidth }]}
+    >
+      <Animated.View
+        style={[
+          styles.itemContent,
+          {
+            transform: [{ scale: scaleAnim }],
+            opacity: opacityAnim,
+          },
+        ]}
+      >
+        <View style={styles.iconArea}>
+          <IconToRender
+            size={iconSize}
+            color={iconColor}
+            strokeWidth={isFocused ? 2.2 : 1.9}
+          />
+
+          {badge != null && (
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>
+                {typeof badge === "number" && badge > 99 ? "99+" : badge}
+              </Text>
+            </View>
+          )}
+        </View>
+
+        <Text
+          numberOfLines={1}
+          style={[
+            styles.label,
+            {
+              fontSize,
+              color: iconColor,
+              fontWeight: isFocused
+                ? Platform.OS === "ios"
+                  ? "700"
+                  : "bold"
+                : "500",
+            },
+          ]}
+        >
+          {cfg.title}
+        </Text>
+      </Animated.View>
+    </PlatformPressable>
+  );
+}
 
 export default function BaseTabBar({
   state,
@@ -35,208 +142,114 @@ export default function BaseTabBar({
   tabs,
   mode,
   routeGroup,
-  activeColor = "#1B4A5A",
-  inactiveColor = "#8A94A6",
+  activeColor = "#FFFFFF",
+  inactiveColor = "#98A2B3",
+  activePillColor = "#1B4A5A",
+  closeAllOverlays,
 }: Props) {
   const { buildHref } = useLinkBuilder();
   const router = useRouter();
   const pathname = usePathname();
   const insets = useSafeAreaInsets();
-  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
+  const { width: screenWidth } = useWindowDimensions();
 
   const isSmallDevice = screenWidth < 360;
   const isTablet = screenWidth >= 768;
-  const isLandscape = screenWidth > screenHeight;
 
-  const trayPadding = mode === "pill" ? TRAY_PADDING_PILL : TRAY_PADDING_SIMPLE;
-  const trayRadius = mode === "pill" ? 20 : 24;
+  const tabHeight = isTablet ? 64 : isSmallDevice ? 56 : 60;
+  const iconSize = isTablet ? 25 : isSmallDevice ? 20 : 22;
+  const fontSize = isTablet ? 13 : isSmallDevice ? 10 : 11;
 
-  const tabHeight =
-    mode === "pill"
-      ? isTablet
-        ? 60
-        : isSmallDevice || isLandscape
-          ? 48
-          : 54
-      : isTablet
-        ? 58
-        : isSmallDevice
-          ? 48
-          : 54;
+  const visibleRoutes = useMemo(
+    () =>
+      state.routes.filter((route: any) => {
+        const options = descriptors?.[route.key]?.options;
+        return (
+          options?.href !== null &&
+          tabs.some((tab) => tab.name === route.name)
+        );
+      }),
+    [state.routes, descriptors, tabs]
+  );
 
-  const iconSize =
-    mode === "pill"
-      ? isTablet
-        ? 26
-        : isSmallDevice
-          ? 19
-          : 22
-      : isTablet
-        ? 26
-        : isSmallDevice
-          ? 20
-          : 23;
+  const routeCount = Math.max(visibleRoutes.length, 1);
+  const tabWidth = screenWidth / routeCount;
 
-  const fontSize =
-    mode === "pill"
-      ? isTablet
-        ? 13
-        : isSmallDevice
-          ? 10
-          : 11
-      : isTablet
-        ? 13
-        : isSmallDevice
-          ? 10
-          : 11;
+  const indicatorWidth = Math.min(tabWidth - 24, 120);
 
-  const visibleRoutes = useMemo(() => {
-    return state.routes.filter((route: any) => {
-      const options = descriptors?.[route.key]?.options;
-      return options?.href !== null && tabs.some((tab) => tab.name === route.name);
-    });
-  }, [state.routes, descriptors, tabs]);
+  // FIX: Derive the pill position from the focused route's index within
+  // visibleRoutes rather than using state.index directly. state.index is an
+  // index into state.routes, which may contain hidden routes (href: null),
+  // so it can diverge from the visible index and slide the pill to the wrong tab.
+  const focusedVisibleIndex = useMemo(() => {
+    const focusedKey = state.routes[state.index]?.key;
+    const idx = visibleRoutes.findIndex((r: any) => r.key === focusedKey);
+    return idx === -1 ? 0 : idx;
+  }, [state.index, state.routes, visibleRoutes]);
 
-  const tabCount = Math.max(visibleRoutes.length || tabs.length, 1);
-
-  const maxTrayWidth =
-    mode === "pill" ? (isTablet ? 520 : screenWidth) : isTablet ? 460 : 360;
-
-  const sideInsets =
-    Math.max(H_PADDING, insets.left) + Math.max(H_PADDING, insets.right);
-  const availableWidth =
-    mode === "pill"
-      ? Math.min(maxTrayWidth, screenWidth) - sideInsets
-      : Math.min(screenWidth - H_PADDING * 2, maxTrayWidth);
-
-  const tabWidth =
-    mode === "pill"
-      ? Math.floor((availableWidth - trayPadding * 2) / tabCount)
-      : (availableWidth - trayPadding * 2) / tabCount;
-
-  const trayWidth =
-    mode === "pill"
-      ? tabWidth * tabCount + trayPadding * 2
-      : Math.min(screenWidth - H_PADDING * 2, maxTrayWidth);
-
-  const currentRouteName = state.routes[state.index]?.name;
-
-  const activeTabIndex = tabs.findIndex((tab) => tab.name === currentRouteName);
-  const lastValidIdx = useRef(activeTabIndex >= 0 ? activeTabIndex : 0);
-
-  if (activeTabIndex >= 0) {
-    lastValidIdx.current = activeTabIndex;
-  }
-
-  const pillTarget =
-    activeTabIndex >= 0 ? activeTabIndex * tabWidth : lastValidIdx.current * tabWidth;
-
-  const pillX = useRef(new Animated.Value(pillTarget)).current;
+  const translateX = useRef(
+    new Animated.Value(
+      focusedVisibleIndex * tabWidth + (tabWidth - indicatorWidth) / 2
+    )
+  ).current;
 
   useEffect(() => {
-    if (mode !== "pill") return;
-
-    Animated.spring(pillX, {
-      toValue: pillTarget,
+    Animated.spring(translateX, {
+      toValue: focusedVisibleIndex * tabWidth + (tabWidth - indicatorWidth) / 2,
       useNativeDriver: true,
       damping: 18,
-      stiffness: 200,
-      mass: 0.8,
+      stiffness: 220,
+      mass: 0.85,
     }).start();
-  }, [mode, pillTarget, pillX]);
-
-  const bottomPad = Math.max(insets.bottom, isLandscape ? 4 : 8);
-
-  const trayShadow =
-    Platform.OS === "ios"
-      ? {
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: mode === "pill" ? 2 : 4 },
-          shadowOpacity: 0.08,
-          shadowRadius: mode === "pill" ? 10 : 12,
-        }
-      : { elevation: 6 };
-
-  const pillShadow =
-    Platform.OS === "ios"
-      ? {
-          shadowColor: activeColor,
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.18,
-          shadowRadius: 6,
-        }
-      : { elevation: 4 };
-
-  const containerHorizontalPadding =
-    mode === "pill"
-      ? {
-          paddingLeft: Math.max(H_PADDING, insets.left),
-          paddingRight: Math.max(H_PADDING, insets.right),
-        }
-      : {};
+  }, [focusedVisibleIndex, tabWidth, indicatorWidth, translateX]);
 
   return (
-    <View
-      style={{
-        backgroundColor: "#FFFFFF",
-        paddingTop: isLandscape && mode === "pill" ? 4 : 8,
-        paddingBottom: bottomPad,
-        alignItems: "center",
-        ...containerHorizontalPadding,
-      }}
-    >
-      <View
-        style={[
-          {
-            width: trayWidth,
-            minHeight: tabHeight + trayPadding * 2,
-            borderRadius: trayRadius,
-            backgroundColor: "#F3F4F6",
-            padding: trayPadding,
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "center",
-            position: "relative",
-          },
-          trayShadow,
-        ]}
-      >
-        {mode === "pill" && (
-          <Animated.View
-            style={[
-              {
-                position: "absolute",
-                top: trayPadding,
-                left: trayPadding,
-                width: tabWidth - trayPadding * 2,
-                height: tabHeight,
-                backgroundColor: "#FFFFFF",
-                borderRadius: 16,
-                transform: [{ translateX: pillX }],
-              },
-              pillShadow,
-            ]}
-          />
-        )}
+    <View style={[styles.container, { paddingBottom: insets.bottom }]}>
+      <View style={styles.separator} />
 
-        {visibleRoutes.map((route: any, index: number) => {
-          const cfg = tabs.find((tab) => tab.name === route.name);
+      <View style={[styles.tabRow, { height: tabHeight }]}>
+        <Animated.View
+          pointerEvents="none"
+          style={[
+            styles.activePill,
+            {
+              width: indicatorWidth,
+              height: 46,
+              backgroundColor: activePillColor,
+              transform: [{ translateX }],
+            },
+          ]}
+        />
+
+        {visibleRoutes.map((route: any) => {
+          const cfg = tabs.find((t) => t.name === route.name);
           if (!cfg) return null;
 
-          const isFocused =
-            mode === "pill"
-              ? activeTabIndex >= 0 && activeTabIndex === index
-              : state.routes[state.index]?.key === route.key;
-
-          const InactiveIcon = cfg.icon;
-          const ActiveIcon = cfg.activeIcon ?? cfg.icon;
-          const IconToRender = isFocused ? ActiveIcon : InactiveIcon;
+          const isFocused = state.routes[state.index]?.key === route.key;
 
           const targetPath = `/${routeGroup}/${route.name}`;
           const isCurrentlyOnPath =
-            pathname === targetPath || pathname?.startsWith(`${targetPath}/`);
+            pathname === targetPath ||
+            pathname?.startsWith(`${targetPath}/`);
+
+          const handleNavigate = () => {
+            if (mode === "pill") {
+              if (!isFocused && !isCurrentlyOnPath) {
+                router.replace(targetPath as RelativePathString);
+              }
+            } else {
+              if (!isFocused) {
+                navigation.reset({
+                  index: 0,
+                  routes: [{ name: route.name }],
+                });
+              }
+            }
+          };
 
           const onPress = () => {
+            closeAllOverlays?.();
+
             const event = navigation.emit({
               type: "tabPress",
               target: route.key,
@@ -244,81 +257,109 @@ export default function BaseTabBar({
             });
 
             if (event.defaultPrevented) return;
-
-            if (mode === "pill") {
-              if (!isFocused && !isCurrentlyOnPath) {
-                router.replace(targetPath as RelativePathString);
-              }
-            } else {
-              navigation.reset({
-                index: 0,
-                routes: [{ name: route.name }],
-              });
-            }
+            setTimeout(handleNavigate, 0);
           };
 
-          const onLongPress = () => {
-            navigation.emit({
-              type: "tabLongPress",
-              target: route.key,
-            });
-          };
+          const onLongPress = () =>
+            navigation.emit({ type: "tabLongPress", target: route.key });
 
           return (
-            <PlatformPressable
+            <TabItem
               key={route.key}
-              href={buildHref(route.name, route.params)}
-              accessibilityRole="button"
-              accessibilityState={isFocused ? { selected: true } : {}}
-              accessibilityLabel={cfg.title}
+              route={route}
+              cfg={cfg}
+              isFocused={isFocused}
+              tabWidth={tabWidth}
+              iconSize={iconSize}
+              fontSize={fontSize}
+              activeColor={activeColor}
+              inactiveColor={inactiveColor}
               onPress={onPress}
               onLongPress={onLongPress}
-              style={{
-                width: tabWidth,
-                height: tabHeight,
-                alignItems: "center",
-                justifyContent: "center",
-                borderRadius: mode === "pill" ? 16 : 18,
-                backgroundColor: "transparent",
-                zIndex: 1,
-              }}
-            >
-              <View
-                style={{
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: mode === "pill" ? (isSmallDevice ? 2 : 3) : 3,
-                }}
-              >
-                <IconToRender
-                  size={iconSize}
-                  color={isFocused ? activeColor : inactiveColor}
-                  strokeWidth={isFocused ? (mode === "pill" ? 2.2 : 2.4) : 1.8}
-                />
-
-                <Text
-                  numberOfLines={1}
-                  style={{
-                    fontSize,
-                    color: isFocused ? activeColor : inactiveColor,
-                    fontWeight:
-                      mode === "pill"
-                        ? Platform.OS === "ios"
-                          ? "600"
-                          : "bold"
-                        : isFocused
-                          ? "700"
-                          : "600",
-                    letterSpacing: mode === "pill" ? 0.2 : 0,
-                  }}
-                >
-                  {cfg.title}
-                </Text>
-              </View>
-            </PlatformPressable>
+              buildHref={buildHref}
+            />
           );
         })}
       </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    width: "100%",
+    backgroundColor: "#FFFFFF",
+    borderTopLeftRadius: 0,
+    borderTopRightRadius: 0,
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: -2 },
+        shadowOpacity: 0.06,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 10,
+      },
+    }),
+  },
+  separator: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: "rgba(0,0,0,0.08)",
+  },
+  tabRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    position: "relative",
+  },
+  activePill: {
+    position: "absolute",
+    top: 7,
+    left: 0,
+    borderRadius: 24,
+    shadowColor: "#1B4A5A",
+    shadowOpacity: 0.16,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 4,
+  },
+  pressable: {
+    alignItems: "center",
+    justifyContent: "center",
+    height: "100%",
+    zIndex: 2,
+  },
+  itemContent: {
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: 48,
+  },
+  iconArea: {
+    minHeight: 24,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 3,
+  },
+  badge: {
+    position: "absolute",
+    top: -4,
+    right: -14,
+    backgroundColor: "#FF3B30",
+    borderRadius: 9,
+    minWidth: 18,
+    height: 18,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 4,
+    borderWidth: 1.5,
+    borderColor: "#fff",
+  },
+  badgeText: {
+    color: "#fff",
+    fontSize: 9,
+    fontWeight: "700",
+  },
+  label: {
+    letterSpacing: 0.1,
+  },
+});
