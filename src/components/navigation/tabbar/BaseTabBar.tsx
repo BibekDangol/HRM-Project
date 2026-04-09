@@ -4,6 +4,7 @@ import { RelativePathString, usePathname, useRouter } from "expo-router";
 import React, { useRef, useEffect, useMemo } from "react";
 import {
   Animated,
+  Easing,
   Platform,
   Text,
   View,
@@ -27,7 +28,6 @@ type Props = {
   closeAllOverlays?: () => void;
 };
 
-// ─── Single animated tab item ──────────────────────────────────────────────
 function TabItem({
   route,
   cfg,
@@ -37,7 +37,6 @@ function TabItem({
   fontSize,
   activeColor,
   inactiveColor,
-  activePillColor,
   onPress,
   onLongPress,
   buildHref,
@@ -50,41 +49,33 @@ function TabItem({
   fontSize: number;
   activeColor: string;
   inactiveColor: string;
-  activePillColor: string;
   onPress: () => void;
   onLongPress: () => void;
   buildHref: (name: string, params?: object) => string | undefined;
 }) {
-  const pillAnim = useRef(new Animated.Value(isFocused ? 1 : 0)).current;
-  const iconAnim = useRef(new Animated.Value(isFocused ? 1 : 0.88)).current;
-  const labelAnim = useRef(new Animated.Value(isFocused ? 1 : 0.55)).current;
+  const scaleAnim = useRef(new Animated.Value(isFocused ? 1 : 0.96)).current;
+  const opacityAnim = useRef(new Animated.Value(isFocused ? 1 : 0.75)).current;
 
   useEffect(() => {
     Animated.parallel([
-      Animated.spring(pillAnim, {
-        toValue: isFocused ? 1 : 0,
+      Animated.spring(scaleAnim, {
+        toValue: isFocused ? 1 : 0.96,
         useNativeDriver: true,
-        damping: 20,
-        stiffness: 260,
-        mass: 0.7,
+        damping: 16,
+        stiffness: 220,
+        mass: 0.8,
       }),
-      Animated.spring(iconAnim, {
-        toValue: isFocused ? 1 : 0.88,
-        useNativeDriver: true,
-        damping: 18,
-        stiffness: 240,
-        mass: 0.7,
-      }),
-      Animated.timing(labelAnim, {
-        toValue: isFocused ? 1 : 0.55,
-        duration: 160,
+      Animated.timing(opacityAnim, {
+        toValue: isFocused ? 1 : 0.75,
+        duration: 180,
+        easing: Easing.out(Easing.ease),
         useNativeDriver: true,
       }),
     ]).start();
-  }, [isFocused]);
+  }, [isFocused, scaleAnim, opacityAnim]);
 
   const IconToRender = isFocused ? (cfg.activeIcon ?? cfg.icon) : cfg.icon;
-  const iconColor = isFocused ? activeColor : inactiveColor;
+  const iconColor = isFocused ? "#FFFFFF" : inactiveColor;
   const badge = (cfg as any).badge as number | string | undefined;
 
   return (
@@ -95,73 +86,55 @@ function TabItem({
       accessibilityLabel={cfg.title}
       onPress={onPress}
       onLongPress={onLongPress}
-      style={{ width: tabWidth, alignItems: "center", justifyContent: "center" }}
+      style={[styles.pressable, { width: tabWidth }]}
     >
-      {/* Icon row with animated pill behind it */}
-      <View style={styles.iconArea}>
-        <Animated.View
-          style={[
-            styles.pill,
-            {
-              backgroundColor: activePillColor,
-              borderRadius: 20,
-              shadowColor: "#1B4A5A",
-              shadowOpacity: 0.08,
-              shadowRadius: 6,
-              opacity: pillAnim,
-              transform: [
-                {
-                  scaleX: pillAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0.5, 1],
-                  }),
-                },
-              ],
-            },
-          ]}
-        />
-
-        <Animated.View style={{ transform: [{ scale: iconAnim }] }}>
-          <IconToRender
-            size={iconSize}
-            color={iconColor}
-            strokeWidth={isFocused ? 2.1 : 1.75}
-          />
-        </Animated.View>
-
-        {badge != null && (
-          <View style={styles.badge}>
-            <Text style={styles.badgeText}>
-              {typeof badge === "number" && badge > 99 ? "99+" : badge}
-            </Text>
-          </View>
-        )}
-      </View>
-
-      {/* Label */}
-      <Animated.Text
-        numberOfLines={1}
+      <Animated.View
         style={[
-          styles.label,
+          styles.itemContent,
           {
-            fontSize,
-            color: iconColor,
-            opacity: labelAnim,
-            fontWeight: isFocused
-              ? Platform.OS === "ios"
-                ? "600"
-                : "bold"
-              : "500",
+            transform: [{ scale: scaleAnim }],
+            opacity: opacityAnim,
           },
         ]}
       >
-        {cfg.title}
-      </Animated.Text>
+        <View style={styles.iconArea}>
+          <IconToRender
+            size={iconSize}
+            color={iconColor}
+            strokeWidth={isFocused ? 2.2 : 1.9}
+          />
+
+          {badge != null && (
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>
+                {typeof badge === "number" && badge > 99 ? "99+" : badge}
+              </Text>
+            </View>
+          )}
+        </View>
+
+        <Text
+          numberOfLines={1}
+          style={[
+            styles.label,
+            {
+              fontSize,
+              color: iconColor,
+              fontWeight: isFocused
+                ? Platform.OS === "ios"
+                  ? "700"
+                  : "bold"
+                : "500",
+            },
+          ]}
+        >
+          {cfg.title}
+        </Text>
+      </Animated.View>
     </PlatformPressable>
   );
 }
 
-// ─── Main component ────────────────────────────────────────────────────────
 export default function BaseTabBar({
   state,
   descriptors,
@@ -169,9 +142,9 @@ export default function BaseTabBar({
   tabs,
   mode,
   routeGroup,
-  activeColor = "#1B4A5A",
-  inactiveColor = "#8A94A6",
-  activePillColor = "#E4EFF2",
+  activeColor = "#FFFFFF",
+  inactiveColor = "#98A2B3",
+  activePillColor = "#1B4A5A",
   closeAllOverlays,
 }: Props) {
   const { buildHref } = useLinkBuilder();
@@ -183,8 +156,8 @@ export default function BaseTabBar({
   const isSmallDevice = screenWidth < 360;
   const isTablet = screenWidth >= 768;
 
-  const tabHeight = isTablet ? 58 : isSmallDevice ? 50 : 54;
-  const iconSize = isTablet ? 26 : isSmallDevice ? 20 : 23;
+  const tabHeight = isTablet ? 64 : isSmallDevice ? 56 : 60;
+  const iconSize = isTablet ? 25 : isSmallDevice ? 20 : 22;
   const fontSize = isTablet ? 13 : isSmallDevice ? 10 : 11;
 
   const visibleRoutes = useMemo(
@@ -199,13 +172,55 @@ export default function BaseTabBar({
     [state.routes, descriptors, tabs]
   );
 
-  const tabWidth = screenWidth / Math.max(visibleRoutes.length, 1);
+  const routeCount = Math.max(visibleRoutes.length, 1);
+  const tabWidth = screenWidth / routeCount;
+
+  const indicatorWidth = Math.min(tabWidth - 24, 120);
+
+  // FIX: Derive the pill position from the focused route's index within
+  // visibleRoutes rather than using state.index directly. state.index is an
+  // index into state.routes, which may contain hidden routes (href: null),
+  // so it can diverge from the visible index and slide the pill to the wrong tab.
+  const focusedVisibleIndex = useMemo(() => {
+    const focusedKey = state.routes[state.index]?.key;
+    const idx = visibleRoutes.findIndex((r: any) => r.key === focusedKey);
+    return idx === -1 ? 0 : idx;
+  }, [state.index, state.routes, visibleRoutes]);
+
+  const translateX = useRef(
+    new Animated.Value(
+      focusedVisibleIndex * tabWidth + (tabWidth - indicatorWidth) / 2
+    )
+  ).current;
+
+  useEffect(() => {
+    Animated.spring(translateX, {
+      toValue: focusedVisibleIndex * tabWidth + (tabWidth - indicatorWidth) / 2,
+      useNativeDriver: true,
+      damping: 18,
+      stiffness: 220,
+      mass: 0.85,
+    }).start();
+  }, [focusedVisibleIndex, tabWidth, indicatorWidth, translateX]);
 
   return (
     <View style={[styles.container, { paddingBottom: insets.bottom }]}>
       <View style={styles.separator} />
 
-      <View style={{ flexDirection: "row", height: tabHeight }}>
+      <View style={[styles.tabRow, { height: tabHeight }]}>
+        <Animated.View
+          pointerEvents="none"
+          style={[
+            styles.activePill,
+            {
+              width: indicatorWidth,
+              height: 46,
+              backgroundColor: activePillColor,
+              transform: [{ translateX }],
+            },
+          ]}
+        />
+
         {visibleRoutes.map((route: any) => {
           const cfg = tabs.find((t) => t.name === route.name);
           if (!cfg) return null;
@@ -219,24 +234,28 @@ export default function BaseTabBar({
 
           const handleNavigate = () => {
             if (mode === "pill") {
-              if (!isFocused && !isCurrentlyOnPath)
+              if (!isFocused && !isCurrentlyOnPath) {
                 router.replace(targetPath as RelativePathString);
+              }
             } else {
-              if (!isFocused)
+              if (!isFocused) {
                 navigation.reset({
                   index: 0,
                   routes: [{ name: route.name }],
                 });
+              }
             }
           };
 
           const onPress = () => {
             closeAllOverlays?.();
+
             const event = navigation.emit({
               type: "tabPress",
               target: route.key,
               canPreventDefault: true,
             });
+
             if (event.defaultPrevented) return;
             setTimeout(handleNavigate, 0);
           };
@@ -255,7 +274,6 @@ export default function BaseTabBar({
               fontSize={fontSize}
               activeColor={activeColor}
               inactiveColor={inactiveColor}
-              activePillColor={activePillColor}
               onPress={onPress}
               onLongPress={onLongPress}
               buildHref={buildHref}
@@ -270,39 +288,66 @@ export default function BaseTabBar({
 const styles = StyleSheet.create({
   container: {
     width: "100%",
-    backgroundColor: "rgba(255,255,255,0.97)",
+    backgroundColor: "#FFFFFF",
+    borderTopLeftRadius: 0,
+    borderTopRightRadius: 0,
     ...Platform.select({
       ios: {
         shadowColor: "#000",
-        shadowOffset: { width: 0, height: -1 },
+        shadowOffset: { width: 0, height: -2 },
         shadowOpacity: 0.06,
-        shadowRadius: 4,
+        shadowRadius: 8,
       },
-      android: { elevation: 8 },
+      android: {
+        elevation: 10,
+      },
     }),
   },
   separator: {
     height: StyleSheet.hairlineWidth,
-    backgroundColor: "rgba(0,0,0,0.12)",
+    backgroundColor: "rgba(0,0,0,0.08)",
   },
-  iconArea: {
-    width: 52,
-    height: 30,
+  tabRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    position: "relative",
+  },
+  activePill: {
+    position: "absolute",
+    top: 7,
+    left: 0,
+    borderRadius: 24,
+    shadowColor: "#1B4A5A",
+    shadowOpacity: 0.16,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 4,
+  },
+  pressable: {
     alignItems: "center",
     justifyContent: "center",
+    height: "100%",
+    zIndex: 2,
   },
-  pill: {
-    ...StyleSheet.absoluteFillObject,
-    borderRadius: 15,
+  itemContent: {
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: 48,
+  },
+  iconArea: {
+    minHeight: 24,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 3,
   },
   badge: {
     position: "absolute",
-    top: -2,
-    right: -2,
+    top: -4,
+    right: -14,
     backgroundColor: "#FF3B30",
-    borderRadius: 8,
-    minWidth: 16,
-    height: 16,
+    borderRadius: 9,
+    minWidth: 18,
+    height: 18,
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 4,
@@ -313,10 +358,8 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 9,
     fontWeight: "700",
-    letterSpacing: 0.2,
   },
   label: {
-    marginTop: 2,
     letterSpacing: 0.1,
   },
 });

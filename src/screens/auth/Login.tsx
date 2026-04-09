@@ -249,11 +249,7 @@ const LoginScreen = () => {
               </TouchableOpacity>
 
               <View style={[tw`flex-col w-full`, { gap: 16, marginTop: 16 }]}>
-                {/* {loginError && (
-                  <Text style={tw`text-[#FF6B6B] text-[13px] text-center mb-2`}>
-                    {loginError}
-                  </Text>
-                )} */}
+        
                 <TouchableOpacity
                   style={[
                     tw`rounded-xl items-center justify-center ${TW.bgAction}`,

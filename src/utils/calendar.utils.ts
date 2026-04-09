@@ -1,13 +1,7 @@
+import { CalendarItem } from "../types/Calendar";
+
 export type FilterType = "all" | "holiday" | "event";
 
-export type CalendarItem = {
-  id: string;
-  title: string;
-  type: "holiday" | "event";
-  color: string;
-  start_date: string;
-  end_date: string;
-};
 export const MONTHS = [
   "January",
   "February",
