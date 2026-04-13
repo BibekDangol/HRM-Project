@@ -12,13 +12,11 @@ import tw from "twrnc";
 
 import { TW } from "@/theme/twStyles";
 import {
-  CalendarItem,
   formatMonthDay,
   formatWeekday,
   getNepalTodayKey,
-  getSyncedCalendarItems,
-  isActiveToday,
 } from "@/src/utils/calendar.utils";
+import { CalendarItem } from "../types/Calendar";
 
 type Props = {
   calendarItems: CalendarItem[];
@@ -33,6 +31,26 @@ const CARD_RADIUS = 12;
 const MAX_VISIBLE = 5;
 const CARD_HEIGHT = 86;
 const CARD_GAP = 12;
+
+function isActiveToday(item: CalendarItem, todayKey: string) {
+  const endDate = item.end_date || item.start_date;
+  return item.start_date <= todayKey && endDate >= todayKey;
+}
+
+function isUpcoming(item: CalendarItem, todayKey: string) {
+  return item.start_date > todayKey;
+}
+
+function isPast(item: CalendarItem, todayKey: string) {
+  const endDate = item.end_date || item.start_date;
+  return endDate < todayKey;
+}
+
+function getSortPriority(item: CalendarItem, todayKey: string) {
+  if (isActiveToday(item, todayKey)) return 0;
+  if (isUpcoming(item, todayKey)) return 1;
+  return 2;
+}
 
 function PaginationDot({
   index,
@@ -245,6 +263,7 @@ function AnimatedCard({
   pageWidth,
   progress,
   todayKey,
+  isHighlighted,
   onCardPress,
 }: {
   item: CalendarItem;
@@ -253,35 +272,39 @@ function AnimatedCard({
   pageWidth: number;
   progress: SharedValue<number>;
   todayKey: string;
+  isHighlighted: boolean;
   onCardPress?: (item: CalendarItem) => void;
 }) {
   const { month, day, dayName } = formatMonthDay(item.start_date);
   const isHoliday = item.type === "holiday";
-  const activeToday = isActiveToday(item, todayKey);
 
   const cardShellStyle = useAnimatedStyle(() => {
-    if (!activeToday) {
+    const dist = Math.abs(progress.value - index);
+
+    if (isHighlighted) {
       return {
-        backgroundColor: "#FFFFFF",
-        borderColor: "#E2E8F0",
+        backgroundColor: interpolateColor(dist, [0, 0.6], ["#F0F9FF", "#FFFFFF"]),
+        borderColor: interpolateColor(dist, [0, 0.6], ["#BAE6FD", "#E2E8F0"]),
       };
     }
 
-    const dist = Math.abs(progress.value - index);
-
     return {
-      backgroundColor: interpolateColor(dist, [0, 0.6], ["#F0F9FF", "#FFFFFF"]),
-      borderColor: interpolateColor(dist, [0, 0.6], ["#BAE6FD", "#E2E8F0"]),
+      backgroundColor: "#FFFFFF",
+      borderColor: "#E2E8F0",
     };
   });
 
   const dividerStyle = useAnimatedStyle(() => {
-    if (!activeToday) return { backgroundColor: "#E2E8F0" };
-
     const dist = Math.abs(progress.value - index);
 
+    if (isHighlighted) {
+      return {
+        backgroundColor: interpolateColor(dist, [0, 0.6], ["#BAE6FD", "#E2E8F0"]),
+      };
+    }
+
     return {
-      backgroundColor: interpolateColor(dist, [0, 0.6], ["#BAE6FD", "#E2E8F0"]),
+      backgroundColor: "#E2E8F0",
     };
   });
 
@@ -364,25 +387,29 @@ export const HolidaysEventsSection = ({
 
   const todayKey = useMemo(() => getNepalTodayKey(), []);
 
-  const syncedItems = useMemo(() => {
-    return getSyncedCalendarItems(calendarItems, todayKey, "all");
-  }, [calendarItems, todayKey]);
-
   const visibleItems = useMemo(() => {
-    return syncedItems.slice(0, MAX_VISIBLE);
-  }, [syncedItems]);
+    return [...calendarItems]
+      .filter((item) => !isPast(item, todayKey))
+      .sort((a, b) => {
+        const priorityDiff =
+          getSortPriority(a, todayKey) - getSortPriority(b, todayKey);
+
+        if (priorityDiff !== 0) return priorityDiff;
+
+        return a.start_date.localeCompare(b.start_date);
+      })
+      .slice(0, MAX_VISIBLE);
+  }, [calendarItems, todayKey]);
 
   const total = visibleItems.length;
 
-  const initialIndex = useMemo(() => {
+  const highlightedIndex = useMemo(() => {
     const todayIdx = visibleItems.findIndex((item) =>
       isActiveToday(item, todayKey)
     );
-
     if (todayIdx !== -1) return todayIdx;
 
     const futureIdx = visibleItems.findIndex((item) => item.start_date >= todayKey);
-
     if (futureIdx !== -1) return futureIdx;
 
     return 0;
@@ -394,12 +421,12 @@ export const HolidaysEventsSection = ({
       return;
     }
 
-    progress.value = initialIndex;
+    progress.value = highlightedIndex;
 
     requestAnimationFrame(() => {
-      carouselRef.current?.scrollTo?.({ index: initialIndex, animated: false });
+      carouselRef.current?.scrollTo?.({ index: highlightedIndex, animated: false });
     });
-  }, [initialIndex, total, progress]);
+  }, [highlightedIndex, total, progress]);
 
   const renderItem = ({
     item,
@@ -416,6 +443,7 @@ export const HolidaysEventsSection = ({
       pageWidth={pageWidth}
       progress={progress}
       todayKey={todayKey}
+      isHighlighted={index === highlightedIndex}
       onCardPress={onCardPress}
     />
   );
@@ -477,7 +505,7 @@ export const HolidaysEventsSection = ({
             width={pageWidth}
             height={CARD_HEIGHT}
             data={visibleItems}
-            defaultIndex={initialIndex}
+            defaultIndex={highlightedIndex}
             pagingEnabled
             snapEnabled
             overscrollEnabled={false}

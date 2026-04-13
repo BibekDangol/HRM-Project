@@ -1,27 +1,44 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 
-import { DayCell } from "@/src/components/Calendar/DayCell";
 import { Calendar } from "react-native-calendars";
+import { DayCell } from "@/src/components/Calendar/DayCell";
+
+import { TW } from "@/theme/twStyles";
+import MonthPickerModal from "./Home/MonthPickerModal";
 
 interface SharedCalendarProps {
   year: number;
-  month: number;
-  markedDates: Record<string, any>;
+  month: number; // 1-based
+  markedDates?: Record<string, any>;
   markingType?: "period" | "custom";
-  onDayPress: (day: { dateString: string }) => void;
+  onDayPress?: (day: { dateString: string }) => void;
   onMonthChange: (m: { year: number; month: number }) => void;
   dayComponent?: any;
   minDate?: string;
   showLegend?: boolean;
+  onRangeChange?: (range: { startDate: string | null; endDate: string | null }) => void;
 }
 
 const todayStr = new Date().toISOString().split("T")[0];
 const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const MONTHS = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
 
 function formatDisplayDate(dateString: string) {
   const date = new Date(dateString);
-
   const weekday = date.toLocaleDateString("en-US", { weekday: "short" });
   const day = date.getDate();
   const month = date.toLocaleDateString("en-US", { month: "short" });
@@ -41,41 +58,143 @@ function getMonthString(year: number, month: number) {
   return `${year}-${String(month).padStart(2, "0")}-01`;
 }
 
+function normalizeDateString(date: Date) {
+  return date.toISOString().split("T")[0];
+}
+
+function buildRangeMarkedDates(
+  startDate: string,
+  endDate: string,
+  color = TW.bgSecondary,
+) {
+  const marks: Record<string, any> = {};
+
+  let start = new Date(startDate);
+  let end = new Date(endDate);
+
+  if (start > end) {
+    const temp = start;
+    start = end;
+    end = temp;
+  }
+
+  const startStr = normalizeDateString(start);
+  const endStr = normalizeDateString(end);
+
+  const current = new Date(start);
+
+  while (current <= end) {
+    const dateString = normalizeDateString(current);
+
+    marks[dateString] = {
+      color,
+      textColor: "#FFFFFF",
+      startingDay: dateString === startStr,
+      endingDay: dateString === endStr,
+    };
+
+    current.setDate(current.getDate() + 1);
+  }
+
+  return marks;
+}
+
+function getOrderedRange(startDate: string, endDate: string) {
+  if (startDate <= endDate) return { startDate, endDate };
+  return { startDate: endDate, endDate: startDate };
+}
+
 export function SharedCalendar({
   year,
   month,
-  markedDates,
-  markingType = "custom",
+  markedDates = {},
+  markingType = "period",
   onDayPress,
   onMonthChange,
   dayComponent,
   minDate = todayStr,
+  showLegend = false,
+  onRangeChange,
 }: SharedCalendarProps) {
-  const initialSelected =
-    Object.keys(markedDates || {}).find((key) => markedDates[key]?.selected) ||
-    todayStr;
-
   const [visibleMonth, setVisibleMonth] = useState({ year, month });
-  const [selectedDate, setSelectedDate] = useState(initialSelected);
+  const [startDate, setStartDate] = useState<string | null>(null);
+  const [endDate, setEndDate] = useState<string | null>(null);
+
+  const [pickerVisible, setPickerVisible] = useState(false);
+  const [pickerYear, setPickerYear] = useState(year);
+  const [pickerMonth, setPickerMonth] = useState(month - 1); // modal uses 0-based
+
+  useEffect(() => {
+    setVisibleMonth({ year, month });
+    setPickerYear(year);
+    setPickerMonth(month - 1);
+  }, [year, month]);
 
   const currentString = useMemo(
     () => getMonthString(visibleMonth.year, visibleMonth.month),
     [visibleMonth],
   );
 
+  const selectedDisplayDate = useMemo(() => {
+    if (endDate) return endDate;
+    if (startDate) return startDate;
+    return todayStr;
+  }, [startDate, endDate]);
+
+  const rangeMarkedDates = useMemo(() => {
+    if (startDate && endDate) {
+      return buildRangeMarkedDates(startDate, endDate, TW.bgSecondary);
+    }
+
+    if (startDate) {
+      return {
+        [startDate]: {
+          selected: true,
+          highlighted: true,
+        },
+      };
+    }
+
+    return {};
+  }, [startDate, endDate]);
+
   const displayedMarkedDates = useMemo(() => {
     return {
       ...markedDates,
-      [selectedDate]: {
-        ...(markedDates[selectedDate] || {}),
-        selected: true,
-      },
+      ...rangeMarkedDates,
     };
-  }, [markedDates, selectedDate]);
+  }, [markedDates, rangeMarkedDates]);
+
+  useEffect(() => {
+    if (!onRangeChange) return;
+
+    if (startDate && endDate) {
+      onRangeChange(getOrderedRange(startDate, endDate));
+      return;
+    }
+
+    onRangeChange({ startDate, endDate });
+  }, [startDate, endDate, onRangeChange]);
 
   const handleSelectDate = (dateString: string) => {
-    setSelectedDate(dateString);
-    onDayPress({ dateString });
+    onDayPress?.({ dateString });
+
+    if (!startDate || (startDate && endDate)) {
+      setStartDate(dateString);
+      setEndDate(null);
+      return;
+    }
+
+    if (startDate && !endDate) {
+      setEndDate(dateString);
+    }
+  };
+
+  const handleMonthChangeInternal = (updated: { year: number; month: number }) => {
+    setVisibleMonth(updated);
+    setPickerYear(updated.year);
+    setPickerMonth(updated.month - 1);
+    onMonthChange(updated);
   };
 
   const goToPrevMonth = () => {
@@ -87,9 +206,7 @@ export function SharedCalendar({
       newYear -= 1;
     }
 
-    const updated = { year: newYear, month: newMonth };
-    setVisibleMonth(updated);
-    onMonthChange(updated);
+    handleMonthChangeInternal({ year: newYear, month: newMonth });
   };
 
   const goToNextMonth = () => {
@@ -101,15 +218,34 @@ export function SharedCalendar({
       newYear += 1;
     }
 
-    const updated = { year: newYear, month: newMonth };
-    setVisibleMonth(updated);
-    onMonthChange(updated);
+    handleMonthChangeInternal({ year: newYear, month: newMonth });
+  };
+
+  const goToToday = () => {
+    const today = new Date();
+    handleMonthChangeInternal({
+      year: today.getFullYear(),
+      month: today.getMonth() + 1,
+    });
+  };
+
+  const clearSelection = () => {
+    setStartDate(null);
+    setEndDate(null);
+    onRangeChange?.({ startDate: null, endDate: null });
+  };
+
+  const handleConfirmPicker = () => {
+    handleMonthChangeInternal({
+      year: pickerYear,
+      month: pickerMonth + 1,
+    });
   };
 
   const resolvedDayComponent =
     dayComponent ??
     (({ date, state, marking }: any) => {
-      if (!date) return <View style={{ width: 36, height: 44 }} />;
+      if (!date) return <View style={{ width: 44, height: 52 }} />;
 
       return (
         <DayCell
@@ -121,155 +257,331 @@ export function SharedCalendar({
       );
     });
 
+  const orderedRange =
+    startDate && endDate ? getOrderedRange(startDate, endDate) : null;
+
   return (
-    <View
-      style={{
-        alignSelf: "center",
-        width: "92%",
-        marginVertical: 16,
-        backgroundColor: "#FFFFFF",
-        borderRadius: 20,
-        overflow: "hidden",
-        shadowColor: "#000",
-        shadowOpacity: 0.12,
-        shadowRadius: 10,
-        shadowOffset: { width: 0, height: 4 },
-        elevation: 6,
-      }}>
+    <>
       <View
         style={{
-          backgroundColor: "#1B4A5A",
-          paddingHorizontal: 18,
-          paddingTop: 18,
-          paddingBottom: 16,
-        }}>
-        <Text
+          alignSelf: "center",
+          width: "92%",
+          marginVertical: 16,
+          backgroundColor: "#FFFFFF", 
+          borderRadius: 20,
+          borderWidth: 1,
+          borderColor: "#E5E7EB", 
+          overflow: "hidden",
+        }}
+      >
+        {/* Top header like your reference */}
+        <View
           style={{
-            color: "#DDE7EB",
-            fontSize: 14,
-            fontWeight: "500",
-          }}>
-          {new Date(selectedDate).getFullYear()}
-        </Text>
-
-        <Text
-          style={{
-            color: "#FFFFFF",
-            fontSize: 22,
-            fontWeight: "700",
-            marginTop: 4,
-          }}>
-          {formatDisplayDate(selectedDate)}
-        </Text>
-      </View>
-
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
-          paddingHorizontal: 16,
-          paddingTop: 14,
-          paddingBottom: 8,
-        }}>
-        <Pressable
-          onPress={goToPrevMonth}
-          style={({ pressed }) => ({
-            width: 34,
-            height: 34,
-            alignItems: "center",
-            justifyContent: "center",
-            opacity: pressed ? 0.7 : 1,
-          })}>
-          <Text style={{ fontSize: 24, color: "#0F172A", fontWeight: "600" }}>
-            ‹
-          </Text>
-        </Pressable>
-
-        <Text
-          style={{
-            fontSize: 18,
-            fontWeight: "700",
-            color: "#0F172A",
-          }}>
-          {formatMonthYear(visibleMonth.year, visibleMonth.month)}
-        </Text>
-
-        <Pressable
-          onPress={goToNextMonth}
-          style={({ pressed }) => ({
-            width: 34,
-            height: 34,
-            alignItems: "center",
-            justifyContent: "center",
-            opacity: pressed ? 0.7 : 1,
-          })}>
-          <Text style={{ fontSize: 24, color: "#0F172A", fontWeight: "600" }}>
-            ›
-          </Text>
-        </Pressable>
-      </View>
-
-      <View
-        style={{
-          flexDirection: "row",
-          justifyContent: "space-between",
-          paddingHorizontal: 14,
-          paddingBottom: 6,
-        }}>
-        {weekDays.map((item) => (
-          <View
-            key={item}
+            paddingHorizontal: 24,
+            paddingTop: 20,
+            paddingBottom: 18,
+            backgroundColor: TW.bgSecondary,
+          }}
+        >
+          <Text
             style={{
-              width: 36,
-              alignItems: "center",
-            }}>
+              fontSize: 11,
+              color: "rgba(255,255,255,0.7)",
+              fontWeight: "600",
+              letterSpacing: 1,
+              textTransform: "uppercase",
+              marginBottom: 8,
+            }}
+          >
+            Select date
+          </Text>
+
+          <Text
+            style={{
+              fontSize: 30,
+              fontWeight: "400",
+              color: "#FFFFFF",
+              letterSpacing: -0.3,
+            }}
+          >
+            {formatDisplayDate(selectedDisplayDate)}
+          </Text>
+
+          {orderedRange && (
             <Text
               style={{
-                fontSize: 12,
+                color: "rgba(255,255,255,0.7)",
+                fontSize: 13,
+                marginTop: 8,
                 fontWeight: "600",
-                color: "#64748B",
-              }}>
-              {item}
+              }}
+            >
+              {`${orderedRange.startDate} → ${orderedRange.endDate}`}
             </Text>
+          )}
+        </View>
+
+        <View style={{ height: 1, backgroundColor: "#EEF2F4" }} />
+
+        {/* Month / year control row */}
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+            paddingHorizontal: 24,
+            paddingTop: 14,
+            paddingBottom: 8,
+          }}
+        >
+          <Pressable
+            onPress={() => setPickerVisible(true)}
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 6,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 15,
+                fontWeight: "700",
+                color: TW.bgSecondary,
+              }}
+            >
+              {formatMonthYear(visibleMonth.year, visibleMonth.month)}
+            </Text>
+            <Text
+              style={{
+                color: TW.bgSecondary,
+                fontSize: 11,
+              }}
+            >
+              ▼
+            </Text>
+          </Pressable>
+
+          <View style={{ flexDirection: "row", gap: 14 }}>
+            <Pressable
+              onPress={goToPrevMonth}
+              style={({ pressed }) => ({
+                width: 32,
+                height: 32,
+                borderRadius: 999,
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: pressed ? "#EEF2F4" : "transparent",
+              })}
+            >
+              <Text
+                style={{
+                  fontSize: 24,
+                  color: TW.bgSecondary,
+                  fontWeight: "500",
+                }}
+              >
+                ‹
+              </Text>
+            </Pressable>
+
+            <Pressable
+              onPress={goToNextMonth}
+              style={({ pressed }) => ({
+                width: 32,
+                height: 32,
+                borderRadius: 999,
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: pressed ? "#EEF2F4" : "transparent",
+              })}
+            >
+              <Text
+                style={{
+                  fontSize: 24,
+                  color: TW.bgSecondary,
+                  fontWeight: "500",
+                }}
+              >
+                ›
+              </Text>
+            </Pressable>
           </View>
-        ))}
+        </View>
+
+        {/* Today / Clear actions */}
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "center",
+            gap: 8,
+            paddingBottom: 10,
+          }}
+        >
+          <Pressable
+            onPress={goToToday}
+            style={({ pressed }) => ({
+              paddingHorizontal: 16,
+              paddingVertical: 7,
+              borderRadius: 999,
+              backgroundColor: pressed ? "#D9E2E7" : "#EEF2F4",
+            })}
+          >
+            <Text
+              style={{
+                fontSize: 13,
+                fontWeight: "700",
+                color: TW.bgSecondary,
+              }}
+            >
+              Today
+            </Text>
+          </Pressable>
+
+          {(startDate || endDate) && (
+            <Pressable
+              onPress={clearSelection}
+              style={({ pressed }) => ({
+                paddingHorizontal: 16,
+                paddingVertical: 7,
+                borderRadius: 999,
+                backgroundColor: pressed ? "#F1D7D7" : "#FDECEC",
+              })}
+            >
+              <Text
+                style={{
+                  fontSize: 13,
+                  fontWeight: "700",
+                  color: "#B42318",
+                }}
+              >
+                Clear
+              </Text>
+            </Pressable>
+          )}
+        </View>
+
+        {/* Weekdays */}
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            paddingHorizontal: 16,
+            paddingBottom: 6,
+          }}
+        >
+          {weekDays.map((item) => (
+            <View
+              key={item}
+              style={{
+                width: 44,
+                alignItems: "center",
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 12,
+                  fontWeight: "600",
+                  color: "#64748B",
+                }}
+              >
+                {item}
+              </Text>
+            </View>
+          ))}
+        </View>
+
+        {/* Calendar */}
+        <View style={{ paddingHorizontal: 12, paddingBottom: 14 }}>
+          <Calendar
+            key={currentString}
+            current={currentString}
+            onDayPress={(day) => handleSelectDate(day.dateString)}
+            onMonthChange={(m) => {
+              handleMonthChangeInternal({ year: m.year, month: m.month });
+            }}
+            markingType={markingType as any}
+            markedDates={displayedMarkedDates}
+            dayComponent={resolvedDayComponent}
+
+            hideArrows
+            renderHeader={() => <View />}
+            headerStyle={{ height: 0, marginBottom: 0 }}
+            hideDayNames
+            hideExtraDays={false}
+            firstDay={0}
+            minDate={minDate}
+            theme={{
+              backgroundColor: TW.bgPrimary,
+              calendarBackground: TW.bgPrimary,
+              dayTextColor: "#0F172A",
+              todayTextColor: TW.bgSecondary,
+              textDisabledColor: "#CBD5E1",
+              textDayFontSize: 14,
+              monthTextColor: TW.bgSecondary,
+            }}
+            style={{
+              backgroundColor:  "#FFFFFF",
+            }}
+          />
+        </View>
+
+        {showLegend && (
+          <>
+            <View style={{ height: 1, backgroundColor: "#EEF2F4" }} />
+            <View
+              style={{
+                flexDirection: "row",
+                flexWrap: "wrap",
+                gap: 12,
+                paddingHorizontal: 18,
+                paddingVertical: 14,
+              }}
+            >
+              <View style={{ flexDirection: "row", alignItems: "center" }}>
+                <View
+                  style={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: 999,
+                    backgroundColor: TW.bgSecondary,
+                    marginRight: 6,
+                  }}
+                />
+                <Text style={{ fontSize: 12, color: "#475569", fontWeight: "500" }}>
+                  Range
+                </Text>
+              </View>
+
+              <View style={{ flexDirection: "row", alignItems: "center" }}>
+                <View
+                  style={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: 999,
+                    backgroundColor: TW.bgYellow,
+                    marginRight: 6,
+                  }}
+                />
+                <Text style={{ fontSize: 12, color: "#475569", fontWeight: "500" }}>
+                  Selected
+                </Text>
+              </View>
+            </View>
+          </>
+        )}
       </View>
 
-      <View style={{ paddingHorizontal: 10, paddingBottom: 12 }}>
-        <Calendar
-          key={currentString}
-          current={currentString}
-          onDayPress={(day) => handleSelectDate(day.dateString)}
-          onMonthChange={(m) => {
-            const updated = { year: m.year, month: m.month };
-            setVisibleMonth(updated);
-            onMonthChange(updated);
-          }}
-          markingType={markingType as any}
-          markedDates={displayedMarkedDates}
-          dayComponent={resolvedDayComponent}
-          enableSwipeMonths
-          hideArrows
-          renderHeader={() => <View />}
-          headerStyle={{ height: 0, marginBottom: 0 }}
-          hideDayNames={true}
-          hideExtraDays={false}
-          firstDay={0}
-          minDate={minDate}
-          theme={{
-            backgroundColor: "#ffffff",
-            calendarBackground: "#ffffff",
-            dayTextColor: "#0F172A",
-            todayTextColor: "#1B4A5A",
-            textDisabledColor: "#CBD5E1",
-            textDayFontSize: 14,
-          }}
-          style={{
-            backgroundColor: "#fff",
-          }}
-        />
-      </View>
-    </View>
+      <MonthPickerModal
+        visible={pickerVisible}
+        selectedYear={pickerYear}
+        selectedMonth={pickerMonth}
+        setSelectedYear={setPickerYear}
+        setSelectedMonth={setPickerMonth}
+        onClose={() => setPickerVisible(false)}
+        onConfirm={handleConfirmPicker}
+      />
+    </>
   );
 }
+
+export default SharedCalendar;

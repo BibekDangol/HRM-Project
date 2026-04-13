@@ -17,13 +17,6 @@ export default function HeaderWithSearch({
 }: HeaderWithSearchProps) {
   return (
     <View style={tw`flex-row items-center px-4 py-3 bg-white`}>
-      {/* <Pressable
-        onPress={onBack}
-        style={tw`w-10 h-10 items-center justify-center mr-2`}
-      >
-        <ChevronLeft size={22} color="#1B4A5A" />
-      </Pressable> */}
-
       <View
         style={[
           tw`flex-1 flex-row items-center rounded-2xl px-3 h-11`,

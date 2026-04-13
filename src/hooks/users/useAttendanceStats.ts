@@ -5,8 +5,8 @@ import {
 } from "@/src/utils/userDashboard";
 import { useCallback, useEffect, useState } from "react";
 
-import { AttendanceRow } from "@/src/types/user";
 import { supabase } from "@/src/supabase/supabaseClient";
+import { AttendanceRow, AttendanceStatsRow } from "@/src/types/attendance";
 
 type Stats = {
   present: number;
@@ -105,7 +105,7 @@ export function useAttendanceStats(
 
       if (createdError) throw createdError;
 
-      const rows = (byCreatedAt ?? []) as AttendanceRow[];
+      const rows = (byDate ?? []) as AttendanceStatsRow[];
 
       const result: Stats = {
         present: rows.filter((r) => normalize(r.status) === "present").length,

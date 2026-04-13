@@ -17,12 +17,12 @@ import { useUsersStore } from "@/src/store/useUsersStore";
 import { supabase } from "@/src/supabase/supabaseClient";
 import { TW } from "@/theme/twStyles";
 import {
-  CalendarItem,
   FILTERS,
   FilterType,
   formatDate,
   getNepalTodayKey,
 } from "@/src/utils/calendar.utils";
+import { CalendarItem } from "../types/Calendar";
 
 type GroupedCalendarItems = {
   date: string;
@@ -37,6 +37,28 @@ type AdminCalendarRow = {
   start_date: string | null;
   end_date: string | null;
 };
+
+function isActiveToday(item: CalendarItem, todayKey: string) {
+  const endDate = item.end_date || item.start_date;
+  return item.start_date <= todayKey && endDate >= todayKey;
+}
+
+function isPastItem(item: CalendarItem, todayKey: string) {
+  const endDate = item.end_date || item.start_date;
+  return endDate < todayKey;
+}
+
+function getGroupStatus(
+  group: GroupedCalendarItems,
+  todayKey: string
+): "today" | "upcoming" | "past" {
+  const hasActiveToday = group.items.some((item) => isActiveToday(item, todayKey));
+  if (hasActiveToday) return "today";
+
+  if (group.date > todayKey) return "upcoming";
+
+  return "past";
+}
 
 const EventItemRow = ({ item }: { item: CalendarItem }) => (
   <View
@@ -72,9 +94,13 @@ const EventItemRow = ({ item }: { item: CalendarItem }) => (
 const DateGroupCard = ({
   group,
   isHighlighted,
+  badgeLabel,
+  isPast,
 }: {
   group: GroupedCalendarItems;
   isHighlighted: boolean;
+  badgeLabel?: "TODAY" | "NEXT" | null;
+  isPast: boolean;
 }) => (
   <View
     style={{
@@ -84,6 +110,7 @@ const DateGroupCard = ({
       borderColor: isHighlighted ? "#BAE6FD" : "rgba(27,74,90,0.08)",
       backgroundColor: isHighlighted ? "#F0F9FF" : "#fff",
       overflow: "hidden",
+      opacity: isPast && !isHighlighted ? 0.72 : 1,
     }}
   >
     <View
@@ -147,7 +174,7 @@ const DateGroupCard = ({
         </View>
       </View>
 
-      {isHighlighted && (
+      {isHighlighted && badgeLabel && (
         <View
           style={{
             backgroundColor: TW.bgSecondary,
@@ -163,7 +190,7 @@ const DateGroupCard = ({
               fontWeight: "700",
             }}
           >
-            LATEST
+            {badgeLabel}
           </Text>
         </View>
       )}
@@ -379,13 +406,35 @@ export default function HolidaysEventsScreen() {
       groups[item.start_date].push(item);
     });
 
-    return Object.entries(groups).map(([date, grouped]) => ({
-      date,
-      items: grouped,
-    }));
+    return Object.entries(groups)
+      .map(([date, grouped]) => ({
+        date,
+        items: grouped,
+      }))
+      .sort((a, b) => b.date.localeCompare(a.date));
   }, [visibleItems]);
 
-  const latestDate = groupedItems.length > 0 ? groupedItems[0].date : null;
+  const highlightedDate = useMemo(() => {
+    const todayGroup = groupedItems.find(
+      (group) => getGroupStatus(group, todayKey) === "today"
+    );
+    if (todayGroup) return todayGroup.date;
+
+    const nextUpcomingGroup = groupedItems
+      .filter((group) => getGroupStatus(group, todayKey) === "upcoming")
+      .sort((a, b) => a.date.localeCompare(b.date))[0];
+
+    return nextUpcomingGroup?.date ?? null;
+  }, [groupedItems, todayKey]);
+
+  const highlightBadgeLabel = useMemo(() => {
+    if (!highlightedDate) return null;
+
+    const group = groupedItems.find((item) => item.date === highlightedDate);
+    if (!group) return null;
+
+    return getGroupStatus(group, todayKey) === "today" ? "TODAY" : "NEXT";
+  }, [groupedItems, highlightedDate, todayKey]);
 
   const emptyMessage = useMemo(() => {
     if (filter === "holiday") return "There are no holidays to display.";
@@ -443,12 +492,19 @@ export default function HolidaysEventsScreen() {
             ref={listRef}
             data={groupedItems}
             keyExtractor={(item) => item.date}
-            renderItem={({ item }) => (
-              <DateGroupCard
-                group={item}
-                isHighlighted={!!latestDate && item.date === latestDate}
-              />
-            )}
+            renderItem={({ item }) => {
+              const status = getGroupStatus(item, todayKey);
+              const isHighlighted = !!highlightedDate && item.date === highlightedDate;
+
+              return (
+                <DateGroupCard
+                  group={item}
+                  isHighlighted={isHighlighted}
+                  badgeLabel={isHighlighted ? highlightBadgeLabel : null}
+                  isPast={status === "past"}
+                />
+              );
+            }}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{
               paddingHorizontal: 16,

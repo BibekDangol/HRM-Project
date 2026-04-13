@@ -1,71 +1,94 @@
 // utils/attendanceHelper.ts
 
-import { AttendanceRow } from "@/src/types/attendance";
 import { getAttendanceRulesService } from "../services/users/attendance.service";
+import { AttendanceRow, AttendanceRules } from "../types/attendance";
 
 export const CHECKIN_NOTIFICATION_ID = "attendance-checkin";
 export const CHECKOUT_NOTIFICATION_ID = "attendance-checkout";
 
 const NEPAL_OFFSET_MIN = 5 * 60 + 45; // UTC+05:45
 
-// 🕑 Nepal time in minutes
+// Nepal time in minutes
 export function minutesOfDayNepal(now = new Date()) {
   const nepalNow = new Date(now.getTime() + NEPAL_OFFSET_MIN * 60 * 1000);
   return nepalNow.getUTCHours() * 60 + nepalNow.getUTCMinutes();
 }
 
-// 🔹 Convert HH:MM:SS → minutes
+// Convert HH:MM:SS → minutes
 export function timeStringToMinutes(time: string) {
   const [h, m] = time.split(":").map(Number);
   return h * 60 + m;
 }
 
-// 🔹 Convert HH:MM:SS → hour & minute for notifications
+// Convert HH:MM:SS → hour & minute for notifications
 export function parseHourMinute(time: string) {
   const [hour, minute] = time.split(":").map(Number);
   return { hour, minute };
 }
 
-// ✅ Get check-in/out times dynamically
+// Get check-in/out times dynamically
 export async function getCheckInTime() {
   const rules = await getAttendanceRulesService();
+
+  if (!rules?.checkin_start) {
+    throw new Error("Check-in start time is not set");
+  }
+
   return parseHourMinute(rules.checkin_start);
 }
+
 export async function getCheckOutTime() {
   const rules = await getAttendanceRulesService();
+
+  if (!rules?.checkout_end) {
+    throw new Error("Check-out end time is not set");
+  }
+
   return parseHourMinute(rules.checkout_end);
 }
 
-// 🔹 Check if check-in needs comment
-export function needsCheckInCommentNepal(rules: any, now = new Date()) {
+// Check if check-in needs comment
+export function needsCheckInCommentNepal(
+  rules: AttendanceRules,
+  now = new Date(),
+) {
+  if (!rules.checkin_end) return false;
+
   const current = minutesOfDayNepal(now);
   const checkinEnd = timeStringToMinutes(rules.checkin_end);
   return current > checkinEnd;
 }
 
-// 🔹 Check if check-out needs comment
-export function needsCheckOutCommentNepal(rules: any, now = new Date()) {
+// Check if check-out needs comment
+export function needsCheckOutCommentNepal(
+  rules: AttendanceRules,
+  now = new Date(),
+) {
+  if (!rules.checkout_start) return false;
+
   const current = minutesOfDayNepal(now);
   const checkoutStart = timeStringToMinutes(rules.checkout_start);
   return current < checkoutStart;
 }
 
-// 🔹 Check-in status: late / half-day / present
-export function getCheckInStatus(rules: any, now = new Date()) {
-  const current = minutesOfDayNepal(now);
+// Check-in status: late / half-day / present
+export function getCheckInStatus(rules: AttendanceRules, now = new Date()) {
+  if (!rules.checkin_end) return "present";
 
+  const current = minutesOfDayNepal(now);
   const checkinEnd = timeStringToMinutes(rules.checkin_end);
-  const halfDayLimit = checkinEnd + 60; // optional: 1h after late mark → half-day
+  const halfDayLimit = checkinEnd + 60;
 
   if (current > halfDayLimit) return "half_day";
   if (current > checkinEnd) return "late";
   return "present";
 }
 
-// 🔹 Check-out status: early exit / completed
-export function getCheckOutStatus(rules: any, now = new Date()) {
-  const current = minutesOfDayNepal(now);
+// Check-out status: early exit / completed
+export function getCheckOutStatus(rules: AttendanceRules, now = new Date()) {
+  if (!rules.checkout_start || !rules.checkout_end) return "completed";
 
+  const current = minutesOfDayNepal(now);
   const checkoutStart = timeStringToMinutes(rules.checkout_start);
   const checkoutEnd = timeStringToMinutes(rules.checkout_end);
 
@@ -74,7 +97,7 @@ export function getCheckOutStatus(rules: any, now = new Date()) {
   return "completed";
 }
 
-// 🔹 Generic helpers
+// Generic helpers
 export function getAttendanceStatus(row: AttendanceRow | null) {
   return row?.status ?? "absent";
 }

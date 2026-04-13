@@ -50,6 +50,7 @@ export default function AdminLayout() {
       <StatusBar barStyle="light-content" backgroundColor={TW.bgSecondary} />
 
       <Tabs
+        backBehavior="initialRoute" 
         screenOptions={{
           headerShown: true,
           headerShadowVisible: false,

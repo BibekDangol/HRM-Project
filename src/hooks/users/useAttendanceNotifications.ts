@@ -5,12 +5,11 @@ import {
 import { useEffect, useState } from "react";
 
 import { getAttendanceRulesService } from "../../services/users/attendance.service";
+import { AttendanceRules } from "@/src/types/attendance";
 
 export function useAttendanceNotifications() {
-  const [attendanceRules, setAttendanceRules] = useState<Record<
-    string,
-    unknown
-  > | null>(null);
+  const [attendanceRules, setAttendanceRules] =
+    useState<AttendanceRules | null>(null);
 
   useEffect(() => {
     const init = async () => {

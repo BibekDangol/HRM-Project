@@ -9,7 +9,7 @@ import { LeaveStatus } from "@/src/services/leave.service";
 import { useLeaveTabStore } from "@/src/store/useLeaveTabStore";
 import { TW } from "@/theme/twStyles";
 import tw from "twrnc";
-import { Pagination } from "../PaginationModal";
+
 
 type Props = {
   approvedPath: string;
@@ -51,10 +51,6 @@ export default function LeaveView({
     loading,
     refreshing,
     onRefresh,
-    shouldShowPagination,
-    pageNumbers,
-    totalPages,
-    page,
     setPage,
   } = useLeaveView({ fetchLeaves, scrollRef: listRef, activeTab });
 
@@ -182,19 +178,6 @@ export default function LeaveView({
           </View>
         }
       />
-
-      {/* Pagination */}
-      {/* {shouldShowPagination && (
-        <Pagination
-          page={page}
-          totalPages={totalPages}
-          pageNumbers={pageNumbers}
-          setPage={setPage}
-          shouldShowPagination={shouldShowPagination}
-          TW={TW}
-          tw={tw}
-        />
-      )} */}
     </View>
   );
 }

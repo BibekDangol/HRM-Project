@@ -1,7 +1,7 @@
 import { supabase } from "@/src/supabase/supabaseClient";
 
 export async function getCalendarItems(
-  orgId: string | number,
+  orgId: number,
   start: string,
   end: string,
 ) {

@@ -8,3 +8,15 @@ export type AttendanceRow = {
   status: string | null;
   user_id: string | null;
 };
+export type AttendanceRules = {
+  id: number;
+  checkin_start: string | null;
+  checkin_end: string | null;
+  checkout_start: string | null;
+  checkout_end: string | null;
+};
+export type AttendanceStatsRow = {
+  status: "present" | "absent" | "incomplete" | "on_leave";
+  check_in_comment: string | null;
+  date: string;
+};
