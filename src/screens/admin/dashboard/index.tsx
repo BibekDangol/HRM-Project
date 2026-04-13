@@ -102,17 +102,13 @@ export default function DashboardScreen() {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }>
-        <Text style={tw`font-semibold ${TW.textPrimary} py-2 text-lg`}>
-          High-Level Metrics
-        </Text>
-
         <StatCard
           title="Total Employees"
           value={totalusers}
           icon={<User size={24} color="white" />}
         />
 
-        <QuickAction onOpenAddUserModal={() => setAddUserModalVisible(true)} />
+       
 
         <HolidaysEventsSection
           calendarItems={calendarItems}
@@ -121,6 +117,7 @@ export default function DashboardScreen() {
           selectedYear={selectedYear}
           onViewAll={() => router.push("/(admin)/holidays")}
         />
+         <QuickAction onOpenAddUserModal={() => setAddUserModalVisible(true)} />
       </ScrollView>
 
       <AddUserModal

@@ -3,6 +3,7 @@ import { z } from "zod";
 export const changePasswordSchema = z
   .object({
     oldPassword: z.string().min(1, "Old password is required"),
+
     newPassword: z
       .string()
       .min(8, "Password must be at least 8 characters")
@@ -15,9 +16,16 @@ export const changePasswordSchema = z
         /[^A-Za-z0-9]/,
         "Password must contain at least one special character",
       ),
+
     confirmPassword: z.string().min(1, "Confirm your password"),
   })
+  // match check
   .refine((data) => data.newPassword === data.confirmPassword, {
     path: ["confirmPassword"],
     message: "Passwords do not match",
+  })
+  // prevent reuse
+  .refine((data) => data.oldPassword !== data.newPassword, {
+    path: ["newPassword"],
+    message: "New password must be different from old password",
   });

@@ -31,6 +31,21 @@ const ADMIN_ROOT_TAB_PATHS = [
   "/profile",
 ];
 
+const ADMIN_HOME_PATHS = ["/(admin)/dashboard", "/dashboard"];
+
+const ADMIN_MAIN_TABS_THAT_SHOULD_GO_HOME = [
+  "/(admin)/manage-users",
+  "/manage-users",
+  "/(admin)/more",
+  "/more",
+  "/(admin)/leave",
+  "/leave",
+  "/(admin)/profile",
+  "/profile",
+  "/(admin)/holidays",
+  "/holidays",
+];
+
 export function useAdminHeaderController({
   pathname,
   router,
@@ -45,7 +60,7 @@ export function useAdminHeaderController({
     rootPaths: ADMIN_ROOT_TAB_PATHS,
   });
 
-  const showBackButton = !isRootTab;
+  const showBackButton = !ADMIN_HOME_PATHS.includes(pathname);
 
   const fetchUserProfile = useCallback(async () => {
     if (!user?.id || currentUserProfile) return;
@@ -59,18 +74,27 @@ export function useAdminHeaderController({
   }, [fetchUserProfile]);
 
   const handleBackPress = useCallback(() => {
+    // Main tab screens should always go to dashboard
+    if (ADMIN_MAIN_TABS_THAT_SHOULD_GO_HOME.includes(pathname)) {
+      router.replace("/(admin)/dashboard");
+      return true;
+    }
+
+    // Already on dashboard -> allow Android to exit app
+    if (ADMIN_HOME_PATHS.includes(pathname)) {
+      return false;
+    }
+
+    // Inner screens -> normal back
     if (router.canGoBack()) {
       router.back();
       return true;
     }
 
-    if (!isRootTab) {
-      router.replace("/(admin)/dashboard");
-      return true;
-    }
-
-    return false;
-  }, [router, isRootTab]);
+    // Fallback
+    router.replace("/(admin)/dashboard");
+    return true;
+  }, [pathname, router]);
 
   useEffect(() => {
     const sub = BackHandler.addEventListener(

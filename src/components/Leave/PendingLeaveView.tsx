@@ -170,15 +170,6 @@ const PendingLeaveView = ({
       {showActions && handleStatusChange && (
         <View style={tw`px-5 py-4 flex-row gap-3`}>
           <Pressable
-            onPress={() => handleStatusChange("rejected")}
-            style={({ pressed }) => [
-              tw`flex-1 flex-row items-center justify-center py-4 rounded-2xl ${TW.bgRejected}`,
-              pressed && tw`opacity-70`,
-            ]}>
-            <XCircle size={18} color="#ffffff" />
-            <Text style={tw`text-white font-bold ml-2`}>Reject</Text>
-          </Pressable>
-          <Pressable
             onPress={() => handleStatusChange("approved")}
             style={({ pressed }) => [
               tw`flex-1 flex-row items-center justify-center py-4 rounded-2xl ${TW.bgAction}`,
@@ -187,6 +178,17 @@ const PendingLeaveView = ({
             <CheckCircle size={18} color="#ffffff" />
             <Text style={tw`text-white font-bold ml-2`}>Approve</Text>
           </Pressable>
+
+          <Pressable
+            onPress={() => handleStatusChange("rejected")}
+            style={({ pressed }) => [
+              tw`flex-1 flex-row items-center justify-center py-4 rounded-2xl ${TW.bgRejected}`,
+              pressed && tw`opacity-70`,
+            ]}>
+            <XCircle size={18} color="#ffffff" />
+            <Text style={tw`text-white font-bold ml-2`}>Reject</Text>
+          </Pressable>
+
         </View>
       )}
     </View>

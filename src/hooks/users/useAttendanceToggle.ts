@@ -108,7 +108,7 @@ export const useAttendanceToggle = () => {
           );
           return;
         }
-        if (needsCheckInCommentNepal(attendanceRules)) {
+        if (attendanceRules && needsCheckInCommentNepal(attendanceRules)) {
           setCommentMode("checkin");
           setCommentText("");
           setCommentModalOpen(true);
@@ -119,7 +119,7 @@ export const useAttendanceToggle = () => {
         return;
       }
 
-      if (needsCheckOutCommentNepal(attendanceRules)) {
+      if (attendanceRules && needsCheckOutCommentNepal(attendanceRules)) {
         setCommentMode("checkout");
         setCommentText("");
         setCommentModalOpen(true);

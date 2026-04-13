@@ -9,7 +9,7 @@ import {
   View,
 } from "react-native";
 
-import HeaderWithSearch from "@/src/components/HeaderWithSearch";
+import HeaderWithSearch from "@/src/components/SearchBar";
 import LoadingIndicator from "@/src/components/LoadingIndicator";
 import { Pagination } from "@/src/components/PaginationModal";
 import { useManageUsers } from "@/src/hooks/admin/useManageUsers";
@@ -54,6 +54,8 @@ const ManageUsers = () => {
     isEditingUser,
   } = useManageUsers();
 
+  const flatListRef = useRef<FlatList>(null);
+
   const {
     page,
     setPage,
@@ -61,19 +63,21 @@ const ManageUsers = () => {
     shouldShowPagination,
     pagedData,
     pageNumbers,
-  } = usePagination(filteredUsers);
-
-  const flatListRef = useRef<FlatList>(null);
+    isChangingPage,
+  } = usePagination(filteredUsers, undefined, () => {
+    flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+  });
 
   useFocusEffect(
     useCallback(() => {
       setActiveTab("pending");
-      setPage(1);
-      flatListRef.current?.scrollToOffset({
-        offset: 0,
-        animated: true,
-      });
-    }, [setActiveTab, setPage])
+      flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+    }, [setActiveTab])
+  );
+
+  // ✅ Sort ascending by first_name
+  const sortedPagedData = [...pagedData].sort((a, b) =>
+    (a.first_name ?? "").localeCompare(b.first_name ?? "")
   );
 
   return (
@@ -88,7 +92,6 @@ const ManageUsers = () => {
           <View style={tw`flex-1 flex-row rounded-2xl p-1 bg-slate-100`}>
             {tabs.map((tab) => {
               const isActive = activeTab === tab.key;
-
               return (
                 <Pressable
                   key={tab.key}
@@ -102,9 +105,7 @@ const ManageUsers = () => {
                   <Text
                     style={[
                       tw`text-sm font-bold`,
-                      isActive
-                        ? tw`${TW.textButton}`
-                        : tw`${TW.textPrimary}`,
+                      isActive ? tw`${TW.textButton}` : tw`${TW.textPrimary}`,
                     ]}
                   >
                     {tab.label.toUpperCase()}{" "}
@@ -136,11 +137,15 @@ const ManageUsers = () => {
           </Pressable>
         </View>
 
+        {/* ✅ removed wrapper View, removed overlay — opacity fade only */}
         <FlatList
           ref={flatListRef}
-          data={pagedData}
+          data={sortedPagedData}
           keyExtractor={(item) => item.id}
-          style={tw`px-4`}
+          style={[
+            tw`px-4`,
+            { opacity: isChangingPage ? 0.4 : 1 }, // ✅ real world fade
+          ]}
           renderItem={({ item }) => (
             <UserCard
               user={item}
@@ -169,7 +174,6 @@ const ManageUsers = () => {
                 totalPages={totalPages}
                 pageNumbers={pageNumbers}
                 setPage={setPage}
-                shouldShowPagination={shouldShowPagination}
                 TW={TW}
                 tw={tw}
               />

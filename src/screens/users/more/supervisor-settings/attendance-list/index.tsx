@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { FlatList, Pressable, Text, View } from "react-native";
-import HeaderWithSearch from "@/src/components/HeaderWithSearch";
+import HeaderWithSearch from "@/src/components/SearchBar";
 import { UserCard } from "@/src/screens/admin/components/UserCard";
 import { fetchSupervisorUnderUsersService } from "@/src/services/admin.service";
 import { useUsersStore } from "@/src/store/useUsersStore";

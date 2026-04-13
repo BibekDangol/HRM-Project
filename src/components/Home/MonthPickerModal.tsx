@@ -1,5 +1,6 @@
 import { MAX_YEAR, MIN_YEAR, MONTHS } from "@/src/utils/userDashboard";
 import { TW } from "@/theme/twStyles";
+import { ChevronDown } from "lucide-react-native";
 import React, {
   memo,
   useCallback,
@@ -194,7 +195,7 @@ export function MonthPickerModal({
             },
           ]}
         >
-          <Pressable onPress={() => {}}>
+          <Pressable onPress={() => { }}>
             <View style={s.header}>
               <Text style={s.headerLabel}>Select date</Text>
               <Text style={s.headerDate}>
@@ -213,7 +214,8 @@ export function MonthPickerModal({
                 <Text style={[s.toggleText, mode === "year" && s.toggleActive]}>
                   {selectedYear}
                 </Text>
-                <Text style={s.caret}>▲</Text>
+                <ChevronDown
+                  size={15} color={TW.bgSecondary} />
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -226,7 +228,9 @@ export function MonthPickerModal({
                 >
                   {MONTHS[selectedMonth]}
                 </Text>
-                <Text style={s.caret}>▲</Text>
+                {/* <Text style={s.caret}>▲</Text> */}
+                <ChevronDown
+                  size={15} color={TW.bgSecondary} />
               </TouchableOpacity>
             </View>
 
@@ -239,32 +243,32 @@ export function MonthPickerModal({
             >
               {mode === "year"
                 ? YEAR_ROWS.map((row, ri) => (
-                    <View key={ri} style={s.row}>
-                      {row.map((year) => (
-                        <GridCell
-                          key={year}
-                          label={`${year}`}
-                          isSelected={year === selectedYear}
-                          onPress={() => setSelectedYear(year)}
-                        />
-                      ))}
-                    </View>
-                  ))
+                  <View key={ri} style={s.row}>
+                    {row.map((year) => (
+                      <GridCell
+                        key={year}
+                        label={`${year}`}
+                        isSelected={year === selectedYear}
+                        onPress={() => setSelectedYear(year)}
+                      />
+                    ))}
+                  </View>
+                ))
                 : MONTH_ROWS.map((row, ri) => (
-                    <View key={ri} style={s.row}>
-                      {row.map((month, ci) => {
-                        const index = ri * 3 + ci;
-                        return (
-                          <GridCell
-                            key={month}
-                            label={month.slice(0, 3)}
-                            isSelected={index === selectedMonth}
-                            onPress={() => setSelectedMonth(index)}
-                          />
-                        );
-                      })}
-                    </View>
-                  ))}
+                  <View key={ri} style={s.row}>
+                    {row.map((month, ci) => {
+                      const index = ri * 3 + ci;
+                      return (
+                        <GridCell
+                          key={month}
+                          label={month.slice(0, 3)}
+                          isSelected={index === selectedMonth}
+                          onPress={() => setSelectedMonth(index)}
+                        />
+                      );
+                    })}
+                  </View>
+                ))}
             </ScrollView>
 
             <View style={s.divider} />

@@ -243,7 +243,7 @@ const StatBox = ({
 
 // ─── Main component ───────────────────────────────────────────────────────────
 const AttendanceView: React.FC<Props> = ({ userId, name }) => {
-  const { summary, groupedByDate, selectedMonth, setSelectedMonth } =
+  const {  groupedByDate, selectedMonth, setSelectedMonth } =
     useAttendance(userId);
 
   const [showMonthPicker, setShowMonthPicker] = useState(false);

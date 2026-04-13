@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { FlatList, Pressable, Text, View } from "react-native";
 
-import HeaderWithSearch from "@/src/components/HeaderWithSearch";
+import HeaderWithSearch from "@/src/components/SearchBar";
 import LoadingIndicator from "@/src/components/LoadingIndicator";
 import { useDebounce } from "@/src/hooks/useDebounce";
 import { fetchUsersService } from "@/src/services/admin.service";
@@ -18,21 +18,25 @@ const AttendanceUserList = () => {
   const [loading, setLoading] = useState(true);
   const { currentUserProfile } = useUsersStore();
   const debouncedSearchQuery = useDebounce(search, 300);
-  // const filteredUsers = users.filter((u) =>
-  //   u.first_name?.toLowerCase().includes(debouncedSearchQuery.toLowerCase()),
-  // );
+
   const getSupervisorName = () => "No supervisor";
 
   const loadUsers = useCallback(async () => {
     if (!currentUserProfile?.id) return;
 
-    setLoading(true); // start loading
+    setLoading(true);
     try {
       const usersData = await fetchUsersService(
         currentUserProfile.organization_id,
         debouncedSearchQuery,
       );
-      setUsers(usersData);
+
+      // ✅ Sort ascending by first_name
+      const sorted = usersData.sort((a, b) =>
+        (a.first_name ?? "").localeCompare(b.first_name ?? "")
+      );
+
+      setUsers(sorted);
     } catch (err) {
       console.error(err);
     } finally {
@@ -46,7 +50,6 @@ const AttendanceUserList = () => {
 
   return (
     <View style={tw`flex-1 bg-white`}>
-      {/* Search Bar */}
       <HeaderWithSearch
         search={search}
         onSearchChange={setSearch}
@@ -80,7 +83,8 @@ const AttendanceUserList = () => {
                     name: item.first_name + " " + item.last_name,
                   },
                 })
-              }>
+              }
+            >
               <UserCard
                 user={item}
                 getSupervisorName={getSupervisorName}
