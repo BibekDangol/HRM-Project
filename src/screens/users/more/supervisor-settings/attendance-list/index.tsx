@@ -24,7 +24,7 @@ const AttendanceUserList = () => {
       setLoading(true);
       const data = await fetchSupervisorUnderUsersService(
         currentUserProfile.organization_id,
-        search,
+        search.trim(), // ← only change this line
         currentUserProfile.id,
       );
       setUsers(data);

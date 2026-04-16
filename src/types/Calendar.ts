@@ -30,7 +30,7 @@ export interface CalendarState {
 export type ModalMode = "view" | "addHoliday" | "addEvent";
 
 export type CalendarItem = {
-  id: string;
+  id: number;
   title: string;
   type: "holiday" | "event";
   color: string;

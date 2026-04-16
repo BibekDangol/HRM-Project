@@ -10,6 +10,7 @@ function buildPrefix(searchQuery: string) {
     .map((word) => `${word}`)
     .join(" & ");
 }
+
 export async function fetchUsersService(orgId: number, searchQuery = "") {
   if (searchQuery.trim()) {
     const prefix = buildPrefix(searchQuery);
@@ -22,7 +23,6 @@ export async function fetchUsersService(orgId: number, searchQuery = "") {
     return data as UserProfile[];
   }
 
-  // fallback (no search)
   const { data, error } = await supabase
     .from("profiles")
     .select(
@@ -47,12 +47,22 @@ export async function fetchSupervisorUnderUsersService(
     .eq("organization_id", orgId)
     .eq("supervisor_id", supervisorId)
     .neq("id", supervisorId);
+
   if (searchQuery.trim()) {
     const q = searchQuery.trim().replace(/\s+/g, " ");
-    query = query.or(
-      `first_name.ilike.%${q}%,last_name.ilike.%${q}%,email.ilike.%${q}%`,
-    );
+    const parts = q.split(" ").filter(Boolean);
+
+    if (parts.length >= 2) {
+      query = query
+        .ilike("first_name", `%${parts[0]}%`)
+        .ilike("last_name", `%${parts.slice(1).join(" ")}%`);
+    } else {
+      query = query.or(
+        `first_name.ilike.%${q}%,last_name.ilike.%${q}%,email.ilike.%${q}%`
+      );
+    }
   }
+
   const { data, error } = await query;
   if (error) throw error;
   return data as UserProfile[];

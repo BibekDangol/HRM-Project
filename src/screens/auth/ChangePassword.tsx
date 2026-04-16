@@ -24,13 +24,13 @@ import tw from "twrnc";
 
 const ChangePasswordScreen = () => {
   const router = useRouter();
-  const { user, updateStatus } = useAuthStore();
+  const { user } = useAuthStore();
   const [showPassword, setShowPassword] = useState(false);
   const toggleShowPassword = () => setShowPassword((p) => !p);
-  const [showOld, setShowOld] = useState(false);
-  const [showNew, setShowNew] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
-  const { isSmallPhone, isTablet, width } = useDimension();
+  const [showOld] = useState(false);
+  const [showNew] = useState(false);
+  const [showConfirm] = useState(false);
+  const { isTablet } = useDimension();
   const {
     control,
     handleSubmit,
@@ -113,14 +113,6 @@ const ChangePasswordScreen = () => {
                   : field === "newPassword"
                     ? showNew
                     : showConfirm;
-
-              const setShowToggle =
-                field === "oldPassword"
-                  ? setShowOld
-                  : field === "newPassword"
-                    ? setShowNew
-                    : setShowConfirm;
-
               const label =
                 field === "oldPassword"
                   ? "Old Password"
