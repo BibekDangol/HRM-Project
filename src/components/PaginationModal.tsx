@@ -7,7 +7,7 @@ interface PaginationProps {
   setPage: (page: number) => void;
   TW: any;
   tw: any;
-  // ✅ removed shouldShowPagination — already handled in ListFooterComponent
+
 }
 
 export const Pagination = ({

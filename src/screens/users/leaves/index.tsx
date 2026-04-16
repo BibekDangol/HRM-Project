@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { FlatList, Pressable, RefreshControl, Text, View } from "react-native";
+import { FlatList, Pressable, RefreshControl, View } from "react-native";
 import { FilterTab, Header } from "./components/Header";
 
 import LoadingIndicator from "@/src/components/LoadingIndicator";
@@ -10,14 +10,19 @@ import { Plus } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import tw from "twrnc";
 import { LeaveCard } from "./components/LeaveCard";
+import { Pagination } from "@/src/components/PaginationModal";
+
 
 export default function LeavesScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams<{ tab?: string | string[] }>();
   const flatListRef = useRef<FlatList>(null);
-  const { loading, refreshing, leaves, leaveTypes, onRefresh } = useLeaves();
 
+  const { loading, refreshing, leaves, leaveTypes, onRefresh } =
+    useLeaves();
+
+  // ✅ Handle tab from params
   const requestedTab =
     typeof params.tab === "string"
       ? params.tab
@@ -50,11 +55,13 @@ export default function LeavesScreen() {
     }
   }, [requestedTab]);
 
+  // ✅ Filter data
   const filteredLeaves = useMemo(() => {
     if (activeTab === "all") return leaves;
     return leaves.filter((l) => l.status === activeTab);
   }, [leaves, activeTab]);
 
+  // ✅ Pagination hook
   const {
     page,
     setPage,
@@ -64,6 +71,7 @@ export default function LeavesScreen() {
     shouldShowPagination,
   } = usePagination(filteredLeaves);
 
+  // ✅ Reset page on tab change
   useEffect(() => {
     flatListRef.current?.scrollToOffset({
       offset: 0,
@@ -72,9 +80,11 @@ export default function LeavesScreen() {
     setPage(1);
   }, [activeTab, setPage]);
 
+  // ✅ Leave type name
   const leaveTypeName = useCallback(
-    (id: number | null) => leaveTypes.find((t) => t.id === id)?.name ?? "Leave",
-    [leaveTypes],
+    (id: number | null) =>
+      leaveTypes.find((t) => t.id === id)?.name ?? "Leave",
+    [leaveTypes]
   );
 
   if (loading) {
@@ -120,44 +130,24 @@ export default function LeavesScreen() {
         )}
         ListFooterComponent={
           shouldShowPagination ? (
-            <View style={tw`flex-row items-center justify-center gap-2 py-4`}>
-              <Pressable
-                onPress={() => setPage((p) => Math.max(1, p - 1))}
-                style={tw`px-3 py-2 border border-slate-200 rounded-lg`}
-              >
-                <Text style={tw`text-slate-700 font-medium`}>Prev</Text>
-              </Pressable>
-
-              {pageNumbers.map((p) => (
-                <Pressable
-                  key={p}
-                  onPress={() => setPage(p)}
-                  style={tw`px-3 py-2 rounded-lg border border-slate-200`}
-                >
-                  <Text
-                    style={[
-                      tw`font-medium`,
-                      p === page
-                        ? tw`text-white bg-[#1B4A5A] px-2 py-1 rounded`
-                        : tw`text-slate-700`,
-                    ]}
-                  >
-                    {p}
-                  </Text>
-                </Pressable>
-              ))}
-
-              <Pressable
-                onPress={() => setPage((p) => Math.min(totalPages, p + 1))}
-                style={tw`px-3 py-2 border border-slate-200 rounded-lg`}
-              >
-                <Text style={tw`text-slate-700 font-medium`}>Next</Text>
-              </Pressable>
-            </View>
+            <Pagination
+              page={page}
+              totalPages={totalPages}
+              pageNumbers={pageNumbers}
+              setPage={setPage}
+              TW={{
+                BORDER: "border-slate-200",
+                textPrimary: "text-slate-700",
+                textButton: "text-white",
+                bgAction: "bg-[#1B4A5A]",
+              }}
+              tw={tw}
+            />
           ) : null
         }
       />
 
+      {/* Floating Button */}
       <Pressable
         onPress={() => router.push("/(users)/leaves/calendar")}
         style={[

@@ -355,7 +355,7 @@ export default function HolidaysEventsScreen() {
             (item.type === "holiday" || item.type === "event")
         )
         .map((item) => ({
-          id: String(item.id),
+          id: item.id,
           title: item.title ?? "",
           type: item.type as "holiday" | "event",
           color: item.color ?? "",

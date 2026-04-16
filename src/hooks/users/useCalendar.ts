@@ -4,7 +4,7 @@ import { CalendarItem } from "@/src/types/Calendar";
 import { supabase } from "@/src/supabase/supabaseClient";
 
 export function useCalendar(
-  orgId?: string | number,
+  orgId?: number,
   year?: number,
   monthIndex?: number,
 ) {

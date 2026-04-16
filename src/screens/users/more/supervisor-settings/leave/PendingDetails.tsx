@@ -2,13 +2,17 @@ import {
   Leave,
   fetchLeaveById,
   sumUserLeaveDaysByType,
+  updateLeaveStatus,
+  LeaveStatus,
 } from "@/src/services/leave.service";
+
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Alert, View } from "react-native";
-
-import PendingLeaveView from "@/src/components/Leave/PendingLeaveView";
 import { useLocalSearchParams } from "expo-router";
 import tw from "twrnc";
+
+import PendingLeaveView from "@/src/components/Leave/PendingLeaveView";
+import { useAuthStore } from "@/src/store/useAuthStore";
 
 const statusConfig = {
   pending: { bg: "#fef3c7", text: "#d97706", label: "PENDING" },
@@ -18,11 +22,14 @@ const statusConfig = {
 
 export default function PendingDetails() {
   const { id } = useLocalSearchParams();
+  const { user } = useAuthStore();
 
   const [leave, setLeave] = useState<Leave | null>(null);
   const [usedDays, setUsedDays] = useState<number | null>(null);
   const [remainingDays, setRemainingDays] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const userId = user?.id;
 
   useEffect(() => {
     if (!id) return;
@@ -60,6 +67,21 @@ export default function PendingDetails() {
     loadLeave();
   }, [id]);
 
+  // ✅ Supervisor action handler
+  const handleStatusChange = async (status: LeaveStatus) => {
+    if (!leave || !user?.id) return;
+
+    try {
+      await updateLeaveStatus(leave.id, status, user.id);
+
+      setLeave({ ...leave, status });
+
+    } catch (err) {
+      Alert.alert("Error", "Failed to update leave status");
+    }
+  };
+
+
   if (loading) {
     return (
       <View style={tw`flex-1 items-center justify-center bg-white`}>
@@ -72,6 +94,8 @@ export default function PendingDetails() {
 
   const cfg = statusConfig[leave.status] ?? statusConfig.pending;
 
+
+
   return (
     <PendingLeaveView
       leave={leave}
@@ -79,6 +103,7 @@ export default function PendingDetails() {
       usedDays={usedDays}
       remainingDays={remainingDays}
       showActions={leave.status === "pending"}
+      handleStatusChange={handleStatusChange}
     />
   );
 }

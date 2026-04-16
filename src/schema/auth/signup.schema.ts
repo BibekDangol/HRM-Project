@@ -4,13 +4,13 @@ const nameRegex = /^(?=.*[A-Za-z])[A-Za-z]+(?:[ '-][A-Za-z]+)*$/;
 
 export const signupSchema = z
   .object({
-    first_name: z
+    firstName: z
       .string()
       .min(2, "First name must be at least 2 characters")
       .max(30, "First name cannot exceed 30 characters")
       .regex(nameRegex, "Enter a valid first name"),
 
-    last_name: z
+    lastName: z
       .string()
       .min(2, "Last name must be at least 2 characters")
       .max(30, "Last name cannot exceed 30 characters")
