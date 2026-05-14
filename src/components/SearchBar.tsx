@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
-import { Search, X, ArrowLeft } from "lucide-react-native";
+import { Search, X } from "lucide-react-native";
 import {
   ActivityIndicator,
   Pressable,
@@ -32,13 +32,22 @@ export default function HeaderWithSearch({
   }, [onSearchChange]);
 
   // Sync external prop → local state (only on parent-driven changes)
+  // Sync effect: only reset the flag when it was actually consumed
   useEffect(() => {
     if (!isUserInput.current) {
       setText(search);
+    } else {
+      isUserInput.current = false; // ← reset INSIDE the else, not unconditionally
     }
-    isUserInput.current = false;
   }, [search]);
 
+  // Debounce — no isMounted guard needed, just keep it as-is
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      onSearchChangeRef.current(text);
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [text]);
   // Debounce — send the RAW value, no trim.
   // Trimming here caused "John " → "John" (same as previous search value)
   // → parent saw no change → sync effect never ran → display got stuck.

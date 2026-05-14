@@ -94,16 +94,20 @@ export function HolidayRangeModal({
       animationType="fade"
       onRequestClose={handleClose}
       statusBarTranslucent>
+
+      {/* ✅ Backdrop lives OUTSIDE KeyboardAvoidingView — always fills full screen */}
+      <Pressable
+        style={[tw`absolute inset-0 bg-black/40`, { flex: 1 }]}
+        onPress={handleClose}
+      />
       <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}>
-        <Pressable style={tw`flex-1 bg-black/40`} onPress={handleClose} />
+        style={tw`flex-1 justify-end`}          // ← pushes sheet to bottom
+        behavior={Platform.OS === "ios" ? "padding" : undefined}  // ← no "height" on Android
+        pointerEvents="box-none"               // ← taps on empty area fall through to backdrop
+      >
 
         <View style={tw`bg-white rounded-t-3xl px-6 pt-4 pb-10`}>
-          <View
-            style={tw`w-10 h-1 bg-slate-300 rounded-full self-center mb-5`}
-          />
-
+          <View style={tw`w-10 h-1 bg-slate-300 rounded-full self-center mb-5`} />
           <Text style={tw`text-sm font-semibold text-slate-400 mb-1`}>
             {dateLabel}
           </Text>
@@ -119,9 +123,8 @@ export function HolidayRangeModal({
                 <Pressable
                   onPress={() => !isPastDate && setStep("holiday")}
                   disabled={isPastDate || isSubmitting}
-                  style={tw`flex-1 py-3 rounded-2xl bg-red-50 items-center ${
-                    isPastDate || isSubmitting ? "opacity-40" : ""
-                  }`}>
+                  style={tw`flex-1 py-3 rounded-2xl bg-red-50 items-center ${isPastDate || isSubmitting ? "opacity-40" : ""
+                    }`}>
                   <Text style={tw`text-sm font-bold text-red-500`}>
                     Holiday
                   </Text>
@@ -130,9 +133,8 @@ export function HolidayRangeModal({
                 <Pressable
                   onPress={() => !isPastDate && setStep("event")}
                   disabled={isPastDate || isSubmitting}
-                  style={tw`flex-1 py-3 rounded-2xl bg-blue-50 items-center ${
-                    isPastDate || isSubmitting ? "opacity-40" : ""
-                  }`}>
+                  style={tw`flex-1 py-3 rounded-2xl bg-blue-50 items-center ${isPastDate || isSubmitting ? "opacity-40" : ""
+                    }`}>
                   <Text style={tw`text-sm font-bold text-blue-500`}>Event</Text>
                 </Pressable>
               </View>
@@ -225,7 +227,7 @@ export function HolidayRangeModal({
             </>
           )}
         </View>
-      </KeyboardAvoidingView>
-    </Modal>
+      </KeyboardAvoidingView >
+    </Modal >
   );
 }

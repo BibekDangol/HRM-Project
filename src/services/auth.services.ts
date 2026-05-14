@@ -25,6 +25,7 @@ export const signIn = async (email: string, password: string) => {
     .single();
 
   if (profileError || !profile) {
+    console.log("SIGNIN PROFILE ERROR:", JSON.stringify(profileError));
     throw new Error("Failed to fetch user profile");
   }
 
@@ -46,6 +47,7 @@ export const signUp = async (payload: SignUpPayload) => {
     .maybeSingle();
 
   if (orgFetchError) {
+    console.log("ORG FETCH ERROR:", JSON.stringify(orgFetchError));
     throw new Error("Failed to check organization");
   }
 
@@ -59,11 +61,14 @@ export const signUp = async (payload: SignUpPayload) => {
       .single();
 
     if (newOrgError || !newOrg) {
+      console.log("ORG INSERT ERROR:", JSON.stringify(newOrgError));
       throw new Error("Failed to create organization");
     }
 
     orgId = newOrg.id;
   }
+
+  console.log("ORG ID:", orgId);
 
   const { data: authData, error: authError } = await supabase.auth.signUp({
     email,
@@ -71,22 +76,33 @@ export const signUp = async (payload: SignUpPayload) => {
   });
 
   if (authError || !authData.user) {
+    console.log("AUTH SIGNUP ERROR:", JSON.stringify(authError));
     throw new Error(authError?.message || "Signup failed");
   }
 
+  console.log("AUTH USER ID:", authData.user.id);
+  console.log("AUTH SESSION:", authData.session ? "exists" : "null");
+
+  const insertPayload = {
+    id: authData.user.id,
+    email,
+    first_name: firstName,
+    last_name: lastName,
+    organization_id: orgId,
+    role: "admin",
+    status: "active",
+  };
+
+  console.log("INSERTING PROFILE:", JSON.stringify(insertPayload));
+
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
-    .insert({
-      id: authData.user.id,
-      email,
-      first_name: firstName,
-      last_name: lastName,
-      organization_id: orgId,
-      role: "admin",
-      status: "active",
-    })
+    .insert(insertPayload)
     .select("role, status")
     .single();
+
+  console.log("PROFILE RESULT:", JSON.stringify(profile));
+  console.log("PROFILE ERROR:", JSON.stringify(profileError));
 
   if (profileError || !profile) {
     throw new Error("Failed to create user profile");

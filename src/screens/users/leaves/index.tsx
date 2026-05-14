@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FlatList, Pressable, RefreshControl, View } from "react-native";
 import { FilterTab, Header } from "./components/Header";
-
 import LoadingIndicator from "@/src/components/LoadingIndicator";
 import { usePagination } from "@/src/hooks/usePagination";
 import { useLeaves } from "@/src/hooks/users/useLeaves";
@@ -19,10 +18,8 @@ export default function LeavesScreen() {
   const params = useLocalSearchParams<{ tab?: string | string[] }>();
   const flatListRef = useRef<FlatList>(null);
 
-  const { loading, refreshing, leaves, leaveTypes, onRefresh } =
-    useLeaves();
+  const { loading, refreshing, leaves, leaveTypes, onRefresh } = useLeaves();
 
-  // ✅ Handle tab from params
   const requestedTab =
     typeof params.tab === "string"
       ? params.tab
@@ -55,13 +52,11 @@ export default function LeavesScreen() {
     }
   }, [requestedTab]);
 
-  // ✅ Filter data
   const filteredLeaves = useMemo(() => {
     if (activeTab === "all") return leaves;
     return leaves.filter((l) => l.status === activeTab);
   }, [leaves, activeTab]);
 
-  // ✅ Pagination hook
   const {
     page,
     setPage,
@@ -71,16 +66,11 @@ export default function LeavesScreen() {
     shouldShowPagination,
   } = usePagination(filteredLeaves);
 
-  // ✅ Reset page on tab change
   useEffect(() => {
-    flatListRef.current?.scrollToOffset({
-      offset: 0,
-      animated: true,
-    });
+    flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
     setPage(1);
   }, [activeTab, setPage]);
 
-  // ✅ Leave type name
   const leaveTypeName = useCallback(
     (id: number | null) =>
       leaveTypes.find((t) => t.id === id)?.name ?? "Leave",
@@ -96,30 +86,29 @@ export default function LeavesScreen() {
   }
 
   return (
-    <View style={tw`flex-1 bg-white px-4 pt-6`}>
+    <View style={tw`flex-1 bg-white`}>
       <FlatList
         ref={flatListRef}
         data={pagedData}
         keyExtractor={(i) => String(i.id)}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
-          paddingBottom: 150,
+          paddingHorizontal: 16,
+          paddingBottom: 16, 
         }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
         ListHeaderComponent={
-          <View style={tw`mb-4`}>
-            <Header
-              leaves={leaves}
-              leaveTypes={leaveTypes}
-              activeTab={activeTab}
-              setActiveTab={setActiveTab}
-            />
-          </View>
+          <Header
+            leaves={leaves}
+            leaveTypes={leaveTypes}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+          />
         }
         renderItem={({ item }) => (
-          <View style={tw`mb-3`}>
+          <View style={tw`mb-2`}>
             <LeaveCard
               item={item}
               leaveTypeName={leaveTypeName}
@@ -130,34 +119,40 @@ export default function LeavesScreen() {
         )}
         ListFooterComponent={
           shouldShowPagination ? (
-            <Pagination
-              page={page}
-              totalPages={totalPages}
-              pageNumbers={pageNumbers}
-              setPage={setPage}
-              TW={{
-                BORDER: "border-slate-200",
-                textPrimary: "text-slate-700",
-                textButton: "text-white",
-                bgAction: "bg-[#1B4A5A]",
-              }}
-              tw={tw}
-            />
+            <View style={{ paddingBottom: 16 }}> 
+              <Pagination
+                page={page}
+                totalPages={totalPages}
+                pageNumbers={pageNumbers}
+                setPage={setPage}
+                TW={{
+                  BORDER: "border-slate-200",
+                  textPrimary: "text-slate-700",
+                  textButton: "text-white",
+                  bgAction: "bg-[#1B4A5A]",
+                }}
+                tw={tw}
+              />
+            </View>
           ) : null
         }
       />
 
-      {/* Floating Button */}
       <Pressable
         onPress={() => router.push("/(users)/leaves/calendar")}
         style={[
-          tw`absolute right-6 bg-[#1B4A5A] w-14 h-14 rounded-full items-center justify-center shadow-lg`,
+          tw`absolute right-5 bg-[#1B4A5A] w-13 h-13 rounded-full items-center justify-center`,
           {
-            bottom: insets.bottom + 78,
+            bottom: insets.bottom + 72, 
+            shadowColor: "#1B4A5A",
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 8,
+            elevation: 8,
           },
         ]}
       >
-        <Plus color="#fff" size={28} />
+        <Plus color="#fff" size={24} />
       </Pressable>
     </View>
   );

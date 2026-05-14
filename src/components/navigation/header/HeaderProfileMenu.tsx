@@ -1,13 +1,11 @@
 import { LogOut, UserCircle } from "lucide-react-native";
 import React, { useEffect, useRef } from "react";
 import {
-    Animated,
-    Dimensions,
-    Modal,
-    Pressable,
-    Text,
-    TouchableWithoutFeedback,
-    View,
+  Animated,
+  Dimensions,
+  Pressable,
+  Text,
+  View,
 } from "react-native";
 
 type AnchorLayout = {
@@ -91,118 +89,138 @@ const HeaderProfileMenu: React.FC<Props> = ({
         }),
       ]).start();
     }
-  }, [open, opacity, scale, translateY]);
+  }, [open]);
 
   const hasValidLayout =
     !!anchorLayout && anchorLayout.width > 0 && anchorLayout.height > 0;
 
-  if (!hasValidLayout || !anchorLayout) return null;
+  if (!open || !hasValidLayout || !anchorLayout) return null;
 
   const position = getDropdownPosition(anchorLayout, width);
 
   return (
-    <Modal
-      visible={open && hasValidLayout}
-      transparent
-      animationType="none"
-      statusBarTranslucent
-      onRequestClose={onClose}
+    <View
+      style={{
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        zIndex: 999,
+      }}
+      pointerEvents="box-none" // 🔑 allows tab clicks to pass through
     >
-      <TouchableWithoutFeedback onPress={onClose}>
-        <View style={{ flex: 1 }}>
-          <TouchableWithoutFeedback>
-            <View
-              style={{
-                position: "absolute",
-                top: position.top,
-                left: position.left,
-                width,
+      {/* Background press (closes dropdown) */}
+      <Pressable
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+        }}
+        onPress={onClose}
+      />
+
+      {/* Dropdown */}
+      <View
+        style={{
+          position: "absolute",
+          top: position.top,
+          left: position.left,
+          width,
+        }}
+      >
+        <Animated.View
+          style={{
+            opacity,
+            transform: [{ translateY }, { scale }],
+          }}
+        >
+          <View
+            style={{
+              width,
+              borderRadius: 14,
+              backgroundColor: "#FFFFFF",
+              borderWidth: 1,
+              borderColor: "#E5E7EB",
+              paddingVertical: 4,
+              paddingHorizontal: 6,
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.08,
+              shadowRadius: 10,
+              elevation: 10,
+            }}
+          >
+            {/* Profile */}
+            <Pressable
+              onPress={() => {
+                onClose();
+                onProfilePress();
               }}
+              android_ripple={{ color: "#E5E7EB" }}
+              style={({ pressed }) => ({
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 10,
+                paddingHorizontal: 12,
+                paddingVertical: 12,
+                opacity: pressed ? 0.75 : 1,
+              })}
             >
-              <Animated.View
+              <UserCircle size={18} color="#111827" />
+              <Text
                 style={{
-                  opacity,
-                  transform: [{ translateY }, { scale }],
+                  fontSize: 15,
+                  fontWeight: "600",
+                  color: "#111827",
                 }}
               >
-                <View
-                  style={{
-                    width,
-                    borderRadius: 14,
-                    backgroundColor: "#FFFFFF",
-                    borderWidth: 1,
-                    borderColor: "#E5E7EB",
-                    paddingVertical: 4,
-                    paddingHorizontal: 6,
-                    shadowColor: "#000",
-                    shadowOffset: { width: 0, height: 4 },
-                    shadowOpacity: 0.08,
-                    shadowRadius: 10,
-                    elevation: 10,
-                  }}
-                >
-                  <Pressable
-                    onPress={onProfilePress}
-                    android_ripple={{ color: "#E5E7EB" }}
-                    style={({ pressed }) => ({
-                      flexDirection: "row",
-                      alignItems: "center",
-                      gap: 10,
-                      paddingHorizontal: 12,
-                      paddingVertical: 12,
-                      opacity: pressed ? 0.75 : 1,
-                    })}
-                  >
-                    <UserCircle size={18} color="#111827" />
-                    <Text
-                      style={{
-                        fontSize: 15,
-                        fontWeight: "600",
-                        color: "#111827",
-                      }}
-                    >
-                      Profile
-                    </Text>
-                  </Pressable>
+                Profile
+              </Text>
+            </Pressable>
 
-                  <View
-                    style={{
-                      height: 1,
-                      backgroundColor: "#E5E7EB",
-                      marginHorizontal: 10,
-                    }}
-                  />
+            {/* Divider */}
+            <View
+              style={{
+                height: 1,
+                backgroundColor: "#E5E7EB",
+                marginHorizontal: 10,
+              }}
+            />
 
-                  <Pressable
-                    onPress={onLogoutPress}
-                    android_ripple={{ color: "#FEE2E2" }}
-                    style={({ pressed }) => ({
-                      flexDirection: "row",
-                      alignItems: "center",
-                      gap: 10,
-                      paddingHorizontal: 12,
-                      paddingVertical: 12,
-                      opacity: pressed ? 0.75 : 1,
-                    })}
-                  >
-                    <LogOut size={18} color="#EF4444" />
-                    <Text
-                      style={{
-                        fontSize: 15,
-                        fontWeight: "600",
-                        color: "#EF4444",
-                      }}
-                    >
-                      Logout
-                    </Text>
-                  </Pressable>
-                </View>
-              </Animated.View>
-            </View>
-          </TouchableWithoutFeedback>
-        </View>
-      </TouchableWithoutFeedback>
-    </Modal>
+            {/* Logout */}
+            <Pressable
+              onPress={() => {
+                onClose();
+                onLogoutPress();
+              }}
+              android_ripple={{ color: "#FEE2E2" }}
+              style={({ pressed }) => ({
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 10,
+                paddingHorizontal: 12,
+                paddingVertical: 12,
+                opacity: pressed ? 0.75 : 1,
+              })}
+            >
+              <LogOut size={18} color="#EF4444" />
+              <Text
+                style={{
+                  fontSize: 15,
+                  fontWeight: "600",
+                  color: "#EF4444",
+                }}
+              >
+                Logout
+              </Text>
+            </Pressable>
+          </View>
+        </Animated.View>
+      </View>
+    </View>
   );
 };
 

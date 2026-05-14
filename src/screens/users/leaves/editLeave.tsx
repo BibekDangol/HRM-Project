@@ -158,8 +158,6 @@ export default function EditLeaveScreen() {
     return marks;
   }, [localStartDate, localEndDate]);
 
-  // ─── Same stats logic as ApplyLeaveScreen ───────────────────────────────────
-  // Key difference: exclude the current leaveId from used-days + overlap ranges
   const loadLeaveTypesWithStats = useCallback(async () => {
     if (!user?.id || !orgId) return;
 
