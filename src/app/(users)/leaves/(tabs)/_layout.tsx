@@ -5,12 +5,10 @@ const TopTabs = withLayoutContext(createMaterialTopTabNavigator().Navigator);
 
 export default function LeavesTabsLayout() {
   return (
-    <TopTabs
+    <Stack
       screenOptions={{
-        tabBarStyle: { display: "none" },
+        headerShown: false,
       }}
-    >
-      <TopTabs.Screen name="index" />
-    </TopTabs>
+    />
   );
 }
