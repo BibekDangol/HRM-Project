@@ -17,6 +17,12 @@ Notifications.setNotificationHandler({
 
 /* Register device for push notifications */
 export async function registerForPushNotificationsAsync() {
+  // Push token listeners are not supported on web; bail out before touching
+  // the Notifications API to avoid the expo-notifications web warning.
+  if (Platform.OS === "web") {
+    return;
+  }
+
   if (!Device.isDevice) {
     console.log("Push notifications require a physical device");
     return;
@@ -52,6 +58,10 @@ export async function registerForPushNotificationsAsync() {
 
 /* Schedule Attendance Notifications dynamically using DB rules */
 export async function scheduleAttendanceNotifications(rules: any) {
+  if (Platform.OS === "web") {
+    return;
+  }
+
   if (!rules?.checkin_start || !rules?.checkout_end) {
     console.warn(
       "Attendance rules are missing, cannot schedule notifications",

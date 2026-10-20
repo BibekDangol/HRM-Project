@@ -1,5 +1,6 @@
 import { Database } from '@/database.types';
 import { createClient } from '@supabase/supabase-js';
+import { Platform } from 'react-native';
 import { secureStoreAdapter } from './secureStoreAdapter';
 
 const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL;
@@ -14,6 +15,6 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY,{
     storage:secureStoreAdapter,
     autoRefreshToken:true,
     persistSession:true,
-    detectSessionInUrl:false, //imp for native
+    detectSessionInUrl: Platform.OS === 'web', // required on web for OAuth/magic-link redirects; must stay false on native
   }
 });

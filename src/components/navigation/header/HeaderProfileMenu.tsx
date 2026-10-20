@@ -107,8 +107,8 @@ const HeaderProfileMenu: React.FC<Props> = ({
         right: 0,
         bottom: 0,
         zIndex: 999,
+        pointerEvents: "box-none", // 🔑 allows tab clicks to pass through
       }}
-      pointerEvents="box-none" // 🔑 allows tab clicks to pass through
     >
       {/* Background press (closes dropdown) */}
       <Pressable

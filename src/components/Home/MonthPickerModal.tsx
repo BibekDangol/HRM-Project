@@ -261,7 +261,7 @@ export function MonthPickerModal({
 
       {/* CARD — animated wrapper is separate from borderRadius/overflow
           to avoid Android clipping bug with transforms + overflow:hidden */}
-      <View style={s.centeredContainer} pointerEvents="box-none">
+      <View style={[s.centeredContainer, { pointerEvents: "box-none" }]}>
         <Animated.View
           style={[
             s.cardAnimated,

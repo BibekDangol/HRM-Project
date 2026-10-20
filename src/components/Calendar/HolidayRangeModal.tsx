@@ -101,9 +101,8 @@ export function HolidayRangeModal({
         onPress={handleClose}
       />
       <KeyboardAvoidingView
-        style={tw`flex-1 justify-end`}          // ← pushes sheet to bottom
+        style={[tw`flex-1 justify-end`, { pointerEvents: "box-none" }]}          // ← pushes sheet to bottom
         behavior={Platform.OS === "ios" ? "padding" : undefined}  // ← no "height" on Android
-        pointerEvents="box-none"               // ← taps on empty area fall through to backdrop
       >
 
         <View style={tw`bg-white rounded-t-3xl px-6 pt-4 pb-10`}>

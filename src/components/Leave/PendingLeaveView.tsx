@@ -1,7 +1,7 @@
 import {
   LabelValue,
   StatusConfigValue,
-} from "@/src/screens/admin/leave/PendingDetails";
+} from "@/src/components/Leave/leaveDetailsShared";
 import { Leave, LeaveStatus } from "@/src/services/leave.service";
 import { CheckCircle, XCircle } from "lucide-react-native";
 import { Pressable, ScrollView, Text, View } from "react-native";

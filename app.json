@@ -9,6 +9,7 @@
     "userInterfaceStyle": "automatic",
 
     "ios": {
+      "bundleIdentifier": "com.bibekdangol.techhaushrm",
       "supportsTablet": true,
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "We use your location for attendance check-in verification."
@@ -29,7 +30,7 @@
         "android.permission.RECORD_AUDIO"
       ],
       "predictiveBackGestureEnabled": false,
-      "package": "com.satyabhattarai.techhaushrm"
+      "package": "com.bibekdangol.techhaushrm"
     },
 
     "web": {

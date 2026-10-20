@@ -7,43 +7,13 @@ import {
 } from "@/src/services/leave.service";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Alert, Text, View } from "react-native";
+import { ActivityIndicator, Alert, View } from "react-native";
 
 import PendingLeaveView from "@/src/components/Leave/PendingLeaveView";
+import { StatusConfig } from "@/src/components/Leave/leaveDetailsShared";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { useLeaveStore } from "@/src/store/useLeaveStore";
 import tw from "twrnc";
-
-// Helper component: Label + Value (full control)
-export function LabelValue({
-  label,
-  value,
-  labelStyle,
-  valueStyle,
-  containerStyle,
-}: {
-  label: string;
-  value: string | number;
-  labelStyle?: object;
-  valueStyle?: object;
-  containerStyle?: object;
-}) {
-  return (
-    <View style={[{ paddingVertical: 12 }, containerStyle]}>
-      <Text style={[tw`text-sm`, { color: "#6b7280" }, labelStyle]}>
-        {label}
-      </Text>
-      <Text
-        style={[tw`text-sm font-semibold`, { color: "#111827" }, valueStyle]}>
-        {value}
-      </Text>
-    </View>
-  );
-}
-
-export type StatusConfigValue = { bg: string; text: string; label: string };
-
-export type StatusConfig = Record<string, StatusConfigValue>;
 
 const statusConfig: StatusConfig = {
   pending: { bg: "#fef3c7", text: "#d97706", label: "PENDING" },

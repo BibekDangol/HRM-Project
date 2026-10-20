@@ -1,5 +1,7 @@
-import { PlatformPressable } from "@react-navigation/elements";
-import { useLinkBuilder } from "@react-navigation/native";
+import {
+  PlatformPressable,
+  useLinkBuilder,
+} from "expo-router/react-navigation";
 import { RelativePathString, usePathname, useRouter } from "expo-router";
 import React, { useRef, useEffect, useMemo } from "react";
 import {
@@ -209,9 +211,9 @@ export default function BaseTabBar({
 
       <View style={[styles.tabRow, { height: tabHeight }]}>
         <Animated.View
-          pointerEvents="none"
           style={[
             styles.activePill,
+            { pointerEvents: "none" },
             {
               width: indicatorWidth,
               height: 46,
