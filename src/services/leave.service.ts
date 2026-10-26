@@ -116,3 +116,64 @@ export async function updateLeaveService(payload: any) {
 
   if (error) throw error;
 }
+
+export type CreateLeaveInput = {
+  user_id: string;
+  organization_id: number;
+  leave_type_id: number | null;
+  start_date: string;
+  end_date: string;
+  day_type: "FULL" | "FIRST_SHIFT" | "SECOND_SHIFT";
+  days_count: number;
+  reason: string;
+  status?: LeaveStatus;
+  action_taken_by?: string | null;
+};
+
+export type UpdateLeaveInput = {
+  leave_type_id: number | null;
+  start_date: string;
+  end_date: string;
+  day_type: "FULL" | "FIRST_SHIFT" | "SECOND_SHIFT";
+  days_count: number;
+  reason: string;
+  status?: LeaveStatus;
+};
+
+export async function createLeaveRequest(payload: CreateLeaveInput) {
+  const { data, error } = await supabase
+    .from("leaves")
+    .insert([
+      {
+        ...payload,
+        status: payload.status ?? "pending",
+        action_taken_by: payload.action_taken_by ?? null,
+      },
+    ])
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function updateLeaveRequest(
+  leaveId: string,
+  userId: string,
+  payload: UpdateLeaveInput,
+) {
+  const { data, error } = await supabase
+    .from("leaves")
+    .update({
+      ...payload,
+      status: payload.status ?? "pending",
+    })
+    .eq("id", leaveId)
+    .eq("user_id", userId)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+

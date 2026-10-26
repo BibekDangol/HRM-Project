@@ -27,26 +27,39 @@ export default function LeaveTypeSettings() {
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
-  const loadLeaveTypes = useCallback(async () => {
-    if (!currentUserProfile?.organization_id) return;
+  const organizationId = currentUserProfile?.organization_id;
 
+  const loadLeaveTypes = useCallback(async () => {
+    if (!organizationId) return;
     try {
       setLoading(true);
-      const result = await fetchLeaveTypesService(
-        currentUserProfile.organization_id,
-      );
-
+      const result = await fetchLeaveTypesService(organizationId);
       setLeaveTypes(result || []);
     } catch (err: any) {
       Alert.alert("Error", err.message);
     } finally {
       setLoading(false);
     }
-  }, [currentUserProfile]);
+  }, [organizationId, setLeaveTypes]);
 
   useEffect(() => {
-    loadLeaveTypes();
-  }, [loadLeaveTypes]);
+    if (!organizationId) return;
+    let cancelled = false;
+
+    fetchLeaveTypesService(organizationId)
+      .then((result) => {
+        if (cancelled) return;
+        setLeaveTypes(result || []);
+      })
+      .catch((err: any) => {
+        if (cancelled) return;
+        Alert.alert("Error", err.message);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [organizationId, setLeaveTypes]);
 
   const onRefresh = async () => {
     setRefreshing(true);

@@ -1,10 +1,10 @@
-import React from "react";
+import type { BottomTabBarProps } from "expo-router/build/react-navigation/bottom-tabs";
 
 import { userTabs } from "@/src/config/userTabs";
 
 import BaseTabBar from "./BaseTabBar";
 
-type Props = any & {
+type Props = BottomTabBarProps & {
   closeAllOverlays?: () => void;
 };
 

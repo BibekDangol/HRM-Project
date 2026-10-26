@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 
-import { CalendarItem } from "@/src/components/HolidaysEventsSection";
+import { CalendarItem } from "@/src/types/Calendar";
 import { supabase } from "@/src/supabase/supabaseClient";
 import { Alert } from "react-native";
 
@@ -26,7 +26,7 @@ export function useAdminCalendar() {
         const { data, error } = await supabase
           .from("admin_calendar")
           .select("id, title, type, color, start_date, end_date")
-          .eq("organization_id", orgId)
+          .eq("organization_id", Number(orgId))
           .lte("start_date", monthEnd)
           .or(`end_date.gte.${monthStart},end_date.is.null`)
           .order("start_date", { ascending: true });
@@ -34,13 +34,13 @@ export function useAdminCalendar() {
         if (error) throw error;
 
         setCalendarItems((data ?? []) as CalendarItem[]);
-      } catch (err) {
+      } catch {
         Alert.alert("Error", "Failed to load calendar items.");
       } finally {
         setCalendarLoading(false);
       }
     },
-    [selectedMonthIndex, selectedYear],
+    [selectedMonthIndex, selectedYear, setCalendarLoading, setCalendarItems],
   );
 
   return {

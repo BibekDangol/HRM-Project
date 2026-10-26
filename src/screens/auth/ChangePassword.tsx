@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   Alert,
@@ -6,31 +6,23 @@ import {
   Platform,
   ScrollView,
   Text,
-  TextInput,
-  TouchableOpacity,
   View,
 } from "react-native";
 
 import { apiClient } from "@/src/api/apiClient";
-import { useDimension } from "@/src/hooks/useDimension";
+import PasswordField from "@/src/components/form/PasswordField";
+import AppButton from "@/src/components/ui/AppButton";
 import { changePasswordSchema } from "@/src/schema/auth";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { FormData } from "@/src/types/changePassword";
 import { TW } from "@/theme/twStyles";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
-import { Eye, EyeClosed } from "lucide-react-native";
 import tw from "twrnc";
 
 const ChangePasswordScreen = () => {
   const router = useRouter();
   const { user } = useAuthStore();
-  const [showPassword, setShowPassword] = useState(false);
-  const toggleShowPassword = () => setShowPassword((p) => !p);
-  const [showOld] = useState(false);
-  const [showNew] = useState(false);
-  const [showConfirm] = useState(false);
-  const { isTablet } = useDimension();
   const {
     control,
     handleSubmit,
@@ -68,15 +60,11 @@ const ChangePasswordScreen = () => {
         [
           {
             text: "OK",
-            onPress: () => router.replace("/login"), // redirect to login screen
+            onPress: () => router.replace("/(auth)/login"), // redirect to login screen
           },
         ],
       );
     } catch (err: any) {
-      Alert.alert(
-        "Error",
-        err.response?.data?.error || err.message || "Something went wrong",
-      );
       Alert.alert(
         "Error",
         err.response?.data?.error || err.message || "Something went wrong",
@@ -107,12 +95,6 @@ const ChangePasswordScreen = () => {
           {/* Fields */}
           <View style={tw`gap-4`}>
             {["oldPassword", "newPassword", "confirmPassword"].map((field) => {
-              const showToggle =
-                field === "oldPassword"
-                  ? showOld
-                  : field === "newPassword"
-                    ? showNew
-                    : showConfirm;
               const label =
                 field === "oldPassword"
                   ? "Old Password"
@@ -126,45 +108,15 @@ const ChangePasswordScreen = () => {
                   control={control}
                   name={field as keyof FormData}
                   render={({ field: { value, onChange } }) => (
-                    <View>
-                      <Text style={tw`${TW.textSecondary} font-semibold mb-2`}>
-                        {label}
-                      </Text>
-
-                      <View
-                        style={tw`${TW.bgButton} rounded-lg flex-row items-center`}
-                      >
-                        <TextInput
-                          style={tw`flex-1 px-3 py-4`}
-                          secureTextEntry={!showToggle}
-                          value={value}
-                          onChangeText={onChange}
-                          placeholder="•••••••••••••"
-                          placeholderTextColor="#7e7e7e"
-                        />
-
-                        <TouchableOpacity
-                          onPress={toggleShowPassword}
-                          hitSlop={10}
-                          style={tw`pr-3`}
-                        >
-                          {showPassword ? (
-                            <Eye size={isTablet ? 24 : 22} color="#7e7e7e" />
-                          ) : (
-                            <EyeClosed
-                              size={isTablet ? 24 : 22}
-                              color="#7e7e7e"
-                            />
-                          )}
-                        </TouchableOpacity>
-                      </View>
-
-                      {errors[field as keyof FormData] && (
-                        <Text style={tw`text-[#FF6B6B] text-[13px] mt-1`}>
-                          {errors[field as keyof FormData]?.message}
-                        </Text>
-                      )}
-                    </View>
+                    <PasswordField
+                      label={label}
+                      value={value}
+                      onChangeText={onChange}
+                      placeholder="•••••••••••••"
+                      error={errors[field as keyof FormData]?.message}
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                    />
                   )}
                 />
               );
@@ -172,19 +124,14 @@ const ChangePasswordScreen = () => {
           </View>
 
           {/* Button */}
-          <TouchableOpacity
-            style={[
-              tw`rounded-xl items-center justify-center mt-6 ${TW.bgAction}`,
-              isSubmitting ? tw`opacity-80` : tw`opacity-100`,
-              { paddingVertical: 16 },
-            ]}
+          <AppButton
+            title="Update Password"
+            loadingTitle="Updating..."
             onPress={handleSubmit(onSubmit)}
-            disabled={isSubmitting}
-          >
-            <Text style={tw`text-white font-semibold text-[16px]`}>
-              {isSubmitting ? "Updating..." : "Update Password"}
-            </Text>
-          </TouchableOpacity>
+            loading={isSubmitting}
+            textStyle={tw`text-[16px]`}
+            style={tw`mt-6`}
+          />
         </ScrollView>
       </KeyboardAvoidingView>
     </View>

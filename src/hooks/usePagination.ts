@@ -1,38 +1,76 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 const PAGE_SIZE = 10;
+
+export type UsePaginationOptions = {
+  pageSize?: number;
+  resetKey?: any;
+};
 
 export function usePagination<T>(
   data: T[],
   externalPage?: number,
   onPageChange?: (page: number) => void,
+  options?: UsePaginationOptions,
 ) {
+  const pageSize = options?.pageSize ?? PAGE_SIZE;
+  const resetKey = options?.resetKey;
+
   const [internalPage, setInternalPage] = useState(1);
-  const [isChangingPage, setIsChangingPage] = useState(false); // ✅ new
+  const [prevResetKey, setPrevResetKey] = useState(resetKey);
+  const [isChangingPage, setIsChangingPage] = useState(false);
+  const transitionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Adjust state during render when resetKey changes (React 19 pattern)
+  if (prevResetKey !== resetKey) {
+    setPrevResetKey(resetKey);
+    setInternalPage(1);
+  }
 
   const isControlled = externalPage !== undefined;
-  const page = isControlled ? externalPage : internalPage;
+  const rawPage = isControlled ? externalPage : internalPage;
 
+  const totalPages = Math.max(1, Math.ceil(data.length / pageSize));
+  // Keep page clamped within bounds
+  const page = Math.min(Math.max(1, rawPage), totalPages);
+
+  // Clear transition timer on unmount
   useEffect(() => {
-    if (!isControlled) setInternalPage(1);
-    onPageChange?.(1);
-  }, [data]);
+    return () => {
+      if (transitionTimerRef.current) {
+        clearTimeout(transitionTimerRef.current);
+      }
+    };
+  }, []);
+
+  const prevReportedPageRef = useRef(page);
+  useEffect(() => {
+    if (prevReportedPageRef.current !== page) {
+      prevReportedPageRef.current = page;
+      onPageChange?.(page);
+    }
+  }, [page, onPageChange]);
 
   const setPage = (newPage: number) => {
-    if (!isControlled) setInternalPage(newPage);
-    onPageChange?.(newPage);
+    const clamped = Math.min(Math.max(1, newPage), totalPages);
+    if (!isControlled) setInternalPage(clamped);
 
-    // ✅ Show loader briefly on page change
+    // Show loader briefly on page change, safely clearing any active timer
+    if (transitionTimerRef.current) {
+      clearTimeout(transitionTimerRef.current);
+    }
     setIsChangingPage(true);
-    setTimeout(() => setIsChangingPage(false), 400);
+    transitionTimerRef.current = setTimeout(() => {
+      setIsChangingPage(false);
+      transitionTimerRef.current = null;
+    }, 400);
   };
 
-  const totalPages = Math.max(1, Math.ceil(data.length / PAGE_SIZE));
   const shouldShowPagination = totalPages > 1;
 
   const pagedData = useMemo(() => {
-    return data.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-  }, [data, page]);
+    return data.slice((page - 1) * pageSize, page * pageSize);
+  }, [data, page, pageSize]);
 
   const pageNumbers = useMemo(() => {
     if (totalPages <= 5)
@@ -56,6 +94,8 @@ export function usePagination<T>(
     shouldShowPagination,
     pagedData,
     pageNumbers,
-    isChangingPage, // ✅ new
+    isChangingPage,
   };
 }
+
+export default usePagination;

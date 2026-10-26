@@ -54,20 +54,21 @@ export function useAdminHeaderController({
 }: Params) {
   const { user } = useAuthStore();
   const { currentUserProfile, setCurrentUserProfile } = useUsersStore();
+  const userId = user?.id;
 
   const isRootTab = useIsRootTab({
     pathname,
     rootPaths: ADMIN_ROOT_TAB_PATHS,
   });
 
-  const showBackButton = !ADMIN_HOME_PATHS.includes(pathname);
+  const showBackButton = !isRootTab;
 
   const fetchUserProfile = useCallback(async () => {
-    if (!user?.id || currentUserProfile) return;
+    if (!userId || currentUserProfile) return;
 
-    const profile = await fetchCurrentUserProfleService(user.id);
+    const profile = await fetchCurrentUserProfleService(userId);
     setCurrentUserProfile(profile);
-  }, [user?.id, currentUserProfile, setCurrentUserProfile]);
+  }, [userId, currentUserProfile, setCurrentUserProfile]);
 
   useEffect(() => {
     fetchUserProfile();

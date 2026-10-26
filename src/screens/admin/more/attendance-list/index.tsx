@@ -1,101 +1,28 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { FlatList, Pressable, Text, View } from "react-native";
-
-import HeaderWithSearch from "@/src/components/SearchBar";
-import LoadingIndicator from "@/src/components/LoadingIndicator";
-import { useDebounce } from "@/src/hooks/useDebounce";
-import { fetchUsersService } from "@/src/services/admin.service";
-import { useUsersStore } from "@/src/store/useUsersStore";
-import { UserProfile } from "@/src/types/admin";
+import React from "react";
 import { useRouter } from "expo-router";
-import tw from "twrnc";
-import { UserCard } from "../../components/UserCard";
 
-const AttendanceUserList = () => {
+import UserDirectoryList from "@/src/screens/admin/components/UserDirectoryList";
+import { UserProfile } from "@/src/types/admin";
+
+export default function AttendanceUserList() {
   const router = useRouter();
-  const [users, setUsers] = useState<UserProfile[]>([]);
-  const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(true);
-  const { currentUserProfile } = useUsersStore();
-  const debouncedSearchQuery = useDebounce(search, 300);
 
-  const getSupervisorName = () => "No supervisor";
-
-  const loadUsers = useCallback(async () => {
-    if (!currentUserProfile?.id) return;
-
-    setLoading(true);
-    try {
-      const usersData = await fetchUsersService(
-        currentUserProfile.organization_id,
-        debouncedSearchQuery,
-      );
-
-      // ✅ Sort ascending by first_name
-      const sorted = usersData.sort((a, b) =>
-        (a.first_name ?? "").localeCompare(b.first_name ?? "")
-      );
-
-      setUsers(sorted);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  }, [currentUserProfile?.id, currentUserProfile?.organization_id, debouncedSearchQuery]);
-
-  useEffect(() => {
-    loadUsers();
-  }, [loadUsers]);
+  const handleUserPress = (user: UserProfile) => {
+    router.navigate({
+      pathname: "/(admin)/more/attendance-list/attendance-details",
+      params: {
+        userId: user.id,
+        name: `${user.first_name} ${user.last_name}`.trim(),
+      },
+    });
+  };
 
   return (
-    <View style={tw`flex-1 bg-white`}>
-      <HeaderWithSearch
-        search={search}
-        onSearchChange={setSearch}
-        onBack={() => router.back()}
-      />
-
-      {loading ? (
-        <View style={tw`flex-1 justify-center items-center`}>
-          <LoadingIndicator />
-        </View>
-      ) : (
-        <FlatList
-          contentContainerStyle={tw`px-4 pb-6 flex gap-4`}
-          data={users}
-          showsVerticalScrollIndicator={false}
-          persistentScrollbar={false}
-          nestedScrollEnabled={true}
-          keyExtractor={(item) => item.id}
-          ListEmptyComponent={
-            <Text style={tw`text-center text-gray-500 mt-10`}>
-              No users found
-            </Text>
-          }
-          renderItem={({ item }) => (
-            <Pressable
-              onPress={() =>
-                router.navigate({
-                  pathname: "/(admin)/more/attendance-list/attendance-details",
-                  params: {
-                    userId: item.id,
-                    name: item.first_name + " " + item.last_name,
-                  },
-                })
-              }
-            >
-              <UserCard
-                user={item}
-                getSupervisorName={getSupervisorName}
-                showRightArrow
-              />
-            </Pressable>
-          )}
-        />
-      )}
-    </View>
+    <UserDirectoryList
+      mode="admin-attendance"
+      onUserPress={handleUserPress}
+      onBack={() => router.back()}
+      searchPlaceholder="Search employees..."
+    />
   );
-};
-
-export default AttendanceUserList;
+}

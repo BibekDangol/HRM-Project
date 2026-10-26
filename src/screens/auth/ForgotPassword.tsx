@@ -3,14 +3,12 @@ import { ChevronLeft } from "lucide-react-native";
 import React from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
-  ActivityIndicator,
   Alert,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
   Text,
-  TextInput,
   TouchableOpacity,
   TouchableWithoutFeedback,
   View,
@@ -18,6 +16,8 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import tw from "twrnc";
 
+import FormField from "@/src/components/form/FormField";
+import AppButton from "@/src/components/ui/AppButton";
 import { useDimension } from "@/src/hooks/useDimension";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { TW } from "@/theme/twStyles";
@@ -28,8 +28,6 @@ const ForgotPassword = () => {
   const forgotPassword = useAuthStore((s) => s.forgotPassword);
   const { isSmallPhone, isTablet } = useDimension();
 
-  const inputPadding = isTablet ? 18 : isSmallPhone ? 12 : 15;
-  const fontSize = isTablet ? 16 : 14;
   const fieldGap = isTablet ? 20 : isSmallPhone ? 14 : 16;
 
   const {
@@ -111,68 +109,27 @@ const ForgotPassword = () => {
                 control={control}
                 name="email"
                 render={({ field: { value, onChange } }) => (
-                  <View style={{ marginBottom: fieldGap }}>
-                    <Text
-                      style={[
-                        tw`${TW.textSecondary} font-semibold`,
-                        { marginBottom: 6 },
-                      ]}
-                    >
-                      Email
-                    </Text>
-
-                    <TextInput
-                      style={[
-                        tw`rounded-xl px-4`,
-                        {
-                          backgroundColor: "#ffffff",
-                          paddingVertical: inputPadding,
-                          fontSize: fontSize,
-                          color: TW.textPrimary,
-                        },
-                      ]}
-                      placeholder="Enter your email address"
-                      placeholderTextColor="#7e7e7e"
-                      keyboardType="email-address"
-                      autoCapitalize="none"
-                      value={value}
-                      onChangeText={onChange}
-                    />
-                  </View>
+                  <FormField
+                    label="Email"
+                    value={value}
+                    onChangeText={onChange}
+                    placeholder="Enter your email address"
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    containerStyle={{ marginBottom: fieldGap }}
+                  />
                 )}
               />
 
-              <TouchableOpacity
-                style={[
-                  tw`rounded-xl items-center justify-center`,
-                  {
-                    backgroundColor: TW.bgSecondary,
-                    paddingVertical: inputPadding,
-                    opacity: isSubmitting ? 0.9 : 1,
-                  },
-                ]}
+              <AppButton
+                title="Send Reset Link"
+                loadingTitle="Sending..."
                 onPress={handleSubmit(onSubmit)}
-                disabled={isSubmitting}
-              >
-                <View style={tw`flex-row items-center`}>
-                  {isSubmitting && (
-                    <ActivityIndicator size="small" color="#ffffff" />
-                  )}
-
-                  <Text
-                    style={[
-                      tw`font-semibold`,
-                      {
-                        color: "#ffffff",
-                        fontSize: fontSize,
-                        marginLeft: isSubmitting ? 8 : 0,
-                      },
-                    ]}
-                  >
-                    {isSubmitting ? "Sending..." : "Send Reset Link"}
-                  </Text>
-                </View>
-              </TouchableOpacity>
+                loading={isSubmitting}
+                size={isTablet ? "lg" : isSmallPhone ? "sm" : "md"}
+                textStyle={{ fontSize: isTablet ? 16 : 14 }}
+                style={{ backgroundColor: TW.bgSecondary }}
+              />
 
               {/* BOTTOM */}
               <View style={tw`flex-row justify-center mt-6`}>

@@ -51,6 +51,8 @@ export default function useAdminCalendarActions() {
         .eq("id", user.id)
         .single();
 
+      if (!profile) return;
+
       await supabase.from("admin_calendar").insert([
         {
           user_id: user.id,

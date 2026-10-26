@@ -1,4 +1,3 @@
-import { Eye, EyeClosed } from "lucide-react-native";
 import React, { useState } from "react";
 import {
   Alert,
@@ -6,11 +5,11 @@ import {
   Platform,
   ScrollView,
   Text,
-  TextInput,
-  TouchableOpacity,
   View,
 } from "react-native";
 
+import PasswordField from "@/src/components/form/PasswordField";
+import AppButton from "@/src/components/ui/AppButton";
 import { useDimension } from "@/src/hooks/useDimension";
 import { supabase } from "@/src/supabase/supabaseClient";
 import { TW } from "@/theme/twStyles";
@@ -22,8 +21,6 @@ const ResetPassword = () => {
   const { isTablet } = useDimension();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleReset = async () => {
@@ -71,78 +68,36 @@ const ResetPassword = () => {
             </Text>
           </View>
 
-          {/* Password */}
-          <View style={tw`mb-4`}>
-            <Text style={tw`${TW.textSecondary} font-semibold mb-2`}>
-              New Password
-            </Text>
+          <PasswordField
+            label="New Password"
+            value={password}
+            onChangeText={setPassword}
+            placeholder="•••••••••••••"
+            containerStyle={tw`mb-4`}
+            iconSize={isTablet ? 24 : 22}
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
 
-            <View style={tw`${TW.bgButton} rounded-lg flex-row items-center`}>
-              <TextInput
-                style={tw`flex-1 px-3 py-4`}
-                secureTextEntry={!showPassword}
-                value={password}
-                onChangeText={setPassword}
-                placeholder="•••••••••••••"
-                placeholderTextColor="#7e7e7e"
-              />
+          <PasswordField
+            label="Confirm Password"
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+            placeholder="•••••••••••••"
+            containerStyle={tw`mb-4`}
+            iconSize={isTablet ? 24 : 22}
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
 
-              <TouchableOpacity
-                onPress={() => setShowPassword(!showPassword)}
-                style={tw`pr-3`}
-              >
-                {showPassword ? (
-                  <Eye size={isTablet ? 24 : 22} color="#7e7e7e" />
-                ) : (
-                  <EyeClosed size={isTablet ? 24 : 22} color="#7e7e7e" />
-                )}
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          {/* Confirm Password */}
-          <View style={tw`mb-4`}>
-            <Text style={tw`${TW.textSecondary} font-semibold mb-2`}>
-              Confirm Password
-            </Text>
-
-            <View style={tw`${TW.bgButton} rounded-lg flex-row items-center`}>
-              <TextInput
-                style={tw`flex-1 px-3 py-4`}
-                secureTextEntry={!showConfirm}
-                value={confirmPassword}
-                onChangeText={setConfirmPassword}
-                placeholder="•••••••••••••"
-                placeholderTextColor="#7e7e7e"
-              />
-
-              <TouchableOpacity
-                onPress={() => setShowConfirm(!showConfirm)}
-                style={tw`pr-3`}
-              >
-                {showConfirm ? (
-                  <Eye size={isTablet ? 24 : 22} color="#7e7e7e" />
-                ) : (
-                  <EyeClosed size={isTablet ? 24 : 22} color="#7e7e7e" />
-                )}
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          {/* Button */}
-          <TouchableOpacity
-            style={[
-              tw`rounded-xl items-center justify-center ${TW.bgAction}`,
-              loading ? tw`opacity-80` : tw`opacity-100`,
-              { paddingVertical: 16 },
-            ]}
+          <AppButton
+            title="Update Password"
+            loadingTitle="Updating..."
             onPress={handleReset}
-            disabled={loading}
-          >
-            <Text style={tw`text-white font-semibold text-[16px]`}>
-              {loading ? "Updating..." : "Update Password"}
-            </Text>
-          </TouchableOpacity>
+            loading={loading}
+            textStyle={tw`text-[16px]`}
+            style={tw`mt-2`}
+          />
         </ScrollView>
       </KeyboardAvoidingView>
     </View>

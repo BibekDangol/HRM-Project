@@ -21,7 +21,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { BorderlessButton } from "react-native-gesture-handler";
 
 const ROW_HEIGHT = 54;
 
@@ -104,24 +103,26 @@ export function MonthPickerModal({
 
   // Mount control — keeps the modal in the tree during exit animation
   const [modalMounted, setModalMounted] = useState(visible);
-  const isClosing = useRef(false);
+  const [prevVisible, setPrevVisible] = useState(visible);
+  if (visible !== prevVisible) {
+    setPrevVisible(visible);
+    if (visible) {
+      setModalMounted(true);
+    }
+  }
 
+  const isClosing = useRef(false);
   const scrollRef = useRef<ScrollView>(null);
 
-  const overlayOpacity = useRef(new Animated.Value(0)).current;
-  const cardOpacity = useRef(new Animated.Value(0)).current;
-  const cardScale = useRef(new Animated.Value(0.96)).current;
-  const cardTranslateY = useRef(new Animated.Value(18)).current;
+  const overlayOpacity = useMemo(() => new Animated.Value(0), []);
+  const cardOpacity = useMemo(() => new Animated.Value(0), []);
+  const cardScale = useMemo(() => new Animated.Value(0.96), []);
+  const cardTranslateY = useMemo(() => new Animated.Value(18), []);
 
   const shortMonth = useMemo(
     () => MONTHS[selectedMonth]?.slice(0, 3) ?? "",
     [selectedMonth],
   );
-
-  // Mount when visible becomes true
-  useEffect(() => {
-    if (visible) setModalMounted(true);
-  }, [visible]);
 
   // Entry animation — runs once modal is mounted and visible
   useEffect(() => {
@@ -158,7 +159,14 @@ export function MonthPickerModal({
         useNativeDriver: true,
       }),
     ]).start();
-  }, [modalMounted, visible]);
+  }, [
+    modalMounted,
+    visible,
+    cardOpacity,
+    cardScale,
+    cardTranslateY,
+    overlayOpacity,
+  ]);
 
   // Auto-scroll to selected item whenever mode or selection changes
   useEffect(() => {
@@ -215,7 +223,7 @@ export function MonthPickerModal({
         onClose();
       });
     },
-    [onClose],
+    [onClose, cardOpacity, cardScale, cardTranslateY, overlayOpacity],
   );
 
   const handleClose = useCallback(() => animateOut(), [animateOut]);

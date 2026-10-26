@@ -3,7 +3,9 @@ import { CalendarClock, ChevronRight } from "lucide-react-native";
 import { useCallback, useRef } from "react";
 import { FlatList, Pressable, Text, View } from "react-native";
 
-import LoadingIndicator from "@/src/components/LoadingIndicator";
+import EmptyState from "@/src/components/states/EmptyState";
+import LoadingState from "@/src/components/states/LoadingState";
+import { Pagination } from "@/src/components/lists/Pagination";
 import { useLeaveView } from "@/src/hooks/admin/useLeaveView";
 import { LeaveStatus } from "@/src/services/leave.service";
 import { useLeaveTabStore } from "@/src/store/useLeaveTabStore";
@@ -51,7 +53,11 @@ export default function LeaveView({
     loading,
     refreshing,
     onRefresh,
+    page,
     setPage,
+    totalPages,
+    shouldShowPagination,
+    pageNumbers,
   } = useLeaveView({ fetchLeaves, scrollRef: listRef, activeTab });
 
   useFocusEffect(
@@ -61,7 +67,7 @@ export default function LeaveView({
         offset: 0,
         animated: true,
       });
-    }, []),
+    }, [setPage]),
   );
 
   const goToDetails = (leave: any) => {
@@ -78,7 +84,9 @@ export default function LeaveView({
     });
   };
 
-  if (loading) return <LoadingIndicator />;
+  if (loading) {
+    return <LoadingState fullScreen message="Loading leave requests..." />;
+  }
 
   return (
     <View style={tw`flex-1 bg-white`}>
@@ -164,18 +172,27 @@ export default function LeaveView({
           );
         }}
         ListEmptyComponent={
-          <View style={tw`items-center justify-center py-20`}>
-            <View
-              style={tw`h-16 w-16 rounded-full ${TW.bgCards} items-center justify-center mb-4`}>
-              <CalendarClock size={28} color="#94a3b8" />
-            </View>
-            <Text style={tw`text-base font-semibold ${TW.textPrimary}`}>
-              No leave requests
-            </Text>
-            <Text style={tw`text-sm mt-1 ${TW.textSecondary}`}>
-              All leave requests will appear here
-            </Text>
-          </View>
+          <EmptyState
+            icon={
+              <View
+                style={tw`h-16 w-16 rounded-full ${TW.bgCards} items-center justify-center`}
+              >
+                <CalendarClock size={28} color="#94a3b8" />
+              </View>
+            }
+            title="No leave requests"
+            message={`No ${activeTab} leave requests found.`}
+          />
+        }
+        ListFooterComponent={
+          shouldShowPagination ? (
+            <Pagination
+              page={page}
+              totalPages={totalPages}
+              pageNumbers={pageNumbers}
+              setPage={setPage}
+            />
+          ) : null
         }
       />
     </View>

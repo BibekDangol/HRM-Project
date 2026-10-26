@@ -1,15 +1,16 @@
 import { BackButton } from "@/src/components/BackButton";
+import FormField from "@/src/components/form/FormField";
+import PasswordField from "@/src/components/form/PasswordField";
+import AppButton from "@/src/components/ui/AppButton";
 import { useDimension } from "@/src/hooks/useDimension";
 import { signupSchema } from "@/src/schema/auth";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { TW } from "@/theme/twStyles";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
-import { Eye, EyeClosed } from "lucide-react-native";
-import React, { useState } from "react";
+import React from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
-  ActivityIndicator,
   Alert,
   Keyboard,
   KeyboardAvoidingView,
@@ -17,7 +18,6 @@ import {
   Pressable,
   ScrollView,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -32,9 +32,6 @@ export default function SignupScreen() {
   const insets = useSafeAreaInsets();
   const { signUp, loading } = useAuthStore();
   const { isSmallPhone, isTablet } = useDimension();
-
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const {
     control,
@@ -52,7 +49,6 @@ export default function SignupScreen() {
     },
   });
 
-  const inputVerticalPadding = isTablet ? 18 : isSmallPhone ? 12 : 15;
   const horizontalPadding = isTablet ? 40 : isSmallPhone ? 16 : 24;
   const labelFontSize = isTablet ? 16 : 14;
   const inputFontSize = isTablet ? 16 : 14;
@@ -139,37 +135,19 @@ export default function SignupScreen() {
                   control={control}
                   name="firstName"
                   render={({ field: { value, onChange, onBlur } }) => (
-                    <View style={{ marginBottom: fieldGap }}>
-                      <Text
-                        style={[
-                          tw`${TW.textSecondary} font-semibold`,
-                          { fontSize: labelFontSize, marginBottom: 6 },
-                        ]}
-                      >
-                        First Name *
-                      </Text>
-                      <TextInput
-                        placeholder="First Name"
-                        value={value}
-                        onChangeText={onChange}
-                        onBlur={onBlur}
-                        placeholderTextColor="#7e7e7e"
-                        returnKeyType="next"
-                        autoCapitalize="words"
-                        style={[
-                          tw`${TW.bgButton} rounded-xl px-4`,
-                          {
-                            paddingVertical: inputVerticalPadding,
-                            fontSize: inputFontSize,
-                          },
-                        ]}
-                      />
-                      {errors.firstName && (
-                        <Text style={tw`text-[#FF6B6B] text-[13px] mt-1 ml-1`}>
-                          {errors.firstName.message}
-                        </Text>
-                      )}
-                    </View>
+                    <FormField
+                      label="First Name *"
+                      value={value}
+                      onChangeText={onChange}
+                      onBlur={onBlur}
+                      placeholder="First Name"
+                      returnKeyType="next"
+                      autoCapitalize="words"
+                      error={errors.firstName?.message}
+                      labelStyle={{ fontSize: labelFontSize }}
+                      inputStyle={{ fontSize: inputFontSize }}
+                      containerStyle={{ marginBottom: fieldGap }}
+                    />
                   )}
                 />
 
@@ -178,37 +156,19 @@ export default function SignupScreen() {
                   control={control}
                   name="lastName"
                   render={({ field: { value, onChange, onBlur } }) => (
-                    <View style={{ marginBottom: fieldGap }}>
-                      <Text
-                        style={[
-                          tw`${TW.textSecondary} font-semibold mb-2`,
-                          { fontSize: labelFontSize },
-                        ]}
-                      >
-                        Last Name *
-                      </Text>
-                      <TextInput
-                        placeholder="Last Name"
-                        value={value}
-                        onChangeText={onChange}
-                        onBlur={onBlur}
-                        placeholderTextColor="#7e7e7e"
-                        returnKeyType="next"
-                        autoCapitalize="words"
-                        style={[
-                          tw`${TW.bgButton} rounded-xl px-4`,
-                          {
-                            paddingVertical: inputVerticalPadding,
-                            fontSize: inputFontSize,
-                          },
-                        ]}
-                      />
-                      {errors.lastName && (
-                        <Text style={tw`text-[#FF6B6B] text-[13px] mt-1 ml-1`}>
-                          {errors.lastName.message}
-                        </Text>
-                      )}
-                    </View>
+                    <FormField
+                      label="Last Name *"
+                      value={value}
+                      onChangeText={onChange}
+                      onBlur={onBlur}
+                      placeholder="Last Name"
+                      returnKeyType="next"
+                      autoCapitalize="words"
+                      error={errors.lastName?.message}
+                      labelStyle={{ fontSize: labelFontSize }}
+                      inputStyle={{ fontSize: inputFontSize }}
+                      containerStyle={{ marginBottom: fieldGap }}
+                    />
                   )}
                 />
 
@@ -217,37 +177,19 @@ export default function SignupScreen() {
                   control={control}
                   name="organizationName"
                   render={({ field: { value, onChange, onBlur } }) => (
-                    <View style={{ marginBottom: fieldGap }}>
-                      <Text
-                        style={[
-                          tw`${TW.textSecondary} font-semibold mb-2`,
-                          { fontSize: labelFontSize },
-                        ]}
-                      >
-                        Organization Name *
-                      </Text>
-                      <TextInput
-                        placeholder="Organization Name"
-                        value={value}
-                        onChangeText={onChange}
-                        onBlur={onBlur}
-                        placeholderTextColor="#7e7e7e"
-                        returnKeyType="next"
-                        autoCapitalize="words"
-                        style={[
-                          tw`${TW.bgButton} rounded-xl px-4`,
-                          {
-                            paddingVertical: inputVerticalPadding,
-                            fontSize: inputFontSize,
-                          },
-                        ]}
-                      />
-                      {errors.organizationName && (
-                        <Text style={tw`text-[#FF6B6B] text-[13px] mt-1 ml-1`}>
-                          {errors.organizationName.message}
-                        </Text>
-                      )}
-                    </View>
+                    <FormField
+                      label="Organization Name *"
+                      value={value}
+                      onChangeText={onChange}
+                      onBlur={onBlur}
+                      placeholder="Organization Name"
+                      returnKeyType="next"
+                      autoCapitalize="words"
+                      error={errors.organizationName?.message}
+                      labelStyle={{ fontSize: labelFontSize }}
+                      inputStyle={{ fontSize: inputFontSize }}
+                      containerStyle={{ marginBottom: fieldGap }}
+                    />
                   )}
                 />
 
@@ -256,41 +198,23 @@ export default function SignupScreen() {
                   control={control}
                   name="email"
                   render={({ field: { value, onChange, onBlur } }) => (
-                    <View style={{ marginBottom: fieldGap }}>
-                      <Text
-                        style={[
-                          tw`${TW.textSecondary} font-semibold mb-2`,
-                          { fontSize: labelFontSize },
-                        ]}
-                      >
-                        Email *
-                      </Text>
-                      <TextInput
-                        placeholder="info@company.com"
-                        keyboardType="email-address"
-                        autoCapitalize="none"
-                        autoCorrect={false}
-                        autoComplete="email"
-                        textContentType="emailAddress"
-                        returnKeyType="next"
-                        value={value}
-                        onChangeText={onChange}
-                        onBlur={onBlur}
-                        placeholderTextColor="#7e7e7e"
-                        style={[
-                          tw`${TW.bgButton} rounded-xl px-4`,
-                          {
-                            paddingVertical: inputVerticalPadding,
-                            fontSize: inputFontSize,
-                          },
-                        ]}
-                      />
-                      {errors.email && (
-                        <Text style={tw`text-[#FF6B6B] text-[13px] mt-1 ml-1`}>
-                          {errors.email.message}
-                        </Text>
-                      )}
-                    </View>
+                    <FormField
+                      label="Email *"
+                      placeholder="info@company.com"
+                      keyboardType="email-address"
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                      autoComplete="email"
+                      textContentType="emailAddress"
+                      returnKeyType="next"
+                      value={value}
+                      onChangeText={onChange}
+                      onBlur={onBlur}
+                      error={errors.email?.message}
+                      labelStyle={{ fontSize: labelFontSize }}
+                      inputStyle={{ fontSize: inputFontSize }}
+                      containerStyle={{ marginBottom: fieldGap }}
+                    />
                   )}
                 />
 
@@ -299,59 +223,23 @@ export default function SignupScreen() {
                   control={control}
                   name="password"
                   render={({ field: { value, onChange, onBlur } }) => (
-                    <View style={{ marginBottom: fieldGap }}>
-                      <Text
-                        style={[
-                          tw`${TW.textSecondary} font-semibold mb-2`,
-                          { fontSize: labelFontSize },
-                        ]}
-                      >
-                        Password *
-                      </Text>
-                      <View
-                        style={tw`${TW.bgButton} rounded-xl flex-row items-center px-1`}
-                      >
-                        <TextInput
-                          style={[
-                            tw`flex-1 px-3`,
-                            {
-                              paddingVertical: inputVerticalPadding,
-                              fontSize: inputFontSize,
-                            },
-                          ]}
-                          placeholder="•••••••••••••"
-                          placeholderTextColor="#7e7e7e"
-                          secureTextEntry={!showPassword}
-                          autoCapitalize="none"
-                          autoCorrect={false}
-                          textContentType="newPassword"
-                          autoComplete="new-password"
-                          returnKeyType="next"
-                          value={value}
-                          onChangeText={onChange}
-                          onBlur={onBlur}
-                        />
-                        <TouchableOpacity
-                          onPress={() => setShowPassword((prev) => !prev)}
-                          hitSlop={10}
-                          style={tw`px-3 py-2`}
-                        >
-                          {showPassword ? (
-                            <Eye size={isTablet ? 24 : 22} color="#7e7e7e" />
-                          ) : (
-                            <EyeClosed
-                              size={isTablet ? 24 : 22}
-                              color="#7e7e7e"
-                            />
-                          )}
-                        </TouchableOpacity>
-                      </View>
-                      {errors.password && (
-                        <Text style={tw`text-[#FF6B6B] text-[13px] mt-1 ml-1`}>
-                          {errors.password.message}
-                        </Text>
-                      )}
-                    </View>
+                    <PasswordField
+                      label="Password *"
+                      placeholder="•••••••••••••"
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                      textContentType="newPassword"
+                      autoComplete="new-password"
+                      returnKeyType="next"
+                      value={value}
+                      onChangeText={onChange}
+                      onBlur={onBlur}
+                      error={errors.password?.message}
+                      labelStyle={{ fontSize: labelFontSize }}
+                      inputStyle={{ fontSize: inputFontSize }}
+                      containerStyle={{ marginBottom: fieldGap }}
+                      iconSize={isTablet ? 24 : 22}
+                    />
                   )}
                 />
 
@@ -360,93 +248,37 @@ export default function SignupScreen() {
                   control={control}
                   name="confirmPassword"
                   render={({ field: { value, onChange, onBlur } }) => (
-                    <View style={{ marginBottom: fieldGap }}>
-                      <Text
-                        style={[
-                          tw`${TW.textSecondary} font-semibold mb-2`,
-                          { fontSize: labelFontSize },
-                        ]}
-                      >
-                        Confirm Password *
-                      </Text>
-                      <View
-                        style={tw`${TW.bgButton} rounded-xl flex-row items-center px-1`}
-                      >
-                        <TextInput
-                          style={[
-                            tw`flex-1 px-3`,
-                            {
-                              paddingVertical: inputVerticalPadding,
-                              fontSize: inputFontSize,
-                            },
-                          ]}
-                          placeholder="•••••••••••••"
-                          placeholderTextColor="#7e7e7e"
-                          secureTextEntry={!showConfirmPassword}
-                          autoCapitalize="none"
-                          autoCorrect={false}
-                          textContentType="newPassword"
-                          autoComplete="new-password"
-                          returnKeyType="done"
-                          onSubmitEditing={handleSubmit(handleSignup)}
-                          value={value}
-                          onChangeText={onChange}
-                          onBlur={onBlur}
-                        />
-                        <TouchableOpacity
-                          onPress={() =>
-                            setShowConfirmPassword((prev) => !prev)
-                          }
-                          hitSlop={10}
-                          style={tw`px-3 py-2`}
-                        >
-                          {showConfirmPassword ? (
-                            <Eye size={isTablet ? 24 : 22} color="#7e7e7e" />
-                          ) : (
-                            <EyeClosed
-                              size={isTablet ? 24 : 22}
-                              color="#7e7e7e"
-                            />
-                          )}
-                        </TouchableOpacity>
-                      </View>
-                      {errors.confirmPassword && (
-                        <Text style={tw`text-[#FF6B6B] text-[13px] mt-1 ml-1`}>
-                          {errors.confirmPassword.message}
-                        </Text>
-                      )}
-                    </View>
+                    <PasswordField
+                      label="Confirm Password *"
+                      placeholder="•••••••••••••"
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                      textContentType="newPassword"
+                      autoComplete="new-password"
+                      returnKeyType="done"
+                      onSubmitEditing={handleSubmit(handleSignup)}
+                      value={value}
+                      onChangeText={onChange}
+                      onBlur={onBlur}
+                      error={errors.confirmPassword?.message}
+                      labelStyle={{ fontSize: labelFontSize }}
+                      inputStyle={{ fontSize: inputFontSize }}
+                      containerStyle={{ marginBottom: fieldGap }}
+                      iconSize={isTablet ? 24 : 22}
+                    />
                   )}
                 />
                 <View style={[tw`flex-col w-full`, { gap: 16, marginTop: 16 }]}>
                   {/* Submit Button */}
-                  <TouchableOpacity
-                    disabled={loading}
+                  <AppButton
+                    title="Register"
+                    loadingTitle="Creating..."
                     onPress={handleSubmit(handleSignup)}
-                    activeOpacity={0.75}
-                    style={[
-                      tw`rounded-xl items-center justify-center ${TW.bgAction}`,
-                      {
-                        paddingVertical: isTablet ? 18 : 15,
-                        marginTop: 4,
-                      },
-                      loading ? tw`opacity-90` : tw`opacity-100`,
-                    ]}
-                  >
-                    <View style={tw`flex-row items-center gap-2`}>
-                      {loading && (
-                        <ActivityIndicator size="small" color="#ffffff" />
-                      )}
-                      <Text
-                        style={[
-                          tw`${TW.textButton} font-semibold`,
-                          { fontSize: isTablet ? 18 : 14 },
-                        ]}
-                      >
-                        {loading ? "Creating..." : "Register"}
-                      </Text>
-                    </View>
-                  </TouchableOpacity>
+                    loading={loading}
+                    size={isTablet ? "lg" : isSmallPhone ? "sm" : "md"}
+                    textStyle={{ fontSize: isTablet ? 18 : 14 }}
+                    style={tw`mt-1`}
+                  />
 
                   {/* Login redirect */}
 

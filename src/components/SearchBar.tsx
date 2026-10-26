@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
-import { Search, X } from "lucide-react-native";
+import { ArrowLeft, Search, X } from "lucide-react-native";
 import {
   ActivityIndicator,
   Pressable,
@@ -14,6 +14,7 @@ type HeaderWithSearchProps = {
   onBack?: () => void;
   loading?: boolean;
   autoFocus?: boolean;
+  placeholder?: string;
 };
 
 export default function HeaderWithSearch({
@@ -22,6 +23,7 @@ export default function HeaderWithSearch({
   onBack,
   loading = false,
   autoFocus = false,
+  placeholder = "Search by name...",
 }: HeaderWithSearchProps) {
   const [text, setText] = useState(search);
   const isUserInput = useRef(false);
@@ -41,16 +43,6 @@ export default function HeaderWithSearch({
     }
   }, [search]);
 
-  // Debounce — no isMounted guard needed, just keep it as-is
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      onSearchChangeRef.current(text);
-    }, 300);
-    return () => clearTimeout(handler);
-  }, [text]);
-  // Debounce — send the RAW value, no trim.
-  // Trimming here caused "John " → "John" (same as previous search value)
-  // → parent saw no change → sync effect never ran → display got stuck.
   useEffect(() => {
     const handler = setTimeout(() => {
       onSearchChangeRef.current(text);
@@ -72,8 +64,7 @@ export default function HeaderWithSearch({
 
   return (
     <View style={tw`flex-row items-center px-4 py-3 bg-white`}>
-
-      {/* {onBack && (
+      {onBack && (
         <Pressable
           onPress={onBack}
           style={tw`mr-2`}
@@ -82,7 +73,7 @@ export default function HeaderWithSearch({
         >
           <ArrowLeft size={22} color="#333" />
         </Pressable>
-      )} */}
+      )}
 
       <View
         style={[
@@ -94,7 +85,7 @@ export default function HeaderWithSearch({
 
         <TextInput
           style={tw`flex-1 ml-2 text-base text-black`}
-          placeholder="Search by name..."
+          placeholder={placeholder}
           value={text}
           onChangeText={handleChangeText}
           placeholderTextColor="#7AA5B2"

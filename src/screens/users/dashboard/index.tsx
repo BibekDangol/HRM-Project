@@ -110,8 +110,6 @@ export default function HomeScreen() {
         <HolidaysEventsSection
           calendarItems={calendarItems}
           calendarLoading={calendarLoading}
-          monthTitle={monthTitle}
-          selectedYear={selectedYear}
           onViewAll={() => router.push("/(users)/holidays")}
         />
       </View>

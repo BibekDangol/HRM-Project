@@ -42,11 +42,41 @@ export function useCalendar(
   }, [orgId, year, monthIndex]);
 
   /**
-   * Auto-fetch when dependencies change
+   * Auto-fetch when dependencies change — uses Promise.then to avoid
+   * triggering the react-hooks/set-state-in-effect lint rule.
    */
   useEffect(() => {
-    fetchCalendar();
-  }, [fetchCalendar]);
+    if (orgId == null || year == null || monthIndex == null) return;
+
+    let cancelled = false;
+
+    const monthStr = String(monthIndex + 1).padStart(2, "0");
+    const monthStart = `${year}-${monthStr}-01`;
+    const monthEnd = `${year}-${monthStr}-${String(
+      new Date(year, monthIndex + 1, 0).getDate(),
+    ).padStart(2, "0")}`;
+
+    supabase
+      .from("admin_calendar")
+      .select("id, title, type, color, start_date, end_date")
+      .eq("organization_id", orgId)
+      .lte("start_date", monthEnd)
+      .or(`end_date.gte.${monthStart},end_date.is.null`)
+      .order("start_date", { ascending: true })
+      .then(({ data, error }) => {
+        if (cancelled) return;
+        if (error) {
+          console.error("useCalendar error:", error);
+          setItems([]);
+        } else {
+          setItems((data ?? []) as CalendarItem[]);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [orgId, year, monthIndex]);
 
   return {
     items,

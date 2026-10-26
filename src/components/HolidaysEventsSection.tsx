@@ -6,6 +6,7 @@ import Animated, {
   SharedValue,
   useAnimatedStyle,
   useSharedValue,
+  runOnUI,
 } from "react-native-reanimated";
 import Carousel from "react-native-reanimated-carousel";
 import tw from "twrnc";
@@ -21,8 +22,6 @@ import { CalendarItem } from "../types/Calendar";
 type Props = {
   calendarItems: CalendarItem[];
   calendarLoading: boolean;
-  monthTitle: string;
-  selectedYear: number;
   onViewAll: () => void;
   onCardPress?: (item: CalendarItem) => void;
 };
@@ -416,15 +415,14 @@ export const HolidaysEventsSection = ({
   }, [visibleItems, todayKey]);
 
   useEffect(() => {
-    if (!total) {
-      progress.value = 0;
-      return;
-    }
-
-    progress.value = highlightedIndex;
+    const targetIndex = total ? highlightedIndex : 0;
+    runOnUI((val: number) => {
+      "worklet";
+      progress.value = val;
+    })(targetIndex);
 
     requestAnimationFrame(() => {
-      carouselRef.current?.scrollTo?.({ index: highlightedIndex, animated: false });
+      carouselRef.current?.scrollTo?.({ index: targetIndex, animated: false });
     });
   }, [highlightedIndex, total, progress]);
 
@@ -514,7 +512,10 @@ export const HolidaysEventsSection = ({
             scrollAnimationDuration={350}
             style={{ width: cardWidth }}
             onProgressChange={(_, absoluteProgress) => {
-              progress.value = absoluteProgress;
+              runOnUI((val: number) => {
+                "worklet";
+                progress.value = val;
+              })(absoluteProgress);
             }}
             renderItem={renderItem}
           />

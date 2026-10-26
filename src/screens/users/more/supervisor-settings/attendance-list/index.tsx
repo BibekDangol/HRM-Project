@@ -1,94 +1,29 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { FlatList, Pressable, Text, View } from "react-native";
-import HeaderWithSearch from "@/src/components/SearchBar";
-import { UserCard } from "@/src/screens/admin/components/UserCard";
-import { fetchSupervisorUnderUsersService } from "@/src/services/admin.service";
-import { useUsersStore } from "@/src/store/useUsersStore";
-import { UserProfile } from "@/src/types/admin";
+import React from "react";
 import { useRouter } from "expo-router";
-import tw from "twrnc";
 
-const AttendanceUserList = () => {
+import UserDirectoryList from "@/src/screens/admin/components/UserDirectoryList";
+import { UserProfile } from "@/src/types/admin";
+
+export default function SupervisorAttendanceUserList() {
   const router = useRouter();
-  const { currentUserProfile } = useUsersStore();
-  const [users, setUsers] = useState<UserProfile[]>([]);
-  const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(false);
 
-  const getSupervisorName = () => "No supervisor";
-
-  const loadUsers = useCallback(async () => {
-    if (!currentUserProfile?.id || !currentUserProfile?.organization_id) return;
-
-    try {
-      setLoading(true);
-      const data = await fetchSupervisorUnderUsersService(
-        currentUserProfile.organization_id,
-        search.trim(), // ← only change this line
-        currentUserProfile.id,
-      );
-      setUsers(data);
-    } catch (err) {
-      console.error("Error loading supervisor users:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, [currentUserProfile?.id, currentUserProfile?.organization_id, search]);
-
-  useEffect(() => {
-    loadUsers();
-  }, [loadUsers]);
+  const handleUserPress = (user: UserProfile) => {
+    router.navigate({
+      pathname:
+        "/(users)/more/supervisor-settings/attendance-list/attendance-details",
+      params: {
+        userId: user.id,
+        name: `${user.first_name} ${user.last_name}`.trim(),
+      },
+    });
+  };
 
   return (
-    <View style={tw`flex-1 bg-white`}>
-      <HeaderWithSearch
-        search={search}
-        onSearchChange={setSearch}
-        onBack={() => router.back()}
-      />
-
-      <FlatList
-        data={users}
-        keyExtractor={(item) => item.id}
-        showsVerticalScrollIndicator={false}
-        persistentScrollbar={false}
-        overScrollMode="never"
-        contentContainerStyle={[
-          tw`px-4 pt-2 pb-6`,
-          users.length === 0 ? tw`flex-grow justify-center` : undefined,
-        ]}
-        ItemSeparatorComponent={() => <View style={tw`h-3`} />}
-        ListEmptyComponent={
-          <View style={tw`items-center justify-center py-16`}>
-            <Text style={tw`text-base text-gray-500`}>
-              {loading ? "Loading..." : "No users found"}
-            </Text>
-          </View>
-        }
-        renderItem={({ item }) => (
-          <Pressable
-            onPress={() =>
-              router.navigate({
-                pathname:
-                  "/(users)/more/supervisor-settings/attendance-list/attendance-details",
-                params: {
-                  userId: item.id,
-                  name: `${item.first_name} ${item.last_name}`,
-                },
-              })
-            }
-            style={tw`rounded-2xl overflow-hidden`}
-          >
-            <UserCard
-              user={item}
-              getSupervisorName={getSupervisorName}
-              showRightArrow
-            />
-          </Pressable>
-        )}
-      />
-    </View>
+    <UserDirectoryList
+      mode="supervisor-attendance"
+      onUserPress={handleUserPress}
+      onBack={() => router.back()}
+      searchPlaceholder="Search supervisees..."
+    />
   );
-};
-
-export default AttendanceUserList;
+}

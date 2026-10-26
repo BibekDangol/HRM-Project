@@ -1,16 +1,16 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { FlatList, Pressable, RefreshControl, View } from "react-native";
 import { FilterTab, Header } from "./components/Header";
-import LoadingIndicator from "@/src/components/LoadingIndicator";
-import { usePagination } from "@/src/hooks/usePagination";
+import EmptyState from "@/src/components/states/EmptyState";
+import LoadingState from "@/src/components/states/LoadingState";
+import { Pagination } from "@/src/components/lists/Pagination";
 import { useLeaves } from "@/src/hooks/users/useLeaves";
+import { usePagination } from "@/src/hooks/usePagination";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Plus } from "lucide-react-native";
+import { CalendarClock, Plus } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import tw from "twrnc";
 import { LeaveCard } from "./components/LeaveCard";
-import { Pagination } from "@/src/components/PaginationModal";
-
 
 export default function LeavesScreen() {
   const router = useRouter();
@@ -20,37 +20,31 @@ export default function LeavesScreen() {
 
   const { loading, refreshing, leaves, leaveTypes, onRefresh } = useLeaves();
 
-  const requestedTab =
+  const rawTab =
     typeof params.tab === "string"
       ? params.tab
       : Array.isArray(params.tab)
         ? params.tab[0]
         : undefined;
 
-  const getInitialTab = (): FilterTab => {
-    if (
-      requestedTab === "all" ||
-      requestedTab === "pending" ||
-      requestedTab === "approved" ||
-      requestedTab === "rejected"
-    ) {
-      return requestedTab;
-    }
-    return "all";
-  };
+  const validRequestedTab =
+    rawTab === "all" ||
+    rawTab === "pending" ||
+    rawTab === "approved" ||
+    rawTab === "rejected"
+      ? (rawTab as FilterTab)
+      : undefined;
 
-  const [activeTab, setActiveTab] = useState<FilterTab>(getInitialTab());
+  const [prevRequestedTab, setPrevRequestedTab] = useState(validRequestedTab);
+  const [activeTab, setActiveTab] = useState<FilterTab>(
+    validRequestedTab ?? "all",
+  );
 
-  useEffect(() => {
-    if (
-      requestedTab === "all" ||
-      requestedTab === "pending" ||
-      requestedTab === "approved" ||
-      requestedTab === "rejected"
-    ) {
-      setActiveTab(requestedTab);
-    }
-  }, [requestedTab]);
+  // Adjust activeTab during render if URL param changes (React 19 pattern)
+  if (prevRequestedTab !== validRequestedTab && validRequestedTab !== undefined) {
+    setPrevRequestedTab(validRequestedTab);
+    setActiveTab(validRequestedTab);
+  }
 
   const filteredLeaves = useMemo(() => {
     if (activeTab === "all") return leaves;
@@ -64,25 +58,23 @@ export default function LeavesScreen() {
     pageNumbers,
     totalPages,
     shouldShowPagination,
-  } = usePagination(filteredLeaves);
-
-  useEffect(() => {
-    flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
-    setPage(1);
-  }, [activeTab, setPage]);
+  } = usePagination(
+    filteredLeaves,
+    undefined,
+    () => {
+      flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+    },
+    { resetKey: activeTab },
+  );
 
   const leaveTypeName = useCallback(
     (id: number | null) =>
       leaveTypes.find((t) => t.id === id)?.name ?? "Leave",
-    [leaveTypes]
+    [leaveTypes],
   );
 
   if (loading) {
-    return (
-      <View style={tw`flex-1 items-center justify-center bg-white`}>
-        <LoadingIndicator />
-      </View>
-    );
+    return <LoadingState fullScreen message="Loading leaves..." />;
   }
 
   return (
@@ -94,7 +86,7 @@ export default function LeavesScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
           paddingHorizontal: 16,
-          paddingBottom: 16, 
+          paddingBottom: 80,
         }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -117,21 +109,35 @@ export default function LeavesScreen() {
             />
           </View>
         )}
+        ListEmptyComponent={
+          <EmptyState
+            icon={
+              <View
+                style={tw`h-14 w-14 rounded-full bg-slate-100 items-center justify-center`}
+              >
+                <CalendarClock size={26} color="#94A3B8" />
+              </View>
+            }
+            title="No leaves found"
+            message={
+              activeTab === "all"
+                ? "You haven't requested any leaves yet."
+                : `You have no ${activeTab} leave requests.`
+            }
+            actionLabel="Apply Leave"
+            onAction={() => router.push("/(users)/leaves/calendar")}
+            style={tw`py-12`}
+          />
+        }
         ListFooterComponent={
           shouldShowPagination ? (
-            <View style={{ paddingBottom: 16 }}> 
+            <View style={{ paddingBottom: 16 }}>
               <Pagination
                 page={page}
                 totalPages={totalPages}
                 pageNumbers={pageNumbers}
                 setPage={setPage}
-                TW={{
-                  BORDER: "border-slate-200",
-                  textPrimary: "text-slate-700",
-                  textButton: "text-white",
-                  bgAction: "bg-[#1B4A5A]",
-                }}
-                tw={tw}
+                variant="muted"
               />
             </View>
           ) : null
@@ -143,7 +149,7 @@ export default function LeavesScreen() {
         style={[
           tw`absolute right-5 bg-[#1B4A5A] w-13 h-13 rounded-full items-center justify-center`,
           {
-            bottom: insets.bottom + 72, 
+            bottom: insets.bottom + 72,
             shadowColor: "#1B4A5A",
             shadowOffset: { width: 0, height: 4 },
             shadowOpacity: 0.3,

@@ -29,14 +29,14 @@ const AppHeaderRight: React.FC<AppHeaderRightProps> = ({
   const measure = useCallback((callback?: () => void) => {
     requestAnimationFrame(() => {
       btnRef.current?.measureInWindow((x, y, width, height) => {
-        if (!width || !height) return;
-
-        setAnchorLayout({
-          pageX: x,
-          pageY: y,
-          width,
-          height,
-        });
+        if (width > 0 && height > 0) {
+          setAnchorLayout({
+            pageX: x,
+            pageY: y,
+            width,
+            height,
+          });
+        }
 
         callback?.();
       });
@@ -63,7 +63,7 @@ const AppHeaderRight: React.FC<AppHeaderRightProps> = ({
     >
       {children}
 
-      <View ref={btnRef} collapsable={false}>
+      <View ref={btnRef} collapsable={false} onLayout={() => measure()}>
         <HeaderProfileButton
           disabled={isLocked}
           onPress={handleProfileTrigger}

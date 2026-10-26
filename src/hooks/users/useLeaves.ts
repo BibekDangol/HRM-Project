@@ -1,47 +1,51 @@
 import {
   Leave,
   LeaveStatus,
+  LeaveType,
   fetchLeaveRequests,
 } from "@/src/services/leave.service";
-import { useCallback, useEffect, useState } from "react";
-
+import { fetchLeaveTypesService } from "@/src/services/leave.type.service";
+import { useRefreshableQuery } from "@/src/hooks/useRefreshableQuery";
+import { useCallback, useMemo } from "react";
 import { useUsersStore } from "@/src/store/useUsersStore";
 
-type LeaveType = {
-  id: number;
-  name: string;
+const EMPTY_DATA: { leaves: Leave[]; leaveTypes: LeaveType[] } = {
+  leaves: [],
+  leaveTypes: [],
 };
 
 export function useLeaves() {
   const { currentUserProfile } = useUsersStore();
-  const [leaves, setLeaves] = useState<Leave[]>([]);
-  const [leaveTypes, setLeaveTypes] = useState<LeaveType[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
 
-  const loadLeaves = useCallback(async () => {
-    if (!currentUserProfile) return;
-    try {
-      setLoading(true);
-      const data = await fetchLeaveRequests(currentUserProfile.organization_id);
-      setLeaves(data);
-      setLeaveTypes([]);
-    } catch (err) {
-      console.log("Error loading leaves:", err);
-    } finally {
-      setLoading(false);
+  const organizationId = currentUserProfile?.organization_id;
+  const userId = currentUserProfile?.id;
+
+  const queryFn = useCallback(async () => {
+    if (!organizationId || !userId) {
+      return EMPTY_DATA;
     }
-  }, [currentUserProfile]);
+    const [allLeaves, types] = await Promise.all([
+      fetchLeaveRequests(organizationId),
+      fetchLeaveTypesService(organizationId),
+    ]);
+    const userLeaves = (allLeaves ?? []).filter((l) => l.user_id === userId);
+    return {
+      leaves: userLeaves,
+      leaveTypes: (types ?? []) as LeaveType[],
+    };
+  }, [organizationId, userId]);
 
-  const onRefresh = useCallback(async () => {
-    setRefreshing(true);
-    await loadLeaves();
-    setRefreshing(false);
-  }, [loadLeaves]);
+  const { data, loading, refreshing, onRefresh } = useRefreshableQuery(
+    queryFn,
+    [organizationId, userId],
+    {
+      enabled: Boolean(organizationId && userId),
+      initialData: EMPTY_DATA,
+    },
+  );
 
-  useEffect(() => {
-    loadLeaves();
-  }, [loadLeaves]);
+  const leaves = useMemo(() => data?.leaves ?? [], [data?.leaves]);
+  const leaveTypes = useMemo(() => data?.leaveTypes ?? [], [data?.leaveTypes]);
 
   const filteredByStatus = useCallback(
     (status: LeaveStatus) => leaves.filter((l) => l.status === status),
@@ -57,3 +61,4 @@ export function useLeaves() {
     filteredByStatus,
   };
 }
+

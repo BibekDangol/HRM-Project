@@ -1,20 +1,20 @@
-import { Eye, EyeClosed } from "lucide-react-native";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
-  ActivityIndicator,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
   Text,
-  TextInput,
   TouchableOpacity,
   TouchableWithoutFeedback,
   View,
 } from "react-native";
 
 import Logo from "@/src/components/Logo";
+import PasswordField from "@/src/components/form/PasswordField";
+import FormField from "@/src/components/form/FormField";
+import AppButton from "@/src/components/ui/AppButton";
 import { useDimension } from "@/src/hooks/useDimension";
 import { loginSchema } from "@/src/schema/auth";
 import { useAuthStore } from "@/src/store/useAuthStore";
@@ -34,8 +34,6 @@ const LoginScreen = () => {
   const { isSmallPhone, isTablet, width } = useDimension();
 
   const [loginError, setLoginError] = useState<string | null>(null);
-  const [showPassword, setShowPassword] = useState(false);
-  const toggleShowPassword = () => setShowPassword((p) => !p);
 
   const {
     control,
@@ -123,47 +121,19 @@ const LoginScreen = () => {
                   control={control}
                   name="email"
                   render={({ field: { value, onChange } }) => (
-                    <View>
-                      <Text
-                        style={[
-                          tw`${TW.textSecondary} font-semibold mb-2`,
-                          { fontSize: isTablet ? 16 : 14 },
-                        ]}
-                      >
-                        Email
-                      </Text>
-
-                      <TextInput
-                        style={[
-                          tw`${TW.bgButton} rounded-lg px-3`,
-                          {
-                            paddingVertical: isTablet
-                              ? 18
-                              : isSmallPhone
-                                ? 12
-                                : 16,
-                            fontSize: isTablet ? 16 : 14,
-                          },
-                          loginError && {
-                            borderWidth: 1.5,
-                            borderColor: "#FF6B6B",
-                          },
-                        ]}
-                        placeholder="Enter your email address"
-                        placeholderTextColor="#7e7e7e"
-                        keyboardType="email-address"
-                        textContentType="emailAddress"
-                        autoCapitalize="none"
-                        value={value}
-                        onChangeText={onChange}
-                      />
-
-                      {errors.email && (
-                        <Text style={tw`text-[#FF6B6B] text-[13px] mt-1 ml-1`}>
-                          {errors.email.message}
-                        </Text>
-                      )}
-                    </View>
+                    <FormField
+                      label="Email"
+                      value={value}
+                      onChangeText={onChange}
+                      placeholder="Enter your email address"
+                      keyboardType="email-address"
+                      textContentType="emailAddress"
+                      autoCapitalize="none"
+                      error={errors.email?.message}
+                      forceErrorBorder={!!loginError}
+                      labelStyle={{ fontSize: isTablet ? 16 : 14 }}
+                      inputStyle={{ fontSize: isTablet ? 16 : 14 }}
+                    />
                   )}
                 />
 
@@ -172,67 +142,17 @@ const LoginScreen = () => {
                   control={control}
                   name="password"
                   render={({ field: { value, onChange } }) => (
-                    <View>
-                      <Text
-                        style={[
-                          tw`${TW.textSecondary} font-semibold mb-2`,
-                          { fontSize: isTablet ? 16 : 14 },
-                        ]}
-                      >
-                        Password
-                      </Text>
-
-                      <View
-                        style={[
-                          tw`${TW.bgButton} rounded-lg flex-row items-center`,
-                          loginError && {
-                            borderWidth: 1.5,
-                            borderColor: "#FF6B6B",
-                          },
-                        ]}
-                      >
-                        <TextInput
-                          style={[
-                            tw`flex-1 px-3`,
-                            {
-                              paddingVertical: isTablet
-                                ? 18
-                                : isSmallPhone
-                                  ? 12
-                                  : 16,
-                              fontSize: isTablet ? 16 : 14,
-                            },
-                          ]}
-                          placeholder="•••••••••••••"
-                          placeholderTextColor="#7e7e7e"
-                          secureTextEntry={!showPassword}
-                          autoCorrect={false}
-                          value={value}
-                          onChangeText={onChange}
-                        />
-
-                        <TouchableOpacity
-                          onPress={toggleShowPassword}
-                          hitSlop={10}
-                          style={tw`pr-3`}
-                        >
-                          {showPassword ? (
-                            <Eye size={isTablet ? 24 : 22} color="#7e7e7e" />
-                          ) : (
-                            <EyeClosed
-                              size={isTablet ? 24 : 22}
-                              color="#7e7e7e"
-                            />
-                          )}
-                        </TouchableOpacity>
-                      </View>
-
-                      {errors.password && (
-                        <Text style={tw`text-[#FF6B6B] text-[13px] mt-1 ml-1`}>
-                          {errors.password.message}
-                        </Text>
-                      )}
-                    </View>
+                    <PasswordField
+                      label="Password"
+                      value={value}
+                      onChangeText={onChange}
+                      placeholder="•••••••••••••"
+                      error={errors.password?.message}
+                      forceErrorBorder={!!loginError}
+                      labelStyle={{ fontSize: isTablet ? 16 : 14 }}
+                      inputStyle={{ fontSize: isTablet ? 16 : 14 }}
+                      iconSize={isTablet ? 24 : 22}
+                    />
                   )}
                 />
               </View>
@@ -253,31 +173,14 @@ const LoginScreen = () => {
               </TouchableOpacity>
 
               <View style={[tw`flex-col w-full`, { gap: 16, marginTop: 16 }]}>
-                <TouchableOpacity
-                  style={[
-                    tw`rounded-xl items-center justify-center ${TW.bgAction}`,
-                    isSubmitting ? tw`opacity-90` : tw`opacity-100`,
-                    {
-                      paddingVertical: isTablet ? 18 : isSmallPhone ? 12 : 16,
-                    },
-                  ]}
+                <AppButton
+                  title="Login"
+                  loadingTitle="Logging in..."
                   onPress={handleSubmit(handleLogin)}
-                  disabled={isSubmitting}
-                >
-                  <View style={tw`flex-row items-center gap-2`}>
-                    {isSubmitting && (
-                      <ActivityIndicator size="small" color="#ffffff" />
-                    )}
-                    <Text
-                      style={[
-                        tw`font-semibold ${TW.textButton}`,
-                        { fontSize: isTablet ? 18 : 14 },
-                      ]}
-                    >
-                      {isSubmitting ? "Logging in..." : "Login"}
-                    </Text>
-                  </View>
-                </TouchableOpacity>
+                  loading={isSubmitting}
+                  size={isTablet ? "lg" : isSmallPhone ? "sm" : "md"}
+                  textStyle={{ fontSize: isTablet ? 18 : 14 }}
+                />
 
                 <View style={tw`flex-row justify-center`}>
                   <Text

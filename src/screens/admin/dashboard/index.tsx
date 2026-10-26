@@ -1,14 +1,12 @@
 import AddUserModal, { AddUserFormData } from "../manage-users/AddUserModal";
-import { Alert, RefreshControl, ScrollView, Text, View } from "react-native";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Alert, RefreshControl, ScrollView, View } from "react-native";
+import { useCallback, useEffect, useState } from "react";
 
 import { HolidaysEventsSection } from "@/src/components/HolidaysEventsSection";
-import { MONTHS } from "@/src/utils/userDashboard";
-import QuickAction from "../components/QuickAction";
-import StatCard from "@/src/screens/admin/components/StatCard";
-import { TW } from "@/theme/twStyles";
+import QuickActionGrid from "@/src/components/ui/QuickActionGrid";
+import MetricCard from "@/src/components/ui/MetricCard";
 import TempPasswordModal from "../manage-users/TempPasswordModal";
-import { User } from "lucide-react-native";
+import { CalendarPlus, Clock, FileText, User, UserPlus } from "lucide-react-native";
 import { adminAddUserService } from "@/src/services/admin/add-user-service";
 import { fetchUsersService } from "@/src/services/admin.service";
 import tw from "twrnc";
@@ -25,8 +23,6 @@ export default function DashboardScreen() {
   const {
     calendarItems,
     calendarLoading,
-    selectedMonthIndex,
-    selectedYear,
     fetchCalendarItems,
   } = useAdminCalendar();
 
@@ -36,21 +32,18 @@ export default function DashboardScreen() {
   const [tempPassword, setTempPassword] = useState<string | null>(null);
   const totalusers = users.length;
 
-  const monthTitle = useMemo(
-    () => MONTHS[selectedMonthIndex],
-    [selectedMonthIndex],
-  );
+  const organizationId = currentUserProfile?.organization_id;
 
   const loadAll = useCallback(async () => {
     try {
-      if (!currentUserProfile?.organization_id) return;
-      const updatedUsers = await fetchUsersService(currentUserProfile.organization_id);
+      if (!organizationId) return;
+      const updatedUsers = await fetchUsersService(organizationId);
       setUsers(updatedUsers);
-      await fetchCalendarItems(currentUserProfile.organization_id);
+      await fetchCalendarItems(organizationId);
     } catch {
       Alert.alert("Error", "Failed to load dashboard data.");
     }
-  }, [currentUserProfile?.organization_id, setUsers, fetchCalendarItems]);
+  }, [organizationId, setUsers, fetchCalendarItems]);
 
   useEffect(() => {
     loadAll();
@@ -77,7 +70,9 @@ export default function DashboardScreen() {
       if (res.tempPassword) {
         setTempPassword(res.tempPassword);
       }
-      const updatedUsers = await fetchUsersService(currentUserProfile.organization_id);
+      const updatedUsers = await fetchUsersService(
+        currentUserProfile.organization_id,
+      );
       setUsers(updatedUsers);
       Alert.alert("Success", "User added successfully.");
       setAddUserModalVisible(false);
@@ -101,23 +96,43 @@ export default function DashboardScreen() {
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }>
-        <StatCard
+        }
+      >
+        <MetricCard
           title="Total Employees"
           value={totalusers}
           icon={<User size={24} color="white" />}
         />
 
-       
-
         <HolidaysEventsSection
           calendarItems={calendarItems}
           calendarLoading={calendarLoading}
-          monthTitle={monthTitle}
-          selectedYear={selectedYear}
           onViewAll={() => router.push("/(admin)/holidays")}
         />
-         <QuickAction onOpenAddUserModal={() => setAddUserModalVisible(true)} />
+        <QuickActionGrid
+          items={[
+            {
+              label: "Add Employee",
+              icon: <UserPlus size={24} color="#1B4A5A" />,
+              onPress: () => setAddUserModalVisible(true),
+            },
+            {
+              label: "Manage Leave",
+              icon: <CalendarPlus size={24} color="#1B4A5A" />,
+              onPress: () => router.replace("/(admin)/leave"),
+            },
+            {
+              label: "Attendance",
+              icon: <Clock size={24} color="#1B4A5A" />,
+              onPress: () => router.replace("/(admin)/more/attendance-list"),
+            },
+            {
+              label: "Holidays",
+              icon: <FileText size={24} color="#1B4A5A" />,
+              onPress: () => router.replace("/(admin)/more/holidays"),
+            },
+          ]}
+        />
       </ScrollView>
 
       <AddUserModal

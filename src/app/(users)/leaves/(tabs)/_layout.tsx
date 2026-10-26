@@ -1,14 +1,9 @@
-import { createMaterialTopTabNavigator } from "expo-router/js-top-tabs";
-import { withLayoutContext } from "expo-router";
-
-const TopTabs = withLayoutContext(createMaterialTopTabNavigator().Navigator);
+import { Stack } from "expo-router";
 
 export default function LeavesTabsLayout() {
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-      }}
-    />
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="index" />
+    </Stack>
   );
 }

@@ -24,7 +24,7 @@ export default function MoreScreen() {
       title: "Leave Management",
       description: "Add, Update",
       icon: CalendarFold,
-      path: "/(admin)/more//leave-type",
+      path: "/(admin)/more/leave-type",
     },
     {
       title: "Holidays",

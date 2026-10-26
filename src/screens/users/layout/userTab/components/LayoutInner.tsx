@@ -6,7 +6,7 @@ import { useAttendanceContext } from "@/src/context/AttendanceContext";
 import { useUserHeaderController } from "@/src/hooks/navigation/useUserHeaderController";
 import { useAdminHeaderMenu } from "@/src/hooks/useHeaderMenu";
 import { TW } from "@/theme/twStyles";
-import { MyTabBar } from "../../tabBar";
+import MyTabBar from "@/src/components/navigation/tabbar/UserTabBar";
 import ReasonModel from "./ReasonModel";
 
 export default function LayoutInner() {
@@ -96,7 +96,10 @@ export default function LayoutInner() {
       >
         <Tabs.Screen name="dashboard" options={{ title: "Dashboard" }} />
         <Tabs.Screen name="leaves" options={{ title: "Leaves" }} />
-        <Tabs.Screen name="profile/index" options={{ title: "Profile" }} />
+        <Tabs.Screen
+          name="profile/index"
+          options={{ title: "Profile", href: null }}
+        />
         <Tabs.Screen name="more" options={{ title: "Settings" }} />
 
         <Tabs.Screen

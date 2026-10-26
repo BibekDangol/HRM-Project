@@ -1,6 +1,6 @@
 import { Tabs, usePathname, useRouter } from "expo-router";
 import { LucideIcon } from "lucide-react-native";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { StatusBar, Text, View } from "react-native";
 
 import AppHeaderLeft from "@/src/components/navigation/header/AppHeaderLeft";
@@ -9,7 +9,7 @@ import { adminTabs } from "@/src/config/adminTabs";
 import { useAdminHeaderController } from "@/src/hooks/navigation/useAdminHeaderController";
 import { useDimension } from "@/src/hooks/useDimension";
 import { useAdminHeaderMenu } from "@/src/hooks/useHeaderMenu";
-import AdminTabBar from "@/src/screens/admin/components/AdminTabBar";
+import AdminTabBar from "@/src/components/navigation/tabbar/AdminTabBar";
 import { TW } from "@/theme/twStyles";
 
 type AdminTabItem = {
@@ -22,14 +22,12 @@ export default function AdminLayout() {
   const router = useRouter();
   const pathname = usePathname();
   const menu = useAdminHeaderMenu();
-
-  const [checkOpen, setCheckOpen] = useState(false);
   const { isTablet, isSmallPhone } = useDimension();
   const buttonSize = isTablet ? 42 : isSmallPhone ? 32 : 36;
   const typedAdminTabs = adminTabs as readonly AdminTabItem[];
-  const checkActionLockRef = useRef(false);
+
   const [loadingAttendance] = useState(false);
-  const isLocked = loadingAttendance || checkActionLockRef.current;
+  const isLocked = loadingAttendance;
 
   const {
     currentUserProfile,
@@ -50,7 +48,7 @@ export default function AdminLayout() {
       <StatusBar barStyle="light-content" backgroundColor={TW.bgSecondary} />
 
       <Tabs
-        backBehavior="initialRoute" 
+        backBehavior="initialRoute"
         screenOptions={{
           headerShown: true,
           headerShadowVisible: false,
@@ -93,7 +91,6 @@ export default function AdminLayout() {
               isLocked={isLocked}
               profileMenuOpen={menu.open}
               onProfileTrigger={() => {
-                setCheckOpen(false);
                 handleProfileTrigger();
               }}
               onProfileClose={handleProfileClose}
@@ -111,7 +108,8 @@ export default function AdminLayout() {
             title: "Dashboard",
             headerTitle: () => (
               <View
-                style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+                style={{ flexDirection: "row", alignItems: "center", gap: 10 }}
+              >
                 <View
                   style={{
                     width: 32,
@@ -120,7 +118,8 @@ export default function AdminLayout() {
                     backgroundColor: "rgba(255,255,255,0.2)",
                     alignItems: "center",
                     justifyContent: "center",
-                  }}>
+                  }}
+                >
                   <Text
                     style={{ color: "#fff", fontSize: 13, fontWeight: "700" }}
                   >
@@ -158,33 +157,10 @@ export default function AdminLayout() {
         />
 
         <Tabs.Screen
-          name="leave/add-leave-type"
+          name="profile"
           options={{
-            title: "Add Leave Type",
-            headerTitleAlign: "center",
-          }}
-        />
-
-        <Tabs.Screen
-          name="more/attendance-list/index"
-          options={{
-            title: "Attendance List",
-            headerTitleAlign: "center",
-          }}
-        />
-
-        <Tabs.Screen
-          name="more/attendance-list/attendance-details"
-          options={{
-            title: "Attendance Details",
-            headerTitleAlign: "center",
-          }}
-        />
-
-        <Tabs.Screen
-          name="more/holidays/index"
-          options={{
-            title: "Holidays and Events",
+            title: "Profile",
+            href: null,
             headerTitleAlign: "center",
           }}
         />
