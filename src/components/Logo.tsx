@@ -6,7 +6,7 @@ const Logo = () => {
     <View style={tw`items-center justify-center mb-2`}>
       <View style={tw`w-35 h-35`}>
         <Image
-          source={require("@/src/assets/images/TechLogo.png")}
+          source={require("@/src/assets/images/hrm.png")}
           style={tw`w-full h-full rounded-xl`}
           resizeMode="stretch"
         />

@@ -100,7 +100,7 @@ const LoginScreen = () => {
                     { fontSize: 24 },
                   ]}
                 >
-                  TechHaus
+                  Oddooo  
                 </Text>
 
                 <Text
@@ -122,10 +122,10 @@ const LoginScreen = () => {
                   name="email"
                   render={({ field: { value, onChange } }) => (
                     <FormField
-                      label="Email"
+                      // label="Email"
                       value={value}
                       onChangeText={onChange}
-                      placeholder="Enter your email address"
+                      placeholder="Email"
                       keyboardType="email-address"
                       textContentType="emailAddress"
                       autoCapitalize="none"
@@ -143,10 +143,10 @@ const LoginScreen = () => {
                   name="password"
                   render={({ field: { value, onChange } }) => (
                     <PasswordField
-                      label="Password"
+                      // label="Password"
                       value={value}
                       onChangeText={onChange}
-                      placeholder="•••••••••••••"
+                      placeholder="Password"
                       error={errors.password?.message}
                       forceErrorBorder={!!loginError}
                       labelStyle={{ fontSize: isTablet ? 16 : 14 }}
