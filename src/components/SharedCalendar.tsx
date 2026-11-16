@@ -5,7 +5,7 @@ import { Calendar } from "react-native-calendars";
 import { DayCell } from "@/src/components/Calendar/DayCell";
 
 import { TW } from "@/theme/twStyles";
-import MonthPickerModal from "./Home/MonthPickerModal";
+import { MonthPickerModal } from "./Home/MonthPickerModal";
 
 interface SharedCalendarProps {
   year: number;
@@ -22,20 +22,6 @@ interface SharedCalendarProps {
 
 const todayStr = new Date().toISOString().split("T")[0];
 const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-const MONTHS = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-];
 
 function formatDisplayDate(dateString: string) {
   const date = new Date(dateString);
@@ -116,7 +102,7 @@ export function SharedCalendar({
   showLegend = false,
   onRangeChange,
 }: SharedCalendarProps) {
-  const [visibleMonth, setVisibleMonth] = useState({ year, month });
+  const visibleMonth = { year, month };
   const [startDate, setStartDate] = useState<string | null>(null);
   const [endDate, setEndDate] = useState<string | null>(null);
 
@@ -124,15 +110,9 @@ export function SharedCalendar({
   const [pickerYear, setPickerYear] = useState(year);
   const [pickerMonth, setPickerMonth] = useState(month - 1); // modal uses 0-based
 
-  useEffect(() => {
-    setVisibleMonth({ year, month });
-    setPickerYear(year);
-    setPickerMonth(month - 1);
-  }, [year, month]);
-
   const currentString = useMemo(
-    () => getMonthString(visibleMonth.year, visibleMonth.month),
-    [visibleMonth],
+    () => getMonthString(year, month),
+    [year, month],
   );
 
   const selectedDisplayDate = useMemo(() => {
@@ -191,7 +171,6 @@ export function SharedCalendar({
   };
 
   const handleMonthChangeInternal = (updated: { year: number; month: number }) => {
-    setVisibleMonth(updated);
     setPickerYear(updated.year);
     setPickerMonth(updated.month - 1);
     onMonthChange(updated);
@@ -335,7 +314,11 @@ export function SharedCalendar({
           }}
         >
           <Pressable
-            onPress={() => setPickerVisible(true)}
+            onPress={() => {
+              setPickerYear(year);
+              setPickerMonth(month - 1);
+              setPickerVisible(true);
+            }}
             style={{
               flexDirection: "row",
               alignItems: "center",

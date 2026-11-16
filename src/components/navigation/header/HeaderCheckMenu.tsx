@@ -10,6 +10,7 @@ import {
   Text,
   TouchableWithoutFeedback,
   View,
+  useAnimatedValue,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -46,9 +47,9 @@ const AnimatedDropdown: React.FC<{
   visible: boolean;
   children: React.ReactNode;
 }> = ({ visible, children }) => {
-  const opacity = useRef(new Animated.Value(0)).current;
-  const translateY = useRef(new Animated.Value(-8)).current;
-  const scale = useRef(new Animated.Value(0.96)).current;
+  const opacity = useAnimatedValue(0);
+  const translateY = useAnimatedValue(-8);
+  const scale = useAnimatedValue(0.96);
 
   useEffect(() => {
     if (visible) {

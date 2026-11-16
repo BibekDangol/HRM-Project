@@ -1,5 +1,5 @@
 import { FormInput, FormOutput } from "@/src/types/user";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   fetchProfileService,
   removeAvatarService,
@@ -35,7 +35,7 @@ export function useProfile(userId?: string ) {
     },
   });
 
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async () => {
     if (!userId) return;
     try {
       setIsLoading(true);
@@ -56,11 +56,12 @@ export function useProfile(userId?: string ) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [userId, reset]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Start the loading indicator for this external data fetch.
     fetchProfile();
-  }, [userId]);
+  }, [fetchProfile]);
 
   const openEdit = () => {
     if (!profile) return;

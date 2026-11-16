@@ -11,25 +11,20 @@ import tw from "twrnc";
 
 export const ActivityLogSection = ({ onViewAll, hideTitle }: Props) => {
   const user = useAuthStore((s) => s.user);
+  const userId = user?.id;
 
   const [activityLog, setActivityLog] = useState<ActivityRecord[]>([]);
   const [initialLoading, setInitialLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  const hasViewAll = useRef(!!onViewAll);
+  const hasViewAll = Boolean(onViewAll);
   const fetchingRef = useRef(false);
 
   const fetchActivityLog = useCallback(async () => {
-    if (!user?.id || fetchingRef.current) return;
+    if (!userId || fetchingRef.current) return;
 
     fetchingRef.current = true;
-    const isFirstLoad = activityLog.length === 0;
-
-    if (isFirstLoad) {
-      setInitialLoading(true);
-    } else {
-      setRefreshing(true);
-    }
+    setRefreshing(true);
 
     try {
       const fmt = (d: Date) =>
@@ -42,10 +37,10 @@ export const ActivityLogSection = ({ onViewAll, hideTitle }: Props) => {
         .select(
           "id, date, status, check_in_time, check_out_time, check_in_comment",
         )
-        .eq("user_id", user.id)
+        .eq("user_id", userId)
         .order("date", { ascending: false });
 
-      if (hasViewAll.current) {
+      if (hasViewAll) {
         const today = new Date();
         const sevenDaysAgo = new Date(today);
         sevenDaysAgo.setDate(today.getDate() - 6);
@@ -63,9 +58,10 @@ export const ActivityLogSection = ({ onViewAll, hideTitle }: Props) => {
       setRefreshing(false);
       fetchingRef.current = false;
     }
-  }, [user?.id, activityLog.length]);
+  }, [userId, hasViewAll]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Start the refresh indicator for this external data fetch.
     fetchActivityLog();
   }, [fetchActivityLog]);
 

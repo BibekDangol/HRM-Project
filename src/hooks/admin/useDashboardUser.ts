@@ -28,7 +28,7 @@ export function useDashboardUsers() {
 
       const res = await fetchUsersService(profile.organization_id);
       setUsers(res);
-    } catch (err) {
+    } catch {
       Alert.alert("Error", "Failed to load users or profile.");
     } finally {
       setLoadingUsers(false);

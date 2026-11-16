@@ -2,7 +2,6 @@ import {
   checkInService,
   checkOutService,
   fetchLatestAttendanceService,
-  getAttendanceRulesService,
   getOpenAttendanceService,
 } from "@/src/services/users/attendance.service";
 import {
@@ -70,7 +69,7 @@ export const useAttendanceToggle = () => {
   }, []);
 
   useEffect(() => {
-    getAttendanceRulesService();
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Start the loading indicator for this external data fetch.
     fetchLatestAttendance();
   }, [fetchLatestAttendance]);
 

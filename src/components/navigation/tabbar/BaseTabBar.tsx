@@ -3,7 +3,7 @@ import {
   useLinkBuilder,
 } from "expo-router/react-navigation";
 import { RelativePathString, usePathname, useRouter } from "expo-router";
-import React, { useRef, useEffect, useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import {
   Animated,
   Easing,
@@ -11,6 +11,7 @@ import {
   Text,
   View,
   useWindowDimensions,
+  useAnimatedValue,
   StyleSheet,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -55,8 +56,8 @@ function TabItem({
   onLongPress: () => void;
   buildHref: (name: string, params?: object) => string | undefined;
 }) {
-  const scaleAnim = useRef(new Animated.Value(isFocused ? 1 : 0.96)).current;
-  const opacityAnim = useRef(new Animated.Value(isFocused ? 1 : 0.75)).current;
+  const scaleAnim = useAnimatedValue(isFocused ? 1 : 0.96);
+  const opacityAnim = useAnimatedValue(isFocused ? 1 : 0.75);
 
   useEffect(() => {
     Animated.parallel([
@@ -189,11 +190,9 @@ export default function BaseTabBar({
     return idx === -1 ? 0 : idx;
   }, [state.index, state.routes, visibleRoutes]);
 
-  const translateX = useRef(
-    new Animated.Value(
-      focusedVisibleIndex * tabWidth + (tabWidth - indicatorWidth) / 2
-    )
-  ).current;
+  const translateX = useAnimatedValue(
+    focusedVisibleIndex * tabWidth + (tabWidth - indicatorWidth) / 2
+  );
 
   useEffect(() => {
     Animated.spring(translateX, {

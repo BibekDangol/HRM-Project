@@ -132,13 +132,14 @@ export const getSessionWithProfile = async () => {
     .eq("id", data.session.user.id)
     .maybeSingle();
 
-  if (profileError) {
+  if (profileError || !profile) {
     throw new Error("Failed to fetch session profile");
   }
 
   return {
     session: data.session,
     user: data.session.user,
-    role: profile?.role ?? "user",
+    role: profile.role,
+    status: profile.status,
   };
 };

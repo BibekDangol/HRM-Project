@@ -41,6 +41,7 @@ export function useDailyAttendanceStats(
   }, [organizationId, startDate, endDate]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Start the loading indicator for this external data fetch.
     fetchStats();
   }, [fetchStats]);
 
@@ -70,6 +71,7 @@ export function useLatestDailyAttendanceStats(
   }, [organizationId, limit]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Start the loading indicator for this external data fetch.
     fetchStats();
   }, [fetchStats]);
 
@@ -99,6 +101,7 @@ export function useDailyAttendanceStatsByDate(
   }, [organizationId, statDate]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Start the loading indicator for this external data fetch.
     fetchStat();
   }, [fetchStat]);
 
@@ -129,6 +132,7 @@ export function useOrganizationDailyAttendanceSummary(
   }, [organizationId, year, month]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Start the loading indicator for this external data fetch.
     fetchSummary();
   }, [fetchSummary]);
 

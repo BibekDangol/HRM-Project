@@ -35,15 +35,9 @@ export function getNepalMonthDateRangeYYYYMMDD(
     Date.UTC(selectedYear, selectedMonthIndex + 1, 1, 0, 0, 0),
   );
 
-  const startUTC = new Date(
-    nepalStartLocalAsUTC.getTime() - NEPAL_OFFSET_MIN * 60 * 1000,
-  );
-  const endUTC = new Date(
-    nepalEndLocalAsUTC.getTime() - NEPAL_OFFSET_MIN * 60 * 1000,
-  );
-
-  const start = startUTC.toISOString().slice(0, 10);
-  const end = endUTC.toISOString().slice(0, 10);
+  // DATE columns contain calendar dates, so no timezone offset applies.
+  const start = nepalStartLocalAsUTC.toISOString().slice(0, 10);
+  const end = nepalEndLocalAsUTC.toISOString().slice(0, 10);
 
   return { startDate: start, endDateExclusive: end };
 }

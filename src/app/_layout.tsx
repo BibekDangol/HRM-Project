@@ -32,7 +32,7 @@ export default function Layout() {
       if (url) handleDeepLink({ url });
     });
     return () => subscription.remove();
-  }, []);
+  }, [restoreSession]);
 
   return (
     <>

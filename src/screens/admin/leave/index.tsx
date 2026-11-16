@@ -10,7 +10,7 @@ export default function AdminLeaveScreen() {
   useFocusEffect(
     useCallback(() => {
       reset();
-    }, []),
+    }, [reset]),
   );
 
   return (

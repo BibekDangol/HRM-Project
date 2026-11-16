@@ -16,11 +16,17 @@ export const fetchLatestAttendanceService = async (): Promise<{
   if (!user) {
     return { row: null, checkedInAt: null };
   }
+  const openRow = await getOpenAttendanceService(user.id);
+  if (openRow) {
+    return { row: openRow, checkedInAt: parseDate(openRow.check_in_time) };
+  }
+
   const { data, error } = await supabase
     .from("attendance")
     .select("*")
     .eq("user_id", user.id)
-    .order("check_in_time", { ascending: false })
+    .order("date", { ascending: false })
+    .order("check_in_time", { ascending: false, nullsFirst: false })
     .limit(1)
     .maybeSingle();
   if (error) throw error;
@@ -37,6 +43,8 @@ export const getOpenAttendanceService = async (
     .from("attendance")
     .select("*")
     .eq("user_id", userId)
+    .eq("status", "incomplete")
+    .not("check_in_time", "is", null)
     .is("check_out_time", null)
     .order("check_in_time", { ascending: false })
     .limit(1)
@@ -126,6 +134,8 @@ export const checkOutService = async (comment?: string) => {
       check_out_lng: loc.lng,
     })
     .eq("id", openRow.id)
+    .eq("status", "incomplete")
+    .is("check_out_time", null)
     .select("*")
     .single();
 

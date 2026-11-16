@@ -6,7 +6,7 @@ import {
 import { useCallback, useEffect, useState } from "react";
 
 import { supabase } from "@/src/supabase/supabaseClient";
-import { AttendanceRow, AttendanceStatsRow } from "@/src/types/attendance";
+import { diffDaysInclusive } from "@/src/utils/leaveUtils";
 
 type Stats = {
   present: number;
@@ -61,9 +61,17 @@ export function useAttendanceStats(
       if (leaveError) throw leaveError;
 
       const leaves = (leaveData ?? []) as LeaveRow[];
-
+      const lastDate = new Date(Date.parse(endDateExclusive) - 86400000)
+        .toISOString().slice(0, 10);
       const leaveTaken = leaves.reduce((sum, leave) => {
-        return sum + (leave.days_count ?? 0);
+        const end = leave.end_date ?? leave.start_date;
+        const totalDays = diffDaysInclusive(leave.start_date, end) ?? 0;
+        if (totalDays <= 0) return sum;
+        const overlapDays = Math.max(0, diffDaysInclusive(
+          leave.start_date > startDate ? leave.start_date : startDate,
+          end < lastDate ? end : lastDate,
+        ) ?? 0);
+        return sum + overlapDays * ((leave.days_count ?? totalDays) / totalDays);
       }, 0);
 
       /**
@@ -77,7 +85,7 @@ export function useAttendanceStats(
         .lt("date", endDateExclusive);
 
       if (!dateError) {
-        const rows = (byDate ?? []) as AttendanceRow[];
+        const rows = byDate ?? [];
 
         const result: Stats = {
           present: rows.filter((r) => normalize(r.status) === "present").length,
@@ -105,7 +113,7 @@ export function useAttendanceStats(
 
       if (createdError) throw createdError;
 
-      const rows = (byDate ?? []) as AttendanceStatsRow[];
+      const rows = byCreatedAt ?? [];
 
       const result: Stats = {
         present: rows.filter((r) => normalize(r.status) === "present").length,
@@ -131,6 +139,7 @@ export function useAttendanceStats(
   }, [userId, year, monthIndex]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Start the loading indicator for this external data fetch.
     fetchStats();
   }, [fetchStats]);
 

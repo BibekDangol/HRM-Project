@@ -42,7 +42,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   session: null,
   role: null,
-  loading: false,
+  loading: true,
   status: null,
   forgotPasswordState: {
     loading: false,
@@ -90,7 +90,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     } catch (err) {
       console.log("SignOut error:", err);
     } finally {
-      set({ user: null, session: null, role: null, loading: false });
+      set({ user: null, session: null, role: null, status: null, loading: false });
     }
   },
   forgotPassword: async (email): Promise<ForgotPasswordResult> => {
@@ -130,7 +130,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       const data = await getSessionWithProfile();
 
       if (!data) {
-        set({ session: null, user: null, role: null, loading: false });
+        set({ session: null, user: null, role: null, status: null, loading: false });
         return;
       }
 
@@ -138,11 +138,12 @@ export const useAuthStore = create<AuthState>((set) => ({
         session: data.session,
         user: data.user,
         role: data.role,
+        status: data.status,
         loading: false,
       });
     } catch (err) {
       console.log("Restore session error:", err);
-      set({ session: null, user: null, role: null, loading: false });
+      set({ session: null, user: null, role: null, status: null, loading: false });
     }
   },
 }));

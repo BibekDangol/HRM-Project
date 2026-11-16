@@ -43,11 +43,6 @@ function isActiveToday(item: CalendarItem, todayKey: string) {
   return item.start_date <= todayKey && endDate >= todayKey;
 }
 
-function isPastItem(item: CalendarItem, todayKey: string) {
-  const endDate = item.end_date || item.start_date;
-  return endDate < todayKey;
-}
-
 function getGroupStatus(
   group: GroupedCalendarItems,
   todayKey: string
@@ -373,6 +368,7 @@ export default function HolidaysEventsScreen() {
   }, [currentUserProfile?.organization_id]);
 
   React.useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Start the loading indicator for this external data fetch.
     fetchItems();
   }, [fetchItems]);
 

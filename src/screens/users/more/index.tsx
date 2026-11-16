@@ -15,7 +15,6 @@ import tw from "twrnc";
 export default function SupervisorSettings() {
   const router = useRouter();
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [statsLoading, setStatsLoading] = useState(false);
 
   const onRefresh = async () => {
     try {
@@ -32,7 +31,7 @@ export default function SupervisorSettings() {
       contentContainerStyle={tw`px-4 pt-4 pb-6`}
       refreshControl={
         <RefreshControl
-          refreshing={isRefreshing || statsLoading}
+          refreshing={isRefreshing}
           onRefresh={onRefresh}
           colors={["#1B4A5A"]}
           tintColor="#1B4A5A"

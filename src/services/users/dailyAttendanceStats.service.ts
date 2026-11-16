@@ -1,5 +1,6 @@
 import { supabase } from "@/src/supabase/supabaseClient";
 import { DailyAttendanceStatsRow } from "@/src/types/dailyAttendanceStats";
+import { getNepalMonthDateRangeYYYYMMDD } from "@/src/utils/userDashboard";
 
 type StatsRow = {
   id: number;
@@ -77,14 +78,13 @@ export const getOrganizationDailyAttendanceSummaryService = async (
   total_leave_days: number;
   days_with_data: number;
 }> => {
-  const startDate = `${year}-${month.toString().padStart(2, '0')}-01`;
-  const endDate = new Date(year, month, 0).toISOString().split('T')[0];
+  const { startDate, endDateExclusive } = getNepalMonthDateRangeYYYYMMDD(year, month - 1);
 
   const { data, error } = await getDailyStatsTable()
     .select("total_employees, present_count, absent_count, on_leave_count, incomplete_count, leave_days_total")
     .eq("organization_id", organizationId)
     .gte("stat_date", startDate)
-    .lte("stat_date", endDate);
+    .lt("stat_date", endDateExclusive);
 
   if (error) throw error;
 

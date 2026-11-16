@@ -1,17 +1,17 @@
-import { useAuthStore } from "@/src/store/useAuthStore";
-import axios from "axios";
+import { supabase } from "@/src/supabase/supabaseClient";
+import { create } from "axios";
 
-export const apiClient = axios.create({
+export const apiClient = create({
   baseURL: "https://dibcpzqlaypincnthhnm.supabase.co/functions/v1",
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-//to attach token on every request we use this-> extender of axios
 apiClient.interceptors.request.use(
-  (config) => {
-    const session = useAuthStore.getState().session;
+  async (config) => {
+    const { data: { session }, error } = await supabase.auth.getSession();
+    if (error) throw error;
     const token = session?.access_token;
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;

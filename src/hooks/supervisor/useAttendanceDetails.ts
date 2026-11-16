@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { supabase } from "@/src/supabase/supabaseClient";
 import { getMonthKey } from "@/src/utils/getDate";
@@ -16,7 +16,7 @@ export const useAttendance = (userId: string | undefined) => {
   const [expandedDayId, setExpandedDayId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const fetchAttendance = async () => {
+  const fetchAttendance = useCallback(async () => {
     if (!userId) return;
     setLoading(true);
     const { data, error } = await supabase
@@ -27,11 +27,12 @@ export const useAttendance = (userId: string | undefined) => {
       setAttendance(data);
     }
     setLoading(false);
-  };
+  }, [userId]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Start the loading indicator for this external data fetch.
     fetchAttendance();
-  }, [userId]);
+  }, [fetchAttendance]);
 
   const summary = useMemo(() => {
     return {

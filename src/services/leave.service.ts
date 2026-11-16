@@ -99,7 +99,7 @@ export async function fetchUserLeavesByYear(
 ) {
   const { data, error } = await supabase
     .from("leaves")
-    .select("leave_type_id,start_date,end_date,day_type,days_count,status")
+    .select("id,leave_type_id,start_date,end_date,day_type,days_count,status")
     .eq("user_id", userId)
     .gte("start_date", from)
     .lte("start_date", to);

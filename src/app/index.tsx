@@ -3,8 +3,7 @@ import { Redirect } from "expo-router";
 import { useAuthStore } from "@/src/store/useAuthStore";
 
 export default function Index() {
-  const { loading, role } = useAuthStore();
-  const { user } = useAuthStore();
+  const { loading, role, user, status } = useAuthStore();
   if (loading) {
     return <LoadingIndicator message="Loading.." />;
   }
@@ -12,6 +11,9 @@ export default function Index() {
     return <Redirect href="/(admin)/dashboard" />;
   }
   if (user && role === "user") {
+    if (status === "pending") {
+      return <Redirect href="/(auth)/changePassword" />;
+    }
     return <Redirect href="/(users)/dashboard" />;
   }
   if (!user) {
