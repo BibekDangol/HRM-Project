@@ -1,3 +1,4 @@
+import { colors } from "@/theme/colors";
 import React, { useEffect, useMemo, useRef } from "react";
 import { Pressable, Text, useWindowDimensions, View } from "react-native";
 import Animated, {
@@ -9,7 +10,7 @@ import Animated, {
   runOnUI,
 } from "react-native-reanimated";
 import Carousel from "react-native-reanimated-carousel";
-import tw from "twrnc";
+import tw from "@/theme/tw";
 
 import { TW } from "@/theme/twStyles";
 import {
@@ -28,7 +29,7 @@ type Props = {
 
 const CARD_RADIUS = 12;
 const MAX_VISIBLE = 5;
-const CARD_HEIGHT = 86;
+const CARD_HEIGHT = 120;
 const CARD_GAP = 12;
 
 function isActiveToday(item: CalendarItem, todayKey: string) {
@@ -68,7 +69,7 @@ function PaginationDot({
       backgroundColor: interpolateColor(
         distance,
         [0, 1],
-        ["#1B4A5A", "#DCE3EA"]
+        [colors.primary, colors.border]
       ),
     };
   });
@@ -91,8 +92,8 @@ function CardDateBlock({
     <View
       style={{
         alignItems: "center",
-        width: 44,
-        backgroundColor: "#F8FAFC",
+        width: 52,
+        backgroundColor: colors.canvas,
         borderRadius: 8,
         paddingVertical: 6,
         paddingHorizontal: 4,
@@ -100,8 +101,8 @@ function CardDateBlock({
     >
       <Text
         style={{
-          color: "#94A3B8",
-          fontSize: 9,
+          color: colors.subtle,
+          fontSize: 14,
           fontWeight: "600",
           letterSpacing: 0.5,
           textTransform: "uppercase",
@@ -112,7 +113,7 @@ function CardDateBlock({
 
       <Text
         style={{
-          color: "#0F172A",
+          color: colors.ink,
           fontSize: 20,
           fontWeight: "700",
           lineHeight: 24,
@@ -121,7 +122,7 @@ function CardDateBlock({
         {day}
       </Text>
 
-      <Text style={{ color: "#94A3B8", fontSize: 9, fontWeight: "500" }}>
+      <Text style={{ color: colors.subtle, fontSize: 14, fontWeight: "500" }}>
         {dayName}
       </Text>
     </View>
@@ -129,9 +130,9 @@ function CardDateBlock({
 }
 
 function TypeBadge({ isHoliday }: { isHoliday: boolean }) {
-  const badgeBg = isHoliday ? "#FEE2E2" : "#EEF2FF";
-  const badgeText = isHoliday ? "#B91C1C" : "#4338CA";
-  const badgeDot = isHoliday ? "#EF4444" : "#6366F1";
+  const badgeBg = isHoliday ? colors.dangerSoft : colors.primarySoft;
+  const badgeText = isHoliday ? colors.dangerText : colors.primary;
+  const badgeDot = isHoliday ? colors.danger : colors.primary;
 
   return (
     <View
@@ -143,7 +144,7 @@ function TypeBadge({ isHoliday }: { isHoliday: boolean }) {
         paddingHorizontal: 9,
         paddingVertical: 4,
         borderRadius: 999,
-        alignSelf: "center",
+        alignSelf: "flex-start",
       }}
     >
       <View
@@ -155,7 +156,7 @@ function TypeBadge({ isHoliday }: { isHoliday: boolean }) {
         }}
       />
 
-      <Text style={{ fontSize: 11, fontWeight: "600", color: badgeText }}>
+      <Text style={{ fontSize: 13, fontWeight: "600", color: badgeText }}>
         {isHoliday ? "Holiday" : "Event"}
       </Text>
     </View>
@@ -169,20 +170,20 @@ function SkeletonCard({ cardWidth }: { cardWidth: number }) {
         width: cardWidth,
         height: CARD_HEIGHT,
         borderRadius: CARD_RADIUS,
-        backgroundColor: "#F8FAFC",
+        backgroundColor: colors.canvas,
         flexDirection: "row",
         alignItems: "center",
         paddingHorizontal: 12,
         gap: 12,
         borderWidth: 1,
-        borderColor: "#E2E8F0",
+        borderColor: colors.border,
       }}
     >
       <View
         style={{
           alignItems: "center",
-          width: 44,
-          backgroundColor: "#F1F5F9",
+          width: 52,
+          backgroundColor: colors.surfaceMuted,
           borderRadius: 8,
           paddingVertical: 6,
           paddingHorizontal: 4,
@@ -194,7 +195,7 @@ function SkeletonCard({ cardWidth }: { cardWidth: number }) {
             width: 22,
             height: 8,
             borderRadius: 4,
-            backgroundColor: "#E2E8F0",
+            backgroundColor: colors.border,
           }}
         />
         <View
@@ -202,7 +203,7 @@ function SkeletonCard({ cardWidth }: { cardWidth: number }) {
             width: 28,
             height: 18,
             borderRadius: 4,
-            backgroundColor: "#CBD5E1",
+            backgroundColor: colors.borderStrong,
           }}
         />
         <View
@@ -210,7 +211,7 @@ function SkeletonCard({ cardWidth }: { cardWidth: number }) {
             width: 18,
             height: 8,
             borderRadius: 4,
-            backgroundColor: "#E2E8F0",
+            backgroundColor: colors.border,
           }}
         />
       </View>
@@ -219,7 +220,7 @@ function SkeletonCard({ cardWidth }: { cardWidth: number }) {
         style={{
           width: 1,
           alignSelf: "stretch",
-          backgroundColor: "#E2E8F0",
+          backgroundColor: colors.border,
           marginVertical: 10,
         }}
       />
@@ -230,7 +231,7 @@ function SkeletonCard({ cardWidth }: { cardWidth: number }) {
             width: "65%",
             height: 12,
             borderRadius: 4,
-            backgroundColor: "#E2E8F0",
+            backgroundColor: colors.border,
           }}
         />
         <View
@@ -238,7 +239,7 @@ function SkeletonCard({ cardWidth }: { cardWidth: number }) {
             width: "40%",
             height: 9,
             borderRadius: 4,
-            backgroundColor: "#F1F5F9",
+            backgroundColor: colors.surfaceMuted,
           }}
         />
       </View>
@@ -248,7 +249,7 @@ function SkeletonCard({ cardWidth }: { cardWidth: number }) {
           width: 60,
           height: 24,
           borderRadius: 999,
-          backgroundColor: "#E2E8F0",
+          backgroundColor: colors.border,
         }}
       />
     </View>
@@ -282,14 +283,14 @@ function AnimatedCard({
 
     if (isHighlighted) {
       return {
-        backgroundColor: interpolateColor(dist, [0, 0.6], ["#F0F9FF", "#FFFFFF"]),
-        borderColor: interpolateColor(dist, [0, 0.6], ["#BAE6FD", "#E2E8F0"]),
+        backgroundColor: interpolateColor(dist, [0, 0.6], [colors.primarySoft, colors.surface]),
+        borderColor: interpolateColor(dist, [0, 0.6], [colors.primaryBorder, colors.border]),
       };
     }
 
     return {
-      backgroundColor: "#FFFFFF",
-      borderColor: "#E2E8F0",
+      backgroundColor: colors.surface,
+      borderColor: colors.border,
     };
   });
 
@@ -298,12 +299,12 @@ function AnimatedCard({
 
     if (isHighlighted) {
       return {
-        backgroundColor: interpolateColor(dist, [0, 0.6], ["#BAE6FD", "#E2E8F0"]),
+        backgroundColor: interpolateColor(dist, [0, 0.6], [colors.primaryBorder, colors.border]),
       };
     }
 
     return {
-      backgroundColor: "#E2E8F0",
+      backgroundColor: colors.border,
     };
   });
 
@@ -343,18 +344,17 @@ function AnimatedCard({
 
         <View style={{ flex: 1, gap: 4 }}>
           <Text
-            style={{ color: "#0F172A", fontSize: 14, fontWeight: "600" }}
+            style={{ color: colors.ink, fontSize: 14, fontWeight: "600" }}
             numberOfLines={1}
           >
             {item.title}
           </Text>
 
-          <Text style={{ color: "#94A3B8", fontSize: 12 }} numberOfLines={1}>
+          <Text style={{ color: colors.subtle, fontSize: 14 }} numberOfLines={1}>
             {formatWeekday(item.start_date)}
           </Text>
+          <TypeBadge isHoliday={isHoliday} />
         </View>
-
-        <TypeBadge isHoliday={isHoliday} />
       </Animated.View>
     </View>
   );
@@ -461,14 +461,18 @@ export const HolidaysEventsSection = ({
         </Text>
 
         <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="View all holidays and events"
           onPress={onViewAll}
           style={({ pressed }) => ({
             opacity: pressed ? 0.6 : 1,
-            paddingVertical: 4,
+            paddingVertical: 12,
+            minHeight: 48,
+            justifyContent: "center",
             paddingHorizontal: 10,
           })}
         >
-          <Text style={{ color: "#475569", fontSize: 12, fontWeight: "600" }}>
+          <Text style={{ color: colors.muted, fontSize: 14, fontWeight: "600" }}>
             View All
           </Text>
         </Pressable>
@@ -483,15 +487,15 @@ export const HolidaysEventsSection = ({
             paddingVertical: 32,
             borderRadius: CARD_RADIUS,
             borderWidth: 1,
-            borderColor: "#E2E8F0",
-            backgroundColor: "#FFFFFF",
+            borderColor: colors.border,
+            backgroundColor: colors.surface,
             gap: 6,
           }}
         >
-          <Text style={{ color: "#CBD5E1", fontWeight: "600", fontSize: 14 }}>
+          <Text style={{ color: colors.ink, fontWeight: "600", fontSize: 14 }}>
             No upcoming events
           </Text>
-          <Text style={{ color: "#E2E8F0", fontSize: 12 }}>
+          <Text style={{ color: colors.muted, fontSize: 14 }}>
             No holidays or events scheduled
           </Text>
         </View>

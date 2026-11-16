@@ -4,7 +4,7 @@ import type { StyleProp, ViewStyle } from "react-native";
 
 import AppButton from "@/src/components/ui/AppButton";
 import { TW } from "@/theme/twStyles";
-import tw from "twrnc";
+import tw from "@/theme/tw";
 
 type Props = {
   message?: string;

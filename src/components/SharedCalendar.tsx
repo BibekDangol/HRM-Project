@@ -1,3 +1,4 @@
+import { colors } from "@/theme/colors";
 import React, { useEffect, useMemo, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 
@@ -74,7 +75,7 @@ function buildRangeMarkedDates(
 
     marks[dateString] = {
       color,
-      textColor: "#FFFFFF",
+      textColor: colors.surface,
       startingDay: dateString === startStr,
       endingDay: dateString === endStr,
     };
@@ -246,10 +247,10 @@ export function SharedCalendar({
           alignSelf: "center",
           width: "92%",
           marginVertical: 16,
-          backgroundColor: "#FFFFFF", 
+          backgroundColor: colors.surface,
           borderRadius: 20,
           borderWidth: 1,
-          borderColor: "#E5E7EB", 
+          borderColor: colors.border,
           overflow: "hidden",
         }}
       >
@@ -265,7 +266,7 @@ export function SharedCalendar({
           <Text
             style={{
               fontSize: 11,
-              color: "rgba(255,255,255,0.7)",
+              color: colors.onPrimarySoft,
               fontWeight: "600",
               letterSpacing: 1,
               textTransform: "uppercase",
@@ -279,7 +280,7 @@ export function SharedCalendar({
             style={{
               fontSize: 30,
               fontWeight: "400",
-              color: "#FFFFFF",
+              color: colors.surface,
               letterSpacing: -0.3,
             }}
           >
@@ -289,7 +290,7 @@ export function SharedCalendar({
           {orderedRange && (
             <Text
               style={{
-                color: "rgba(255,255,255,0.7)",
+                color: colors.onPrimarySoft,
                 fontSize: 13,
                 marginTop: 8,
                 fontWeight: "600",
@@ -300,12 +301,14 @@ export function SharedCalendar({
           )}
         </View>
 
-        <View style={{ height: 1, backgroundColor: "#EEF2F4" }} />
+        <View style={{ height: 1, backgroundColor: colors.border }} />
 
         {/* Month / year control row */}
         <View
           style={{
             flexDirection: "row",
+            flexWrap: "wrap",
+            gap: 8,
             justifyContent: "space-between",
             alignItems: "center",
             paddingHorizontal: 24,
@@ -314,12 +317,15 @@ export function SharedCalendar({
           }}
         >
           <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Choose calendar month and year"
             onPress={() => {
               setPickerYear(year);
               setPickerMonth(month - 1);
               setPickerVisible(true);
             }}
             style={{
+              minHeight: 48,
               flexDirection: "row",
               alignItems: "center",
               gap: 6,
@@ -346,14 +352,16 @@ export function SharedCalendar({
 
           <View style={{ flexDirection: "row", gap: 14 }}>
             <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Previous month"
               onPress={goToPrevMonth}
               style={({ pressed }) => ({
-                width: 32,
-                height: 32,
+                width: 48,
+                height: 48,
                 borderRadius: 999,
                 alignItems: "center",
                 justifyContent: "center",
-                backgroundColor: pressed ? "#EEF2F4" : "transparent",
+                backgroundColor: pressed ? colors.border : "transparent",
               })}
             >
               <Text
@@ -368,14 +376,16 @@ export function SharedCalendar({
             </Pressable>
 
             <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Next month"
               onPress={goToNextMonth}
               style={({ pressed }) => ({
-                width: 32,
-                height: 32,
+                width: 48,
+                height: 48,
                 borderRadius: 999,
                 alignItems: "center",
                 justifyContent: "center",
-                backgroundColor: pressed ? "#EEF2F4" : "transparent",
+                backgroundColor: pressed ? colors.border : "transparent",
               })}
             >
               <Text
@@ -406,7 +416,7 @@ export function SharedCalendar({
               paddingHorizontal: 16,
               paddingVertical: 7,
               borderRadius: 999,
-              backgroundColor: pressed ? "#D9E2E7" : "#EEF2F4",
+              backgroundColor: pressed ? colors.border : colors.border,
             })}
           >
             <Text
@@ -427,14 +437,14 @@ export function SharedCalendar({
                 paddingHorizontal: 16,
                 paddingVertical: 7,
                 borderRadius: 999,
-                backgroundColor: pressed ? "#F1D7D7" : "#FDECEC",
+                backgroundColor: pressed ? colors.dangerBorder : colors.dangerSoft,
               })}
             >
               <Text
                 style={{
                   fontSize: 13,
                   fontWeight: "700",
-                  color: "#B42318",
+                  color: colors.dangerText,
                 }}
               >
                 Clear
@@ -464,7 +474,7 @@ export function SharedCalendar({
                 style={{
                   fontSize: 12,
                   fontWeight: "600",
-                  color: "#64748B",
+                  color: colors.muted,
                 }}
               >
                 {item}
@@ -496,21 +506,21 @@ export function SharedCalendar({
             theme={{
               backgroundColor: TW.bgPrimary,
               calendarBackground: TW.bgPrimary,
-              dayTextColor: "#0F172A",
+              dayTextColor: colors.ink,
               todayTextColor: TW.bgSecondary,
-              textDisabledColor: "#CBD5E1",
+              textDisabledColor: colors.borderStrong,
               textDayFontSize: 14,
               monthTextColor: TW.bgSecondary,
             }}
             style={{
-              backgroundColor:  "#FFFFFF",
+              backgroundColor:  colors.surface,
             }}
           />
         </View>
 
         {showLegend && (
           <>
-            <View style={{ height: 1, backgroundColor: "#EEF2F4" }} />
+            <View style={{ height: 1, backgroundColor: colors.border }} />
             <View
               style={{
                 flexDirection: "row",
@@ -530,7 +540,7 @@ export function SharedCalendar({
                     marginRight: 6,
                   }}
                 />
-                <Text style={{ fontSize: 12, color: "#475569", fontWeight: "500" }}>
+                <Text style={{ fontSize: 12, color: colors.muted, fontWeight: "500" }}>
                   Range
                 </Text>
               </View>
@@ -545,7 +555,7 @@ export function SharedCalendar({
                     marginRight: 6,
                   }}
                 />
-                <Text style={{ fontSize: 12, color: "#475569", fontWeight: "500" }}>
+                <Text style={{ fontSize: 12, color: colors.muted, fontWeight: "500" }}>
                   Selected
                 </Text>
               </View>

@@ -1,3 +1,4 @@
+import { colors } from "@/theme/colors";
 import { buildAdminMarks, useCalendarStore } from "@/src/utils/adminCalendar";
 
 import { formatDateKey } from "@/src/utils/getDate";
@@ -26,7 +27,7 @@ export default function useAdminCalendarMarks(
         base[key] = {
           ...(base[key] ?? {}),
           color: store.colors.publicHoliday,
-          textColor: "white",
+          textColor: colors.surface,
           startingDay: key === rangeStart,
           endingDay: key === end,
         };

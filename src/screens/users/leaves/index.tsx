@@ -1,5 +1,6 @@
+import { colors } from "@/theme/colors";
 import { useCallback, useMemo, useRef, useState } from "react";
-import { FlatList, Pressable, RefreshControl, View } from "react-native";
+import { FlatList, RefreshControl, View } from "react-native";
 import { FilterTab, Header } from "./components/Header";
 import EmptyState from "@/src/components/states/EmptyState";
 import LoadingState from "@/src/components/states/LoadingState";
@@ -7,14 +8,13 @@ import { Pagination } from "@/src/components/lists/Pagination";
 import { useLeaves } from "@/src/hooks/users/useLeaves";
 import { usePagination } from "@/src/hooks/usePagination";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { CalendarClock, Plus } from "lucide-react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import tw from "twrnc";
+import { CalendarClock, CalendarDays, Plus } from "lucide-react-native";
+import AppButton from "@/src/components/ui/AppButton";
+import tw from "@/theme/tw";
 import { LeaveCard } from "./components/LeaveCard";
 
 export default function LeavesScreen() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const params = useLocalSearchParams<{ tab?: string | string[] }>();
   const flatListRef = useRef<FlatList>(null);
 
@@ -78,7 +78,7 @@ export default function LeavesScreen() {
   }
 
   return (
-    <View style={tw`flex-1 bg-white`}>
+    <View style={tw`flex-1 bg-canvas`}>
       <FlatList
         ref={flatListRef}
         data={pagedData}
@@ -86,18 +86,26 @@ export default function LeavesScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
           paddingHorizontal: 16,
-          paddingBottom: 80,
+          paddingBottom: 24,
         }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
         ListHeaderComponent={
-          <Header
-            leaves={leaves}
-            leaveTypes={leaveTypes}
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-          />
+          <View>
+            <AppButton
+              title="View calendar"
+              variant="ghost"
+              icon={<CalendarDays size={18} color={colors.primary} />}
+              onPress={() => router.push("/(users)/leaves/calendar")}
+              style={{ alignSelf: "flex-end", marginTop: 8 }}
+            />
+            <Header
+              leaves={leaves}
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+            />
+          </View>
         }
         renderItem={({ item }) => (
           <View style={tw`mb-2`}>
@@ -115,7 +123,7 @@ export default function LeavesScreen() {
               <View
                 style={tw`h-14 w-14 rounded-full bg-slate-100 items-center justify-center`}
               >
-                <CalendarClock size={26} color="#94A3B8" />
+                <CalendarClock size={26} color={colors.subtle} />
               </View>
             }
             title="No leaves found"
@@ -124,8 +132,8 @@ export default function LeavesScreen() {
                 ? "You haven't requested any leaves yet."
                 : `You have no ${activeTab} leave requests.`
             }
-            actionLabel="Apply Leave"
-            onAction={() => router.push("/(users)/leaves/calendar")}
+            actionLabel="Request leave"
+            onAction={() => router.push("/(users)/leaves/calendar/applyLeave")}
             style={tw`py-12`}
           />
         }
@@ -144,22 +152,14 @@ export default function LeavesScreen() {
         }
       />
 
-      <Pressable
-        onPress={() => router.push("/(users)/leaves/calendar")}
-        style={[
-          tw`absolute right-5 bg-[#1B4A5A] w-13 h-13 rounded-full items-center justify-center`,
-          {
-            bottom: insets.bottom + 72,
-            shadowColor: "#1B4A5A",
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.3,
-            shadowRadius: 8,
-            elevation: 8,
-          },
-        ]}
-      >
-        <Plus color="#fff" size={24} />
-      </Pressable>
+      <View style={tw`px-4 py-3 border-t border-border bg-surface`}>
+        <AppButton
+          title="Request leave"
+          fullWidth
+          icon={<Plus color={colors.surface} size={20} />}
+          onPress={() => router.push("/(users)/leaves/calendar/applyLeave")}
+        />
+      </View>
     </View>
   );
 }

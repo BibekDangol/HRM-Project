@@ -1,6 +1,6 @@
 import { Circle } from "lucide-react-native";
 import { Text, View } from "react-native";
-import tw from "twrnc";
+import tw from "@/theme/tw";
 
 export type CalendarLegendItem = {
   key: string;

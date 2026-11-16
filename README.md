@@ -48,3 +48,22 @@ Join our community of developers creating universal apps.
 
 - [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
 - [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+
+## App colors
+
+Edit the `--color-*` variables in [`global.css`](./global.css) to change the
+app palette. Blue is used for actions, charcoal for text, white for cards,
+and soft gray for screen backgrounds. Status colors have separate tokens.
+
+React Native does not consume CSS variables directly. `npm run theme` generates
+`theme/colors.ts` from this palette; Metro also runs the generator when it starts,
+including with `npx expo start`. While the app is running, run `npm run theme`
+after editing `global.css` to refresh the generated tokens. Do not edit the
+generated file.
+
+For new styles, import `colors` from `@/theme/colors` for native color values,
+or `tw` from `@/theme/tw` for shared utilities such as `bg-primary`, `bg-canvas`,
+`bg-surface`, `text-ink`, and `border-border`. The shared Tailwind instance also
+maps existing neutral, blue, and status utilities to the CSS palette.
+
+Run `npm run theme:check` to verify that the generated palette is current.

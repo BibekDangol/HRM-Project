@@ -22,7 +22,7 @@ import { TW } from "@/theme/twStyles";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
 import Toast from "react-native-toast-message";
-import tw from "twrnc";
+import tw from "@/theme/tw";
 import { z } from "zod";
 
 type FormData = z.infer<typeof loginSchema>;

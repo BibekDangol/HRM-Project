@@ -1,3 +1,4 @@
+import { colors } from "@/theme/colors";
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { ArrowLeft, Search, X } from "lucide-react-native";
 import {
@@ -6,7 +7,7 @@ import {
   TextInput,
   View,
 } from "react-native";
-import tw from "twrnc";
+import tw from "@/theme/tw";
 
 type HeaderWithSearchProps = {
   search: string;
@@ -71,24 +72,24 @@ export default function HeaderWithSearch({
           hitSlop={10}
           accessibilityLabel="Go back"
         >
-          <ArrowLeft size={22} color="#333" />
+          <ArrowLeft size={22} color={colors.ink} />
         </Pressable>
       )}
 
       <View
         style={[
           tw`flex-1 flex-row items-center rounded-2xl px-3 h-11`,
-          { backgroundColor: "#F5F7F8", borderWidth: 1, borderColor: "#D9E2E8" },
+          { backgroundColor: colors.canvas, borderWidth: 1, borderColor: colors.border },
         ]}
       >
-        <Search size={18} color="#7AA5B2" />
+        <Search size={18} color={colors.primaryMuted} />
 
         <TextInput
           style={tw`flex-1 ml-2 text-base text-black`}
           placeholder={placeholder}
           value={text}
           onChangeText={handleChangeText}
-          placeholderTextColor="#7AA5B2"
+          placeholderTextColor={colors.primaryMuted}
           autoFocus={autoFocus}
           autoCapitalize="none"
           autoCorrect={false}
@@ -98,10 +99,10 @@ export default function HeaderWithSearch({
         />
 
         {loading ? (
-          <ActivityIndicator size="small" color="#7AA5B2" />
+          <ActivityIndicator size="small" color={colors.primaryMuted} />
         ) : text.length > 0 ? (
           <Pressable onPress={handleClear} hitSlop={10} accessibilityLabel="Clear search">
-            <X size={18} color="#7AA5B2" />
+            <X size={18} color={colors.primaryMuted} />
           </Pressable>
         ) : null}
       </View>

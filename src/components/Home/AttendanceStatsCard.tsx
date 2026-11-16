@@ -1,3 +1,4 @@
+import { colors } from "@/theme/colors";
 import { Text, View } from "react-native";
 
 import React from "react";
@@ -19,20 +20,20 @@ export function AttendanceStatsCard({ stats, loading }: Props) {
     {
       label: "Present",
       value: stats.present,
-      color: "#008080",
-      bg: "#E6F4F4",
+      color: colors.success,
+      bg: colors.surface,
     },
     {
       label: "Absent",
       value: stats.absent,
-      color: "#EF4444",
-      bg: "#FEE2E2",
+      color: colors.danger,
+      bg: colors.surface,
     },
     {
       label: "Leave Taken",
       value: stats.leaveTaken,
-      color: "#7C3AED",
-      bg: "#F3E8FF",
+      color: colors.primary,
+      bg: colors.surface,
     },
   ];
 
@@ -45,6 +46,8 @@ export function AttendanceStatsCard({ stats, loading }: Props) {
             flex: 1,
             backgroundColor: item.bg,
             borderRadius: 16,
+            borderWidth: 1,
+            borderColor: colors.border,
             padding: 12,
             alignItems: "center",
           }}
@@ -53,15 +56,18 @@ export function AttendanceStatsCard({ stats, loading }: Props) {
             style={{
               fontSize: 28,
               fontWeight: "800",
-              color: item.color,
+              color: colors.ink,
             }}
           >
             {loading ? "—" : item.value}
           </Text>
 
-          <Text style={{ fontSize: 12, color: "#6B7280", marginTop: 4 }}>
-            {item.label}
-          </Text>
+          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, marginTop: 4 }}>
+            <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: item.color }} />
+            <Text style={{ fontSize: 14, color: colors.muted, flexShrink: 1, textAlign: "center" }}>
+              {item.label}
+            </Text>
+          </View>
         </View>
       ))}
     </View>

@@ -1,3 +1,4 @@
+import { colors } from "@/theme/colors";
 import { TW } from "@/theme/twStyles";
 import { Text, View } from "react-native";
 
@@ -25,9 +26,9 @@ export default function InfoRow({
         alignItems: "center",
         paddingHorizontal: 16,
         paddingVertical: 13,
-        backgroundColor: "#ffffff",
+        backgroundColor: colors.surface,
         borderBottomWidth: isLast ? 0 : 0.5,
-        borderBottomColor: "#E5E7EB",
+        borderBottomColor: colors.border,
       }}
     >
       {/* Icon */}
@@ -49,9 +50,9 @@ export default function InfoRow({
       <View style={{ flex: 1 }}>
         <Text
           style={{
-            fontSize: 11,
+            fontSize: 13,
             fontWeight: "600",
-            color: "#8d8d8d",
+            color: colors.subtle,
             letterSpacing: 0.3,
             marginBottom: 2,
           }}
@@ -63,10 +64,10 @@ export default function InfoRow({
           style={{
             fontSize: 14,
             fontWeight: "500",
-            color: locked ? "#D3D3D3" : TW.bgSecondary,
+            color: locked ? colors.muted : colors.ink,
             letterSpacing: 0.1,
           }}
-          numberOfLines={1}
+          selectable
         >
           {value || "—"}
         </Text>

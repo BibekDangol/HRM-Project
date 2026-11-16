@@ -1,3 +1,4 @@
+import { colors } from "@/theme/colors";
 import {
   LabelValue,
   StatusConfigValue,
@@ -8,7 +9,7 @@ import { Pressable, ScrollView, Text, View } from "react-native";
 
 import { TW } from "@/theme/twStyles";
 import React from "react";
-import tw from "twrnc";
+import tw from "@/theme/tw";
 
 interface Props {
   leave: Leave;
@@ -35,7 +36,7 @@ const PendingLeaveView = ({
   );
 
   return (
-    <View style={tw`flex-1 bg-white`}>
+    <View style={tw`flex-1 bg-canvas`}>
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={tw`${showActions ? "pb-32" : "pb-10"}`}>
@@ -135,14 +136,14 @@ const PendingLeaveView = ({
                 <LabelValue
                   label="Used"
                   value={`${usedDays} days`}
-                  valueStyle={{ color: "#ef4444" }}
+                  valueStyle={{ color: colors.danger }}
                 />
               </View>
               <View style={tw`flex-1 border-b border-slate-100`}>
                 <LabelValue
                   label="Limit"
                   value={`${leave.leave_limit} days`}
-                  valueStyle={{ color: "#111827" }}
+                  valueStyle={{ color: colors.ink }}
                 />
               </View>
             </View>
@@ -153,7 +154,7 @@ const PendingLeaveView = ({
                   label="Remaining"
                   value={`${remainingDays} days`}
                   valueStyle={{
-                    color: remainingDays <= 0 ? "#ef4444" : "#16a34a",
+                    color: remainingDays <= 0 ? colors.danger : colors.success,
                   }}
                 />
               </View>
@@ -175,7 +176,7 @@ const PendingLeaveView = ({
               tw`flex-1 flex-row items-center justify-center py-4 rounded-2xl ${TW.bgAction}`,
               pressed && tw`opacity-70`,
             ]}>
-            <CheckCircle size={18} color="#ffffff" />
+            <CheckCircle size={18} color={colors.surface} />
             <Text style={tw`text-white font-bold ml-2`}>Approve</Text>
           </Pressable>
 
@@ -185,7 +186,7 @@ const PendingLeaveView = ({
               tw`flex-1 flex-row items-center justify-center py-4 rounded-2xl ${TW.bgRejected}`,
               pressed && tw`opacity-70`,
             ]}>
-            <XCircle size={18} color="#ffffff" />
+            <XCircle size={18} color={colors.surface} />
             <Text style={tw`text-white font-bold ml-2`}>Reject</Text>
           </Pressable>
 

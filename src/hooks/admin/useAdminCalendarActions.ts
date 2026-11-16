@@ -1,3 +1,4 @@
+import { colors } from "@/theme/colors";
 import { supabase } from "@/src/supabase/supabaseClient";
 import { calendarStore } from "@/src/utils/adminCalendar";
 import { formatDateKey } from "@/src/utils/getDate";
@@ -32,7 +33,7 @@ export default function useAdminCalendarActions() {
       if (type === "holiday") {
         calendarStore.setHoliday(key, label);
       } else {
-        calendarStore.addEvent(key, label, color ?? "#3B82F6");
+        calendarStore.addEvent(key, label, color ?? colors.primary);
       }
 
       cursor.setDate(cursor.getDate() + 1);
@@ -61,7 +62,7 @@ export default function useAdminCalendarActions() {
           end_date: end,
           title: label,
           type,
-          color: color ?? "#EF4444",
+          color: color ?? colors.danger,
         },
       ]);
     } catch (err) {

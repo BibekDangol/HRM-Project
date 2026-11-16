@@ -1,3 +1,4 @@
+import { colors } from "@/theme/colors";
 import {
   ActivityIndicator,
   Alert,
@@ -12,7 +13,7 @@ import {
 import React, { useState } from "react";
 
 import { COLOR_PRESETS } from "@/src/constants/adminCalendar";
-import tw from "twrnc";
+import tw from "@/theme/tw";
 
 type Step = "choose" | "holiday" | "event";
 
@@ -37,7 +38,7 @@ export function HolidayRangeModal({
 }: Props) {
   const [step, setStep] = useState<Step>("choose");
   const [label, setLabel] = useState("");
-  const [eventColor, setEventColor] = useState("#3B82F6");
+  const [eventColor, setEventColor] = useState(colors.primary);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const isSingleDay = startDate === endDate;
@@ -56,7 +57,7 @@ export function HolidayRangeModal({
   const reset = () => {
     setStep("choose");
     setLabel("");
-    setEventColor("#3B82F6");
+    setEventColor(colors.primary);
   };
 
   const handleClose = () => {
@@ -170,7 +171,7 @@ export function HolidayRangeModal({
                 disabled={isSubmitting}
                 style={tw`py-3 rounded-xl bg-red-500 items-center`}>
                 {isSubmitting ? (
-                  <ActivityIndicator color="#fff" />
+                  <ActivityIndicator color={colors.surface} />
                 ) : (
                   <Text style={tw`text-white font-semibold`}>Add Holiday</Text>
                 )}
@@ -218,7 +219,7 @@ export function HolidayRangeModal({
                   { backgroundColor: eventColor },
                 ]}>
                 {isSubmitting ? (
-                  <ActivityIndicator color="#fff" />
+                  <ActivityIndicator color={colors.surface} />
                 ) : (
                   <Text style={tw`text-white font-semibold`}>Add Event</Text>
                 )}

@@ -1,3 +1,4 @@
+import { colors } from "@/theme/colors";
 import { LogOut, UserCircle } from "lucide-react-native";
 import {
   Modal,
@@ -6,7 +7,7 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
-import tw from "twrnc";
+import tw from "@/theme/tw";
 
 type Props = {
   open: boolean;
@@ -38,11 +39,11 @@ export default function ProfileMenu({
           <TouchableWithoutFeedback>
             <View
               style={[
-                tw`absolute right-4 top-20 bg-white border border-[#E5E5E5] p-2 rounded-xl`,
+                tw`absolute right-4 top-20 bg-white border border-border p-2 rounded-xl`,
                 {
                   width: 150,
                   elevation: 10,
-                  shadowColor: "#000",
+                  shadowColor: colors.shadow,
                   shadowOffset: { width: 0, height: 4 },
                   shadowOpacity: 0.1,
                   shadowRadius: 10,
@@ -51,25 +52,25 @@ export default function ProfileMenu({
             >
               <Pressable
                 onPress={onProfile}
-                android_ripple={{ color: "#E5E7EB" }}
+                android_ripple={{ color: colors.border }}
                 style={({ pressed }) =>
                   tw`flex-row items-center px-3 py-2 ${pressed ? "opacity-75" : ""}`
                 }
               >
-                <UserCircle size={18} color="#0C0C0C" />
-                <Text style={tw`ml-2 font-bold text-[#0C0C0C]`}>Profile</Text>
+                <UserCircle size={18} color={colors.ink} />
+                <Text style={tw`ml-2 font-bold text-ink`}>Profile</Text>
               </Pressable>
 
-              <View style={tw`h-px bg-[#E5E5E5] my-1`} />
+              <View style={tw`h-px bg-border my-1`} />
               <Pressable
                 onPress={onLogout}
-                android_ripple={{ color: "#FEE2E2" }}
+                android_ripple={{ color: colors.dangerSoft }}
                 style={({ pressed }) =>
                   tw`flex-row items-center px-3 py-2 ${pressed ? "opacity-75" : ""}`
                 }
               >
-                <LogOut size={20} color="#FF4D4F" />
-                <Text style={tw`ml-2 font-bold text-[#FF4D4F]`}>Logout</Text>
+                <LogOut size={20} color={colors.danger} />
+                <Text style={tw`ml-2 font-bold text-danger`}>Logout</Text>
               </Pressable>
             </View>
           </TouchableWithoutFeedback>

@@ -1,7 +1,7 @@
 import { Pressable, Text, View } from "react-native";
 
 import { TW } from "@/theme/twStyles";
-import tw from "twrnc";
+import tw from "@/theme/tw";
 
 export type PaginationVariant = "brand" | "muted";
 
@@ -27,7 +27,7 @@ const VARIANTS: Record<
     border: "border-slate-200",
     text: "text-slate-700",
     activeText: "text-white",
-    activeBg: "bg-[#1B4A5A]",
+    activeBg: "bg-primary",
   },
 };
 

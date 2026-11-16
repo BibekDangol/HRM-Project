@@ -1,5 +1,5 @@
 import { Image, View } from "react-native";
-import tw from "twrnc";
+import tw from "@/theme/tw";
 
 const Logo = () => {
   return (

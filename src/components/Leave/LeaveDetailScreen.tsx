@@ -1,3 +1,4 @@
+import { colors } from "@/theme/colors";
 import EmptyState from "@/src/components/states/EmptyState";
 import { LeaveDetailCard } from "@/src/components/Leave/LeaveDetailCard";
 import { LeaveStatus } from "@/src/services/leave.service";
@@ -8,7 +9,7 @@ import { useLeaveDetail } from "@/src/hooks/useLeaveDetail";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { CalendarX } from "lucide-react-native";
 import { View } from "react-native";
-import tw from "twrnc";
+import tw from "@/theme/tw";
 
 export type LeaveDetailScreenProps = {
   role?: "admin" | "supervisor";
@@ -16,9 +17,9 @@ export type LeaveDetailScreenProps = {
 };
 
 const STATUS_CONFIG = {
-  pending: { bg: "#fef3c7", text: "#d97706", label: "PENDING" },
-  approved: { bg: "#dcfce7", text: "#16a34a", label: "APPROVED" },
-  rejected: { bg: "#fee2e2", text: "#ef4444", label: "REJECTED" },
+  pending: { bg: colors.accentSoft, text: colors.warning, label: "PENDING" },
+  approved: { bg: colors.successSoft, text: colors.success, label: "APPROVED" },
+  rejected: { bg: colors.dangerSoft, text: colors.danger, label: "REJECTED" },
 };
 
 export function LeaveDetailScreen({
@@ -77,9 +78,9 @@ export function LeaveDetailScreen({
 
   if (!leave) {
     return (
-      <View style={tw`flex-1 bg-white items-center justify-center p-6`}>
+      <View style={tw`flex-1 bg-canvas items-center justify-center p-6`}>
         <EmptyState
-          icon={<CalendarX size={36} color="#9CA3AF" />}
+          icon={<CalendarX size={36} color={colors.subtle} />}
           title="Leave Not Found"
           message="The requested leave application could not be found."
         />

@@ -18,7 +18,7 @@ import { FormData } from "@/src/types/changePassword";
 import { TW } from "@/theme/twStyles";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
-import tw from "twrnc";
+import tw from "@/theme/tw";
 
 const ChangePasswordScreen = () => {
   const router = useRouter();

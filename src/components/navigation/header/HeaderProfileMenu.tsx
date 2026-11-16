@@ -1,3 +1,4 @@
+import { colors } from "@/theme/colors";
 import { LogOut, UserCircle } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
 import {
@@ -142,12 +143,12 @@ const HeaderProfileMenu: React.FC<Props> = ({
                   style={{
                     width,
                     borderRadius: 14,
-                    backgroundColor: "#FFFFFF",
+                    backgroundColor: colors.surface,
                     borderWidth: 1,
-                    borderColor: "#E5E7EB",
+                    borderColor: colors.border,
                     paddingVertical: 4,
                     paddingHorizontal: 6,
-                    shadowColor: "#000",
+                    shadowColor: colors.shadow,
                     shadowOffset: { width: 0, height: 4 },
                     shadowOpacity: 0.08,
                     shadowRadius: 10,
@@ -160,7 +161,7 @@ const HeaderProfileMenu: React.FC<Props> = ({
                       onClose();
                       onProfilePress();
                     }}
-                    android_ripple={{ color: "#E5E7EB" }}
+                    android_ripple={{ color: colors.border }}
                     style={({ pressed }) => ({
                       flexDirection: "row",
                       alignItems: "center",
@@ -170,12 +171,12 @@ const HeaderProfileMenu: React.FC<Props> = ({
                       opacity: pressed ? 0.75 : 1,
                     })}
                   >
-                    <UserCircle size={18} color="#111827" />
+                    <UserCircle size={18} color={colors.ink} />
                     <Text
                       style={{
                         fontSize: 15,
                         fontWeight: "600",
-                        color: "#111827",
+                        color: colors.ink,
                       }}
                     >
                       Profile
@@ -186,7 +187,7 @@ const HeaderProfileMenu: React.FC<Props> = ({
                   <View
                     style={{
                       height: 1,
-                      backgroundColor: "#E5E7EB",
+                      backgroundColor: colors.border,
                       marginHorizontal: 10,
                     }}
                   />
@@ -197,7 +198,7 @@ const HeaderProfileMenu: React.FC<Props> = ({
                       onClose();
                       onLogoutPress();
                     }}
-                    android_ripple={{ color: "#FEE2E2" }}
+                    android_ripple={{ color: colors.dangerSoft }}
                     style={({ pressed }) => ({
                       flexDirection: "row",
                       alignItems: "center",
@@ -207,12 +208,12 @@ const HeaderProfileMenu: React.FC<Props> = ({
                       opacity: pressed ? 0.75 : 1,
                     })}
                   >
-                    <LogOut size={18} color="#EF4444" />
+                    <LogOut size={18} color={colors.danger} />
                     <Text
                       style={{
                         fontSize: 15,
                         fontWeight: "600",
-                        color: "#EF4444",
+                        color: colors.danger,
                       }}
                     >
                       Logout

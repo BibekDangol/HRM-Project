@@ -1,3 +1,4 @@
+import { colors } from "@/theme/colors";
 import { ProfileData } from "@/src/types/profile.types";
 import { FormInput, FormOutput } from "@/src/types/user";
 import { TW } from "@/theme/twStyles";
@@ -5,7 +6,7 @@ import { Lock } from "lucide-react-native";
 import React from "react";
 import { Control, Controller, FieldErrors } from "react-hook-form";
 import { Keyboard } from "react-native";
-import tw from "twrnc";
+import tw from "@/theme/tw";
 
 import FormActions from "@/src/components/form/FormActions";
 import FormField from "@/src/components/form/FormField";
@@ -66,7 +67,7 @@ export default function EditProfileModal({
             onChangeText={onChange}
             onBlur={onBlur}
             placeholder="Enter first name"
-            placeholderTextColor="#C9D0D8"
+            placeholderTextColor={colors.borderStrong}
             error={errors.firstName?.message}
             containerStyle={tw`mb-4`}
           />
@@ -85,7 +86,7 @@ export default function EditProfileModal({
             onChangeText={onChange}
             onBlur={onBlur}
             placeholder="Enter last name"
-            placeholderTextColor="#C9D0D8"
+            placeholderTextColor={colors.borderStrong}
             error={errors.lastName?.message}
             containerStyle={tw`mb-4`}
           />

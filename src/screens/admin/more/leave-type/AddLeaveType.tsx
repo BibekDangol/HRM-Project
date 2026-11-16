@@ -1,3 +1,4 @@
+import { colors } from "@/theme/colors";
 import { useCallback, useEffect, useState } from "react";
 import { Alert, FlatList, Pressable, Text, View } from "react-native";
 
@@ -9,7 +10,7 @@ import { useUsersStore } from "@/src/store/useUsersStore";
 import { TW } from "@/theme/twStyles";
 import { Pencil, Plus, Trash2 } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import tw from "twrnc";
+import tw from "@/theme/tw";
 import AddLeaveTypeModal from "./AddLeaveTypeModal";
 
 export default function LeaveTypeSettings() {
@@ -129,7 +130,7 @@ export default function LeaveTypeSettings() {
   return (
     <SafeAreaView
       edges={["bottom", "left", "right"]}
-      style={tw`flex-1 bg-white px-4`}
+      style={tw`flex-1 bg-canvas px-4`}
     >
       <View style={tw`pt-3`}></View>
       {/* Header */}
@@ -143,7 +144,7 @@ export default function LeaveTypeSettings() {
           }}
           style={tw`h-12 w-12 rounded-full ${TW.bgAction}/90 items-center justify-center`}
         >
-          <Plus size={22} color="white" strokeWidth={2.5} />
+          <Plus size={22} color={colors.surface} strokeWidth={2.5} />
         </Pressable>
       </View>
 

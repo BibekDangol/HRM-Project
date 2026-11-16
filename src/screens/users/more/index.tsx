@@ -1,3 +1,4 @@
+import { colors } from "@/theme/colors";
 import { BookUser, CalendarX, ChevronRight } from "lucide-react-native";
 import React, { useState } from "react";
 import {
@@ -10,7 +11,7 @@ import {
 
 import { TW } from "@/theme/twStyles";
 import { useRouter } from "expo-router";
-import tw from "twrnc";
+import tw from "@/theme/tw";
 
 export default function SupervisorSettings() {
   const router = useRouter();
@@ -27,14 +28,14 @@ export default function SupervisorSettings() {
   return (
     <ScrollView
       showsVerticalScrollIndicator={false}
-      style={tw`flex-1 bg-white`}
+      style={tw`flex-1 bg-canvas`}
       contentContainerStyle={tw`px-4 pt-4 pb-6`}
       refreshControl={
         <RefreshControl
           refreshing={isRefreshing}
           onRefresh={onRefresh}
-          colors={["#1B4A5A"]}
-          tintColor="#1B4A5A"
+          colors={[colors.primary]}
+          tintColor={colors.primary}
         />
       }
     >
@@ -54,9 +55,9 @@ export default function SupervisorSettings() {
           style={[
             tw`mb-4 flex-row items-center justify-between rounded-2xl px-4 py-4`,
             {
-              backgroundColor: "#FFFFFF",
+              backgroundColor: colors.surface,
               borderWidth: 1,
-              borderColor: "#E3EDF0",
+              borderColor: colors.primaryBorder,
             },
           ]}
         >
@@ -64,23 +65,23 @@ export default function SupervisorSettings() {
             <View
               style={[
                 tw`mr-4 h-12 w-12 items-center justify-center rounded-xl`,
-                { backgroundColor: "#EEF6F8" },
+                { backgroundColor: colors.primarySoft },
               ]}
             >
-              <BookUser size={22} color="#1B4A5A" />
+              <BookUser size={22} color={colors.primary} />
             </View>
 
             <View style={tw`flex-1`}>
-              <Text style={[tw`text-base font-semibold`, { color: "#1B4A5A" }]}>
+              <Text style={[tw`text-base font-semibold`, { color: colors.primary }]}>
                 Attendance
               </Text>
-              <Text style={[tw`mt-0.5 text-sm`, { color: "#7AA5B2" }]}>
+              <Text style={[tw`mt-0.5 text-sm`, { color: colors.primaryMuted }]}>
                 View attendance records
               </Text>
             </View>
           </View>
 
-          <ChevronRight size={20} color="#7AA5B2" />
+          <ChevronRight size={20} color={colors.primaryMuted} />
         </TouchableOpacity>
 
         {/* Leave */}
@@ -92,9 +93,9 @@ export default function SupervisorSettings() {
           style={[
             tw`flex-row items-center justify-between rounded-2xl px-4 py-4`,
             {
-              backgroundColor: "#FFFFFF",
+              backgroundColor: colors.surface,
               borderWidth: 1,
-              borderColor: "#E3EDF0",
+              borderColor: colors.primaryBorder,
             },
           ]}
         >
@@ -102,23 +103,23 @@ export default function SupervisorSettings() {
             <View
               style={[
                 tw`mr-4 h-12 w-12 items-center justify-center rounded-xl`,
-                { backgroundColor: "#EEF6F8" },
+                { backgroundColor: colors.primarySoft },
               ]}
             >
-              <CalendarX size={22} color="#1B4A5A" />
+              <CalendarX size={22} color={colors.primary} />
             </View>
 
             <View style={tw`flex-1`}>
-              <Text style={[tw`text-base font-semibold`, { color: "#1B4A5A" }]}>
+              <Text style={[tw`text-base font-semibold`, { color: colors.primary }]}>
                 Leave
               </Text>
-              <Text style={[tw`mt-0.5 text-sm`, { color: "#7AA5B2" }]}>
+              <Text style={[tw`mt-0.5 text-sm`, { color: colors.primaryMuted }]}>
                 Manage leave requests
               </Text>
             </View>
           </View>
 
-          <ChevronRight size={20} color="#7AA5B2" />
+          <ChevronRight size={20} color={colors.primaryMuted} />
         </TouchableOpacity>
       </View>
     </ScrollView>

@@ -1,3 +1,4 @@
+import { colors } from "@/theme/colors";
 import * as Clipboard from "expo-clipboard";
 import { Pressable, Text, useWindowDimensions, View } from "react-native";
 import { useEffect, useMemo, useState } from "react";
@@ -6,7 +7,7 @@ import AppButton from "@/src/components/ui/AppButton";
 import ModalShell from "@/src/components/ui/ModalShell";
 import { TW } from "@/theme/twStyles";
 import { Check, Copy, Eye, EyeClosed } from "lucide-react-native";
-import tw from "twrnc";
+import tw from "@/theme/tw";
 
 interface Props {
   tempPassword: string;
@@ -62,9 +63,9 @@ export default function TempPasswordModal({
         style={[
           tw`rounded-2xl mb-3 mt-2`,
           {
-            backgroundColor: "#FFFFFF",
+            backgroundColor: colors.surface,
             borderWidth: 1,
-            borderColor: copied ? "#86EFAC" : "#D9E3E8",
+            borderColor: copied ? colors.successBorder : colors.border,
             paddingHorizontal: isSmallPhone ? 14 : 16,
             paddingVertical: isSmallPhone ? 14 : 16,
           },
@@ -103,7 +104,7 @@ export default function TempPasswordModal({
                 {
                   width: sizes.actionSize,
                   height: sizes.actionSize,
-                  backgroundColor: "#DDECEF",
+                  backgroundColor: colors.primaryBorder,
                 },
                 pressed && tw`opacity-80`,
               ]}
@@ -122,15 +123,15 @@ export default function TempPasswordModal({
                 {
                   width: sizes.actionSize,
                   height: sizes.actionSize,
-                  backgroundColor: copied ? "#16A34A" : TW.bgSecondary,
+                  backgroundColor: copied ? colors.success : TW.bgSecondary,
                 },
                 pressed && tw`opacity-80`,
               ]}
             >
               {copied ? (
-                <Check size={20} color="#FFFFFF" />
+                <Check size={20} color={colors.surface} />
               ) : (
-                <Copy size={18} color="#FFFFFF" />
+                <Copy size={18} color={colors.surface} />
               )}
             </Pressable>
           </View>

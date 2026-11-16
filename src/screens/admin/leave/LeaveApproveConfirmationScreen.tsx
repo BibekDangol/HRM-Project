@@ -1,15 +1,16 @@
+import { colors } from "@/theme/colors";
 import { Pressable, Text, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 
 import { CheckCircle } from "lucide-react-native";
-import tw from "twrnc";
+import tw from "@/theme/tw";
 
 export default function LeaveApproveConfirmationScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams();
   return (
-    <View style={tw`flex-1 bg-white items-center justify-center px-6`}>
-      <CheckCircle size={72} color="#16a34a" />
+    <View style={tw`flex-1 bg-canvas items-center justify-center px-6`}>
+      <CheckCircle size={72} color={colors.success} />
 
       <Text style={tw`text-xl font-semibold mt-4`}>
         Leave request approved

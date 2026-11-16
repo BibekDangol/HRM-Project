@@ -14,7 +14,7 @@ import { useDimension } from "@/src/hooks/useDimension";
 import { supabase } from "@/src/supabase/supabaseClient";
 import { TW } from "@/theme/twStyles";
 import { useRouter } from "expo-router";
-import tw from "twrnc";
+import tw from "@/theme/tw";
 
 const ResetPassword = () => {
   const router = useRouter();

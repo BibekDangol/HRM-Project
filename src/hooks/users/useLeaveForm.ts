@@ -1,3 +1,4 @@
+import { colors } from "@/theme/colors";
 import {
   CreateLeaveInput,
   createLeaveRequest,
@@ -98,7 +99,7 @@ export function useLeaveForm(options: UseLeaveFormOptions = {}) {
       marks[localStartDate] = {
         customStyles: {
           container: { backgroundColor: TW.bgSecondary },
-          text: { color: "#ffffff", fontWeight: "700" },
+          text: { color: colors.surface, fontWeight: "700" },
         },
       };
     }
@@ -106,7 +107,7 @@ export function useLeaveForm(options: UseLeaveFormOptions = {}) {
       marks[localEndDate] = {
         customStyles: {
           container: { backgroundColor: TW.bgSecondary },
-          text: { color: "#ffffff", fontWeight: "700" },
+          text: { color: colors.surface, fontWeight: "700" },
         },
       };
     }
@@ -545,6 +546,7 @@ export function useLeaveForm(options: UseLeaveFormOptions = {}) {
     markedDates,
     todayStr,
     computedDaysCount,
+    selectedType,
     setCalYear,
     setCalMonth,
     handleLeaveTypeChange,

@@ -1,9 +1,10 @@
+import { colors } from "@/theme/colors";
 import React, { Dispatch, SetStateAction } from "react";
 
 import FormActions from "@/src/components/form/FormActions";
 import FormField from "@/src/components/form/FormField";
 import ModalShell from "@/src/components/ui/ModalShell";
-import tw from "twrnc";
+import tw from "@/theme/tw";
 
 type CommentMode = "checkin" | "checkout" | "";
 
@@ -57,7 +58,7 @@ const ReasonModel: React.FC<Props> = ({
         value={commentText}
         onChangeText={setCommentText}
         placeholder="Write your reason here..."
-        placeholderTextColor="#9CA3AF"
+        placeholderTextColor={colors.subtle}
         multiline
         editable={!isLocked}
         variant="filled"

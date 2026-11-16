@@ -1,8 +1,9 @@
+import { colors } from "@/theme/colors";
 import { Clock, Pencil } from "lucide-react-native";
 import { Pressable, Text, View } from "react-native";
 
 import { TW } from "@/theme/twStyles";
-import tw from "twrnc";
+import tw from "@/theme/tw";
 
 export function LeaveCard({ item, leaveTypeName, router, activeTab }: any) {
   const STATUS_CONFIG: {
@@ -10,21 +11,21 @@ export function LeaveCard({ item, leaveTypeName, router, activeTab }: any) {
   } = {
     approved: {
       label: "APPROVED",
-      color: "#008080",
-      bg: "#E6F4F4",
-      border: "#008080",
+      color: colors.successText,
+      bg: colors.successSoft,
+      border: colors.successBorder,
     },
     pending: {
       label: "PENDING",
-      color: "#D97706",
-      bg: "#FFFBEB",
-      border: "#D97706",
+      color: colors.warningText,
+      bg: colors.warningSoft,
+      border: colors.warning,
     },
     rejected: {
       label: "REJECTED",
-      color: "#DC2626",
-      bg: "#FEF2F2",
-      border: "#DC2626",
+      color: colors.dangerText,
+      bg: colors.dangerSoft,
+      border: colors.danger,
     },
   };
   const formatDate = (d: string) =>
@@ -39,11 +40,11 @@ export function LeaveCard({ item, leaveTypeName, router, activeTab }: any) {
   return (
     <View
       style={{
-        backgroundColor: "#FFFFFF",
+        backgroundColor: colors.surface,
         borderRadius: 16,
         padding: 16,
         marginBottom: 12,
-        shadowColor: "#000",
+        shadowColor: colors.shadow,
         shadowOpacity: 0.04,
         shadowRadius: 8,
         shadowOffset: { width: 0, height: 2 },
@@ -63,7 +64,7 @@ export function LeaveCard({ item, leaveTypeName, router, activeTab }: any) {
         <View style={{ flex: 1, marginRight: 12 }}>
           <Text
             style={{
-              color: "#0F172A",
+              color: colors.ink,
               fontSize: 16,
               fontWeight: "700",
             }}
@@ -73,7 +74,7 @@ export function LeaveCard({ item, leaveTypeName, router, activeTab }: any) {
           </Text>
           <Text
             style={{
-              color: "#64748B",
+              color: colors.muted,
               fontSize: 13,
               marginTop: 3,
             }}
@@ -104,7 +105,7 @@ export function LeaveCard({ item, leaveTypeName, router, activeTab }: any) {
               <Text
                 style={{
                   color: cfg.color,
-                  fontSize: 11,
+                  fontSize: 13,
                   fontWeight: "700",
                   letterSpacing: 0.5,
                 }}
@@ -119,6 +120,8 @@ export function LeaveCard({ item, leaveTypeName, router, activeTab }: any) {
           >
             {canEdit && (
               <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Edit pending leave request"
                 onPress={() =>
                   router.push({
                     pathname: "/(users)/leaves/editLeave",
@@ -127,7 +130,7 @@ export function LeaveCard({ item, leaveTypeName, router, activeTab }: any) {
                 }
                 hitSlop={12}
                 style={({ pressed }) => [
-                  tw`w-10 h-10 rounded-full items-center justify-center ${TW.bgAction}/90`,
+                  tw`w-12 h-12 rounded-full items-center justify-center ${TW.bgAction}/90`,
                   pressed && tw`opacity-70`,
                 ]}
               >
@@ -142,7 +145,7 @@ export function LeaveCard({ item, leaveTypeName, router, activeTab }: any) {
       <View
         style={{
           height: 1,
-          backgroundColor: "#F1F5F9",
+          backgroundColor: colors.surfaceMuted,
           marginVertical: 12,
         }}
       />
@@ -155,9 +158,9 @@ export function LeaveCard({ item, leaveTypeName, router, activeTab }: any) {
           gap: 6,
         }}
       >
-        <Clock size={13} color="#94A3B8" strokeWidth={1.8} />
+        <Clock size={13} color={colors.subtle} strokeWidth={1.8} />
 
-        <Text style={{ color: "#94A3B8", fontSize: 12 }}>
+        <Text style={{ color: colors.subtle, fontSize: 12 }}>
           Applied on:{" "}
           {item.created_at ? formatDate(item.created_at.split("T")[0]) : "—"}
         </Text>

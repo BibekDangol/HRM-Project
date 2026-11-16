@@ -1,3 +1,4 @@
+import { colors } from "@/theme/colors";
 import type { BottomTabBarProps } from "expo-router/build/react-navigation/bottom-tabs";
 
 import { adminTabs } from "@/src/config/adminTabs";
@@ -18,8 +19,8 @@ export default function AdminTabBar({
       tabs={adminTabs}
       mode="pill"
       routeGroup="(admin)"
-      activeColor="#1B4A5A"
-      inactiveColor="#8A94A6"
+      activeColor={colors.primary}
+      inactiveColor={colors.subtle}
       closeAllOverlays={closeAllOverlays}
     />
   );

@@ -1,3 +1,4 @@
+import { colors } from "@/theme/colors";
 import { LeaveTypeRow, LeaveTypeWithStats } from "@/src/types/userLeave";
 import { TW } from "@/theme/twStyles";
 import { ChevronDown, X } from "lucide-react-native";
@@ -10,7 +11,7 @@ import {
   View,
   type LayoutRectangle,
 } from "react-native";
-import tw from "twrnc";
+import tw from "@/theme/tw";
 
 export function LeaveTypeDropdown({
   value,
@@ -65,26 +66,31 @@ export function LeaveTypeDropdown({
   const remaining = selectedStats?.remaining ?? null;
   const pillBg =
     remaining == null
-      ? "#E2E8F0"
+      ? colors.border
       : remaining === 0
-        ? "#FEE2E2"
+        ? colors.dangerSoft
         : remaining <= 2
-          ? "#FEF3C7"
-          : "#DCFCE7";
+          ? colors.accentSoft
+          : colors.successSoft;
   const pillText =
     remaining == null
-      ? "#94A3B8"
+      ? colors.subtle
       : remaining === 0
-        ? "#EF4444"
+        ? colors.danger
         : remaining <= 2
-          ? "#D97706"
-          : "#16A34A";
+          ? colors.warningText
+          : colors.successText;
 
   return (
     <View>
       {/* ── Trigger — styled like a TextInput field ── */}
       <View ref={triggerRef} collapsable={false}>
         <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`Leave type: ${currentLabel || "Not selected"}`}
+          aria-expanded={open}
+          accessibilityState={{ expanded: open, disabled: loading }}
+          disabled={loading}
           onPress={handleOpen}
           style={({ pressed }) => ({
             flexDirection: "row",
@@ -94,8 +100,8 @@ export function LeaveTypeDropdown({
             paddingVertical: 10,
             borderRadius: 12,
             borderWidth: 1.5,
-            borderColor: open ? TW.bgSecondary : "#E2E8F0",
-            backgroundColor: open ? "#F8FAFC" : "#ffffff",
+            borderColor: open ? TW.bgSecondary : colors.border,
+            backgroundColor: open ? colors.canvas : colors.surface,
             opacity: pressed || loading ? 0.8 : 1,
             minHeight: 48,
           })}
@@ -106,9 +112,9 @@ export function LeaveTypeDropdown({
               <>
                 {/* <Text
                   style={{
-                    fontSize: 11,
+                    fontSize: 13,
                     fontWeight: "600",
-                    color: open ? TW.bgSecondary : "#94A3B8",
+                    color: open ? TW.bgSecondary : colors.subtle,
                     letterSpacing: 0.3,
                     marginBottom: 3,
                   }}
@@ -124,7 +130,7 @@ export function LeaveTypeDropdown({
                 style={{
                   fontSize: 15,
                   fontWeight: "400",
-                  color: "#94A3B8",
+                  color: colors.subtle,
                 }}
               >
                 {loading ? "Loading..." : "Select leave type"}
@@ -144,7 +150,7 @@ export function LeaveTypeDropdown({
                 }}
               >
                 <Text
-                  style={{ fontSize: 11, fontWeight: "700", color: pillText }}
+                  style={{ fontSize: 13, fontWeight: "700", color: pillText }}
                 >
                   {remaining} left
                 </Text>
@@ -153,25 +159,27 @@ export function LeaveTypeDropdown({
 
             {value != null && !loading && (
               <Pressable
-                onPress={() => handleSelect(null)}
+                accessibilityRole="button"
+                accessibilityLabel="Clear leave type"
+                onPress={(event) => { event.stopPropagation(); handleSelect(null); }}
                 hitSlop={10}
                 style={({ pressed }) => ({
-                  width: 22,
-                  height: 22,
-                  borderRadius: 11,
-                  backgroundColor: "#F1F5F9",
+                  width: 48,
+                  height: 48,
+                  borderRadius: 24,
+                  backgroundColor: colors.surfaceMuted,
                   alignItems: "center",
                   justifyContent: "center",
                   opacity: pressed ? 0.6 : 1,
                 })}
               >
-                <X size={11} color="#64748B" strokeWidth={2.5} />
+                <X size={18} color={colors.muted} strokeWidth={2.5} />
               </Pressable>
             )}
 
             <ChevronDown
               size={17}
-              color={open ? TW.bgSecondary : "#94A3B8"}
+              color={open ? TW.bgSecondary : colors.subtle}
               strokeWidth={2.5}
               style={{ transform: [{ rotate: open ? "180deg" : "0deg" }] }}
             />
@@ -196,12 +204,12 @@ export function LeaveTypeDropdown({
                 top: triggerLayout.y + triggerLayout.height + 4,
                 left: triggerLayout.x,
                 width: triggerLayout.width,
-                backgroundColor: "#ffffff",
+                backgroundColor: colors.surface,
                 borderRadius: 14,
                 borderWidth: 1.5,
-                borderColor: "#E2E8F0",
+                borderColor: colors.border,
                 maxHeight: 320,
-                shadowColor: "#1B4A5A",
+                shadowColor: colors.primary,
                 shadowOffset: { width: 0, height: 6 },
                 shadowOpacity: 0.08,
                 shadowRadius: 20,
@@ -217,7 +225,7 @@ export function LeaveTypeDropdown({
                 >
                   {leaveTypes.length === 0 ? (
                     <View style={{ padding: 20, alignItems: "center" }}>
-                      <Text style={{ fontSize: 13, color: "#94A3B8" }}>
+                      <Text style={{ fontSize: 13, color: colors.subtle }}>
                         No leave types available.
                       </Text>
                     </View>
@@ -229,20 +237,20 @@ export function LeaveTypeDropdown({
 
                       const rowPillBg =
                         rem == null
-                          ? "#E2E8F0"
+                          ? colors.border
                           : rem === 0
-                            ? "#FEE2E2"
+                            ? colors.dangerSoft
                             : rem <= 2
-                              ? "#FEF3C7"
-                              : "#DCFCE7";
+                              ? colors.accentSoft
+                              : colors.successSoft;
                       const rowPillText =
                         rem == null
-                          ? "#94A3B8"
+                          ? colors.subtle
                           : rem === 0
-                            ? "#EF4444"
+                            ? colors.danger
                             : rem <= 2
-                              ? "#D97706"
-                              : "#16A34A";
+                              ? colors.warningText
+                              : colors.successText;
 
                       return (
                         <Pressable
@@ -255,12 +263,12 @@ export function LeaveTypeDropdown({
                             paddingVertical: 13,
                             borderBottomWidth:
                               index < leaveTypes.length - 1 ? 1 : 0,
-                            borderBottomColor: "#F1F5F9",
+                            borderBottomColor: colors.surfaceMuted,
                             backgroundColor: isSelected
                               ? `${TW.bgSecondary}0D`
                               : pressed
-                                ? "#F8FAFC"
-                                : "#ffffff",
+                                ? colors.canvas
+                                : colors.surface,
                           })}
                         >
                           {/* Avatar */}
@@ -271,7 +279,7 @@ export function LeaveTypeDropdown({
                               borderRadius: 10,
                               backgroundColor: isSelected
                                 ? TW.bgSecondary
-                                : "#F0F4FF",
+                                : colors.primarySoft,
                               alignItems: "center",
                               justifyContent: "center",
                               marginRight: 12,
@@ -281,7 +289,7 @@ export function LeaveTypeDropdown({
                               style={{
                                 fontSize: 13,
                                 fontWeight: "700",
-                                color: isSelected ? "#ffffff" : TW.bgSecondary,
+                                color: isSelected ? colors.surface : TW.bgSecondary,
                               }}
                             >
                               {(t.name ?? "?")[0].toUpperCase()}
@@ -302,8 +310,8 @@ export function LeaveTypeDropdown({
                             {stats != null && (
                               <Text
                                 style={{
-                                  fontSize: 11,
-                                  color: "#94A3B8",
+                                  fontSize: 13,
+                                  color: colors.subtle,
                                   marginTop: 2,
                                 }}
                               >
@@ -326,7 +334,7 @@ export function LeaveTypeDropdown({
                             >
                               <Text
                                 style={{
-                                  fontSize: 11,
+                                  fontSize: 13,
                                   fontWeight: "700",
                                   color: rowPillText,
                                 }}

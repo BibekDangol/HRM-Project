@@ -1,27 +1,28 @@
+import { colors } from "@/theme/colors";
 export const TW = {
-  bgPrimary: "#FDF8F0",
-  bgSecondary: "#1B4A5A",
-  bgYellow: "#FFB300",
+  bgPrimary: colors.canvas,
+  bgSecondary: colors.primary,
+  bgYellow: colors.accent,
 
   bgWhite: "bg-white",
-  bgAction: "bg-[#1B4A5A]",
+  bgAction: "bg-primary",
   bgButton: "bg-white",
-  bgCards: "bg-gray-50 border border-gray-200",
+  bgCards: "bg-surface border border-border",
   textButton: "text-white",
 
-  textPrimary: "text-[#1B4A5A]",
-  textSecondary: "text-[#3F6B78]",
-  textTertiary: "text-[#5C8A96]",
+  textPrimary: "text-ink",
+  textSecondary: "text-muted",
+  textTertiary: "text-muted",
 
   bgApproved: "bg-green-100 text-green-800",
   bgPending: "bg-yellow-100 text-yellow-800",
-  bgRejected: "bg-[#EF4444]",
+  bgRejected: "bg-danger",
 
-  DANGER: "#EF4444",
-  SUCCESS: "text-[#16A34A]",
-  BORDER: "border-[#EEF2F4]",
+  DANGER: colors.danger,
+  SUCCESS: "text-success",
+  BORDER: "border-border",
 
-  SUCCESS_COLOR: "#16A34A",
-  BRAND_LIGHT: "#d6eaf0",
-  BRAND_MUTED: "#7fb6c9",
+  SUCCESS_COLOR: colors.success,
+  BRAND_LIGHT: colors.primaryBorder,
+  BRAND_MUTED: colors.primaryMuted,
 };

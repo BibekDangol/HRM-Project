@@ -1,7 +1,7 @@
 import { ActivityIndicator, Text, View } from "react-native";
 import type { StyleProp, ViewStyle } from "react-native";
 
-import tw from "twrnc";
+import tw from "@/theme/tw";
 
 type Props = {
   message?: string;

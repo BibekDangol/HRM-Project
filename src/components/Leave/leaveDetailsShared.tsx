@@ -1,5 +1,6 @@
+import { colors } from "@/theme/colors";
 import { Text, View } from "react-native";
-import tw from "twrnc";
+import tw from "@/theme/tw";
 
 export type StatusConfigValue = { bg: string; text: string; label: string };
 
@@ -23,11 +24,11 @@ export function LabelValue({
 }) {
   return (
     <View style={[{ paddingVertical: 12 }, containerStyle]}>
-      <Text style={[tw`text-sm`, { color: "#6b7280" }, labelStyle]}>
+      <Text style={[tw`text-sm`, { color: colors.muted }, labelStyle]}>
         {label}
       </Text>
       <Text
-        style={[tw`text-sm font-semibold`, { color: "#111827" }, valueStyle]}>
+        style={[tw`text-sm font-semibold`, { color: colors.ink }, valueStyle]}>
         {value}
       </Text>
     </View>

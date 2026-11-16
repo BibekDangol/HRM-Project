@@ -1,3 +1,4 @@
+import { colors } from "@/theme/colors";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { Props, StatusInfo } from "../types/activitylog";
@@ -7,7 +8,7 @@ import { supabase } from "@/src/supabase/supabaseClient";
 import { ActivityRecord } from "@/src/types/Calendar";
 import { normalize } from "@/src/utils/userDashboard";
 import { TW } from "@/theme/twStyles";
-import tw from "twrnc";
+import tw from "@/theme/tw";
 
 export const ActivityLogSection = ({ onViewAll, hideTitle }: Props) => {
   const user = useAuthStore((s) => s.user);
@@ -106,35 +107,35 @@ export const ActivityLogSection = ({ onViewAll, hideTitle }: Props) => {
     if (isLate) {
       return {
         label: "Late",
-        dotColor: "#F59E0B",
-        badgeBg: "#FEF9C3",
-        badgeText: "#B45309",
+        dotColor: colors.accent,
+        badgeBg: colors.accentSoft,
+        badgeText: colors.warningText,
       };
     }
 
     if (isAbsent) {
       return {
         label: "Absent",
-        dotColor: "#EF4444",
-        badgeBg: "#FEE2E2",
-        badgeText: "#DC2626",
+        dotColor: colors.danger,
+        badgeBg: colors.dangerSoft,
+        badgeText: colors.dangerText,
       };
     }
 
     if (isIncomplete) {
       return {
         label: "Incomplete",
-        dotColor: "#8B5CF6",
-        badgeBg: "#F3E8FF",
-        badgeText: "#7C3AED",
+        dotColor: colors.warning,
+        badgeBg: colors.warningSoft,
+        badgeText: colors.warningText,
       };
     }
 
     return {
       label: "Present",
-      dotColor: "#22C55E",
-      badgeBg: "#DCFCE7",
-      badgeText: "#16A34A",
+      dotColor: colors.success,
+      badgeBg: colors.successSoft,
+      badgeText: colors.successText,
     };
   };
 
@@ -143,12 +144,12 @@ export const ActivityLogSection = ({ onViewAll, hideTitle }: Props) => {
       style={{
         flexDirection: "row",
         gap: 12,
-        backgroundColor: "#F8FAFC",
+        backgroundColor: colors.canvas,
         borderRadius: 12,
         padding: 12,
         alignItems: "center",
         borderWidth: 0.5,
-        borderColor: "#E2E8F0",
+        borderColor: colors.border,
         marginBottom: 8,
       }}
     >
@@ -156,7 +157,7 @@ export const ActivityLogSection = ({ onViewAll, hideTitle }: Props) => {
         style={{
           alignItems: "center",
           width: 44,
-          backgroundColor: "#F1F5F9",
+          backgroundColor: colors.surfaceMuted,
           borderRadius: 8,
           paddingVertical: 6,
           paddingHorizontal: 4,
@@ -168,7 +169,7 @@ export const ActivityLogSection = ({ onViewAll, hideTitle }: Props) => {
             width: 22,
             height: 8,
             borderRadius: 4,
-            backgroundColor: "#E2E8F0",
+            backgroundColor: colors.border,
           }}
         />
         <View
@@ -176,7 +177,7 @@ export const ActivityLogSection = ({ onViewAll, hideTitle }: Props) => {
             width: 28,
             height: 18,
             borderRadius: 4,
-            backgroundColor: "#CBD5E1",
+            backgroundColor: colors.borderStrong,
           }}
         />
         <View
@@ -184,7 +185,7 @@ export const ActivityLogSection = ({ onViewAll, hideTitle }: Props) => {
             width: 18,
             height: 8,
             borderRadius: 4,
-            backgroundColor: "#E2E8F0",
+            backgroundColor: colors.border,
           }}
         />
       </View>
@@ -193,7 +194,7 @@ export const ActivityLogSection = ({ onViewAll, hideTitle }: Props) => {
         style={{
           width: 0.5,
           alignSelf: "stretch",
-          backgroundColor: "#E2E8F0",
+          backgroundColor: colors.border,
         }}
       />
 
@@ -203,7 +204,7 @@ export const ActivityLogSection = ({ onViewAll, hideTitle }: Props) => {
             width: "45%",
             height: 22,
             borderRadius: 999,
-            backgroundColor: "#E2E8F0",
+            backgroundColor: colors.border,
           }}
         />
         <View
@@ -211,7 +212,7 @@ export const ActivityLogSection = ({ onViewAll, hideTitle }: Props) => {
             width: "30%",
             height: 9,
             borderRadius: 4,
-            backgroundColor: "#F1F5F9",
+            backgroundColor: colors.surfaceMuted,
           }}
         />
       </View>
@@ -222,7 +223,7 @@ export const ActivityLogSection = ({ onViewAll, hideTitle }: Props) => {
             width: 110,
             height: 11,
             borderRadius: 4,
-            backgroundColor: "#E2E8F0",
+            backgroundColor: colors.border,
           }}
         />
         <View
@@ -230,7 +231,7 @@ export const ActivityLogSection = ({ onViewAll, hideTitle }: Props) => {
             width: 50,
             height: 9,
             borderRadius: 4,
-            backgroundColor: "#F1F5F9",
+            backgroundColor: colors.surfaceMuted,
           }}
         />
       </View>
@@ -254,15 +255,19 @@ export const ActivityLogSection = ({ onViewAll, hideTitle }: Props) => {
 
           {onViewAll && (
             <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="View all attendance activity"
               onPress={onViewAll}
               style={({ pressed }) => ({
                 opacity: pressed ? 0.6 : 1,
-                paddingVertical: 4,
+                paddingVertical: 12,
+                minHeight: 48,
+                justifyContent: "center",
                 paddingHorizontal: 10,
               })}
             >
               <Text
-                style={{ color: "#475569", fontSize: 13, fontWeight: "600" }}
+                style={{ color: colors.muted, fontSize: 13, fontWeight: "600" }}
               >
                 View All
               </Text>
@@ -278,10 +283,10 @@ export const ActivityLogSection = ({ onViewAll, hideTitle }: Props) => {
         </View>
       ) : activityLog.length === 0 ? (
         <View style={{ paddingVertical: 40, alignItems: "center", gap: 6 }}>
-          <Text style={{ color: "#CBD5E1", fontWeight: "600", fontSize: 14 }}>
+          <Text style={{ color: colors.ink, fontWeight: "600", fontSize: 14 }}>
             No activity found
           </Text>
-          <Text style={{ color: "#E2E8F0", fontSize: 12 }}>
+          <Text style={{ color: colors.muted, fontSize: 14 }}>
             {onViewAll
               ? "No records in the last 7 days"
               : "No attendance records yet"}
@@ -302,12 +307,13 @@ export const ActivityLogSection = ({ onViewAll, hideTitle }: Props) => {
                 key={record.id}
                 style={{
                   flexDirection: "row",
+                  flexWrap: "wrap",
                   alignItems: "center",
                   gap: 12,
-                  backgroundColor: "#FFFFFF",
+                  backgroundColor: colors.surface,
                   borderRadius: 12,
                   borderWidth: 0.5,
-                  borderColor: "#E2E8F0",
+                  borderColor: colors.border,
                   padding: 12,
                 }}
               >
@@ -322,8 +328,8 @@ export const ActivityLogSection = ({ onViewAll, hideTitle }: Props) => {
                 >
                   <Text
                     style={{
-                      color: "#94A3B8",
-                      fontSize: 9,
+                      color: colors.subtle,
+                      fontSize: 14,
                       fontWeight: "600",
                       letterSpacing: 0.5,
                       textTransform: "uppercase",
@@ -334,7 +340,7 @@ export const ActivityLogSection = ({ onViewAll, hideTitle }: Props) => {
 
                   <Text
                     style={{
-                      color: "#0F172A",
+                      color: colors.ink,
                       fontSize: 20,
                       fontWeight: "700",
                       lineHeight: 24,
@@ -345,8 +351,8 @@ export const ActivityLogSection = ({ onViewAll, hideTitle }: Props) => {
 
                   <Text
                     style={{
-                      color: "#94A3B8",
-                      fontSize: 9,
+                      color: colors.subtle,
+                      fontSize: 14,
                       fontWeight: "500",
                     }}
                   >
@@ -358,7 +364,7 @@ export const ActivityLogSection = ({ onViewAll, hideTitle }: Props) => {
                   style={{
                     width: 0.5,
                     alignSelf: "stretch",
-                    backgroundColor: "#E2E8F0",
+                    backgroundColor: colors.border,
                   }}
                 />
 
@@ -385,7 +391,7 @@ export const ActivityLogSection = ({ onViewAll, hideTitle }: Props) => {
                     />
                     <Text
                       style={{
-                        fontSize: 12,
+                        fontSize: 14,
                         fontWeight: "600",
                         color: status.badgeText,
                       }}
@@ -397,8 +403,8 @@ export const ActivityLogSection = ({ onViewAll, hideTitle }: Props) => {
                   {record.check_in_comment ? (
                     <Text
                       style={{
-                        color: "#94A3B8",
-                        fontSize: 11,
+                        color: colors.subtle,
+                        fontSize: 13,
                         lineHeight: 16,
                       }}
                       numberOfLines={2}
@@ -408,8 +414,8 @@ export const ActivityLogSection = ({ onViewAll, hideTitle }: Props) => {
                   ) : (
                     <Text
                       style={{
-                        color: "#94A3B8",
-                        fontSize: 11,
+                        color: colors.subtle,
+                        fontSize: 13,
                         lineHeight: 16,
                       }}
                     >
@@ -420,11 +426,11 @@ export const ActivityLogSection = ({ onViewAll, hideTitle }: Props) => {
                   )}
                 </View>
 
-                <View style={{ alignItems: "flex-end", gap: 4 }}>
+                <View style={{ flexBasis: "100%", flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", gap: 8 }}>
                   <Text
                     style={{
-                      color: "#0F172A",
-                      fontSize: 12,
+                      color: colors.ink,
+                      fontSize: 14,
                       fontWeight: "600",
                     }}
                   >
@@ -434,8 +440,8 @@ export const ActivityLogSection = ({ onViewAll, hideTitle }: Props) => {
 
                   <Text
                     style={{
-                      color: "#94A3B8",
-                      fontSize: 11,
+                      color: colors.subtle,
+                      fontSize: 13,
                       fontWeight: "500",
                     }}
                   >

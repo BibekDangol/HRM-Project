@@ -1,5 +1,5 @@
 import { Text, View } from "react-native";
-import tw from "twrnc";
+import tw from "@/theme/tw";
 
 export function StatPill({
   label,

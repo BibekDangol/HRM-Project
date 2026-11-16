@@ -1,5 +1,5 @@
 import { Pressable, Text, View } from "react-native";
-import tw from "twrnc";
+import tw from "@/theme/tw";
 
 interface Props {
   onSettingsPress: () => void;

@@ -22,7 +22,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import tw from "twrnc";
+import tw from "@/theme/tw";
 import { z } from "zod";
 
 type FormData = z.infer<typeof signupSchema>;

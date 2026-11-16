@@ -1,3 +1,4 @@
+import { colors } from "@/theme/colors";
 import { parseLocalYMD } from "@/src/constants/adminCalendar";
 import { supabase } from "@/src/supabase/supabaseClient";
 import { ModalMode } from "@/src/types/Calendar";
@@ -15,7 +16,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import tw from "twrnc";
+import tw from "@/theme/tw";
 import { ColorPicker } from "./ColorPicker";
 import { Dot } from "./Dot";
 
@@ -35,7 +36,7 @@ export function DayModal({
   const store = useCalendarStore();
   const [mode, setMode] = useState<ModalMode>("view");
   const [inputText, setInputText] = useState("");
-  const [eventColor, setEventColor] = useState("#3B82F6");
+  const [eventColor, setEventColor] = useState(colors.primary);
 
   const cfg = store.days[dateStr];
   const dayType = calendarStore.getDayType(dateStr);
@@ -114,7 +115,7 @@ export function DayModal({
 
     calendarStore.addEvent(dateStr, label, color);
     setInputText("");
-    setEventColor("#3B82F6");
+    setEventColor(colors.primary);
     setMode("view");
   };
 
@@ -259,7 +260,7 @@ export function DayModal({
                 <TextInput
                   autoFocus
                   placeholder="e.g. New Year's Day"
-                  placeholderTextColor="#94a3b8"
+                  placeholderTextColor={colors.subtle}
                   value={inputText}
                   onChangeText={setInputText}
                   returnKeyType="done"
@@ -313,7 +314,7 @@ export function DayModal({
                 <TextInput
                   autoFocus
                   placeholder="Event name"
-                  placeholderTextColor="#94a3b8"
+                  placeholderTextColor={colors.subtle}
                   value={inputText}
                   onChangeText={setInputText}
                   returnKeyType="done"

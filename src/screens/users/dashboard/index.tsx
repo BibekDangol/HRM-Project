@@ -1,3 +1,4 @@
+import { colors } from "@/theme/colors";
 import { formatElapsed, formatSinceTime } from "@/src/utils/attendanceHelper";
 import { MAX_YEAR, MONTHS } from "@/src/utils/userDashboard";
 import React, { useMemo, useState } from "react";
@@ -21,7 +22,7 @@ import { useProfile } from "@/src/hooks/useProfile";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { router } from "expo-router";
 import { CalendarDays } from "lucide-react-native";
-import tw from "twrnc";
+import tw from "@/theme/tw";
 
 export default function HomeScreen() {
   const user = useAuthStore((s) => s.user);
@@ -64,7 +65,7 @@ export default function HomeScreen() {
 
   return (
     <ScrollView
-      style={tw`bg-white flex-1`}
+      style={tw`bg-canvas flex-1`}
       contentContainerStyle={{ paddingVertical: 16, flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
       refreshControl={
@@ -80,6 +81,7 @@ export default function HomeScreen() {
           elapsedMs={att.elapsedMs}
           checkedInAt={att.checkedInAt}
           isLocked={att.isLocked}
+          pendingAction={att.pendingAction}
           onToggle={att.onToggleCheck}
           formatElapsed={formatElapsed}
           formatSinceTime={(d) => (d ? formatSinceTime(d) : "")}
@@ -93,13 +95,16 @@ export default function HomeScreen() {
           </Text>
 
           <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Change attendance month"
+            accessibilityHint={`Showing ${monthTitle} ${selectedYear}`}
             onPress={() => setShowMonthPicker(true)}
             style={({ pressed }) => [
-              tw`px-3 py-2 rounded-full`,
+              tw`h-12 w-12 items-center justify-center rounded-full`,
               pressed && { opacity: 0.7 },
             ]}
           >
-            <CalendarDays size={20} color="#475569" />
+            <CalendarDays size={20} color={colors.muted} />
           </Pressable>
         </View>
 

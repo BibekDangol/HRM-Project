@@ -1,3 +1,4 @@
+import { colors } from "@/theme/colors";
 import type { BottomTabBarProps } from "expo-router/build/react-navigation/bottom-tabs";
 
 import { userTabs } from "@/src/config/userTabs";
@@ -18,8 +19,8 @@ export default function UserTabBar({
       tabs={userTabs}
       mode="pill"
       routeGroup="(users)"
-      activeColor="#1B4A5A"
-      inactiveColor="#8A94A6"
+      activeColor={colors.primary}
+      inactiveColor={colors.subtle}
       closeAllOverlays={closeAllOverlays}
     />
   );

@@ -1,3 +1,4 @@
+import { colors } from "@/theme/colors";
 import React from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
 import { Control, Controller, FieldErrors, UseFormSetValue } from "react-hook-form";
@@ -6,7 +7,7 @@ import { DateField } from "@/src/components/userLeave/DateField";
 import { LeaveTypeDropdown } from "@/src/components/userLeave/LeaveTypeDropdown";
 import { FormValues, LeaveTypeWithStats } from "@/src/types/userLeave";
 import { TW } from "@/theme/twStyles";
-import tw from "twrnc";
+import tw from "@/theme/tw";
 
 export type LeaveFormFieldsProps = {
   control: Control<FormValues>;
@@ -36,8 +37,8 @@ const SPACING = {
 
 const ERROR_TEXT = {
   marginTop: 6,
-  fontSize: 12,
-  color: "#EF4444",
+  fontSize: 14,
+  color: colors.danger,
   fontWeight: "500" as const,
 };
 
@@ -126,6 +127,10 @@ export function LeaveFormFields({
           name="isHalfDay"
           render={({ field: { value, onChange } }) => (
             <Pressable
+              accessibilityRole="checkbox"
+              accessibilityLabel="Half day"
+              accessibilityState={{ checked: value }}
+              aria-checked={value}
               onPress={() => {
                 const next = !value;
                 onChange(next);
@@ -141,6 +146,8 @@ export function LeaveFormFields({
                 alignItems: "center",
                 gap: 10,
                 alignSelf: "flex-start",
+                minHeight: 48,
+                paddingHorizontal: 4,
                 opacity: pressed ? 0.85 : 1,
                 marginBottom: value ? 14 : 0,
               })}
@@ -151,19 +158,19 @@ export function LeaveFormFields({
                   height: 20,
                   borderWidth: 2,
                   borderRadius: 5,
-                  borderColor: value ? TW.bgSecondary : "#CBD5E1",
-                  backgroundColor: value ? TW.bgSecondary : "#ffffff",
+                  borderColor: value ? TW.bgSecondary : colors.borderStrong,
+                  backgroundColor: value ? TW.bgSecondary : colors.surface,
                   alignItems: "center",
                   justifyContent: "center",
                 }}
               >
                 {value ? (
-                  <Check color="#ffffff" size={12} strokeWidth={3} />
+                  <Check color={colors.surface} size={12} strokeWidth={3} />
                 ) : null}
               </View>
               <Text
                 style={{
-                  fontSize: 13,
+                  fontSize: 14,
                   fontWeight: "600",
                   color: TW.bgSecondary,
                 }}
@@ -195,6 +202,9 @@ export function LeaveFormFields({
                   {(["first_shift", "second_shift"] as const).map((session) => (
                     <Pressable
                       key={session}
+                      accessibilityRole="radio"
+                      accessibilityState={{ checked: value === session }}
+                      aria-checked={value === session}
                       onPress={() => onChange(session)}
                       style={({ pressed }) => ({
                         flex: 1,
@@ -202,18 +212,18 @@ export function LeaveFormFields({
                         borderWidth: 1.5,
                         borderRadius: 10,
                         borderColor:
-                          value === session ? TW.bgSecondary : "#E2E8F0",
+                          value === session ? TW.bgSecondary : colors.border,
                         backgroundColor:
-                          value === session ? TW.bgSecondary : "#ffffff",
+                          value === session ? TW.bgSecondary : colors.surface,
                         alignItems: "center",
                         opacity: pressed ? 0.85 : 1,
                       })}
                     >
                       <Text
                         style={{
-                          fontSize: 12,
+                          fontSize: 14,
                           fontWeight: "500",
-                          color: value === session ? "#ffffff" : TW.bgSecondary,
+                          color: value === session ? colors.surface : TW.bgSecondary,
                         }}
                       >
                         {session === "first_shift" ? "First Half" : "Second Half"}
@@ -246,7 +256,8 @@ export function LeaveFormFields({
               onChangeText={onChange}
               onBlur={onBlur}
               placeholder="Enter reason for leave..."
-              placeholderTextColor="#CBD5E1"
+              accessibilityLabel="Reason for leave"
+              placeholderTextColor={colors.subtle}
               multiline
               textAlignVertical="top"
               style={{
@@ -254,12 +265,12 @@ export function LeaveFormFields({
                 paddingVertical: SPACING.inputY,
                 borderWidth: 1.5,
                 borderRadius: 10,
-                borderColor: errors.reason ? "#EF4444" : "#E2E8F0",
+                borderColor: errors.reason ? colors.danger : colors.border,
                 color: TW.bgSecondary,
                 fontSize: 14,
                 lineHeight: 22,
                 minHeight: 90,
-                backgroundColor: "#ffffff",
+                backgroundColor: colors.surface,
               }}
             />
           )}

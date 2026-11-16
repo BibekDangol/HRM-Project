@@ -1,9 +1,10 @@
+import { colors } from "@/theme/colors";
 import { useState } from "react";
 
 import FormActions from "@/src/components/form/FormActions";
 import FormField from "@/src/components/form/FormField";
 import ModalShell from "@/src/components/ui/ModalShell";
-import tw from "twrnc";
+import tw from "@/theme/tw";
 
 type Props = {
   visible: boolean;
@@ -86,7 +87,7 @@ export default function AddLeaveTypeModal({
         label="Leave Name"
         variant="outlined"
         placeholder="Annual, Sick..."
-        placeholderTextColor="#94a3b8"
+        placeholderTextColor={colors.subtle}
         value={name}
         onChangeText={setName}
         containerStyle={tw`mb-4`}
@@ -96,7 +97,7 @@ export default function AddLeaveTypeModal({
         label="Leave Limit (days)"
         variant="outlined"
         placeholder="10"
-        placeholderTextColor="#94a3b8"
+        placeholderTextColor={colors.subtle}
         keyboardType="numeric"
         value={limit}
         onChangeText={setLimit}

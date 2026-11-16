@@ -1,3 +1,4 @@
+import { colors } from "@/theme/colors";
 import { Pressable, Text, View } from "react-native";
 
 type Props = {
@@ -29,19 +30,23 @@ export default function Section({
             fontSize: 14,
             fontWeight: "600",
             letterSpacing: 1,
-            color: "#6B7280",
+            color: colors.muted,
           }}
         >
           {title.toUpperCase()}
         </Text>
 
         {rightText && (
-          <Pressable onPress={onRightPress}>
+          <Pressable
+            accessibilityRole="button"
+            onPress={onRightPress}
+            style={{ minHeight: 48, paddingHorizontal: 8, justifyContent: "center" }}
+          >
             <Text
               style={{
                 fontSize: 14,
                 fontWeight: "600",
-                color: "#6B7280",
+                color: colors.muted,
               }}
             >
               {rightText}
@@ -53,11 +58,11 @@ export default function Section({
       {/* Content */}
       <View
         style={{
-          backgroundColor: "#fff",
+          backgroundColor: colors.surface,
           borderRadius: 16,
           overflow: "hidden",
           borderWidth: 1,
-          borderColor: "#E5E7EB",
+          borderColor: colors.border,
         }}
       >
         {children}

@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { Text, View } from "react-native";
 
 import { TW } from "@/theme/twStyles";
-import tw from "twrnc";
+import tw from "@/theme/tw";
 
 type Props = {
   title: string;
@@ -19,9 +19,9 @@ export default function MetricCard({
   value,
   icon,
   accent = TW.bgAction,
-  sectionTitle = "High-Level Metrics",
-  statusLabel = "Live",
-  statusMeta = "Updated today",
+  sectionTitle = "Team overview",
+  statusLabel = "Directory",
+  statusMeta = "Refresh to update",
 }: Props) {
   return (
     <>
@@ -32,15 +32,15 @@ export default function MetricCard({
         style={tw`overflow-hidden rounded-xl ${TW.bgButton} ${TW.BORDER} border`}
       >
         <View style={tw`h-0.5 w-full ${accent}`} />
-        <View style={tw`flex-row items-center gap-3 px-4 py-3`}>
+        <View style={tw`flex-row flex-wrap items-center gap-3 px-4 py-4`}>
           <View
-            style={tw`w-8 h-8 rounded-lg ${accent} items-center justify-center shrink-0`}
+            style={tw`w-10 h-10 rounded-lg ${accent} items-center justify-center shrink-0`}
           >
             {icon}
           </View>
-          <View style={tw`flex-1`}>
+          <View style={{ flexGrow: 1, flexBasis: 120 }}>
             <Text
-              style={tw`${TW.textSecondary} text-[10px] font-semibold uppercase tracking-wider`}
+              style={tw`${TW.textSecondary} text-sm font-semibold`}
             >
               {title}
             </Text>
@@ -53,11 +53,11 @@ export default function MetricCard({
           <View style={tw`items-end gap-0.5`}>
             <View style={tw`flex-row items-center gap-1`}>
               <View style={tw`w-1.5 h-1.5 rounded-full ${accent}`} />
-              <Text style={tw`${TW.textSecondary} text-[10px] font-medium`}>
+              <Text style={tw`${TW.textSecondary} text-[13px] font-medium`}>
                 {statusLabel}
               </Text>
             </View>
-            <Text style={tw`${TW.textSecondary} text-[10px]`}>{statusMeta}</Text>
+            <Text style={tw`${TW.textSecondary} text-[13px]`}>{statusMeta}</Text>
           </View>
         </View>
       </View>

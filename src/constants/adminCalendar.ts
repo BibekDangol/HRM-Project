@@ -1,16 +1,17 @@
+import { colors } from "@/theme/colors";
 import { WeekendRules } from "../types/Calendar";
 
 export const COLOR_PRESETS = [
-  "#EF4444",
-  "#F97316",
-  "#EAB308",
-  "#22C55E",
-  "#06B6D4",
-  "#3B82F6",
-  "#8B5CF6",
-  "#EC4899",
-  "#64748B",
-  "#000000",
+  colors.danger,
+  colors.orange,
+  colors.accent,
+  colors.success,
+  colors.cyan,
+  colors.primary,
+  colors.purple,
+  colors.pink,
+  colors.muted,
+  colors.shadow,
 ];
 
 export const TODAY = new Date().toISOString().slice(0, 10);

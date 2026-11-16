@@ -2,7 +2,7 @@ import { ScrollView, Text, View } from "react-native";
 
 import { Leave } from "@/src/services/leave.service";
 import React from "react";
-import tw from "twrnc";
+import tw from "@/theme/tw";
 
 interface Props {
   leave: Leave;

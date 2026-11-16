@@ -1,5 +1,5 @@
 import { View } from "react-native";
-import tw from "twrnc";
+import tw from "@/theme/tw";
 
 export function Dot({ color, size = 10 }: { color: string; size?: number }) {
   return (

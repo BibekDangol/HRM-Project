@@ -1,3 +1,4 @@
+import { colors } from "@/theme/colors";
 import { useState } from "react";
 import type { ReactNode } from "react";
 import { Text, TextInput, View } from "react-native";
@@ -9,7 +10,7 @@ import type {
 } from "react-native";
 
 import { TW } from "@/theme/twStyles";
-import tw from "twrnc";
+import tw from "@/theme/tw";
 
 export type FormFieldVariant = "auth" | "outlined" | "filled";
 export type FormFieldLabelVariant = "default" | "compact" | "uppercase";
@@ -59,7 +60,7 @@ const LABEL: Record<FormFieldLabelVariant, string> = {
   default: `${TW.textSecondary} font-semibold mb-2 text-sm`,
   compact: `text-sm font-semibold mb-1 ${TW.textSecondary}`,
   uppercase:
-    "text-[11px] font-bold uppercase tracking-wide text-gray-500 mb-2",
+    "text-[13px] font-bold uppercase tracking-wide text-gray-500 mb-2",
 };
 
 export default function FormField({
@@ -69,7 +70,7 @@ export default function FormField({
   onBlur,
   error,
   placeholder,
-  placeholderTextColor = "#7e7e7e",
+  placeholderTextColor = colors.subtle,
   variant = "auth",
   labelVariant = "default",
   containerStyle,
@@ -101,13 +102,15 @@ export default function FormField({
           variant === "outlined" &&
             !hasError && {
               borderWidth: 1,
-              borderColor: focused ? TW.bgSecondary : "#E5E7EB",
+              borderColor: focused ? TW.bgSecondary : colors.border,
             },
         ]}
       >
         {leftAccessory}
 
         <TextInput
+          accessibilityLabel={label ?? placeholder}
+          aria-invalid={hasError}
           value={value}
           onChangeText={onChangeText}
           onFocus={() => setFocused(true)}
@@ -130,7 +133,7 @@ export default function FormField({
       </View>
 
       {error ? (
-        <Text style={tw`text-[13px] mt-1 ml-1 text-[#FF6B6B]`}>{error}</Text>
+        <Text accessibilityRole="alert" style={tw`text-[13px] mt-1 ml-1 text-dangerText`}>{error}</Text>
       ) : null}
     </View>
   );

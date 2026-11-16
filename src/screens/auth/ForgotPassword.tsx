@@ -1,3 +1,4 @@
+import { colors } from "@/theme/colors";
 import { useRouter } from "expo-router";
 import { ChevronLeft } from "lucide-react-native";
 import React from "react";
@@ -14,7 +15,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import tw from "twrnc";
+import tw from "@/theme/tw";
 
 import FormField from "@/src/components/form/FormField";
 import AppButton from "@/src/components/ui/AppButton";
@@ -61,7 +62,7 @@ const ForgotPassword = () => {
         ]}
       >
         <TouchableOpacity onPress={() => router.back()}>
-          <ChevronLeft size={24} color="#7e7e7e" />
+          <ChevronLeft size={24} color={colors.subtle} />
         </TouchableOpacity>
       </View>
 

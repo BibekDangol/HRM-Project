@@ -1,3 +1,4 @@
+import { colors } from "@/theme/colors";
 import { RelativePathString, useFocusEffect, useRouter } from "expo-router";
 import { CalendarClock, ChevronRight } from "lucide-react-native";
 import { useCallback, useRef } from "react";
@@ -10,7 +11,7 @@ import { useLeaveView } from "@/src/hooks/admin/useLeaveView";
 import { LeaveStatus } from "@/src/services/leave.service";
 import { useLeaveTabStore } from "@/src/store/useLeaveTabStore";
 import { TW } from "@/theme/twStyles";
-import tw from "twrnc";
+import tw from "@/theme/tw";
 
 
 type Props = {
@@ -22,13 +23,13 @@ type Props = {
 
 const statusConfig: Record<string, { bg: string; text: string; dot: string }> =
   {
-    pending: { bg: "bg-red-50", text: "text-amber-600", dot: "bg-amber-400" },
+    pending: { bg: "bg-warningSoft", text: "text-warningText", dot: "bg-amber-400" },
     approved: {
       bg: "bg-emerald-50",
-      text: "text-emerald-600",
+      text: "text-successText",
       dot: "bg-emerald-400",
     },
-    rejected: { bg: "bg-red-50", text: "text-red-500", dot: "bg-red-400" },
+    rejected: { bg: "bg-red-50", text: "text-dangerText", dot: "bg-red-400" },
   };
 
 const TABS: LeaveStatus[] = ["pending", "approved", "rejected"];
@@ -89,7 +90,7 @@ export default function LeaveView({
   }
 
   return (
-    <View style={tw`flex-1 bg-white`}>
+    <View style={tw`flex-1 bg-canvas`}>
       {/* Tabs */}
       <View style={tw`flex-row mx-2 mt-2 rounded-2xl p-1 bg-slate-100`}>
         {TABS.map((tab) => {
@@ -142,7 +143,7 @@ export default function LeaveView({
               {/* Icon */}
               <View
                 style={tw`h-12 w-12 rounded-xl bg-slate-100 items-center justify-center mr-4`}>
-                <CalendarClock size={20} color="#475569" />
+                <CalendarClock size={20} color={colors.muted} />
               </View>
 
               {/* Info */}
@@ -167,7 +168,7 @@ export default function LeaveView({
                 </Text>
               </View>
 
-              <ChevronRight size={16} color="#cbd5e1" />
+              <ChevronRight size={16} color={colors.borderStrong} />
             </Pressable>
           );
         }}
@@ -177,7 +178,7 @@ export default function LeaveView({
               <View
                 style={tw`h-16 w-16 rounded-full ${TW.bgCards} items-center justify-center`}
               >
-                <CalendarClock size={28} color="#94a3b8" />
+                <CalendarClock size={28} color={colors.subtle} />
               </View>
             }
             title="No leave requests"

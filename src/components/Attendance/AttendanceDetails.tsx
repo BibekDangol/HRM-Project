@@ -1,3 +1,4 @@
+import { colors } from "@/theme/colors";
 import * as FileSystem from "expo-file-system/legacy";
 import * as Sharing from "expo-sharing";
 
@@ -17,7 +18,7 @@ import {
 import { useAttendance } from "@/src/hooks/supervisor/useAttendanceDetails";
 import { TW } from "@/theme/twStyles";
 import { useState } from "react";
-import tw from "twrnc";
+import tw from "@/theme/tw";
 
 type Props = {
   userId: string;
@@ -36,31 +37,31 @@ const STATUS_CONFIG: Record<
     label: "Present",
     bg: "bg-emerald-50",
     text: "text-emerald-700",
-    dot: "#16704c",
+    dot: colors.successText,
   },
   absent: {
     label: "Absent",
     bg: "bg-rose-50",
     text: "text-rose-700",
-    dot: "#b33030",
+    dot: colors.dangerText,
   },
   on_leave: {
     label: "Leave",
     bg: "bg-amber-50",
     text: "text-amber-700",
-    dot: "#b56b00",
+    dot: colors.warningText,
   },
   late: {
     label: "Late",
     bg: "bg-orange-50",
     text: "text-orange-700",
-    dot: "#c2580a",
+    dot: colors.orangeText,
   },
   holiday: {
     label: "Holiday",
     bg: "bg-slate-100",
     text: "text-slate-500",
-    dot: "#94a3b8",
+    dot: colors.subtle,
   },
 };
 
@@ -176,7 +177,7 @@ const exportCSV = async (csvString: string, filename: string) => {
 //     label: status,
 //     bg: "bg-slate-100",
 //     text: "text-slate-500",
-//     dot: "#94a3b8",
+//     dot: colors.subtle,
 //   };
 //   return (
 //     <View
@@ -291,10 +292,10 @@ const AttendanceView: React.FC<Props> = ({ userId, name }) => {
   const canDecYear = pickerYear > MIN_YEAR;
 
   return (
-    <View style={tw`flex-1 bg-white`}>
+    <View style={tw`flex-1 bg-canvas`}>
 
       <ScrollView
-        style={tw`flex-1 bg-white`}
+        style={tw`flex-1 bg-canvas`}
         contentContainerStyle={tw`p-4 pb-14`}
         showsVerticalScrollIndicator={false}
       >
@@ -318,7 +319,7 @@ const AttendanceView: React.FC<Props> = ({ userId, name }) => {
                   >
                     ATTENDANCE REPORT
                   </Text>
-                  <Text style={[tw`text-2xl font-bold`, { color: "#fff" }]}>
+                  <Text style={[tw`text-2xl font-bold`, { color: colors.surface }]}>
                     {currentMonth}
                   </Text>
                 </View>
@@ -347,9 +348,9 @@ const AttendanceView: React.FC<Props> = ({ userId, name }) => {
                 style={[
                   tw`self-start flex-row items-center px-3 py-1.5 rounded-full mb-5`,
                   {
-                    backgroundColor: "rgba(255,255,255,0.1)",
+                    backgroundColor: colors.onPrimaryWash,
                     borderWidth: 1,
-                    borderColor: "rgba(255,255,255,0.15)",
+                    borderColor: colors.onPrimaryWashMedium,
                   },
                 ]}
               >
@@ -371,9 +372,9 @@ const AttendanceView: React.FC<Props> = ({ userId, name }) => {
                   style={[
                     tw`flex-1 flex-row items-center justify-center gap-1.5 py-2.5 rounded-xl`,
                     {
-                      backgroundColor: "rgba(255,255,255,0.1)",
+                      backgroundColor: colors.onPrimaryWash,
                       borderWidth: 1,
-                      borderColor: "rgba(255,255,255,0.18)",
+                      borderColor: colors.onPrimaryBorderSoft,
                     },
                   ]}
                 >
@@ -394,9 +395,9 @@ const AttendanceView: React.FC<Props> = ({ userId, name }) => {
                   style={[
                     tw`flex-1 flex-row items-center justify-center gap-1.5 py-2.5 rounded-xl`,
                     {
-                      backgroundColor: "rgba(255,255,255,0.1)",
+                      backgroundColor: colors.onPrimaryWash,
                       borderWidth: 1,
-                      borderColor: "rgba(255,255,255,0.18)",
+                      borderColor: colors.onPrimaryBorderSoft,
                     },
                   ]}
                 >
@@ -421,17 +422,17 @@ const AttendanceView: React.FC<Props> = ({ userId, name }) => {
                 <StatBox
                   value={monthSummary.present}
                   label={"Days\nPresent"}
-                  accent="#16704c"
+                  accent={colors.successText}
                 />
                 <StatBox
                   value={monthSummary.absent}
                   label={"Days\nAbsent"}
-                  accent="#b33030"
+                  accent={colors.dangerText}
                 />
                 <StatBox
                   value={monthSummary.leave}
                   label={"On\nLeave"}
-                  accent="#b56b00"
+                  accent={colors.warningText}
                 />
               </View>
             </View>
@@ -452,7 +453,7 @@ const AttendanceView: React.FC<Props> = ({ userId, name }) => {
             <Pressable
               style={[
                 tw`rounded-t-3xl px-5 pt-3 pb-8`,
-                { backgroundColor: "#ffffff" },
+                { backgroundColor: colors.surface },
               ]}
               onPress={() => {}}
             >
@@ -475,11 +476,11 @@ const AttendanceView: React.FC<Props> = ({ userId, name }) => {
                   }
                   style={({ pressed }) => [
                     tw`h-9 w-9 rounded-full items-center justify-center border`,
-                    { borderColor: "#e2e8f0", backgroundColor: "#fff" },
+                    { borderColor: colors.border, backgroundColor: colors.surface },
                     (!canDecYear || pressed) && { opacity: 0.4 },
                   ]}
                 >
-                  <Text style={[tw`font-bold text-base`, { color: "#1F2937" }]}>
+                  <Text style={[tw`font-bold text-base`, { color: colors.ink }]}>
                     ‹
                   </Text>
                 </Pressable>
@@ -487,7 +488,7 @@ const AttendanceView: React.FC<Props> = ({ userId, name }) => {
                 <Text
                   style={[
                     tw`text-lg font-bold w-16 text-center`,
-                    { color: "#1F2937" },
+                    { color: colors.ink },
                   ]}
                 >
                   {pickerYear}
@@ -500,11 +501,11 @@ const AttendanceView: React.FC<Props> = ({ userId, name }) => {
                   }
                   style={({ pressed }) => [
                     tw`h-9 w-9 rounded-full items-center justify-center border`,
-                    { borderColor: "#e2e8f0", backgroundColor: "#fff" },
+                    { borderColor: colors.border, backgroundColor: colors.surface },
                     (!canIncYear || pressed) && { opacity: 0.4 },
                   ]}
                 >
-                  <Text style={[tw`font-bold text-base`, { color: "#1F2937" }]}>
+                  <Text style={[tw`font-bold text-base`, { color: colors.ink }]}>
                     ›
                   </Text>
                 </Pressable>
@@ -540,13 +541,13 @@ const AttendanceView: React.FC<Props> = ({ userId, name }) => {
                           ? { backgroundColor: TW.bgSecondary }
                           : isCurrent
                             ? {
-                                backgroundColor: "#FFFBEB",
+                                backgroundColor: colors.warningSoft,
                                 borderWidth: 1.5,
-                                borderColor: "#FFC107",
+                                borderColor: colors.accent,
                               }
                             : isFuture
-                              ? { backgroundColor: "#F9FAFB" }
-                              : { backgroundColor: "#F3F4F6" },
+                              ? { backgroundColor: colors.canvas }
+                              : { backgroundColor: colors.surfaceMuted },
                         pressed && !isFuture && { opacity: 0.8 },
                       ]}
                     >
@@ -554,10 +555,10 @@ const AttendanceView: React.FC<Props> = ({ userId, name }) => {
                         style={[
                           tw`text-sm font-semibold text-center`,
                           isActive
-                            ? { color: "#ffffff" }
+                            ? { color: colors.surface }
                             : isFuture
-                              ? { color: "#CBD5E1" }
-                              : { color: "#1F2937" },
+                              ? { color: colors.borderStrong }
+                              : { color: colors.ink },
                         ]}
                       >
                         {m}
@@ -576,7 +577,7 @@ const AttendanceView: React.FC<Props> = ({ userId, name }) => {
                   pressed && { opacity: 0.85 },
                 ]}
               >
-                <Text style={[tw`font-bold text-base`, { color: "#ffffff" }]}>
+                <Text style={[tw`font-bold text-base`, { color: colors.surface }]}>
                   Done
                 </Text>
               </Pressable>

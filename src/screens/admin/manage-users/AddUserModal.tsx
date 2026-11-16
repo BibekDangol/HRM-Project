@@ -1,3 +1,4 @@
+import { colors } from "@/theme/colors";
 import { Controller, useForm } from "react-hook-form";
 import {
   Keyboard,
@@ -14,7 +15,7 @@ import { addUserSchema } from "@/src/schema/admin/addUserSchema";
 import { UserProfile } from "@/src/types/admin";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRef, useState } from "react";
-import tw from "twrnc";
+import tw from "@/theme/tw";
 import { z } from "zod";
 import { ChevronDown, ChevronUp } from "lucide-react-native";
 
@@ -165,7 +166,7 @@ export default function AddUserModal({
             labelVariant="compact"
             variant="filled"
             placeholder="John"
-            placeholderTextColor="#9CA3AF"
+            placeholderTextColor={colors.subtle}
             value={value}
             onChangeText={onChange}
             onBlur={onBlur}
@@ -189,7 +190,7 @@ export default function AddUserModal({
             labelVariant="compact"
             variant="filled"
             placeholder="Doe"
-            placeholderTextColor="#9CA3AF"
+            placeholderTextColor={colors.subtle}
             value={value}
             onChangeText={onChange}
             onBlur={onBlur}
@@ -213,7 +214,7 @@ export default function AddUserModal({
             labelVariant="compact"
             variant="filled"
             placeholder="example@gmail.com"
-            placeholderTextColor="#9CA3AF"
+            placeholderTextColor={colors.subtle}
             autoCapitalize="none"
             keyboardType="email-address"
             value={value}
@@ -252,9 +253,9 @@ export default function AddUserModal({
                       : "Select Supervisor"}
                 </Text>
                 {showOptions ? (
-                  <ChevronUp size={18} color="#6B7280" />
+                  <ChevronUp size={18} color={colors.muted} />
                 ) : (
-                  <ChevronDown size={18} color="#6B7280" />
+                  <ChevronDown size={18} color={colors.muted} />
                 )}
               </Pressable>
             </View>

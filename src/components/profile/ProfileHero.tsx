@@ -1,3 +1,4 @@
+import { colors } from "@/theme/colors";
 import UploadAvatar from "@/src/screens/profileImage";
 import { TW } from "@/theme/twStyles";
 import { Building2, Trash2 } from "lucide-react-native";
@@ -35,7 +36,7 @@ export default function ProfileHero({
         style={{
           borderRadius: 54,
           borderWidth: 3,
-          borderColor: "rgba(255,255,255,0.3)",
+          borderColor: colors.onPrimaryBorder,
           padding: 3,
         }}
       >
@@ -48,22 +49,24 @@ export default function ProfileHero({
 
           {avatarUrl && (
             <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Remove profile photo"
               onPress={onAvatarRemove}
               style={{
                 position: "absolute",
                 bottom: 0,
                 right: 0,
-                width: 24,
-                height: 24,
+                width: 48,
+                height: 48,
                 backgroundColor: TW.DANGER,
-                borderRadius: 12,
+                borderRadius: 24,
                 borderWidth: 2,
                 borderColor: TW.bgSecondary,
                 alignItems: "center",
                 justifyContent: "center",
               }}
             >
-              <Trash2 size={11} color="#fff" />
+              <Trash2 size={18} color={colors.surface} />
             </Pressable>
           )}
         </View>
@@ -72,7 +75,7 @@ export default function ProfileHero({
       <Text
         style={{
           marginTop: 14,
-          color: "#ffffff",
+          color: colors.surface,
           fontSize: 22,
           fontWeight: "700",
           letterSpacing: -0.5,
@@ -86,8 +89,8 @@ export default function ProfileHero({
           style={{
             marginTop: 8,
             borderWidth: 1.5,
-            borderColor: "rgba(247,164,75,0.5)",
-            backgroundColor: "rgba(247,164,75,0.1)",
+            borderColor: colors.accentHalf,
+            backgroundColor: colors.accentWash,
             paddingHorizontal: 14,
             paddingVertical: 4,
             borderRadius: 20,
@@ -95,8 +98,8 @@ export default function ProfileHero({
         >
           <Text
             style={{
-              color: TW.textTertiary,
-              fontSize: 12,
+              color: colors.surface,
+              fontSize: 14,
               fontWeight: "700",
               letterSpacing: 0.4,
             }}
@@ -115,11 +118,11 @@ export default function ProfileHero({
             gap: 5,
           }}
         >
-          <Building2 size={12} color="rgba(255,255,255,0.5)" strokeWidth={2} />
+          <Building2 size={12} color={colors.onPrimaryHalf} strokeWidth={2} />
           <Text
             style={{
-              color: "rgba(255,255,255,0.65)",
-              fontSize: 13,
+              color: colors.surface,
+              fontSize: 14,
               fontWeight: "600",
             }}
           >

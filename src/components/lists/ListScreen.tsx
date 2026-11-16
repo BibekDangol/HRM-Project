@@ -1,3 +1,4 @@
+import { colors } from "@/theme/colors";
 import { Plus, Search } from "lucide-react-native";
 import React from "react";
 import {
@@ -17,7 +18,7 @@ import HeaderWithSearch from "@/src/components/SearchBar";
 import LoadingState from "@/src/components/states/LoadingState";
 import { Pagination, PaginationVariant } from "./Pagination";
 import { TW } from "@/theme/twStyles";
-import tw from "twrnc";
+import tw from "@/theme/tw";
 
 export type ListScreenTab<K extends string = string> = {
   key: K;
@@ -137,7 +138,7 @@ export function ListScreen<T, K extends string = string>({
     <LoadingState message={loadingMessage} style={tw`py-20`} />
   ) : (
     <EmptyState
-      icon={emptyIcon ?? <Search size={32} color="#94A3B8" />}
+      icon={emptyIcon ?? <Search size={32} color={colors.subtle} />}
       title={emptyTitle}
       message={emptyMessage}
       actionLabel={emptyActionLabel}
@@ -146,7 +147,7 @@ export function ListScreen<T, K extends string = string>({
   );
 
   return (
-    <View style={tw`flex-1 bg-white`}>
+    <View style={tw`flex-1 bg-canvas`}>
       {shouldShowSearch && onSearchChange ? (
         <HeaderWithSearch
           search={search ?? ""}
@@ -204,7 +205,7 @@ export function ListScreen<T, K extends string = string>({
               accessibilityRole="button"
               accessibilityLabel={primaryActionLabel ?? "Add"}
             >
-              {primaryActionIcon ?? <Plus size={22} color="white" strokeWidth={2.5} />}
+              {primaryActionIcon ?? <Plus size={22} color={colors.surface} strokeWidth={2.5} />}
             </Pressable>
           ) : null}
         </View>

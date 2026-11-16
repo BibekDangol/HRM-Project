@@ -1,8 +1,8 @@
+import { colors as appColors } from "@/theme/colors";
 import { TODAY } from "@/src/constants/adminCalendar";
 import { calendarStore, useCalendarStore } from "@/src/utils/adminCalendar";
-import { TW } from "@/theme/twStyles";
 import { Pressable, Text, View } from "react-native";
-import tw from "twrnc";
+import tw from "@/theme/tw";
 
 interface Props {
   date?: { dateString: string; day: number };
@@ -57,28 +57,28 @@ function getTextColor(
     case "selected":
     case "range":
     case "weekend":
-      return "#FFFFFF";
+      return appColors.surface;
 
     case "today":
-      return TW.bgYellow;
+      return appColors.primary;
 
     case "highlighted":
-      return "#1B4A5A";
+      return appColors.primary;
 
     case "event":
-      return "#1B4A5A";
+      return appColors.primary;
 
     case "holiday":
       return colors.publicHoliday;
 
     case "past":
-      return "#94A3B8";
+      return appColors.subtle;
 
     case "disabled":
-      return "#CBD5E1";
+      return appColors.borderStrong;
 
     default:
-      return "#0F172A";
+      return appColors.ink;
   }
 }
 
@@ -91,7 +91,7 @@ function getBgColor(
 
   switch (priority) {
     case "selected":
-      return TW.bgYellow;
+      return appColors.primary;
 
     case "range":
       return rangeColor;
@@ -113,7 +113,7 @@ function getBorderStyle(
     return {
       borderWidth: 2,
       borderRadius: PILL_RADIUS,
-      borderColor: TW.bgYellow,
+      borderColor: appColors.primary,
     };
   }
 
@@ -121,7 +121,7 @@ function getBorderStyle(
     return {
       borderWidth: 2,
       borderRadius: PILL_RADIUS,
-      borderColor: TW.bgYellow,
+      borderColor: appColors.primary,
     };
   }
 
@@ -129,7 +129,7 @@ function getBorderStyle(
     return {
       borderWidth: 1.5,
       borderRadius: PILL_RADIUS,
-      borderColor: "#1B4A5A",
+      borderColor: appColors.primary,
     };
   }
 
@@ -137,7 +137,7 @@ function getBorderStyle(
     return {
       borderWidth: 1.5,
       borderRadius: PILL_RADIUS,
-      borderColor: eventColor || "#1B4A5A",
+      borderColor: eventColor || appColors.primary,
     };
   }
 
@@ -196,7 +196,7 @@ export function DayCell({ date, state, marking, onPress }: Props) {
     ...(cfg?.holidayLabel
       ? [{ id: "holiday", color: store.colors.publicHoliday }]
       : []),
-    ...events.map((ev) => ({ id: ev.id, color: ev.color || "#1B4A5A" })),
+    ...events.map((ev) => ({ id: ev.id, color: ev.color || appColors.primary })),
   ].slice(0, 4);
 
   const showDots =
@@ -214,6 +214,10 @@ export function DayCell({ date, state, marking, onPress }: Props) {
 
   return (
     <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={dateString}
+      accessibilityState={{ disabled: flags.isDisabled, selected: flags.isSelected }}
+      aria-selected={flags.isSelected}
       disabled={flags.isDisabled}
       onPress={() => onPress(dateString)}
       hitSlop={6}
@@ -284,7 +288,7 @@ export function DayCell({ date, state, marking, onPress }: Props) {
             borderStyle,
             flags.isHighlighted &&
               !flags.isSelected && {
-                shadowColor: "#1B4A5A",
+                shadowColor: appColors.primary,
                 shadowOpacity: 0.12,
                 shadowRadius: 6,
                 shadowOffset: { width: 0, height: 2 },

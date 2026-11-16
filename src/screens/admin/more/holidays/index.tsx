@@ -1,3 +1,4 @@
+import { colors } from "@/theme/colors";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 import { DayCell } from "@/src/components/Calendar/DayCell";
@@ -9,7 +10,7 @@ import useCalendarRange from "@/src/hooks/admin/useCalendarRange";
 import { TW } from "@/theme/twStyles";
 import React from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import tw from "twrnc";
+import tw from "@/theme/tw";
 
 interface Props {
   currentUserId: string;
@@ -48,7 +49,7 @@ export default function AdminCalendarScreen({
   };
 
   return (
-    <SafeAreaView style={tw`flex-1 bg-white`}>
+    <SafeAreaView style={tw`flex-1 bg-canvas`}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <SharedCalendar
           year={year}
@@ -75,7 +76,7 @@ export default function AdminCalendarScreen({
             style={{
               margin: 16,
               padding: 12,
-              backgroundColor: "rgba(27,74,90,0.08)",
+              backgroundColor: colors.primaryWash,
               borderRadius: 12,
               flexDirection: "row",
               justifyContent: "space-between",
@@ -86,7 +87,7 @@ export default function AdminCalendarScreen({
             </Text>
 
             <TouchableOpacity onPress={clearRange}>
-              <Text style={{ color: "#EF4444" }}>Cancel</Text>
+              <Text style={{ color: colors.danger }}>Cancel</Text>
             </TouchableOpacity>
           </View>
         )}

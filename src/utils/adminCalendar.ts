@@ -1,3 +1,4 @@
+import { colors } from "@/theme/colors";
 import { useEffect, useState } from "react";
 import {
   CalendarColors,
@@ -43,9 +44,9 @@ let _weekendDows: number[] = weekendArrayToDows(DEFAULT_WEEKENDS); // [0,3]
 
 const DEFAULT_STATE: CalendarState = {
   colors: {
-    publicHoliday: "#EF4444",
-    weekend: "#EF4444",
-    officeDay: "#0f172a",
+    publicHoliday: colors.danger,
+    weekend: colors.danger,
+    officeDay: colors.ink,
   },
   weekendRules: {
     sundayOff: true,

@@ -1,3 +1,4 @@
+import { colors } from "@/theme/colors";
 import { User } from "lucide-react-native";
 import React from "react";
 import { Pressable } from "react-native";
@@ -11,22 +12,25 @@ const HeaderProfileButton: React.FC<HeaderProfileButtonProps> = ({
 }) => {
   return (
     <Pressable
+      accessibilityRole="button"
+      accessibilityLabel="Open profile menu"
+      accessibilityState={{ disabled }}
       disabled={disabled}
       onPress={onPress}
       hitSlop={10}
       style={({ pressed }) => ({
-        height: size,
-        width: size,
-        borderRadius: size / 2,
-        backgroundColor: "rgba(255,255,255,0.15)",
+        height: Math.max(size, 48),
+        width: Math.max(size, 48),
+        borderRadius: Math.max(size, 48) / 2,
+        backgroundColor: colors.onPrimaryWashMedium,
         borderWidth: 2,
-        borderColor: "rgba(255,255,255,0.5)",
+        borderColor: colors.onPrimaryHalf,
         alignItems: "center",
         justifyContent: "center",
         opacity: disabled ? 0.55 : pressed ? 0.75 : 1,
       })}
     >
-      <User size={17} color="#ffffff" />
+      <User size={17} color={colors.surface} />
     </Pressable>
   );
 };

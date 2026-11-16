@@ -1,3 +1,4 @@
+import { colors } from "@/theme/colors";
 import {
   BookUser,
   CalendarFold,
@@ -7,7 +8,7 @@ import {
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 import { TW } from "@/theme/twStyles";
-import tw from "twrnc";
+import tw from "@/theme/tw";
 import { useRouter } from "expo-router";
 
 export default function MoreScreen() {
@@ -35,7 +36,7 @@ export default function MoreScreen() {
   ];
 
   return (
-    <View style={tw`flex-1 bg-white`}>
+    <View style={tw`flex-1 bg-canvas`}>
       <ScrollView
         contentContainerStyle={tw`p-4`}
         showsVerticalScrollIndicator={false}>
@@ -51,8 +52,8 @@ export default function MoreScreen() {
               {/* Left Section */}
               <View style={tw`flex-row items-center`}>
                 <View
-                  style={tw`h-12 w-12 rounded-xl items-center justify-center mr-4 bg-[#E6F1F3]`}>
-                  <Icon size={22} color="#1B4A5A" />
+                  style={tw`h-12 w-12 rounded-xl items-center justify-center mr-4 bg-primarySoft`}>
+                  <Icon size={22} color={colors.primary} />
                 </View>
 
                 <View>
@@ -67,7 +68,7 @@ export default function MoreScreen() {
               </View>
 
               {/* Right Arrow */}
-              <ChevronRight size={20} color="#9ca3af" />
+              <ChevronRight size={20} color={colors.subtle} />
             </TouchableOpacity>
           );
         })}

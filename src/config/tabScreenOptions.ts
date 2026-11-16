@@ -1,3 +1,4 @@
+import { colors } from "@/theme/colors";
 import type { BottomTabNavigationOptions } from "expo-router/build/react-navigation/bottom-tabs";
 
 import { TW } from "@/theme/twStyles";
@@ -8,7 +9,7 @@ export function getTabScreenOptions(pathname: string) {
     headerShadowVisible: false,
     headerTitleAlign: "center",
     headerTitleStyle: {
-      color: "#ffffff",
+      color: colors.surface,
       fontSize: 16,
     },
     headerStyle: {
@@ -18,7 +19,7 @@ export function getTabScreenOptions(pathname: string) {
       height: 100,
     },
     sceneStyle: {
-      backgroundColor: pathname.includes("/profile") ? TW.bgSecondary : "#ffffff",
+      backgroundColor: pathname.includes("/profile") ? TW.bgSecondary : colors.canvas,
     },
   } satisfies BottomTabNavigationOptions;
 }

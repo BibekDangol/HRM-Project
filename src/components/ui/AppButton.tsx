@@ -1,9 +1,10 @@
+import { colors } from "@/theme/colors";
 import type { ReactNode } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import type { StyleProp, TextStyle, ViewStyle } from "react-native";
 
 import { TW } from "@/theme/twStyles";
-import tw from "twrnc";
+import tw from "@/theme/tw";
 
 export type AppButtonVariant = "primary" | "secondary" | "ghost" | "danger";
 export type AppButtonSize = "sm" | "md" | "lg";
@@ -63,13 +64,14 @@ export default function AppButton({
 }: Props) {
   const inactive = disabled || loading;
   const spinnerColor =
-    variant === "primary" || variant === "danger" ? "#FFFFFF" : TW.bgSecondary;
+    variant === "primary" || variant === "danger" ? colors.surface : TW.bgSecondary;
 
   return (
     <Pressable
       onPress={onPress}
       disabled={inactive}
       accessibilityRole="button"
+      aria-busy={loading}
       accessibilityState={{ disabled: inactive, busy: loading }}
       style={({ pressed }) => [
         tw`rounded-xl items-center justify-center flex-row gap-2`,

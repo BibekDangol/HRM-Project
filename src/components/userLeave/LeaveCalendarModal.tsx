@@ -1,7 +1,7 @@
 import React from "react";
 import { Modal, Pressable, View } from "react-native";
 import { SharedCalendar } from "@/src/components/SharedCalendar";
-import tw from "twrnc";
+import tw from "@/theme/tw";
 
 export type LeaveCalendarModalProps = {
   visible: boolean;

@@ -1,3 +1,4 @@
+import { colors } from "@/theme/colors";
 export function firstParam(v?: string | string[]) {
   if (!v) return "";
   return Array.isArray(v) ? String(v[0] ?? "") : String(v);
@@ -29,8 +30,8 @@ export function buildPeriodMarks(start: string, end: string) {
     marks[key] = {
       startingDay: key === start,
       endingDay: key === end,
-      color: "#F59E0B",
-      textColor: "white",
+      color: colors.primary,
+      textColor: colors.surface,
     };
 
     cur.setUTCDate(cur.getUTCDate() + 1);

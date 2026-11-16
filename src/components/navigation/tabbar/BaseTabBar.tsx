@@ -1,3 +1,4 @@
+import { colors } from "@/theme/colors";
 import {
   PlatformPressable,
   useLinkBuilder,
@@ -6,7 +7,6 @@ import { RelativePathString, usePathname, useRouter } from "expo-router";
 import React, { useEffect, useMemo } from "react";
 import {
   Animated,
-  Easing,
   Platform,
   Text,
   View,
@@ -57,28 +57,19 @@ function TabItem({
   buildHref: (name: string, params?: object) => string | undefined;
 }) {
   const scaleAnim = useAnimatedValue(isFocused ? 1 : 0.96);
-  const opacityAnim = useAnimatedValue(isFocused ? 1 : 0.75);
 
   useEffect(() => {
-    Animated.parallel([
-      Animated.spring(scaleAnim, {
-        toValue: isFocused ? 1 : 0.96,
-        useNativeDriver: true,
-        damping: 16,
-        stiffness: 220,
-        mass: 0.8,
-      }),
-      Animated.timing(opacityAnim, {
-        toValue: isFocused ? 1 : 0.75,
-        duration: 180,
-        easing: Easing.out(Easing.ease),
-        useNativeDriver: true,
-      }),
-    ]).start();
-  }, [isFocused, scaleAnim, opacityAnim]);
+    Animated.spring(scaleAnim, {
+      toValue: isFocused ? 1 : 0.96,
+      useNativeDriver: true,
+      damping: 16,
+      stiffness: 220,
+      mass: 0.8,
+    }).start();
+  }, [isFocused, scaleAnim]);
 
   const IconToRender = isFocused ? (cfg.activeIcon ?? cfg.icon) : cfg.icon;
-  const iconColor = isFocused ? "#FFFFFF" : inactiveColor;
+  const iconColor = isFocused ? colors.surface : inactiveColor;
   const badge = (cfg as any).badge as number | string | undefined;
 
   return (
@@ -96,7 +87,6 @@ function TabItem({
           styles.itemContent,
           {
             transform: [{ scale: scaleAnim }],
-            opacity: opacityAnim,
           },
         ]}
       >
@@ -145,9 +135,9 @@ export default function BaseTabBar({
   tabs,
   mode,
   routeGroup,
-  activeColor = "#FFFFFF",
-  inactiveColor = "#98A2B3",
-  activePillColor = "#1B4A5A",
+  activeColor = colors.surface,
+  inactiveColor = colors.subtle,
+  activePillColor = colors.primary,
   closeAllOverlays,
 }: Props) {
   const { buildHref } = useLinkBuilder();
@@ -161,7 +151,7 @@ export default function BaseTabBar({
 
   const tabHeight = isTablet ? 64 : isSmallDevice ? 56 : 60;
   const iconSize = isTablet ? 25 : isSmallDevice ? 20 : 22;
-  const fontSize = isTablet ? 13 : isSmallDevice ? 10 : 11;
+  const fontSize = isTablet ? 14 : isSmallDevice ? 12 : 13;
 
   const visibleRoutes = useMemo(
     () =>
@@ -289,12 +279,12 @@ export default function BaseTabBar({
 const styles = StyleSheet.create({
   container: {
     width: "100%",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.surface,
     borderTopLeftRadius: 0,
     borderTopRightRadius: 0,
     ...Platform.select({
       ios: {
-        shadowColor: "#000",
+        shadowColor: colors.shadow,
         shadowOffset: { width: 0, height: -2 },
         shadowOpacity: 0.06,
         shadowRadius: 8,
@@ -306,7 +296,7 @@ const styles = StyleSheet.create({
   },
   separator: {
     height: StyleSheet.hairlineWidth,
-    backgroundColor: "rgba(0,0,0,0.08)",
+    backgroundColor: colors.separator,
   },
   tabRow: {
     flexDirection: "row",
@@ -318,7 +308,7 @@ const styles = StyleSheet.create({
     top: 7,
     left: 0,
     borderRadius: 24,
-    shadowColor: "#1B4A5A",
+    shadowColor: colors.primary,
     shadowOpacity: 0.16,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 4 },
@@ -345,19 +335,19 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: -4,
     right: -14,
-    backgroundColor: "#FF3B30",
+    backgroundColor: colors.danger,
     borderRadius: 9,
-    minWidth: 18,
-    height: 18,
+    minWidth: 20,
+    height: 20,
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 4,
     borderWidth: 1.5,
-    borderColor: "#fff",
+    borderColor: colors.surface,
   },
   badgeText: {
-    color: "#fff",
-    fontSize: 9,
+    color: colors.surface,
+    fontSize: 11,
     fontWeight: "700",
   },
   label: {

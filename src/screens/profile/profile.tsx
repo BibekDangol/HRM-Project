@@ -1,3 +1,4 @@
+import { colors } from "@/theme/colors";
 import { Mail, User } from "lucide-react-native";
 import { ScrollView, View } from "react-native";
 
@@ -50,7 +51,7 @@ export default function ProfileScreen() {
   return (
     <>
       <ScrollView
-        style={{ flex: 1, backgroundColor: "#ffffff" }}
+        style={{ flex: 1, backgroundColor: colors.surface }}
         contentContainerStyle={{ paddingBottom: 48 }}
         showsVerticalScrollIndicator={false}>
         <ProfileHero

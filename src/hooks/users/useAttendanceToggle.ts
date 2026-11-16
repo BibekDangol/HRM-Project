@@ -22,6 +22,7 @@ export const useAttendanceToggle = () => {
   const { attendanceRules } = useAttendanceNotifications();
 
   const [loadingAttendance, setLoadingAttendance] = useState(false);
+  const [pendingAction, setPendingAction] = useState<"checkin" | "checkout" | null>(null);
   const [attendance, setAttendance] = useState<AttendanceRow | null>(null);
   const [checkedInAt, setCheckedInAt] = useState<Date | null>(null);
   const [now, setNow] = useState(() => Date.now());
@@ -81,6 +82,7 @@ export const useAttendanceToggle = () => {
     }
     try {
       setLoadingAttendance(true);
+      setPendingAction(commentMode);
       if (commentMode === "checkin") await checkIn(comment);
       else await checkOut(comment);
       setCommentModalOpen(false);
@@ -88,14 +90,17 @@ export const useAttendanceToggle = () => {
       setCommentMode(null);
     } catch (err) {
       Alert.alert("Action failed", getErrorMessage(err));
-      fetchLatestAttendance();
+      await fetchLatestAttendance();
     } finally {
       setLoadingAttendance(false);
+      setPendingAction(null);
     }
   }, [commentText, commentMode, checkIn, checkOut, fetchLatestAttendance]);
 
   const onToggleCheck = useCallback(async () => {
     if (isLocked) return;
+    setLoadingAttendance(true);
+    setPendingAction(isCheckedIn ? "checkout" : "checkin");
     try {
       if (!user) throw new Error("Not authenticated.");
       if (!isCheckedIn) {
@@ -113,7 +118,6 @@ export const useAttendanceToggle = () => {
           setCommentModalOpen(true);
           return;
         }
-        setLoadingAttendance(true);
         await checkIn();
         return;
       }
@@ -124,13 +128,13 @@ export const useAttendanceToggle = () => {
         setCommentModalOpen(true);
         return;
       }
-      setLoadingAttendance(true);
       await checkOut();
     } catch (err) {
       Alert.alert("Check action failed", getErrorMessage(err));
-      fetchLatestAttendance();
+      await fetchLatestAttendance();
     } finally {
       setLoadingAttendance(false);
+      setPendingAction(null);
     }
   }, [
     user,
@@ -158,6 +162,7 @@ export const useAttendanceToggle = () => {
   return {
     // state
     isLocked,
+    pendingAction,
     isCheckedIn,
     elapsedMs,
     checkedInAt,

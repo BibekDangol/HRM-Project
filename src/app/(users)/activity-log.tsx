@@ -1,3 +1,4 @@
+import { colors } from "@/theme/colors";
 import { ScrollView, View } from "react-native";
 
 import { ActivityLogSection } from "@/src/components/RecentActivity";
@@ -5,12 +6,12 @@ import React from "react";
 
 export default function ActivityLogPage() {
   return (
-    <View style={{ flex: 1, backgroundColor: "#fff" }}>
+    <View style={{ flex: 1, backgroundColor: colors.surface }}>
       {/* Outside ScrollView = fixed on screen, won't scroll */}
       {/* <BackButton
         floating
         color={TW.bgSecondary}
-        backgroundColor="rgba(27,74,90,0.08)"
+        backgroundColor={colors.primaryWash}
         style={{ marginBottom: 16 }}
         onPress={() => router.back()}
       /> */}

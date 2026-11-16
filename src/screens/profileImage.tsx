@@ -1,10 +1,11 @@
+import { colors } from "@/theme/colors";
 import { MINIO_BUCKET } from "@/src/constants/env";
 import { s3 } from "@/src/lib/s3";
 import * as ImagePicker from "expo-image-picker";
 import React, { useState } from "react";
 import { ActivityIndicator, Alert, Image, Pressable } from "react-native";
 import { Camera } from "lucide-react-native";
-import tw from "twrnc";
+import tw from "@/theme/tw";
 
 type UploadAvatarProps = {
   size?: number;
@@ -58,21 +59,26 @@ export default function UploadAvatar({
 
   return (
     <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={imageUrl ? "Change profile photo" : "Add profile photo"}
+      accessibilityState={{ disabled: loading, busy: loading }}
+      aria-busy={loading}
+      disabled={loading}
       onPress={handleUpload}
       style={[
-        tw`rounded-full bg-[#F2F6FC] border border-[#E5E5E5] items-center justify-center`,
+        tw`rounded-full bg-primarySoft border border-border items-center justify-center`,
         { width: size, height: size },
       ]}
     >
       {loading ? (
-        <ActivityIndicator size="large" color="#0C0C0C" />
+        <ActivityIndicator size="large" color={colors.ink} />
       ) : imageUrl ? (
         <Image
           source={{ uri: imageUrl }}
           style={{ width: size, height: size, borderRadius: size / 2 }}
         />
       ) : (
-        <Camera size={size / 4} color="#0C0C0C" />
+        <Camera size={size / 4} color={colors.ink} />
       )}
     </Pressable>
   );

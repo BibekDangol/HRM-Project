@@ -1,3 +1,4 @@
+import { colors } from "@/theme/colors";
 import { MAX_YEAR, MIN_YEAR, MONTHS } from "@/src/utils/userDashboard";
 import { TW } from "@/theme/twStyles";
 import { ChevronDown, ChevronUp } from "lucide-react-native";
@@ -384,7 +385,7 @@ export function MonthPickerModal({
 
 const s = StyleSheet.create({
   scrim: {
-    backgroundColor: "rgba(0,0,0,0.35)",
+    backgroundColor: colors.overlay,
   },
   centeredContainer: {
     flex: 1,
@@ -412,16 +413,16 @@ const s = StyleSheet.create({
   },
   headerLabel: {
     fontSize: 11,
-    color: "rgba(255,255,255,0.7)",
+    color: colors.onPrimarySoft,
     fontWeight: "600",
     letterSpacing: 1,
     textTransform: "uppercase",
   },
   headerDate: {
     fontSize: 30,
-    color: "#fff",
+    color: colors.surface,
   },
-  divider: { height: 1, backgroundColor: "#EEF2F4" },
+  divider: { height: 1, backgroundColor: colors.border },
   toggleRow: {
     flexDirection: "row",
     justifyContent: "space-between",

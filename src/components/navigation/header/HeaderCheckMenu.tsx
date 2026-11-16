@@ -1,3 +1,4 @@
+import { colors } from "@/theme/colors";
 import { formatElapsed, formatSinceTime } from "@/src/utils/attendanceHelper";
 import { CircleCheck, LogOut } from "lucide-react-native";
 import React, { useEffect, useRef, useState } from "react";
@@ -189,13 +190,18 @@ const HeaderCheckMenu: React.FC<Props> = ({
     <View>
       <View ref={btnRef} collapsable={false}>
         <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={isCheckedIn ? "Attendance: currently working" : "Attendance: checked out"}
+          accessibilityHint="Opens attendance actions"
+          accessibilityState={{ disabled: isLocked, expanded: isOpen }}
+          aria-expanded={isOpen}
           disabled={isLocked}
           onPress={handleTriggerPress}
           hitSlop={10}
           style={({ pressed }) => ({
-            height: 36,
-            width: 36,
-            borderRadius: 18,
+            height: 48,
+            width: 48,
+            borderRadius: 24,
             alignItems: "center",
             justifyContent: "center",
             opacity: pressed ? 0.7 : 1,
@@ -206,7 +212,7 @@ const HeaderCheckMenu: React.FC<Props> = ({
               height: 12,
               width: 12,
               borderRadius: 6,
-              backgroundColor: isCheckedIn ? "#4ADE80" : "#FCA5A5",
+              backgroundColor: isCheckedIn ? colors.successBright : colors.dangerBorder,
             }}
           />
         </Pressable>
@@ -233,13 +239,13 @@ const HeaderCheckMenu: React.FC<Props> = ({
                 <AnimatedDropdown visible={isOpen && hasValidLayout}>
                   <View
                     style={{
-                      borderRadius: 18,
-                      backgroundColor: "#FFFFFF",
+                      borderRadius: 24,
+                      backgroundColor: colors.surface,
                       borderWidth: 1,
-                      borderColor: "#E2E8F0",
+                      borderColor: colors.border,
                       padding: 10,
                       width: CHECK_MENU_WIDTH,
-                      shadowColor: "#000",
+                      shadowColor: colors.shadow,
                       shadowOffset: { width: 0, height: 4 },
                       shadowOpacity: 0.08,
                       shadowRadius: 10,
@@ -250,8 +256,8 @@ const HeaderCheckMenu: React.FC<Props> = ({
                       <View style={{ alignItems: "center" }}>
                         <Text
                           style={{
-                            fontSize: 11,
-                            color: "#64748B",
+                            fontSize: 14,
+                            color: colors.muted,
                             marginBottom: 2,
                           }}
                         >
@@ -262,7 +268,7 @@ const HeaderCheckMenu: React.FC<Props> = ({
                           style={{
                             fontSize: 16,
                             fontWeight: "700",
-                            color: "#0F172A",
+                            color: colors.ink,
                             marginBottom: 8,
                           }}
                         >
@@ -270,6 +276,8 @@ const HeaderCheckMenu: React.FC<Props> = ({
                         </Text>
 
                         <Pressable
+                          accessibilityRole="button"
+                          disabled={isLocked}
                           onPress={onTogglePress}
                           style={({ pressed }) => ({
                             width: "100%",
@@ -277,18 +285,19 @@ const HeaderCheckMenu: React.FC<Props> = ({
                             alignItems: "center",
                             justifyContent: "center",
                             gap: 6,
-                            paddingVertical: 8,
+                            paddingVertical: 12,
+                            minHeight: 48,
                             borderRadius: 12,
-                            backgroundColor: "#FFB300",
+                            backgroundColor: colors.accent,
                             opacity: pressed ? 0.8 : 1,
                           })}
                         >
-                          <LogOut size={14} color="#1F2937" />
+                          <LogOut size={14} color={colors.ink} />
                           <Text
                             style={{
-                              fontSize: 13,
+                              fontSize: 14,
                               fontWeight: "600",
-                              color: "#1F2937",
+                              color: colors.ink,
                             }}
                           >
                             Check Out
@@ -297,24 +306,27 @@ const HeaderCheckMenu: React.FC<Props> = ({
                       </View>
                     ) : (
                       <Pressable
+                        accessibilityRole="button"
+                        disabled={isLocked}
                         onPress={onTogglePress}
                         style={({ pressed }) => ({
                           flexDirection: "row",
                           alignItems: "center",
                           justifyContent: "center",
                           gap: 6,
-                          paddingVertical: 10,
+                          paddingVertical: 12,
+                          minHeight: 48,
                           borderRadius: 12,
-                          backgroundColor: "#FFB300",
+                          backgroundColor: colors.accent,
                           opacity: pressed ? 0.8 : 1,
                         })}
                       >
-                        <CircleCheck size={14} color="#1F2937" />
+                        <CircleCheck size={14} color={colors.ink} />
                         <Text
                           style={{
-                            fontSize: 13,
+                            fontSize: 14,
                             fontWeight: "600",
-                            color: "#1F2937",
+                            color: colors.ink,
                           }}
                         >
                           Check In

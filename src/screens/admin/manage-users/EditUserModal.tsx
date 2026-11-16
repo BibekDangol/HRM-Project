@@ -1,3 +1,4 @@
+import { colors } from "@/theme/colors";
 import { ChevronDown } from "lucide-react-native";
 import React, { useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
@@ -6,7 +7,7 @@ import FormActions from "@/src/components/form/FormActions";
 import ModalShell from "@/src/components/ui/ModalShell";
 import { UserProfile } from "@/src/types/admin";
 import { TW } from "@/theme/twStyles";
-import tw from "twrnc";
+import tw from "@/theme/tw";
 
 interface Props {
   visible: boolean;
@@ -89,7 +90,7 @@ const EditUserModal = ({
                 style={[
                   tw`flex-1 py-3 rounded-xl border items-center`,
                   selected
-                    ? tw`${TW.bgAction} border-[#1B4A5A]`
+                    ? tw`${TW.bgAction} border-primary`
                     : tw`bg-white border-gray-200`,
                   isSubmitting && tw`opacity-60`,
                 ]}
@@ -127,7 +128,7 @@ const EditUserModal = ({
           <Text style={tw`text-sm font-medium ${TW.textPrimary}`}>
             {supervisorName()}
           </Text>
-          <ChevronDown size={18} color="#94a3b8" />
+          <ChevronDown size={18} color={colors.subtle} />
         </Pressable>
 
         {showSupervisorPicker && (

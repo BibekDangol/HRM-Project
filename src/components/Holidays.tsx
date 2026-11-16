@@ -1,3 +1,4 @@
+import { colors } from "@/theme/colors";
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -60,7 +61,7 @@ const EventItemRow = ({ item }: { item: CalendarItem }) => (
     style={{
       paddingVertical: 10,
       borderTopWidth: 1,
-      borderTopColor: "rgba(27,74,90,0.08)",
+      borderTopColor: colors.primaryWash,
     }}
   >
     <Text
@@ -102,8 +103,8 @@ const DateGroupCard = ({
       marginBottom: 12,
       borderRadius: 16,
       borderWidth: 1,
-      borderColor: isHighlighted ? "#BAE6FD" : "rgba(27,74,90,0.08)",
-      backgroundColor: isHighlighted ? "#F0F9FF" : "#fff",
+      borderColor: isHighlighted ? colors.primaryBorder : colors.primaryWash,
+      backgroundColor: isHighlighted ? colors.primarySoft : colors.surface,
       overflow: "hidden",
       opacity: isPast && !isHighlighted ? 0.72 : 1,
     }}
@@ -115,7 +116,7 @@ const DateGroupCard = ({
         justifyContent: "space-between",
         paddingHorizontal: 14,
         paddingVertical: 12,
-        backgroundColor: isHighlighted ? "#E0F2FE" : "rgba(27,74,90,0.04)",
+        backgroundColor: isHighlighted ? colors.primarySoft : colors.primaryWashLight,
       }}
     >
       <View
@@ -131,7 +132,7 @@ const DateGroupCard = ({
             paddingHorizontal: 10,
             paddingVertical: 8,
             borderRadius: 10,
-            backgroundColor: isHighlighted ? "#fff" : "rgba(27,74,90,0.08)",
+            backgroundColor: isHighlighted ? colors.surface : colors.primaryWash,
             alignItems: "center",
           }}
         >
@@ -180,7 +181,7 @@ const DateGroupCard = ({
         >
           <Text
             style={{
-              color: "#fff",
+              color: colors.surface,
               fontSize: 10,
               fontWeight: "700",
             }}
@@ -197,7 +198,7 @@ const DateGroupCard = ({
           key={item.id}
           style={{
             borderTopWidth: index === 0 ? 0 : 1,
-            borderTopColor: "rgba(27,74,90,0.08)",
+            borderTopColor: colors.primaryWash,
           }}
         >
           <EventItemRow item={item} />
@@ -228,7 +229,7 @@ const FilterModal = ({
       onPress={onClose}
       style={{
         flex: 1,
-        backgroundColor: "rgba(0,0,0,0.35)",
+        backgroundColor: colors.overlay,
         justifyContent: "center",
         alignItems: "center",
         padding: 32,
@@ -239,10 +240,10 @@ const FilterModal = ({
         style={{
           width: "100%",
           maxWidth: 300,
-          backgroundColor: "#fff",
+          backgroundColor: colors.surface,
           borderRadius: 22,
           padding: 24,
-          shadowColor: "#000",
+          shadowColor: colors.shadow,
           shadowOpacity: 0.12,
           shadowRadius: 16,
           shadowOffset: { width: 0, height: 4 },
@@ -281,12 +282,12 @@ const FilterModal = ({
                 marginBottom: 8,
                 backgroundColor: active
                   ? TW.bgSecondary
-                  : "rgba(27,74,90,0.06)",
+                  : colors.primaryWashMedium,
               }}
             >
               <Text
                 style={{
-                  color: active ? "#fff" : TW.bgSecondary,
+                  color: active ? colors.surface : TW.bgSecondary,
                   fontSize: 14,
                   fontWeight: active ? "700" : "400",
                 }}
@@ -300,7 +301,7 @@ const FilterModal = ({
                     width: 8,
                     height: 8,
                     borderRadius: 4,
-                    backgroundColor: "#fff",
+                    backgroundColor: colors.surface,
                   }}
                 />
               )}
@@ -440,7 +441,7 @@ export default function HolidaysEventsScreen() {
 
   return (
     <>
-      <View style={{ flex: 1, backgroundColor: "#fff" }}>
+      <View style={{ flex: 1, backgroundColor: colors.surface }}>
         <View
           style={{
             flexDirection: "row",
@@ -450,8 +451,8 @@ export default function HolidaysEventsScreen() {
             paddingTop: 10,
             paddingBottom: 12,
             borderBottomWidth: 1,
-            borderBottomColor: "rgba(27,74,90,0.08)",
-            backgroundColor: "#fff",
+            borderBottomColor: colors.primaryWash,
+            backgroundColor: colors.surface,
           }}
         >
           <Pressable
@@ -460,7 +461,7 @@ export default function HolidaysEventsScreen() {
               flexDirection: "row",
               alignItems: "center",
               gap: 5,
-              backgroundColor: "rgba(27,74,90,0.08)",
+              backgroundColor: colors.primaryWash,
               paddingHorizontal: 12,
               paddingVertical: 6,
               borderRadius: 20,

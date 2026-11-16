@@ -1,3 +1,4 @@
+import { colors } from "@/theme/colors";
 import type { ReactNode } from "react";
 import {
   ActivityIndicator,
@@ -15,7 +16,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { TW } from "@/theme/twStyles";
 import { X } from "lucide-react-native";
-import tw from "twrnc";
+import tw from "@/theme/tw";
 
 type Props = {
   visible: boolean;
@@ -108,7 +109,7 @@ export default function ModalShell({
               </Text>
             ) : null}
             {subtitle ? (
-              <Text style={tw`text-xs text-gray-500 mt-1`}>{subtitle}</Text>
+              <Text style={tw`text-sm text-muted mt-1`}>{subtitle}</Text>
             ) : null}
           </View>
 
@@ -119,11 +120,11 @@ export default function ModalShell({
               accessibilityRole="button"
               accessibilityLabel="Close"
               style={({ pressed }) => [
-                tw`h-9 w-9 rounded-full bg-gray-100 items-center justify-center`,
+                tw`h-12 w-12 rounded-full bg-gray-100 items-center justify-center`,
                 (pressed || closeDisabled) && tw`opacity-60`,
               ]}
             >
-              <X size={18} color="#475569" />
+              <X size={18} color={colors.muted} />
             </Pressable>
           ) : null}
         </View>

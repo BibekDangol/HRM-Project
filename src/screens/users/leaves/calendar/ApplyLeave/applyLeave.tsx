@@ -1,17 +1,18 @@
-import { ActivityIndicator, Pressable, Text, View } from "react-native";
+import AppButton from "@/src/components/ui/AppButton";
+import { LeaveRequestSummary } from "@/src/components/userLeave/LeaveRequestSummary";
+import { Text, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { LeaveCalendarModal } from "@/src/components/userLeave/LeaveCalendarModal";
 import { LeaveFormFields } from "@/src/components/userLeave/LeaveFormFields";
 import React from "react";
 import { TW } from "@/theme/twStyles";
-import tw from "twrnc";
+import tw from "@/theme/tw";
 import { useLeaveForm } from "@/src/hooks/users/useLeaveForm";
 import { useRouter } from "expo-router";
 
 const SPACING = {
   screenX: 16,
   top: 18,
-  buttonY: 12,
 };
 
 export default function ApplyLeaveScreen() {
@@ -30,6 +31,8 @@ export default function ApplyLeaveScreen() {
     localEndDate,
     dateError,
     submitting,
+    computedDaysCount,
+    selectedType,
     calendarVisible,
     calYear,
     calMonth,
@@ -51,7 +54,7 @@ export default function ApplyLeaveScreen() {
   });
 
   return (
-    <View style={tw`flex-1 bg-white`}>
+    <View style={tw`flex-1 bg-canvas`}>
       <KeyboardAwareScrollView
         enableOnAndroid
         extraScrollHeight={24}
@@ -93,58 +96,27 @@ export default function ApplyLeaveScreen() {
           onHalfDayChange={handleHalfDayChange}
         />
 
-        <View style={tw`mt-2 flex-row gap-3`}>
-          <Pressable
+        <LeaveRequestSummary
+          days={computedDaysCount}
+          leaveType={selectedType}
+          loading={loadingTypes}
+        />
+
+        <View style={tw`mt-2 flex-row flex-wrap gap-3`}>
+          <AppButton
+            title="Cancel"
+            variant="secondary"
             disabled={submitting}
             onPress={() => router.replace("/(users)/leaves/(tabs)")}
-            style={({ pressed }) => ({
-              flex: 1,
-              borderWidth: 1.5,
-              borderColor: "#CBD5E1",
-              borderRadius: 10,
-              paddingVertical: SPACING.buttonY,
-              alignItems: "center",
-              backgroundColor: "#ffffff",
-              opacity: pressed || submitting ? 0.6 : 1,
-            })}
-          >
-            <Text
-              style={{
-                fontSize: 14,
-                fontWeight: "600",
-                color: "#64748B",
-              }}
-            >
-              Cancel
-            </Text>
-          </Pressable>
-
-          <Pressable
-            disabled={submitting}
+            style={{ flexGrow: 1, flexBasis: 140 }}
+          />
+          <AppButton
+            title="Submit request"
+            loadingTitle="Submitting…"
+            loading={submitting}
             onPress={handleSubmitPress}
-            style={({ pressed }) => ({
-              flex: 1,
-              backgroundColor: TW.bgSecondary,
-              borderRadius: 10,
-              paddingVertical: SPACING.buttonY,
-              alignItems: "center",
-              flexDirection: "row",
-              justifyContent: "center",
-              gap: 8,
-              opacity: submitting ? 0.55 : pressed ? 0.8 : 1,
-            })}
-          >
-            {submitting && <ActivityIndicator size="small" color="#ffffff" />}
-            <Text
-              style={{
-                fontSize: 14,
-                fontWeight: "700",
-                color: "#ffffff",
-              }}
-            >
-              {submitting ? "Submitting" : "Submit"}
-            </Text>
-          </Pressable>
+            style={{ flexGrow: 1, flexBasis: 140 }}
+          />
         </View>
       </KeyboardAwareScrollView>
 

@@ -1,9 +1,10 @@
+import { colors } from "@/theme/colors";
 import { ChevronRight, Pencil, Trash2 } from "lucide-react-native";
 import { Alert, Image, Pressable, Text, View } from "react-native";
 
 import { UserProfile } from "@/src/types/admin";
 import { TW } from "@/theme/twStyles";
-import tw from "twrnc";
+import tw from "@/theme/tw";
 import Capsule from "../../../components/Capsule";
 
 type Props = {
@@ -63,7 +64,7 @@ export const UserCard = ({
             </Text>
           </View>
         </View>
-        {showRightArrow && <ChevronRight size={20} color="#9ca3af" />}
+        {showRightArrow && <ChevronRight size={20} color={colors.subtle} />}
         {/* Action Buttons */}
         {(onEdit || onDelete) && (
           <View style={tw`flex-row gap-2`}>

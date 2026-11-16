@@ -1,3 +1,4 @@
+import { colors } from "@/theme/colors";
 import { Tabs, usePathname, useRouter } from "expo-router";
 import { LucideIcon } from "lucide-react-native";
 import { useState } from "react";
@@ -59,7 +60,7 @@ export default function AdminLayout() {
             fontWeight: "600",
           },
           tabBarStyle: {
-            backgroundColor: "#fff",
+            backgroundColor: colors.surface,
           },
           headerTitleContainerStyle: {
             justifyContent: "center",
@@ -103,20 +104,20 @@ export default function AdminLayout() {
                     width: 32,
                     height: 32,
                     borderRadius: 12,
-                    backgroundColor: "rgba(255,255,255,0.2)",
+                    backgroundColor: colors.onPrimaryWashStrong,
                     alignItems: "center",
                     justifyContent: "center",
                   }}
                 >
                   <Text
-                    style={{ color: "#fff", fontSize: 13, fontWeight: "700" }}
+                    style={{ color: colors.surface, fontSize: 13, fontWeight: "700" }}
                   >
                     {currentUserProfile?.first_name?.charAt(0)?.toUpperCase() ??
                       "A"}
                   </Text>
                 </View>
                 <Text
-                  style={{ color: "#fff", fontSize: 16, fontWeight: "700" }}
+                  style={{ color: colors.surface, fontSize: 16, fontWeight: "700" }}
                 >
                   {currentUserProfile?.first_name ?? "Admin"}
                 </Text>

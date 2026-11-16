@@ -1,6 +1,7 @@
+import { colors } from "@/theme/colors";
 import { COLOR_PRESETS } from "@/src/constants/adminCalendar";
 import { TouchableOpacity, View } from "react-native";
-import tw from "twrnc";
+import tw from "@/theme/tw";
 
 export function ColorPicker({
   value,
@@ -19,7 +20,7 @@ export function ColorPicker({
             tw`w-8 h-8 rounded-full border-2`,
             {
               backgroundColor: c,
-              borderColor: value === c ? "#0f172a" : "transparent",
+              borderColor: value === c ? colors.ink : "transparent",
             },
           ]}
         />

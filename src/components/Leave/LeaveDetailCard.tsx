@@ -1,7 +1,7 @@
 import { Leave } from "@/src/services/leave.service";
 import React from "react";
 import { ScrollView, Text, View } from "react-native";
-import tw from "twrnc";
+import tw from "@/theme/tw";
 
 export type LeaveDetailCardProps = {
   leave: Leave;

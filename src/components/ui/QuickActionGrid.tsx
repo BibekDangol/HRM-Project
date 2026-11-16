@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 
 import { TW } from "@/theme/twStyles";
-import tw from "twrnc";
+import tw from "@/theme/tw";
 
 export type QuickActionItem = {
   label: string;
@@ -29,11 +29,13 @@ export default function QuickActionGrid({
         {items.map((item) => (
           <TouchableOpacity
             key={item.label}
+            accessibilityRole="button"
+            accessibilityLabel={item.label}
             onPress={item.onPress}
-            style={tw`w-[48%] ${TW.bgCards} p-4 rounded-xl mb-3 items-center`}
+            style={tw`w-[48%] ${TW.bgCards} p-4 rounded-xl mb-3 items-center min-h-[96px] justify-center`}
           >
             {item.icon}
-            <Text style={tw`${TW.textPrimary} mt-2 font-medium`}>
+            <Text style={tw`${TW.textPrimary} mt-2 text-sm text-center font-medium`}>
               {item.label}
             </Text>
           </TouchableOpacity>
