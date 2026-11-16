@@ -4,8 +4,8 @@ import AppHeaderRight from "@/src/components/navigation/header/AppHeaderRight";
 import HeaderCheckMenu from "@/src/components/navigation/header/HeaderCheckMenu";
 import { useAttendanceContext } from "@/src/context/AttendanceContext";
 import { useUserHeaderController } from "@/src/hooks/navigation/useUserHeaderController";
-import { useAdminHeaderMenu } from "@/src/hooks/useHeaderMenu";
-import { TW } from "@/theme/twStyles";
+import { useHeaderMenu } from "@/src/hooks/useHeaderMenu";
+import { getTabScreenOptions } from "@/src/config/tabScreenOptions";
 import MyTabBar from "@/src/components/navigation/tabbar/UserTabBar";
 import ReasonModel from "./ReasonModel";
 
@@ -13,7 +13,8 @@ export default function LayoutInner() {
   const att = useAttendanceContext();
   const router = useRouter();
   const pathname = usePathname();
-  const menu = useAdminHeaderMenu();
+  const sharedOptions = getTabScreenOptions(pathname);
+  const menu = useHeaderMenu();
 
   const {
     checkOpen,
@@ -46,27 +47,16 @@ export default function LayoutInner() {
 
       <Tabs
         screenOptions={{
-          headerShown: true,
-          headerTitleAlign: "center",
+          ...sharedOptions,
           sceneStyle: {
-              flex: 1,  
-            backgroundColor: pathname?.includes("/profile")
-              ? TW.bgSecondary
-              : "#ffffff",
-          },
-          headerStyle: {
-            backgroundColor: TW.bgSecondary,
-            borderBottomLeftRadius: 30,
-            borderBottomRightRadius: 30,
-            height: 100,
+            ...sharedOptions.sceneStyle,
+            flex: 1,
           },
           headerTitleStyle: {
-            color: "#ffffff",
+            ...sharedOptions.headerTitleStyle,
             fontWeight: "bold",
-            fontSize: 16,
             paddingBottom: 8,
           },
-          headerShadowVisible: false,
           headerLeft: () => (
             <AppHeaderLeft visible={showBackButton} onPress={handleBackPress} />
           ),
@@ -76,7 +66,7 @@ export default function LayoutInner() {
               isLocked={att.isLocked}
               profileMenuOpen={menu.open}
               onProfileTrigger={handleProfileTrigger}
-              onProfileClose={menu.close ?? (() => {})}
+              onProfileClose={menu.close}
               onProfilePress={handleProfilePress}
               onLogoutPress={onLogout}
             >

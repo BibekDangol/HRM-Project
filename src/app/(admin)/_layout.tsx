@@ -6,9 +6,10 @@ import { StatusBar, Text, View } from "react-native";
 import AppHeaderLeft from "@/src/components/navigation/header/AppHeaderLeft";
 import AppHeaderRight from "@/src/components/navigation/header/AppHeaderRight";
 import { adminTabs } from "@/src/config/adminTabs";
+import { getTabScreenOptions } from "@/src/config/tabScreenOptions";
 import { useAdminHeaderController } from "@/src/hooks/navigation/useAdminHeaderController";
 import { useDimension } from "@/src/hooks/useDimension";
-import { useAdminHeaderMenu } from "@/src/hooks/useHeaderMenu";
+import { useHeaderMenu } from "@/src/hooks/useHeaderMenu";
 import AdminTabBar from "@/src/components/navigation/tabbar/AdminTabBar";
 import { TW } from "@/theme/twStyles";
 
@@ -21,7 +22,8 @@ type AdminTabItem = {
 export default function AdminLayout() {
   const router = useRouter();
   const pathname = usePathname();
-  const menu = useAdminHeaderMenu();
+  const sharedOptions = getTabScreenOptions(pathname);
+  const menu = useHeaderMenu();
   const { isTablet, isSmallPhone } = useDimension();
   const buttonSize = isTablet ? 42 : isSmallPhone ? 32 : 36;
   const typedAdminTabs = adminTabs as readonly AdminTabItem[];
@@ -50,28 +52,14 @@ export default function AdminLayout() {
       <Tabs
         backBehavior="initialRoute"
         screenOptions={{
-          headerShown: true,
-          headerShadowVisible: false,
-          headerTitleAlign: "center",
+          ...sharedOptions,
           headerTitleStyle: {
-            color: "#fff",
+            ...sharedOptions.headerTitleStyle,
             textAlign: "center",
-            fontSize: 16,
             fontWeight: "600",
-          },
-          sceneStyle: {
-            backgroundColor: pathname.includes("/profile")
-              ? TW.bgSecondary
-              : "#fff",
           },
           tabBarStyle: {
             backgroundColor: "#fff",
-          },
-          headerStyle: {
-            backgroundColor: TW.bgSecondary,
-            borderBottomLeftRadius: 30,
-            borderBottomRightRadius: 30,
-            height: 100,
           },
           headerTitleContainerStyle: {
             justifyContent: "center",

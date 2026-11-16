@@ -1,21 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
-import { Alert, BackHandler } from "react-native";
+import { BackHandler } from "react-native";
 
-import { fetchCurrentUserProfleService } from "@/src/services/currentuser.service";
-import { useAuthStore } from "@/src/store/useAuthStore";
-import { useUsersStore } from "@/src/store/useUsersStore";
-import { supabase } from "@/src/supabase/supabaseClient";
-import { getErrorMessage } from "@/src/utils/attendanceHelper";
+import type { HeaderMenu } from "@/src/hooks/useHeaderMenu";
 import { useIsRootTab } from "./useIsRootTab";
 
 type Params = {
   pathname: string;
   router: any;
-  menu: {
-    open: boolean;
-    toggle: () => void;
-    close?: () => void;
-  };
+  menu: HeaderMenu;
   att: {
     isLocked: boolean;
     onToggleCheck: () => Promise<void> | void;
@@ -41,8 +33,6 @@ export function useUserHeaderController({
   menu,
   att,
 }: Params) {
-  const signOut = useAuthStore((s) => s.signOut);
-  const { setCurrentUserProfile } = useUsersStore();
   const [checkOpen, setCheckOpen] = useState(false);
 
   const isRootTab = useIsRootTab({
@@ -51,20 +41,6 @@ export function useUserHeaderController({
   });
 
   const showBackButton = !isRootTab;
-
-  useEffect(() => {
-    const loadCurrentUser = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) return;
-      const profile = await fetchCurrentUserProfleService(user.id);
-      setCurrentUserProfile(profile);
-    };
-
-    loadCurrentUser();
-  }, [setCurrentUserProfile]);
 
   const handleBackPress = useCallback(() => {
     if (router.canGoBack()) {
@@ -90,27 +66,22 @@ export function useUserHeaderController({
 
   const closeAllMenus = useCallback(() => {
     setCheckOpen(false);
-    menu.close?.();
+    menu.close();
   }, [menu]);
 
   const onLogout = useCallback(async () => {
-    try {
-      closeAllMenus();
-      await signOut();
-      router.replace("/(auth)/login");
-    } catch (e: unknown) {
-      Alert.alert("Logout failed", getErrorMessage(e));
-    }
-  }, [closeAllMenus, signOut, router]);
+    closeAllMenus();
+    await menu.logout();
+  }, [closeAllMenus, menu]);
 
   const handleCheckTrigger = useCallback(() => {
     if (att.isLocked) return;
-    menu.close?.();
+    menu.close();
     setCheckOpen((v) => !v);
   }, [att.isLocked, menu]);
 
   const handleProfilePress = useCallback(() => {
-    menu.close?.();
+    menu.close();
     router.push("/(users)/profile");
   }, [menu, router]);
 

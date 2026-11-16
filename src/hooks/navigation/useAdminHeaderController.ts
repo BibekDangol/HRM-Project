@@ -1,20 +1,13 @@
 import { useCallback, useEffect } from "react";
 import { BackHandler } from "react-native";
 
-import { fetchCurrentUserProfleService } from "@/src/services/currentuser.service";
-import { useAuthStore } from "@/src/store/useAuthStore";
-import { useUsersStore } from "@/src/store/useUsersStore";
+import type { HeaderMenu } from "@/src/hooks/useHeaderMenu";
 import { useIsRootTab } from "./useIsRootTab";
 
 type Params = {
   pathname: string;
   router: any;
-  menu: {
-    open: boolean;
-    toggle: () => void;
-    close: () => void;
-    logout: () => void;
-  };
+  menu: HeaderMenu;
   isLocked: boolean;
 };
 
@@ -52,27 +45,12 @@ export function useAdminHeaderController({
   menu,
   isLocked,
 }: Params) {
-  const { user } = useAuthStore();
-  const { currentUserProfile, setCurrentUserProfile } = useUsersStore();
-  const userId = user?.id;
-
   const isRootTab = useIsRootTab({
     pathname,
     rootPaths: ADMIN_ROOT_TAB_PATHS,
   });
 
   const showBackButton = !isRootTab;
-
-  const fetchUserProfile = useCallback(async () => {
-    if (!userId || currentUserProfile) return;
-
-    const profile = await fetchCurrentUserProfleService(userId);
-    setCurrentUserProfile(profile);
-  }, [userId, currentUserProfile, setCurrentUserProfile]);
-
-  useEffect(() => {
-    fetchUserProfile();
-  }, [fetchUserProfile]);
 
   const handleBackPress = useCallback(() => {
     // Main tab screens should always go to dashboard
@@ -120,7 +98,7 @@ export function useAdminHeaderController({
   }, [menu, router]);
 
   return {
-    currentUserProfile,
+    currentUserProfile: menu.currentUserProfile,
     showBackButton,
     handleBackPress,
     handleProfileTrigger,

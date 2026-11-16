@@ -32,7 +32,6 @@ fixes, and creates or updates the two named cron jobs in one transaction. Existi
 attendance and summary records are preserved. This replaces the separate setup
 and corrective SQL steps for manual deployment; do not run them again afterward.
 
-Then run `supabase/tests/attendance_stats_security.sql` to verify access controls.
 Like any manual SQL deployment, this does not update Supabase CLI migration history.
 
 ### 1. Apply Migration
@@ -54,20 +53,6 @@ For existing installations, run these files in order in SQL Editor as `postgres`
 Skip the first file if you already applied it. Do not rerun the original
 `20261020000001` setup migration on an existing installation. Scheduled jobs keep
 their existing names and times. Applying the fixes does not rewrite past records.
-
-After applying migrations to a local/test database, run the privilege checks:
-
-```bash
-psql "$TEST_DATABASE_URL" -v ON_ERROR_STOP=1 -f supabase/tests/attendance_stats_security.sql
-```
-
-The isolated migration regression test also verifies timezone boundaries,
-leave quantities, holiday handling, backfill repeatability, and organization access:
-
-```bash
-npm install --prefix /tmp/hrm-sql-test --no-package-lock --ignore-scripts @electric-sql/pglite
-PGLITE_MODULE=/tmp/hrm-sql-test/node_modules/@electric-sql/pglite node --test scripts/database-regressions.test.cjs
-```
 
 To correct stored summary totals after applying the migrations, run
 `backfill_daily_attendance_stats` for the actual historical period you need.

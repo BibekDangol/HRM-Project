@@ -17,7 +17,7 @@ import { ActivityLogSection } from "@/src/components/RecentActivity";
 import { useAttendanceContext } from "@/src/context/AttendanceContext";
 import { useAttendanceStats } from "@/src/hooks/users/useAttendanceStats";
 import { useCalendar } from "@/src/hooks/users/useCalendar";
-import { useProfile } from "@/src/hooks/users/useProfile";
+import { useProfile } from "@/src/hooks/useProfile";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { router } from "expo-router";
 import { CalendarDays } from "lucide-react-native";
