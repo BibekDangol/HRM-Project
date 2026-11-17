@@ -1,7 +1,5 @@
+import { AppHeaderLeft, AppHeaderRight, HeaderCheckMenu } from "@/src/components/navigation/header/AppHeader";
 import { Tabs, usePathname, useRouter } from "expo-router";
-import AppHeaderLeft from "@/src/components/navigation/header/AppHeaderLeft";
-import AppHeaderRight from "@/src/components/navigation/header/AppHeaderRight";
-import HeaderCheckMenu from "@/src/components/navigation/header/HeaderCheckMenu";
 import { useAttendanceContext } from "@/src/context/AttendanceContext";
 import { useUserHeaderController } from "@/src/hooks/navigation/useUserHeaderController";
 import { useHeaderMenu } from "@/src/hooks/useHeaderMenu";

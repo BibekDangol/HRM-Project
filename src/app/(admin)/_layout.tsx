@@ -1,11 +1,10 @@
+import { AppHeaderLeft, AppHeaderRight } from "@/src/components/navigation/header/AppHeader";
 import { colors } from "@/theme/colors";
 import { Tabs, usePathname, useRouter } from "expo-router";
 import { LucideIcon } from "lucide-react-native";
 import { useState } from "react";
 import { StatusBar, Text, View } from "react-native";
 
-import AppHeaderLeft from "@/src/components/navigation/header/AppHeaderLeft";
-import AppHeaderRight from "@/src/components/navigation/header/AppHeaderRight";
 import { adminTabs } from "@/src/config/adminTabs";
 import { getTabScreenOptions } from "@/src/config/tabScreenOptions";
 import { useAdminHeaderController } from "@/src/hooks/navigation/useAdminHeaderController";

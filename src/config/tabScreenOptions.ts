@@ -14,8 +14,6 @@ export function getTabScreenOptions(pathname: string) {
     },
     headerStyle: {
       backgroundColor: TW.bgSecondary,
-      borderBottomLeftRadius: 30,
-      borderBottomRightRadius: 30,
       height: 100,
     },
     sceneStyle: {
