@@ -5,7 +5,7 @@ import { TW } from "@/theme/twStyles";
 
 export function getTabScreenOptions(pathname: string) {
   return {
-    headerShown: true,
+    headerShown: false,
     headerShadowVisible: false,
     headerTitleAlign: "center",
     headerTitleStyle: {

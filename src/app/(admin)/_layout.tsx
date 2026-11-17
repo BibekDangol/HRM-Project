@@ -1,4 +1,4 @@
-import { AppHeaderLeft, AppHeaderRight } from "@/src/components/navigation/header/AppHeader";
+import { AppHeaderLeft, AppHeaderRight, AppScreenLayout } from "@/src/components/navigation/header/AppHeader";
 import { colors } from "@/theme/colors";
 import { Tabs, usePathname, useRouter } from "expo-router";
 import { LucideIcon } from "lucide-react-native";
@@ -47,10 +47,22 @@ export default function AdminLayout() {
 
   return (
     <>
-      <StatusBar barStyle="light-content" backgroundColor={TW.bgSecondary} />
+      <StatusBar
+        barStyle={pathname === "/dashboard" || pathname.includes("/profile") ? "light-content" : "dark-content"}
+        backgroundColor={pathname === "/dashboard" || pathname.includes("/profile") ? TW.bgSecondary : colors.canvas}
+      />
 
       <Tabs
         backBehavior="initialRoute"
+        screenLayout={({ children, route }) => (
+          <AppScreenLayout
+            isHome={route.name === "dashboard"}
+            backgroundColor={sharedOptions.sceneStyle.backgroundColor}
+            onBack={!pathname.endsWith("/attendance-list") && (showBackButton || route.name === "profile" || route.name === "holidays") ? handleBackPress : undefined}
+          >
+            {children}
+          </AppScreenLayout>
+        )}
         screenOptions={{
           ...sharedOptions,
           headerTitleStyle: {
@@ -94,6 +106,7 @@ export default function AdminLayout() {
           name="dashboard"
           options={{
             title: "Dashboard",
+            headerShown: true,
             headerTitle: () => (
               <View
                 style={{ flexDirection: "row", alignItems: "center", gap: 10 }}

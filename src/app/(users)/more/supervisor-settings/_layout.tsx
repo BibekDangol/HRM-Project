@@ -2,7 +2,7 @@ import { Stack } from "expo-router";
 
 const supervisor_layout = () => {
   return (
-    <Stack>
+    <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen
         name="attendance-list/index"

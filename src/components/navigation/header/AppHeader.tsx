@@ -1,4 +1,5 @@
 import { colors } from "@/theme/colors";
+import { BackButton } from "@/src/components/BackButton";
 import { formatElapsed, formatSinceTime } from "@/src/utils/attendanceHelper";
 import { ChevronLeft, CircleCheck, LogOut, User, UserCircle } from "lucide-react-native";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -13,8 +14,33 @@ import {
   View,
   useAnimatedValue,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { getDropdownPosition, type AnchorLayout } from "../common/getDropdownPosition";
+
+export function AppScreenLayout({
+  isHome,
+  onBack,
+  backgroundColor = colors.canvas,
+  children,
+}: {
+  isHome: boolean;
+  onBack?: () => void;
+  backgroundColor?: string;
+  children: React.ReactNode;
+}) {
+  if (isHome) return <>{children}</>;
+
+  return (
+    <SafeAreaView edges={["top", "left", "right"]} style={{ flex: 1, backgroundColor }}>
+      {onBack ? (
+        <View style={{ paddingHorizontal: 12, paddingVertical: 4 }}>
+          <BackButton onPress={onBack} color={backgroundColor === colors.primary ? colors.surface : colors.primary} />
+        </View>
+      ) : null}
+      {children}
+    </SafeAreaView>
+  );
+}
 
 export type HeaderVariant = "admin" | "user";
 

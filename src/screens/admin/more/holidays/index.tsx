@@ -49,7 +49,7 @@ export default function AdminCalendarScreen({
   };
 
   return (
-    <SafeAreaView style={tw`flex-1 bg-canvas`}>
+    <SafeAreaView edges={["bottom"]} style={tw`flex-1 bg-canvas`}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <SharedCalendar
           year={year}

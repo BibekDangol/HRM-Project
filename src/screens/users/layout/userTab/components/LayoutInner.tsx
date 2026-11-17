@@ -1,4 +1,5 @@
-import { AppHeaderLeft, AppHeaderRight, HeaderCheckMenu } from "@/src/components/navigation/header/AppHeader";
+import { AppHeaderLeft, AppHeaderRight, AppScreenLayout, HeaderCheckMenu } from "@/src/components/navigation/header/AppHeader";
+import { StatusBar } from "expo-status-bar";
 import { Tabs, usePathname, useRouter } from "expo-router";
 import { useAttendanceContext } from "@/src/context/AttendanceContext";
 import { useUserHeaderController } from "@/src/hooks/navigation/useUserHeaderController";
@@ -32,6 +33,7 @@ export default function LayoutInner() {
 
   return (
     <>
+      <StatusBar style={pathname === "/dashboard" || pathname.includes("/profile") ? "light" : "dark"} />
       <ReasonModel
         commentModalOpen={att.commentModalOpen}
         isLocked={att.isLocked}
@@ -44,6 +46,17 @@ export default function LayoutInner() {
       />
 
       <Tabs
+        screenLayout={({ children, route }) => (
+          <AppScreenLayout
+            isHome={route.name === "dashboard"}
+            backgroundColor={sharedOptions.sceneStyle.backgroundColor}
+            onBack={!pathname.endsWith("/attendance-list") && (showBackButton || ["profile/index", "holidays", "activity-log"].includes(route.name)) ? () => {
+              if (!handleBackPress()) router.replace("/(users)/dashboard");
+            } : undefined}
+          >
+            {children}
+          </AppScreenLayout>
+        )}
         screenOptions={{
           ...sharedOptions,
           sceneStyle: {
@@ -82,7 +95,7 @@ export default function LayoutInner() {
         }}
         tabBar={(props) => <MyTabBar {...props} />}
       >
-        <Tabs.Screen name="dashboard" options={{ title: "Dashboard" }} />
+        <Tabs.Screen name="dashboard" options={{ title: "Dashboard", headerShown: true }} />
         <Tabs.Screen name="leaves" options={{ title: "Leaves" }} />
         <Tabs.Screen
           name="profile/index"
