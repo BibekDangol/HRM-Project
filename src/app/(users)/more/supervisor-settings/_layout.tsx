@@ -1,8 +1,9 @@
+import { colors } from "@/theme/colors";
 import { Stack } from "expo-router";
 
 const supervisor_layout = () => {
   return (
-    <Stack screenOptions={{ headerShown: false }}>
+    <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.canvas } }}>
       <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen
         name="attendance-list/index"

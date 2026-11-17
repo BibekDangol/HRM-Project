@@ -1,3 +1,4 @@
+import TempPasswordContent from "./TempPasswordContent";
 import { colors } from "@/theme/colors";
 import { Controller, useForm } from "react-hook-form";
 import {
@@ -22,7 +23,8 @@ import { ChevronDown, ChevronUp } from "lucide-react-native";
 interface Props {
   visible: boolean;
   onClose: () => void;
-  onSubmit: (data: AddUserFormData) => Promise<void>;
+  onSubmit: (data: AddUserFormData) => Promise<boolean>;
+  tempPassword?: string | null;
   supervisors: UserProfile[];
   currentUserId: string;
   isSubmitting: boolean;
@@ -32,6 +34,7 @@ export type AddUserFormData = z.infer<typeof addUserSchema>;
 
 export default function AddUserModal({
   visible,
+  tempPassword,
   onClose,
   onSubmit,
   isSubmitting,
@@ -62,13 +65,14 @@ export default function AddUserModal({
   };
 
   const submit = async (data: AddUserFormData) => {
-    await onSubmit(data);
+    if (!(await onSubmit(data))) return;
+    Keyboard.dismiss();
     reset();
     setShowOptions(false);
-    onClose();
   };
 
   const handleClose = () => {
+    if (isSubmitting) return;
     Keyboard.dismiss();
     reset();
     setShowOptions(false);
@@ -137,12 +141,13 @@ export default function AddUserModal({
     <ModalShell
       visible={visible}
       onClose={handleClose}
-      title="Add New User"
+      title={tempPassword ? "User Created" : "Add New User"}
+      subtitle={tempPassword ? "Save this temporary password — it won't be shown again." : undefined}
       avoidKeyboard
       closeDisabled={isSubmitting}
-      closeOnBackdropPress={!isSubmitting}
-      overlay={dropdownOverlay}
-      footer={
+      closeOnBackdropPress={!isSubmitting && !tempPassword}
+      overlay={tempPassword ? undefined : dropdownOverlay}
+      footer={tempPassword ? undefined : (
         <FormActions
           onCancel={handleClose}
           onSubmit={handleSubmit(submit)}
@@ -151,117 +156,123 @@ export default function AddUserModal({
           loading={isSubmitting}
           cancelDisabled={isSubmitting}
         />
-      }
+      )}
     >
-      {/* First Name */}
-      <Controller
-        control={control}
-        name="first_name"
-        render={({
-          field: { value, onChange, onBlur },
-          fieldState: { error },
-        }) => (
-          <FormField
-            label="First Name"
-            labelVariant="compact"
-            variant="filled"
-            placeholder="John"
-            placeholderTextColor={colors.subtle}
-            value={value}
-            onChangeText={onChange}
-            onBlur={onBlur}
-            returnKeyType="next"
-            error={error?.message}
-            containerStyle={tw`mb-3`}
+      {tempPassword ? (
+        <TempPasswordContent tempPassword={tempPassword} onDone={handleClose} />
+      ) : (
+        <>
+          {/* First Name */}
+          <Controller
+            control={control}
+            name="first_name"
+            render={({
+              field: { value, onChange, onBlur },
+              fieldState: { error },
+            }) => (
+              <FormField
+                label="First Name"
+                labelVariant="compact"
+                variant="filled"
+                placeholder="John"
+                placeholderTextColor={colors.subtle}
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                returnKeyType="next"
+                error={error?.message}
+                containerStyle={tw`mb-3`}
+              />
+            )}
           />
-        )}
-      />
 
-      {/* Last Name */}
-      <Controller
-        control={control}
-        name="last_name"
-        render={({
-          field: { value, onChange, onBlur },
-          fieldState: { error },
-        }) => (
-          <FormField
-            label="Last Name"
-            labelVariant="compact"
-            variant="filled"
-            placeholder="Doe"
-            placeholderTextColor={colors.subtle}
-            value={value}
-            onChangeText={onChange}
-            onBlur={onBlur}
-            returnKeyType="next"
-            error={error?.message}
-            containerStyle={tw`mb-3`}
+          {/* Last Name */}
+          <Controller
+            control={control}
+            name="last_name"
+            render={({
+              field: { value, onChange, onBlur },
+              fieldState: { error },
+            }) => (
+              <FormField
+                label="Last Name"
+                labelVariant="compact"
+                variant="filled"
+                placeholder="Doe"
+                placeholderTextColor={colors.subtle}
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                returnKeyType="next"
+                error={error?.message}
+                containerStyle={tw`mb-3`}
+              />
+            )}
           />
-        )}
-      />
 
-      {/* Email */}
-      <Controller
-        control={control}
-        name="email"
-        render={({
-          field: { value, onChange, onBlur },
-          fieldState: { error },
-        }) => (
-          <FormField
-            label="Email"
-            labelVariant="compact"
-            variant="filled"
-            placeholder="example@gmail.com"
-            placeholderTextColor={colors.subtle}
-            autoCapitalize="none"
-            keyboardType="email-address"
-            value={value}
-            onChangeText={onChange}
-            onBlur={onBlur}
-            returnKeyType="done"
-            error={error?.message}
-            containerStyle={tw`mb-3`}
+          {/* Email */}
+          <Controller
+            control={control}
+            name="email"
+            render={({
+              field: { value, onChange, onBlur },
+              fieldState: { error },
+            }) => (
+              <FormField
+                label="Email"
+                labelVariant="compact"
+                variant="filled"
+                placeholder="example@gmail.com"
+                placeholderTextColor={colors.subtle}
+                autoCapitalize="none"
+                keyboardType="email-address"
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                returnKeyType="done"
+                error={error?.message}
+                containerStyle={tw`mb-3`}
+              />
+            )}
           />
-        )}
-      />
 
-      {/* Supervisor */}
-      <Controller
-        control={control}
-        name="supervisor_id"
-        render={({ field: { value } }) => {
-          const selected =
-            value === null
-              ? "Self"
-              : supervisors.find((s) => s.id === value);
+          {/* Supervisor */}
+          <Controller
+            control={control}
+            name="supervisor_id"
+            render={({ field: { value } }) => {
+              const selected =
+                value === null
+                  ? "Self"
+                  : supervisors.find((s) => s.id === value);
 
-          return (
-            <View style={tw`mb-2`}>
-              <Text style={tw`text-sm font-semibold mb-1 text-gray-600`}>Supervisor</Text>
-              <Pressable
-                ref={triggerRef}
-                onPress={openDropdown}
-                style={tw`h-12 px-4 rounded-2xl bg-gray-100 flex-row items-center justify-between`}
-              >
-                <Text style={tw`text-[15px] text-gray-800`}>
-                  {typeof selected === "string"
-                    ? selected
-                    : selected
-                      ? `${selected.first_name} ${selected.last_name}`
-                      : "Select Supervisor"}
-                </Text>
-                {showOptions ? (
-                  <ChevronUp size={18} color={colors.muted} />
-                ) : (
-                  <ChevronDown size={18} color={colors.muted} />
-                )}
-              </Pressable>
-            </View>
-          );
-        }}
-      />
+              return (
+                <View style={tw`mb-2`}>
+                  <Text style={tw`text-sm font-semibold mb-1 text-gray-600`}>Supervisor</Text>
+                  <Pressable
+                    ref={triggerRef}
+                    onPress={openDropdown}
+                    style={tw`h-12 px-4 rounded-2xl bg-gray-100 flex-row items-center justify-between`}
+                  >
+                    <Text style={tw`text-[15px] text-gray-800`}>
+                      {typeof selected === "string"
+                        ? selected
+                        : selected
+                          ? `${selected.first_name} ${selected.last_name}`
+                          : "Select Supervisor"}
+                    </Text>
+                    {showOptions ? (
+                      <ChevronUp size={18} color={colors.muted} />
+                    ) : (
+                      <ChevronDown size={18} color={colors.muted} />
+                    )}
+                  </Pressable>
+                </View>
+              );
+            }}
+          />
+        </>
+      )}
     </ModalShell>
   );
 }

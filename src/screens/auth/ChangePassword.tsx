@@ -1,28 +1,20 @@
 import React from "react";
 import { Controller, useForm } from "react-hook-form";
-import {
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  Text,
-  View,
-} from "react-native";
+import { Alert } from "react-native";
 
+import AuthScreen, { authStyles } from "@/src/components/auth/AuthScreen";
 import { apiClient } from "@/src/api/apiClient";
 import PasswordField from "@/src/components/form/PasswordField";
 import AppButton from "@/src/components/ui/AppButton";
 import { changePasswordSchema } from "@/src/schema/auth";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { FormData } from "@/src/types/changePassword";
-import { TW } from "@/theme/twStyles";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
-import tw from "@/theme/tw";
 
 const ChangePasswordScreen = () => {
   const router = useRouter();
-  const { user } = useAuthStore();
+  const user = useAuthStore((state) => state.user);
   const {
     control,
     handleSubmit,
@@ -52,15 +44,14 @@ const ChangePasswordScreen = () => {
         Alert.alert("Error", result.error || "Failed to change password");
         return;
       }
-      // Clear local session/auth
-      useAuthStore.getState().signOut(); // Make sure you have a logout action that clears session
+      await useAuthStore.getState().signOut();
       Alert.alert(
         "Success",
         "Password updated successfully. Please login again.",
         [
           {
             text: "OK",
-            onPress: () => router.replace("/(auth)/login"), // redirect to login screen
+            onPress: () => router.replace("/(auth)/login"),
           },
         ],
       );
@@ -72,69 +63,45 @@ const ChangePasswordScreen = () => {
     }
   };
   return (
-    <View style={tw`flex-1 ${TW.bgPrimary} justify-center`}>
-      <KeyboardAvoidingView
-        style={tw`flex-1`}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-      >
-        <ScrollView
-          contentContainerStyle={tw`flex-grow justify-center px-6`}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-        >
-          {/* Header */}
-          <View style={tw`items-center mb-6`}>
-            <Text style={tw`text-2xl font-bold ${TW.textPrimary}`}>
-              Change Password
-            </Text>
-            <Text style={tw`${TW.textSecondary} text-center mt-1`}>
-              Update your password securely
-            </Text>
-          </View>
-
-          {/* Fields */}
-          <View style={tw`gap-4`}>
-            {["oldPassword", "newPassword", "confirmPassword"].map((field) => {
-              const label =
-                field === "oldPassword"
-                  ? "Old Password"
-                  : field === "newPassword"
-                    ? "New Password"
-                    : "Confirm Password";
-
-              return (
-                <Controller
-                  key={field}
-                  control={control}
-                  name={field as keyof FormData}
-                  render={({ field: { value, onChange } }) => (
-                    <PasswordField
-                      label={label}
-                      value={value}
-                      onChangeText={onChange}
-                      placeholder="•••••••••••••"
-                      error={errors[field as keyof FormData]?.message}
-                      autoCapitalize="none"
-                      autoCorrect={false}
-                    />
-                  )}
-                />
-              );
-            })}
-          </View>
-
-          {/* Button */}
-          <AppButton
-            title="Update Password"
-            loadingTitle="Updating..."
-            onPress={handleSubmit(onSubmit)}
-            loading={isSubmitting}
-            textStyle={tw`text-[16px]`}
-            style={tw`mt-6`}
-          />
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </View>
+    <AuthScreen
+      title="Change password"
+      subtitle="Choose a new password to secure your account."
+    >
+      {(["oldPassword", "newPassword", "confirmPassword"] as const).map((field) => (
+        <Controller
+          key={field}
+          control={control}
+          name={field}
+          render={({ field: { value, onChange, onBlur } }) => (
+            <PasswordField
+              label={field === "oldPassword" ? "Current password" : field === "newPassword" ? "New password" : "Confirm new password"}
+              variant="outlined"
+              value={value}
+              onChangeText={onChange}
+              onBlur={onBlur}
+              placeholder={field === "oldPassword" ? "Enter your current password" : field === "newPassword" ? "Enter a new password" : "Re-enter your new password"}
+              textContentType={field === "oldPassword" ? "password" : "newPassword"}
+              autoComplete={field === "oldPassword" ? "current-password" : "new-password"}
+              returnKeyType={field === "confirmPassword" ? "done" : "next"}
+              onSubmitEditing={field === "confirmPassword" ? handleSubmit(onSubmit) : undefined}
+              editable={!isSubmitting}
+              error={errors[field]?.message}
+              inputStyle={authStyles.input}
+              labelStyle={authStyles.label}
+            />
+          )}
+        />
+      ))}
+      <AppButton
+        title="Update password"
+        loadingTitle="Updating…"
+        onPress={handleSubmit(onSubmit)}
+        loading={isSubmitting}
+        size="md"
+        fullWidth
+        textStyle={authStyles.buttonText}
+      />
+    </AuthScreen>
   );
 };
 

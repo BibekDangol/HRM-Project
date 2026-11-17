@@ -6,7 +6,7 @@ import React from "react";
 
 export default function ActivityLogPage() {
   return (
-    <View style={{ flex: 1, backgroundColor: colors.surface }}>
+    <View style={{ flex: 1, backgroundColor: colors.canvas }}>
       {/* Outside ScrollView = fixed on screen, won't scroll */}
       {/* <BackButton
         floating

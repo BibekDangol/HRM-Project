@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Alert } from "react-native";
 
 import { apiClient } from "@/src/api/apiClient";
+import type { AddUserFormData } from "@/src/screens/admin/manage-users/AddUserModal";
 import { adminAddUserService } from "@/src/services/admin/add-user-service";
 import {
   fetchSupervisorUnderUsersService,
@@ -190,10 +191,10 @@ export function useUserDirectory({
 
   // ---------------- ACTIONS (MANAGE MODE) ----------------
   const handleAddUser = useCallback(
-    async (data: any) => {
+    async (data: AddUserFormData) => {
       if (!organizationId) {
         Alert.alert("Error", "Organization not ready");
-        return;
+        return false;
       }
 
       try {
@@ -206,22 +207,21 @@ export function useUserDirectory({
           supervisor_id: data.supervisor_id,
         });
 
-        if (response.tempPassword) {
-          setTempPassword(response.tempPassword);
+        setTempPassword(response.tempPassword ?? null);
+        if (!response.tempPassword) {
+          setShowAddModal(false);
+          Alert.alert("User created", "No temporary password was returned. Ask the user to reset their password before signing in.");
         }
-
-        const updatedUsers = await fetchDirectoryUsers(search);
-        setUsers(updatedUsers);
-
-        setShowAddModal(false);
-        Alert.alert("Success", "User added successfully");
+        void onRefresh();
+        return true;
       } catch (err: any) {
         Alert.alert("Error", err.message ?? "Failed to add user");
+        return false;
       } finally {
         setIsAddingUser(false);
       }
     },
-    [organizationId, fetchDirectoryUsers, search, setUsers],
+    [organizationId, onRefresh],
   );
 
   const handleEditUser = useCallback((selectedUser: UserProfile) => {

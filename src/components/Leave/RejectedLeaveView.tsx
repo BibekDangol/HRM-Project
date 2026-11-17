@@ -13,7 +13,7 @@ const RejectedLeaveView = ({ leave, leaveDuration }: Props) => {
   return (
     <ScrollView
       showsVerticalScrollIndicator={false}
-      style={tw`flex-1 bg-gray-100`}
+      style={tw`flex-1 bg-canvas`}
     >
       <View style={tw`bg-white m-4 rounded-xl p-4 shadow`}>
         {/* Header */}

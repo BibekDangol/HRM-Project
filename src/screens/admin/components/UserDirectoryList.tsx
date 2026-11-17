@@ -4,7 +4,6 @@ import { FlatList, Pressable } from "react-native";
 import AddUserModal from "@/src/screens/admin/manage-users/AddUserModal";
 import EditUserModal from "@/src/screens/admin/manage-users/EditUserModal";
 import { ListScreen } from "@/src/components/lists/ListScreen";
-import TempPasswordModal from "@/src/screens/admin/manage-users/TempPasswordModal";
 import { UserCard } from "./UserCard";
 import { UserProfile } from "@/src/types/admin";
 import { usePagination } from "@/src/hooks/usePagination";
@@ -122,7 +121,11 @@ export default function UserDirectoryList({
         <>
           <AddUserModal
             visible={directory.showAddModal}
-            onClose={() => directory.setShowAddModal(false)}
+            tempPassword={directory.tempPassword}
+            onClose={() => {
+              directory.setTempPassword(null);
+              directory.setShowAddModal(false);
+            }}
             onSubmit={directory.handleAddUser}
             isSubmitting={directory.isAddingUser}
             supervisors={directory.users}
@@ -145,12 +148,6 @@ export default function UserDirectoryList({
             isSubmitting={directory.isEditingUser}
           />
 
-          {directory.tempPassword ? (
-            <TempPasswordModal
-              tempPassword={directory.tempPassword}
-              setTempPassword={directory.setTempPassword}
-            />
-          ) : null}
         </>
       ) : null}
     </>

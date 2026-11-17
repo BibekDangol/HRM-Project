@@ -20,25 +20,37 @@ import { getDropdownPosition, type AnchorLayout } from "../common/getDropdownPos
 export function AppScreenLayout({
   isHome,
   onBack,
+  homeContent,
   backgroundColor = colors.canvas,
   children,
 }: {
   isHome: boolean;
   onBack?: () => void;
+  homeContent?: React.ReactNode;
   backgroundColor?: string;
   children: React.ReactNode;
 }) {
-  if (isHome) return <>{children}</>;
-
   return (
     <SafeAreaView edges={["top", "left", "right"]} style={{ flex: 1, backgroundColor }}>
-      {onBack ? (
+      {isHome ? homeContent : onBack ? (
         <View style={{ paddingHorizontal: 12, paddingVertical: 4 }}>
           <BackButton onPress={onBack} color={backgroundColor === colors.primary ? colors.surface : colors.primary} />
         </View>
       ) : null}
       {children}
     </SafeAreaView>
+  );
+}
+
+export function HomePageIntro({ name, children }: { name: string; children: React.ReactNode }) {
+  return (
+    <View style={{ flexDirection: "row", alignItems: "center", gap: 16, paddingHorizontal: 16, paddingTop: 12, paddingBottom: 8 }}>
+      <View style={{ flex: 1, gap: 4 }}>
+        <Text style={{ fontSize: 13, color: colors.muted }}>Welcome back</Text>
+        <Text accessibilityRole="header" style={{ fontSize: 24, fontWeight: "700", color: colors.ink }}>{name}</Text>
+      </View>
+      {children}
+    </View>
   );
 }
 
@@ -111,15 +123,15 @@ const HeaderProfileButton: React.FC<HeaderProfileButtonProps> = ({
         height: Math.max(size, 48),
         width: Math.max(size, 48),
         borderRadius: Math.max(size, 48) / 2,
-        backgroundColor: colors.onPrimaryWashMedium,
-        borderWidth: 2,
-        borderColor: colors.onPrimaryHalf,
+        backgroundColor: colors.surface,
+        borderWidth: 1,
+        borderColor: colors.border,
         alignItems: "center",
         justifyContent: "center",
         opacity: disabled ? 0.55 : pressed ? 0.75 : 1,
       })}
     >
-      <User size={17} color={colors.surface} />
+      <User size={20} color={colors.ink} />
     </Pressable>
   );
 };
@@ -338,7 +350,6 @@ const HeaderProfileMenu: React.FC<HeaderProfileMenuProps> = ({
 };
 
 export const AppHeaderRight: React.FC<AppHeaderRightProps> = ({
-  variant,
   isLocked = false,
   profileMenuOpen,
   onProfileTrigger,
@@ -382,8 +393,6 @@ export const AppHeaderRight: React.FC<AppHeaderRightProps> = ({
         flexDirection: "row",
         alignItems: "center",
         gap: 12,
-        marginRight: 16,
-        marginBottom: variant === "user" ? 8 : 0,
       }}
     >
       {children}
@@ -599,7 +608,7 @@ export const HeaderCheckMenu: React.FC<HeaderCheckMenuProps> = ({
               height: 12,
               width: 12,
               borderRadius: 6,
-              backgroundColor: isCheckedIn ? colors.successBright : colors.dangerBorder,
+              backgroundColor: isCheckedIn ? colors.success : colors.danger,
             }}
           />
         </Pressable>

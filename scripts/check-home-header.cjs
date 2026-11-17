@@ -29,15 +29,21 @@ const mocks = {
   '../common/getDropdownPosition': {},
 };
 const { getTabScreenOptions } = load('src/config/tabScreenOptions.ts', mocks);
-for (const path of ['/manage-users', '/leave', '/more', '/profile', '/holidays', '/activity-log', '/more/supervisor-settings/leave/pending-details']) {
-  assert.equal(getTabScreenOptions(path).headerShown, false, path);
+for (const path of ['/dashboard', '/manage-users', '/leave', '/more', '/profile', '/holidays', '/activity-log', '/more/supervisor-settings/leave/pending-details']) {
+  const options = getTabScreenOptions();
+  assert.equal(options.headerShown, false, path);
+  assert.equal(options.sceneStyle.backgroundColor, colors.canvas, path);
 }
 const { AppScreenLayout } = load('src/components/navigation/header/AppHeader.tsx', mocks);
 const content = React.createElement('Content');
-const home = AppScreenLayout({ isHome: true, children: content });
-assert.equal(home.type, React.Fragment);
-assert.equal(home.props.children, content);
-const plain = AppScreenLayout({ isHome: false, children: content });
+const intro = React.createElement('HomePageIntro');
+const home = AppScreenLayout({ isHome: true, children: content, homeContent: intro });
+assert.equal(home.type, 'SafeAreaView');
+assert.equal(home.props.style.backgroundColor, colors.canvas);
+assert.deepEqual(home.props.edges, ['top', 'left', 'right']);
+assert.equal(home.props.children[0], intro);
+assert.equal(home.props.children[1], content);
+const plain = AppScreenLayout({ isHome: false, children: content, homeContent: intro });
 assert.equal(plain.type, 'SafeAreaView');
 assert.deepEqual(plain.props.edges, ['top', 'left', 'right']);
 assert.equal(plain.props.children[0], null, 'Root tabs should not get a back row');
@@ -45,4 +51,4 @@ const back = () => {};
 const detail = AppScreenLayout({ isHome: false, children: content, onBack: back });
 assert.equal(detail.props.children[0].props.children.props.onPress, back);
 assert.equal(detail.props.children[1], content);
-console.log('Home header checks passed (hidden defaults, safe areas, detail back button).');
+console.log('Home page checks passed (no navigation headers, Home-only intro, safe areas, back button).');

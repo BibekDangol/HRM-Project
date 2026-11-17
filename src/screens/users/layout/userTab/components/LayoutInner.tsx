@@ -1,4 +1,5 @@
-import { AppHeaderLeft, AppHeaderRight, AppScreenLayout, HeaderCheckMenu } from "@/src/components/navigation/header/AppHeader";
+import { AppHeaderRight, AppScreenLayout, HeaderCheckMenu, HomePageIntro } from "@/src/components/navigation/header/AppHeader";
+import { colors } from "@/theme/colors";
 import { StatusBar } from "expo-status-bar";
 import { Tabs, usePathname, useRouter } from "expo-router";
 import { useAttendanceContext } from "@/src/context/AttendanceContext";
@@ -12,8 +13,12 @@ export default function LayoutInner() {
   const att = useAttendanceContext();
   const router = useRouter();
   const pathname = usePathname();
-  const sharedOptions = getTabScreenOptions(pathname);
+  const sharedOptions = getTabScreenOptions();
   const menu = useHeaderMenu();
+  const hideBackRow =
+    pathname.endsWith("/attendance-list") ||
+    pathname.includes("/leaves/calendar/applyLeave") ||
+    /\/supervisor-settings\/leave(?:\/index)?$/.test(pathname);
 
   const {
     checkOpen,
@@ -33,7 +38,7 @@ export default function LayoutInner() {
 
   return (
     <>
-      <StatusBar style={pathname === "/dashboard" || pathname.includes("/profile") ? "light" : "dark"} />
+      <StatusBar style="dark" />
       <ReasonModel
         commentModalOpen={att.commentModalOpen}
         isLocked={att.isLocked}
@@ -49,8 +54,31 @@ export default function LayoutInner() {
         screenLayout={({ children, route }) => (
           <AppScreenLayout
             isHome={route.name === "dashboard"}
-            backgroundColor={sharedOptions.sceneStyle.backgroundColor}
-            onBack={!pathname.endsWith("/attendance-list") && (showBackButton || ["profile/index", "holidays", "activity-log"].includes(route.name)) ? () => {
+            backgroundColor={colors.canvas}
+            homeContent={
+              <HomePageIntro name={menu.currentUserProfile?.first_name ?? "Home"}>
+                <AppHeaderRight
+                  variant="user"
+                  isLocked={att.isLocked}
+                  profileMenuOpen={menu.open}
+                  onProfileTrigger={handleProfileTrigger}
+                  onProfileClose={menu.close}
+                  onProfilePress={handleProfilePress}
+                  onLogoutPress={onLogout}
+                >
+                  <HeaderCheckMenu
+                    isLocked={att.isLocked}
+                    isCheckedIn={att.isCheckedIn}
+                    isOpen={checkOpen}
+                    checkedInAt={att.checkedInAt}
+                    elapsedMs={att.elapsedMs}
+                    onTriggerPress={handleCheckTrigger}
+                    onTogglePress={handleToggleCheck}
+                  />
+                </AppHeaderRight>
+              </HomePageIntro>
+            }
+            onBack={!hideBackRow && (showBackButton || ["profile/index", "holidays", "activity-log"].includes(route.name)) ? () => {
               if (!handleBackPress()) router.replace("/(users)/dashboard");
             } : undefined}
           >
@@ -63,39 +91,10 @@ export default function LayoutInner() {
             ...sharedOptions.sceneStyle,
             flex: 1,
           },
-          headerTitleStyle: {
-            ...sharedOptions.headerTitleStyle,
-            fontWeight: "bold",
-            paddingBottom: 8,
-          },
-          headerLeft: () => (
-            <AppHeaderLeft visible={showBackButton} onPress={handleBackPress} />
-          ),
-          headerRight: () => (
-            <AppHeaderRight
-              variant="user"
-              isLocked={att.isLocked}
-              profileMenuOpen={menu.open}
-              onProfileTrigger={handleProfileTrigger}
-              onProfileClose={menu.close}
-              onProfilePress={handleProfilePress}
-              onLogoutPress={onLogout}
-            >
-              <HeaderCheckMenu
-                isLocked={att.isLocked}
-                isCheckedIn={att.isCheckedIn}
-                isOpen={checkOpen}
-                checkedInAt={att.checkedInAt}
-                elapsedMs={att.elapsedMs}
-                onTriggerPress={handleCheckTrigger}
-                onTogglePress={handleToggleCheck}
-              />
-            </AppHeaderRight>
-          ),
         }}
         tabBar={(props) => <MyTabBar {...props} />}
       >
-        <Tabs.Screen name="dashboard" options={{ title: "Dashboard", headerShown: true }} />
+        <Tabs.Screen name="dashboard" options={{ title: "Dashboard" }} />
         <Tabs.Screen name="leaves" options={{ title: "Leaves" }} />
         <Tabs.Screen
           name="profile/index"
@@ -108,7 +107,6 @@ export default function LayoutInner() {
           options={{
             title: "Holidays and Events",
             href: null,
-            headerTitleAlign: "center",
           }}
         />
         <Tabs.Screen
@@ -116,7 +114,6 @@ export default function LayoutInner() {
           options={{
             title: "Recent Activity",
             href: null,
-            headerTitleAlign: "center",
           }}
         />
       </Tabs>

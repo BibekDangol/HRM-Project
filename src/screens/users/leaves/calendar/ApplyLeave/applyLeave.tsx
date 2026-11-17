@@ -49,7 +49,7 @@ export default function ApplyLeaveScreen() {
     handleSubmitPress,
   } = useLeaveForm({
     onSuccess: () => {
-      router.replace("/(users)/leaves/(tabs)");
+      router.back();
     },
   });
 
@@ -107,7 +107,7 @@ export default function ApplyLeaveScreen() {
             title="Cancel"
             variant="secondary"
             disabled={submitting}
-            onPress={() => router.replace("/(users)/leaves/(tabs)")}
+            onPress={() => router.back()}
             style={{ flexGrow: 1, flexBasis: 140 }}
           />
           <AppButton

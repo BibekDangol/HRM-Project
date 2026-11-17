@@ -1,8 +1,9 @@
 import { colors } from "@/theme/colors";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { Props, StatusInfo } from "../types/activitylog";
 
+import { useAttendanceContext } from "@/src/context/AttendanceContext";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { supabase } from "@/src/supabase/supabaseClient";
 import { ActivityRecord } from "@/src/types/Calendar";
@@ -13,58 +14,62 @@ import tw from "@/theme/tw";
 export const ActivityLogSection = ({ onViewAll, hideTitle }: Props) => {
   const user = useAuthStore((s) => s.user);
   const userId = user?.id;
+  const { attendance } = useAttendanceContext();
 
   const [activityLog, setActivityLog] = useState<ActivityRecord[]>([]);
   const [initialLoading, setInitialLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
   const hasViewAll = Boolean(onViewAll);
-  const fetchingRef = useRef(false);
-
-  const fetchActivityLog = useCallback(async () => {
-    if (!userId || fetchingRef.current) return;
-
-    fetchingRef.current = true;
-    setRefreshing(true);
-
-    try {
-      const fmt = (d: Date) =>
-        `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
-          d.getDate(),
-        ).padStart(2, "0")}`;
-
-      let query = supabase
-        .from("attendance")
-        .select(
-          "id, date, status, check_in_time, check_out_time, check_in_comment",
-        )
-        .eq("user_id", userId)
-        .order("date", { ascending: false });
-
-      if (hasViewAll) {
-        const today = new Date();
-        const sevenDaysAgo = new Date(today);
-        sevenDaysAgo.setDate(today.getDate() - 6);
-        query = query.gte("date", fmt(sevenDaysAgo)).lte("date", fmt(today));
-      }
-
-      const { data, error } = await query;
-      if (error) throw error;
-
-      setActivityLog((data ?? []) as ActivityRecord[]);
-    } catch (e) {
-      console.log("Activity log error:", e instanceof Error ? e.message : e);
-    } finally {
-      setInitialLoading(false);
-      setRefreshing(false);
-      fetchingRef.current = false;
-    }
-  }, [userId, hasViewAll]);
-
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- Start the refresh indicator for this external data fetch.
-    fetchActivityLog();
-  }, [fetchActivityLog]);
+    let active = true;
+
+    const fetchActivityLog = async () => {
+      if (!userId) {
+        setActivityLog([]);
+        setInitialLoading(false);
+        return;
+      }
+      setRefreshing(true);
+
+      try {
+        const fmt = (d: Date) =>
+          `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
+            d.getDate(),
+          ).padStart(2, "0")}`;
+
+        let query = supabase
+          .from("attendance")
+          .select(
+            "id, date, status, check_in_time, check_out_time, check_in_comment",
+          )
+          .eq("user_id", userId)
+          .order("date", { ascending: false });
+
+        if (hasViewAll) {
+          const today = new Date();
+          const sevenDaysAgo = new Date(today);
+          sevenDaysAgo.setDate(today.getDate() - 6);
+          query = query.gte("date", fmt(sevenDaysAgo)).lte("date", fmt(today)).limit(2);
+        }
+
+        const { data, error } = await query;
+        if (error) throw error;
+
+        if (active) setActivityLog((data ?? []) as ActivityRecord[]);
+      } catch (e) {
+        if (active) console.log("Activity log error:", e instanceof Error ? e.message : e);
+      } finally {
+        if (active) {
+          setInitialLoading(false);
+          setRefreshing(false);
+        }
+      }
+    };
+
+    void fetchActivityLog();
+    return () => { active = false; };
+  }, [userId, hasViewAll, attendance]);
 
   const fmtTime = (t: string | null) => {
     if (!t) return "—";
@@ -277,12 +282,21 @@ export const ActivityLogSection = ({ onViewAll, hideTitle }: Props) => {
       )}
       {initialLoading ? (
         <View>
-          {[1, 2, 3].map((k) => (
+          {(hasViewAll ? [1, 2] : [1, 2, 3]).map((k) => (
             <SkeletonRow key={k} />
           ))}
         </View>
       ) : activityLog.length === 0 ? (
-        <View style={{ paddingVertical: 40, alignItems: "center", gap: 6 }}>
+        <View style={{
+          paddingVertical: 32,
+          paddingHorizontal: 16,
+          alignItems: "center",
+          gap: 6,
+          borderRadius: 12,
+          borderWidth: 1,
+          borderColor: colors.border,
+          backgroundColor: colors.surface,
+        }}>
           <Text style={{ color: colors.ink, fontWeight: "600", fontSize: 14 }}>
             No activity found
           </Text>

@@ -441,7 +441,7 @@ export default function HolidaysEventsScreen() {
 
   return (
     <>
-      <View style={{ flex: 1, backgroundColor: colors.surface }}>
+      <View style={{ flex: 1, backgroundColor: colors.canvas }}>
         <View
           style={{
             flexDirection: "row",
@@ -452,7 +452,7 @@ export default function HolidaysEventsScreen() {
             paddingBottom: 12,
             borderBottomWidth: 1,
             borderBottomColor: colors.primaryWash,
-            backgroundColor: colors.surface,
+            backgroundColor: colors.canvas,
           }}
         >
           <Pressable

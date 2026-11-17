@@ -35,7 +35,7 @@ export default function ProfileScreen() {
       <View
         style={{
           flex: 1,
-          // backgroundColor: TW.bgPrimary,
+          backgroundColor: colors.canvas,
           alignItems: "center",
           justifyContent: "center",
         }}>
@@ -51,7 +51,7 @@ export default function ProfileScreen() {
   return (
     <>
       <ScrollView
-        style={{ flex: 1, backgroundColor: colors.surface }}
+        style={{ flex: 1, backgroundColor: colors.canvas }}
         contentContainerStyle={{ paddingBottom: 48 }}
         showsVerticalScrollIndicator={false}>
         <ProfileHero

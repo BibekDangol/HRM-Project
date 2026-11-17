@@ -57,7 +57,7 @@ export function LeaveDetailCard({ leave, status }: LeaveDetailCardProps) {
   return (
     <ScrollView
       showsVerticalScrollIndicator={false}
-      style={tw`flex-1 bg-slate-50`}
+      style={tw`flex-1 bg-canvas`}
       contentContainerStyle={tw`p-4 pb-12`}
     >
       <View style={tw`bg-white rounded-2xl p-5 shadow-sm border border-slate-100`}>

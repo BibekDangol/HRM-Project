@@ -5,7 +5,7 @@ import { View } from "react-native";
 
 export default function holidays() {
   return (
-    <View style={{ flex: 1, backgroundColor: colors.surface }}>
+    <View style={{ flex: 1, backgroundColor: colors.canvas }}>
       {/* <BackButton floating /> */}
       <HolidaysEventsScreen />
     </View>

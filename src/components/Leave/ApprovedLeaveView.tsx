@@ -13,7 +13,7 @@ export default function ApprovedLeaveView({ leave }: Props) {
 
   return (
     <ScrollView
-      style={tw`flex-1 bg-gray-100`}
+      style={tw`flex-1 bg-canvas`}
       showsVerticalScrollIndicator={false}
     >
       <View style={tw`bg-white m-4 rounded-xl p-4 shadow`}>

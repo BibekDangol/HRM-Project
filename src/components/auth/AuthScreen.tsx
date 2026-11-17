@@ -7,6 +7,7 @@ import {
   Keyboard,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableWithoutFeedback,
@@ -34,15 +35,20 @@ export default function AuthScreen({ title, subtitle, children, footer, onBack, 
     <KeyboardAvoidingView style={authStyles.screen} behavior={Platform.OS === "ios" ? "padding" : undefined}>
       <StatusBar style="dark" />
       <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-        <View style={[
-          authStyles.canvas,
-          {
-            paddingTop: insets.top + (compact ? 10 : 24),
-            paddingBottom: insets.bottom + (compact ? 12 : 20),
-            paddingLeft: insets.left + (width < 360 ? 20 : 24),
-            paddingRight: insets.right + (width < 360 ? 20 : 24),
-          },
-        ]}>
+        <ScrollView
+          style={authStyles.canvas}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+          alwaysBounceVertical={false}
+          contentContainerStyle={[
+            authStyles.scrollContent,
+            {
+              paddingTop: insets.top + (compact ? 10 : 24),
+              paddingBottom: insets.bottom + (compact ? 12 : 20),
+              paddingLeft: insets.left + (width < 360 ? 20 : 24),
+              paddingRight: insets.right + (width < 360 ? 20 : 24),
+            },
+          ]}>
           <View style={authStyles.content}>
             {showBrand ? (
               <View style={[authStyles.brand, compact && { marginBottom: 12 }]}>
@@ -63,7 +69,7 @@ export default function AuthScreen({ title, subtitle, children, footer, onBack, 
             <View style={[authStyles.form, compact && { gap: 10 }]}>{children}</View>
             {footer ? <View style={authStyles.footer}>{footer}</View> : null}
           </View>
-        </View>
+        </ScrollView>
       </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
   );
@@ -72,6 +78,7 @@ export default function AuthScreen({ title, subtitle, children, footer, onBack, 
 export const authStyles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.surface },
   canvas: { flex: 1 },
+  scrollContent: { flexGrow: 1 },
   content: { width: "100%", maxWidth: 440, alignSelf: "center" },
   brand: { flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 28 },
   logo: { width: 48, height: 48 },

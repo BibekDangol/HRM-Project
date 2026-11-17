@@ -8,7 +8,7 @@ import { Pagination } from "@/src/components/lists/Pagination";
 import { useLeaves } from "@/src/hooks/users/useLeaves";
 import { usePagination } from "@/src/hooks/usePagination";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { CalendarClock, CalendarDays, Plus } from "lucide-react-native";
+import { CalendarClock, Plus } from "lucide-react-native";
 import AppButton from "@/src/components/ui/AppButton";
 import tw from "@/theme/tw";
 import { LeaveCard } from "./components/LeaveCard";
@@ -41,7 +41,10 @@ export default function LeavesScreen() {
   );
 
   // Adjust activeTab during render if URL param changes (React 19 pattern)
-  if (prevRequestedTab !== validRequestedTab && validRequestedTab !== undefined) {
+  if (
+    prevRequestedTab !== validRequestedTab &&
+    validRequestedTab !== undefined
+  ) {
     setPrevRequestedTab(validRequestedTab);
     setActiveTab(validRequestedTab);
   }
@@ -68,8 +71,7 @@ export default function LeavesScreen() {
   );
 
   const leaveTypeName = useCallback(
-    (id: number | null) =>
-      leaveTypes.find((t) => t.id === id)?.name ?? "Leave",
+    (id: number | null) => leaveTypes.find((t) => t.id === id)?.name ?? "Leave",
     [leaveTypes],
   );
 
@@ -92,20 +94,11 @@ export default function LeavesScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
         ListHeaderComponent={
-          <View>
-            <AppButton
-              title="View calendar"
-              variant="ghost"
-              icon={<CalendarDays size={18} color={colors.primary} />}
-              onPress={() => router.push("/(users)/leaves/calendar")}
-              style={{ alignSelf: "flex-end", marginTop: 8 }}
-            />
-            <Header
-              leaves={leaves}
-              activeTab={activeTab}
-              setActiveTab={setActiveTab}
-            />
-          </View>
+          <Header
+            leaves={leaves}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+          />
         }
         renderItem={({ item }) => (
           <View style={tw`mb-2`}>
@@ -132,8 +125,6 @@ export default function LeavesScreen() {
                 ? "You haven't requested any leaves yet."
                 : `You have no ${activeTab} leave requests.`
             }
-            actionLabel="Request leave"
-            onAction={() => router.push("/(users)/leaves/calendar/applyLeave")}
             style={tw`py-12`}
           />
         }

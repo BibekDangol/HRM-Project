@@ -55,7 +55,7 @@ export default function HomeScreen() {
   const onRefresh = async () => {
     setRefreshing(true);
     try {
-      await Promise.all([fetchProfile(), fetchStats(), fetchCalendar()]);
+      await Promise.all([fetchProfile(), fetchStats(), fetchCalendar(), att.fetchLatestAttendance()]);
     } finally {
       setRefreshing(false);
     }

@@ -4,19 +4,18 @@ import { Pressable, Text, useWindowDimensions, View } from "react-native";
 import { useEffect, useMemo, useState } from "react";
 
 import AppButton from "@/src/components/ui/AppButton";
-import ModalShell from "@/src/components/ui/ModalShell";
 import { TW } from "@/theme/twStyles";
 import { Check, Copy, Eye, EyeClosed } from "lucide-react-native";
 import tw from "@/theme/tw";
 
 interface Props {
   tempPassword: string;
-  setTempPassword: React.Dispatch<React.SetStateAction<string | null>>;
+  onDone: () => void;
 }
 
-export default function TempPasswordModal({
+export default function TempPasswordContent({
   tempPassword,
-  setTempPassword,
+  onDone,
 }: Props) {
   const { width } = useWindowDimensions();
 
@@ -49,15 +48,7 @@ export default function TempPasswordModal({
   }, [copied]);
 
   return (
-    <ModalShell
-      visible
-      onClose={() => setTempPassword(null)}
-      variant="bottom"
-      title="User Created"
-      subtitle="Save this temporary password — it won't be shown again."
-      showHandle
-      closeOnBackdropPress={false}
-    >
+    <>
       {/* Password Box */}
       <View
         style={[
@@ -152,10 +143,10 @@ export default function TempPasswordModal({
 
       <AppButton
         title="Done"
-        onPress={() => setTempPassword(null)}
+        onPress={onDone}
         style={{ backgroundColor: TW.bgSecondary, height: sizes.doneHeight }}
         textStyle={{ fontSize: sizes.doneText }}
       />
-    </ModalShell>
+    </>
   );
 }

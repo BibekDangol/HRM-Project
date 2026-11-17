@@ -6,7 +6,6 @@ import { useCallback, useRef, useState } from "react";
 import { HolidaysEventsSection } from "@/src/components/HolidaysEventsSection";
 import QuickActionGrid from "@/src/components/ui/QuickActionGrid";
 import MetricCard from "@/src/components/ui/MetricCard";
-import TempPasswordModal from "../manage-users/TempPasswordModal";
 import { CalendarPlus, Clock, FileText, User, UserPlus } from "lucide-react-native";
 import { adminAddUserService } from "@/src/services/admin/add-user-service";
 import { fetchUsersService } from "@/src/services/admin.service";
@@ -67,11 +66,11 @@ export default function DashboardScreen() {
   const handleAddUser = async (data: AddUserFormData) => {
     if (!currentUserProfile?.organization_id) {
       Alert.alert("Error", "Organization or user information is missing.");
-      return;
+      return false;
     }
     if (!token) {
       Alert.alert("Error", "No token");
-      return; //  DO NOT return string on submit
+      return false;
     }
     try {
       setIsSubmittingUser(true);
@@ -82,17 +81,16 @@ export default function DashboardScreen() {
         orgId: currentUserProfile.organization_id,
         supervisor_id: data.supervisor_id,
       });
-      if (res.tempPassword) {
-        setTempPassword(res.tempPassword);
+      setTempPassword(res.tempPassword ?? null);
+      if (!res.tempPassword) {
+        setAddUserModalVisible(false);
+        Alert.alert("User created", "No temporary password was returned. Ask the user to reset their password before signing in.");
       }
-      const updatedUsers = await fetchUsersService(
-        currentUserProfile.organization_id,
-      );
-      setUsers(updatedUsers);
-      Alert.alert("Success", "User added successfully.");
-      setAddUserModalVisible(false);
+      void loadAll();
+      return true;
     } catch (err: any) {
       Alert.alert("Error", err.message ?? "Failed to add user.");
+      return false;
     } finally {
       setIsSubmittingUser(false);
     }
@@ -161,18 +159,16 @@ export default function DashboardScreen() {
 
       <AddUserModal
         visible={addUserModalVisible}
-        onClose={() => setAddUserModalVisible(false)}
+        tempPassword={tempPassword}
+        onClose={() => {
+          setTempPassword(null);
+          setAddUserModalVisible(false);
+        }}
         onSubmit={handleAddUser}
         supervisors={users}
         currentUserId={user?.id ?? ""}
         isSubmitting={isSubmittingUser}
       />
-      {tempPassword && (
-        <TempPasswordModal
-          tempPassword={tempPassword}
-          setTempPassword={setTempPassword}
-        />
-      )}
     </View>
   );
 }

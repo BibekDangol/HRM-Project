@@ -1,9 +1,9 @@
-import { AppHeaderLeft, AppHeaderRight, AppScreenLayout } from "@/src/components/navigation/header/AppHeader";
+import { AppHeaderRight, AppScreenLayout, HomePageIntro } from "@/src/components/navigation/header/AppHeader";
 import { colors } from "@/theme/colors";
 import { Tabs, usePathname, useRouter } from "expo-router";
 import { LucideIcon } from "lucide-react-native";
 import { useState } from "react";
-import { StatusBar, Text, View } from "react-native";
+import { StatusBar } from "react-native";
 
 import { adminTabs } from "@/src/config/adminTabs";
 import { getTabScreenOptions } from "@/src/config/tabScreenOptions";
@@ -11,7 +11,6 @@ import { useAdminHeaderController } from "@/src/hooks/navigation/useAdminHeaderC
 import { useDimension } from "@/src/hooks/useDimension";
 import { useHeaderMenu } from "@/src/hooks/useHeaderMenu";
 import AdminTabBar from "@/src/components/navigation/tabbar/AdminTabBar";
-import { TW } from "@/theme/twStyles";
 
 type AdminTabItem = {
   name: string;
@@ -22,7 +21,7 @@ type AdminTabItem = {
 export default function AdminLayout() {
   const router = useRouter();
   const pathname = usePathname();
-  const sharedOptions = getTabScreenOptions(pathname);
+  const sharedOptions = getTabScreenOptions();
   const menu = useHeaderMenu();
   const { isTablet, isSmallPhone } = useDimension();
   const buttonSize = isTablet ? 42 : isSmallPhone ? 32 : 36;
@@ -48,8 +47,8 @@ export default function AdminLayout() {
   return (
     <>
       <StatusBar
-        barStyle={pathname === "/dashboard" || pathname.includes("/profile") ? "light-content" : "dark-content"}
-        backgroundColor={pathname === "/dashboard" || pathname.includes("/profile") ? TW.bgSecondary : colors.canvas}
+        barStyle="dark-content"
+        backgroundColor={colors.canvas}
       />
 
       <Tabs
@@ -57,7 +56,21 @@ export default function AdminLayout() {
         screenLayout={({ children, route }) => (
           <AppScreenLayout
             isHome={route.name === "dashboard"}
-            backgroundColor={sharedOptions.sceneStyle.backgroundColor}
+            backgroundColor={colors.canvas}
+            homeContent={
+              <HomePageIntro name={currentUserProfile?.first_name ?? "Admin"}>
+                <AppHeaderRight
+                  variant="admin"
+                  isLocked={isLocked}
+                  profileMenuOpen={menu.open}
+                  onProfileTrigger={handleProfileTrigger}
+                  onProfileClose={handleProfileClose}
+                  onProfilePress={handleProfilePress}
+                  onLogoutPress={menu.logout}
+                  profileButtonSize={buttonSize}
+                />
+              </HomePageIntro>
+            }
             onBack={!pathname.endsWith("/attendance-list") && (showBackButton || route.name === "profile" || route.name === "holidays") ? handleBackPress : undefined}
           >
             {children}
@@ -65,79 +78,11 @@ export default function AdminLayout() {
         )}
         screenOptions={{
           ...sharedOptions,
-          headerTitleStyle: {
-            ...sharedOptions.headerTitleStyle,
-            textAlign: "center",
-            fontWeight: "600",
-          },
-          tabBarStyle: {
-            backgroundColor: colors.surface,
-          },
-          headerTitleContainerStyle: {
-            justifyContent: "center",
-          },
-          headerLeftContainerStyle: {
-            justifyContent: "flex-start",
-          },
-          headerRightContainerStyle: {
-            justifyContent: "flex-end",
-          },
-          headerLeft: () => (
-            <AppHeaderLeft visible={showBackButton} onPress={handleBackPress} />
-          ),
-          headerRight: () => (
-            <AppHeaderRight
-              variant="admin"
-              isLocked={isLocked}
-              profileMenuOpen={menu.open}
-              onProfileTrigger={() => {
-                handleProfileTrigger();
-              }}
-              onProfileClose={handleProfileClose}
-              onProfilePress={handleProfilePress}
-              onLogoutPress={menu.logout}
-              profileButtonSize={buttonSize}
-            />
-          ),
+          tabBarStyle: { backgroundColor: colors.surface },
         }}
         tabBar={(props) => <AdminTabBar {...props} />}
       >
-        <Tabs.Screen
-          name="dashboard"
-          options={{
-            title: "Dashboard",
-            headerShown: true,
-            headerTitle: () => (
-              <View
-                style={{ flexDirection: "row", alignItems: "center", gap: 10 }}
-              >
-                <View
-                  style={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: 12,
-                    backgroundColor: colors.onPrimaryWashStrong,
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Text
-                    style={{ color: colors.surface, fontSize: 13, fontWeight: "700" }}
-                  >
-                    {currentUserProfile?.first_name?.charAt(0)?.toUpperCase() ??
-                      "A"}
-                  </Text>
-                </View>
-                <Text
-                  style={{ color: colors.surface, fontSize: 16, fontWeight: "700" }}
-                >
-                  {currentUserProfile?.first_name ?? "Admin"}
-                </Text>
-              </View>
-            ),
-            headerTitleAlign: "left",
-          }}
-        />
+        <Tabs.Screen name="dashboard" options={{ title: "Dashboard" }} />
 
         {typedAdminTabs
           .filter((tab) => tab.name !== "dashboard")
@@ -153,7 +98,6 @@ export default function AdminLayout() {
           name="holidays"
           options={{
             title: "Holidays and Events",
-            headerTitleAlign: "center",
           }}
         />
 
@@ -162,7 +106,6 @@ export default function AdminLayout() {
           options={{
             title: "Profile",
             href: null,
-            headerTitleAlign: "center",
           }}
         />
       </Tabs>
