@@ -41,7 +41,7 @@ export default function SupervisorSettings() {
     >
       <View style={tw`px-1`}>
         <View style={tw`mb-4`}>
-          <Text style={tw`text-lg font-semibold ${TW.textPrimary}`}>
+          <Text style={tw`text-section font-semibold ${TW.textPrimary}`}>
             Supervisor Settings
           </Text>
         </View>
@@ -50,7 +50,7 @@ export default function SupervisorSettings() {
         <TouchableOpacity
           activeOpacity={0.75}
           onPress={() =>
-            router.navigate("/(users)/more/supervisor-settings/attendance-list")
+            router.navigate("/(users)/(main-tabs)/more/supervisor-settings/attendance-list")
           }
           style={[
             tw`mb-4 flex-row items-center justify-between rounded-2xl px-4 py-4`,
@@ -72,10 +72,10 @@ export default function SupervisorSettings() {
             </View>
 
             <View style={tw`flex-1`}>
-              <Text style={[tw`text-base font-semibold`, { color: colors.primary }]}>
+              <Text style={[tw`text-body font-semibold`, { color: colors.ink }]}>
                 Attendance
               </Text>
-              <Text style={[tw`mt-0.5 text-sm`, { color: colors.primaryMuted }]}>
+              <Text style={[tw`mt-0.5 text-description`, { color: colors.muted }]}>
                 View attendance records
               </Text>
             </View>
@@ -88,7 +88,7 @@ export default function SupervisorSettings() {
         <TouchableOpacity
           activeOpacity={0.75}
           onPress={() =>
-            router.navigate("/(users)/more/supervisor-settings/leave")
+            router.navigate("/(users)/(main-tabs)/more/supervisor-settings/leave")
           }
           style={[
             tw`flex-row items-center justify-between rounded-2xl px-4 py-4`,
@@ -110,10 +110,10 @@ export default function SupervisorSettings() {
             </View>
 
             <View style={tw`flex-1`}>
-              <Text style={[tw`text-base font-semibold`, { color: colors.primary }]}>
+              <Text style={[tw`text-body font-semibold`, { color: colors.ink }]}>
                 Leave
               </Text>
-              <Text style={[tw`mt-0.5 text-sm`, { color: colors.primaryMuted }]}>
+              <Text style={[tw`mt-0.5 text-description`, { color: colors.muted }]}>
                 Manage leave requests
               </Text>
             </View>

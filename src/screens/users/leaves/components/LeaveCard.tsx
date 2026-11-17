@@ -1,3 +1,4 @@
+import { fontSizes, lineHeights } from "@/theme/typography";
 import { colors } from "@/theme/colors";
 import { Clock, Pencil } from "lucide-react-native";
 import { Pressable, Text, View } from "react-native";
@@ -65,7 +66,7 @@ export function LeaveCard({ item, leaveTypeName, router, activeTab }: any) {
           <Text
             style={{
               color: colors.ink,
-              fontSize: 16,
+              fontSize: fontSizes.body, lineHeight: lineHeights.body,
               fontWeight: "700",
             }}
             numberOfLines={1}
@@ -75,7 +76,7 @@ export function LeaveCard({ item, leaveTypeName, router, activeTab }: any) {
           <Text
             style={{
               color: colors.muted,
-              fontSize: 13,
+              fontSize: fontSizes.caption, lineHeight: lineHeights.caption,
               marginTop: 3,
             }}
           >
@@ -105,7 +106,7 @@ export function LeaveCard({ item, leaveTypeName, router, activeTab }: any) {
               <Text
                 style={{
                   color: cfg.color,
-                  fontSize: 13,
+                  fontSize: fontSizes.caption, lineHeight: lineHeights.caption,
                   fontWeight: "700",
                   letterSpacing: 0.5,
                 }}
@@ -124,7 +125,7 @@ export function LeaveCard({ item, leaveTypeName, router, activeTab }: any) {
                 accessibilityLabel="Edit pending leave request"
                 onPress={() =>
                   router.push({
-                    pathname: "/(users)/leaves/editLeave",
+                    pathname: "/(users)/(main-tabs)/leaves/editLeave",
                     params: { leaveId: item.id },
                   })
                 }
@@ -160,7 +161,7 @@ export function LeaveCard({ item, leaveTypeName, router, activeTab }: any) {
       >
         <Clock size={13} color={colors.subtle} strokeWidth={1.8} />
 
-        <Text style={{ color: colors.subtle, fontSize: 12 }}>
+        <Text style={{ color: colors.subtle, fontSize: fontSizes.caption, lineHeight: lineHeights.caption }}>
           Applied on:{" "}
           {item.created_at ? formatDate(item.created_at.split("T")[0]) : "—"}
         </Text>

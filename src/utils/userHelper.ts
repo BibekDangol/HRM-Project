@@ -1,5 +1,5 @@
-// import {AdminProfile} from "@/app/(admin)/manage-users";
-// import { UserProfile } from "@/app/(admin)/manage-users";
+// import {AdminProfile} from "@/app/(admin)/(main-tabs)/manage-users";
+// import { UserProfile } from "@/app/(admin)/(main-tabs)/manage-users";
 // import { supabase } from "@/supabase/supabaseClient";
 
 // export const fetchAdminProfile = async (userId: string) => {

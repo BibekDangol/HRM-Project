@@ -58,10 +58,10 @@ const WRAPPER: Record<FormFieldVariant, string> = {
 };
 
 const LABEL: Record<FormFieldLabelVariant, string> = {
-  default: `${TW.textSecondary} font-semibold mb-2 text-sm`,
-  compact: `text-sm font-semibold mb-1 ${TW.textSecondary}`,
+  default: `${TW.textPrimary} font-semibold mb-2 text-label`,
+  compact: `text-label font-semibold mb-1 ${TW.textPrimary}`,
   uppercase:
-    "text-[13px] font-bold uppercase tracking-wide text-gray-500 mb-2",
+    "text-caption font-semibold uppercase tracking-wide text-ink mb-2",
 };
 
 export default function FormField({
@@ -72,7 +72,7 @@ export default function FormField({
   onBlur,
   error,
   placeholder,
-  placeholderTextColor = colors.subtle,
+  placeholderTextColor = colors.placeholder,
   variant = "auth",
   labelVariant = "default",
   containerStyle,
@@ -124,7 +124,7 @@ export default function FormField({
           placeholder={placeholder}
           placeholderTextColor={placeholderTextColor}
           style={[
-            tw`flex-1 text-[15px] ${TW.textPrimary}`,
+            tw`flex-1 text-input ${TW.textPrimary}`,
             inputProps.multiline && tw`min-h-[96px] text-top`,
             inputProps.editable === false && tw`text-gray-500`,
             inputStyle,
@@ -136,7 +136,7 @@ export default function FormField({
       </View>
 
       {error ? (
-        <Text accessibilityRole="alert" style={tw`text-[13px] mt-1 ml-1 text-dangerText`}>{error}</Text>
+        <Text accessibilityRole="alert" style={tw`text-caption mt-1 ml-1 text-dangerText`}>{error}</Text>
       ) : null}
     </View>
   );

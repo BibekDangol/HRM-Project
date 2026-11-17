@@ -108,14 +108,14 @@ export function HolidayRangeModal({
 
         <View style={tw`bg-white rounded-t-3xl px-6 pt-4 pb-10`}>
           <View style={tw`w-10 h-1 bg-slate-300 rounded-full self-center mb-5`} />
-          <Text style={tw`text-sm font-semibold text-slate-400 mb-1`}>
+          <Text style={tw`text-description font-semibold text-slate-400 mb-1`}>
             {dateLabel}
           </Text>
 
           {/* STEP 1 */}
           {step === "choose" && (
             <>
-              <Text style={tw`text-lg font-bold text-slate-800 mb-6`}>
+              <Text style={tw`text-section font-bold text-slate-800 mb-6`}>
                 What do you want to add?
               </Text>
 
@@ -125,7 +125,7 @@ export function HolidayRangeModal({
                   disabled={isPastDate || isSubmitting}
                   style={tw`flex-1 py-3 rounded-2xl bg-red-50 items-center ${isPastDate || isSubmitting ? "opacity-40" : ""
                     }`}>
-                  <Text style={tw`text-sm font-bold text-red-500`}>
+                  <Text style={tw`text-description font-bold text-red-500`}>
                     Holiday
                   </Text>
                 </Pressable>
@@ -135,7 +135,7 @@ export function HolidayRangeModal({
                   disabled={isPastDate || isSubmitting}
                   style={tw`flex-1 py-3 rounded-2xl bg-blue-50 items-center ${isPastDate || isSubmitting ? "opacity-40" : ""
                     }`}>
-                  <Text style={tw`text-sm font-bold text-blue-500`}>Event</Text>
+                  <Text style={tw`text-description font-bold text-blue-500`}>Event</Text>
                 </Pressable>
               </View>
 
@@ -143,7 +143,7 @@ export function HolidayRangeModal({
                 onPress={handleClose}
                 disabled={isSubmitting}
                 style={tw`mt-4 py-3 rounded-xl items-center bg-slate-100`}>
-                <Text style={tw`text-sm font-semibold text-slate-500`}>
+                <Text style={tw`text-description font-semibold text-slate-500`}>
                   Cancel
                 </Text>
               </Pressable>
@@ -153,7 +153,7 @@ export function HolidayRangeModal({
           {/* HOLIDAY */}
           {step === "holiday" && (
             <>
-              <Text style={tw`text-lg font-bold text-slate-800 mb-4`}>
+              <Text style={tw`text-section font-bold text-slate-800 mb-4`}>
                 Holiday Name
               </Text>
 
@@ -182,7 +182,7 @@ export function HolidayRangeModal({
           {/* EVENT */}
           {step === "event" && (
             <>
-              <Text style={tw`text-lg font-bold text-slate-800 mb-4`}>
+              <Text style={tw`text-section font-bold text-slate-800 mb-4`}>
                 Event Name
               </Text>
 

@@ -1,3 +1,4 @@
+import { fontSizes, lineHeights } from "@/theme/typography";
 import { colors } from "@/theme/colors";
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import {
@@ -67,9 +68,9 @@ const EventItemRow = ({ item }: { item: CalendarItem }) => (
     <Text
       style={{
         color: TW.bgSecondary,
-        fontSize: 15,
+        fontSize: fontSizes.body,
         fontWeight: "600",
-        lineHeight: 21,
+        lineHeight: lineHeights.body,
       }}
     >
       {item.title}
@@ -77,8 +78,8 @@ const EventItemRow = ({ item }: { item: CalendarItem }) => (
 
     <Text
       style={{
-        color: TW.BRAND_MUTED,
-        fontSize: 12,
+        color: colors.subtle,
+        fontSize: fontSizes.caption, lineHeight: lineHeights.caption,
         marginTop: 3,
       }}
     >
@@ -139,7 +140,7 @@ const DateGroupCard = ({
           <Text
             style={{
               color: TW.bgSecondary,
-              fontSize: 13,
+              fontSize: fontSizes.caption, lineHeight: lineHeights.caption,
               fontWeight: "700",
             }}
           >
@@ -151,7 +152,7 @@ const DateGroupCard = ({
           <Text
             style={{
               color: TW.bgSecondary,
-              fontSize: 15,
+              fontSize: fontSizes.body, lineHeight: lineHeights.body,
               fontWeight: "700",
             }}
           >
@@ -160,8 +161,8 @@ const DateGroupCard = ({
 
           <Text
             style={{
-              color: TW.BRAND_MUTED,
-              fontSize: 12,
+              color: colors.subtle,
+              fontSize: fontSizes.caption, lineHeight: lineHeights.caption,
               marginTop: 2,
             }}
           >
@@ -182,7 +183,7 @@ const DateGroupCard = ({
           <Text
             style={{
               color: colors.surface,
-              fontSize: 10,
+              fontSize: fontSizes.caption, lineHeight: lineHeights.caption,
               fontWeight: "700",
             }}
           >
@@ -253,7 +254,7 @@ const FilterModal = ({
         <Text
           style={{
             color: TW.bgSecondary,
-            fontSize: 16,
+            fontSize: fontSizes.body, lineHeight: lineHeights.body,
             fontWeight: "700",
             textAlign: "center",
             marginBottom: 16,
@@ -288,7 +289,7 @@ const FilterModal = ({
               <Text
                 style={{
                   color: active ? colors.surface : TW.bgSecondary,
-                  fontSize: 14,
+                  fontSize: fontSizes.label, lineHeight: lineHeights.label,
                   fontWeight: active ? "700" : "400",
                 }}
               >
@@ -471,7 +472,7 @@ export default function HolidaysEventsScreen() {
             <Text
               style={{
                 color: TW.bgSecondary,
-                fontSize: 13,
+                fontSize: fontSizes.caption, lineHeight: lineHeights.caption,
                 fontWeight: "600",
               }}
             >
@@ -513,9 +514,9 @@ export default function HolidaysEventsScreen() {
               <View style={{ flex: 1, justifyContent: "center", paddingTop: 40 }}>
                 <Text
                   style={{
-                    color: TW.BRAND_MUTED,
+                    color: colors.subtle,
                     textAlign: "center",
-                    fontSize: 14,
+                    fontSize: fontSizes.label, lineHeight: lineHeights.label,
                   }}
                 >
                   {emptyMessage}

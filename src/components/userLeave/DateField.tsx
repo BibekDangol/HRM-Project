@@ -11,7 +11,7 @@ export const DateField = ({ label, value, onPress }: DateFieldProps) => {
   return (
     <View style={tw`mb-3`}>
       {/* Label */}
-      <Text style={tw`text-sm text-slate-600 mb-1`}>{label}</Text>
+      <Text style={tw`text-description text-slate-600 mb-1`}>{label}</Text>
 
       {/* Field */}
       <Pressable
@@ -28,7 +28,7 @@ export const DateField = ({ label, value, onPress }: DateFieldProps) => {
         ]}
       >
         <Text
-          style={tw`${value ? "text-slate-600" : "text-slate-400"} text-sm font-medium flex-shrink`}
+          style={tw`${value ? "text-slate-600" : "text-slate-400"} text-description font-medium flex-shrink`}
         >
           {value || `Select ${label.toLowerCase()}`}
         </Text>

@@ -1,4 +1,5 @@
 import { colors } from "@/theme/colors";
+import { HomeScreenHeader } from "@/src/components/navigation/header/AppHeader";
 import { formatElapsed, formatSinceTime } from "@/src/utils/attendanceHelper";
 import { MAX_YEAR, MONTHS } from "@/src/utils/userDashboard";
 import React, { useMemo, useState } from "react";
@@ -66,7 +67,7 @@ export default function HomeScreen() {
   return (
     <ScrollView
       style={tw`bg-canvas flex-1`}
-      contentContainerStyle={{ paddingVertical: 16, flexGrow: 1 }}
+      contentContainerStyle={{ paddingBottom: 16, flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
       refreshControl={
         <RefreshControl
@@ -75,6 +76,9 @@ export default function HomeScreen() {
         />
       }
     >
+      <View style={{ marginBottom: 8 }}>
+        <HomeScreenHeader />
+      </View>
       <View style={{ paddingHorizontal: 16 }}>
         <CheckInCard
           isCheckedIn={att.isCheckedIn}
@@ -90,7 +94,7 @@ export default function HomeScreen() {
 
       <View style={{ paddingHorizontal: 16, marginTop: 16 }}>
         <View style={tw`flex-row items-center justify-between mb-4`}>
-          <Text style={tw`font-semibold text-lg text-gray-800`}>
+          <Text style={tw`font-semibold text-section text-gray-800`}>
             For {monthTitle} {selectedYear}
           </Text>
 

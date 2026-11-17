@@ -1,3 +1,4 @@
+import { fontSizes, lineHeights } from "@/theme/typography";
 import { colors } from "@/theme/colors";
 import { Pressable, ScrollView, Text } from "react-native";
 import type { Leave } from "@/src/services/leave.service";
@@ -51,7 +52,7 @@ export function Header({ leaves, activeTab, setActiveTab }: Props) {
             })}
           >
             <Text style={{
-              fontSize: 14,
+              fontSize: fontSizes.label, lineHeight: lineHeights.label,
               fontWeight: isActive ? "700" : "500",
               color: isActive ? colors.surface : colors.muted,
             }}>

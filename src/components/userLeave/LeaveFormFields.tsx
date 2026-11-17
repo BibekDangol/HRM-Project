@@ -1,3 +1,4 @@
+import { fontSizes, lineHeights } from "@/theme/typography";
 import { colors } from "@/theme/colors";
 import React from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
@@ -37,7 +38,7 @@ const SPACING = {
 
 const ERROR_TEXT = {
   marginTop: 6,
-  fontSize: 14,
+  fontSize: fontSizes.label, lineHeight: lineHeights.label,
   color: colors.danger,
   fontWeight: "500" as const,
 };
@@ -65,8 +66,8 @@ export function LeaveFormFields({
       <View style={{ marginBottom: SPACING.section }}>
         <Text
           style={[
-            tw`text-base font-semibold`,
-            { color: TW.bgSecondary, marginBottom: SPACING.labelBottom },
+            tw`text-label font-semibold`,
+            { color: colors.ink, marginBottom: SPACING.labelBottom },
           ]}
         >
           Leave Type
@@ -85,8 +86,8 @@ export function LeaveFormFields({
       <View>
         <Text
           style={[
-            tw`text-base font-semibold`,
-            { color: TW.bgSecondary, marginBottom: SPACING.labelBottom },
+            tw`text-label font-semibold`,
+            { color: colors.ink, marginBottom: SPACING.labelBottom },
           ]}
         >
           Duration
@@ -116,8 +117,8 @@ export function LeaveFormFields({
       <View style={{ marginBottom: SPACING.section }}>
         <Text
           style={[
-            tw`text-base font-semibold`,
-            { color: TW.bgSecondary, marginBottom: SPACING.labelBottom },
+            tw`text-label font-semibold`,
+            { color: colors.ink, marginBottom: SPACING.labelBottom },
           ]}
         >
           Day Option
@@ -170,9 +171,9 @@ export function LeaveFormFields({
               </View>
               <Text
                 style={{
-                  fontSize: 14,
+                  fontSize: fontSizes.label, lineHeight: lineHeights.label,
                   fontWeight: "600",
-                  color: TW.bgSecondary,
+                  color: colors.ink,
                 }}
               >
                 Half Day
@@ -185,9 +186,9 @@ export function LeaveFormFields({
           <View>
             <Text
               style={[
-                tw`text-base font-semibold`,
+                tw`text-label font-semibold`,
                 {
-                  color: TW.bgSecondary,
+                  color: colors.ink,
                   marginBottom: SPACING.labelBottom,
                 },
               ]}
@@ -221,7 +222,7 @@ export function LeaveFormFields({
                     >
                       <Text
                         style={{
-                          fontSize: 14,
+                          fontSize: fontSizes.label, lineHeight: lineHeights.label,
                           fontWeight: "500",
                           color: value === session ? colors.surface : TW.bgSecondary,
                         }}
@@ -241,8 +242,8 @@ export function LeaveFormFields({
       <View style={{ marginBottom: SPACING.section }}>
         <Text
           style={[
-            tw`text-base font-semibold`,
-            { color: TW.bgSecondary, marginBottom: SPACING.labelBottom },
+            tw`text-label font-semibold`,
+            { color: colors.ink, marginBottom: SPACING.labelBottom },
           ]}
         >
           Reason / Description
@@ -257,7 +258,7 @@ export function LeaveFormFields({
               onBlur={onBlur}
               placeholder="Enter reason for leave..."
               accessibilityLabel="Reason for leave"
-              placeholderTextColor={colors.subtle}
+              placeholderTextColor={colors.placeholder}
               multiline
               textAlignVertical="top"
               style={{
@@ -266,9 +267,9 @@ export function LeaveFormFields({
                 borderWidth: 1.5,
                 borderRadius: 10,
                 borderColor: errors.reason ? colors.danger : colors.border,
-                color: TW.bgSecondary,
-                fontSize: 14,
-                lineHeight: 22,
+                color: colors.ink,
+                fontSize: fontSizes.label,
+                lineHeight: lineHeights.label,
                 minHeight: 90,
                 backgroundColor: colors.surface,
               }}

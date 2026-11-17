@@ -1,1 +1,1 @@
-export const DEFAULT_RETURN_TO = "/(users)/leaves/calendar/apply";
+export const DEFAULT_RETURN_TO = "/(users)/(main-tabs)/leaves/calendar/apply";

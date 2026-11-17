@@ -15,15 +15,15 @@ type Params = {
 };
 
 const USER_ROOT_TAB_PATHS = [
-  "/(users)/dashboard",
+  "/(users)/(main-tabs)/dashboard",
   "/dashboard",
-  "/(users)/leaves",
+  "/(users)/(main-tabs)/leaves",
   "/leaves",
   "/(users)/profile",
   "/profile",
   "/(users)/profile/index",
   "/profile/index",
-  "/(users)/more",
+  "/(users)/(main-tabs)/more",
   "/more",
 ];
 
@@ -49,7 +49,7 @@ export function useUserHeaderController({
     }
 
     if (!isRootTab) {
-      router.replace("/(users)/dashboard");
+      router.replace("/(users)/(main-tabs)/dashboard");
       return true;
     }
 

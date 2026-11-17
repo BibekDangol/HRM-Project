@@ -1,3 +1,4 @@
+import { fontSizes, lineHeights } from "@/theme/typography";
 import { colors } from "@/theme/colors";
 import React, { useEffect, useMemo, useState } from "react";
 import { Pressable, Text, View } from "react-native";
@@ -265,7 +266,7 @@ export function SharedCalendar({
         >
           <Text
             style={{
-              fontSize: 11,
+              fontSize: fontSizes.caption, lineHeight: lineHeights.caption,
               color: colors.onPrimarySoft,
               fontWeight: "600",
               letterSpacing: 1,
@@ -278,7 +279,7 @@ export function SharedCalendar({
 
           <Text
             style={{
-              fontSize: 30,
+              fontSize: fontSizes.metric, lineHeight: lineHeights.metric,
               fontWeight: "400",
               color: colors.surface,
               letterSpacing: -0.3,
@@ -291,7 +292,7 @@ export function SharedCalendar({
             <Text
               style={{
                 color: colors.onPrimarySoft,
-                fontSize: 13,
+                fontSize: fontSizes.caption, lineHeight: lineHeights.caption,
                 marginTop: 8,
                 fontWeight: "600",
               }}
@@ -333,7 +334,7 @@ export function SharedCalendar({
           >
             <Text
               style={{
-                fontSize: 15,
+                fontSize: fontSizes.body, lineHeight: lineHeights.body,
                 fontWeight: "700",
                 color: TW.bgSecondary,
               }}
@@ -343,7 +344,7 @@ export function SharedCalendar({
             <Text
               style={{
                 color: TW.bgSecondary,
-                fontSize: 11,
+                fontSize: fontSizes.caption, lineHeight: lineHeights.caption,
               }}
             >
               ▼
@@ -366,7 +367,7 @@ export function SharedCalendar({
             >
               <Text
                 style={{
-                  fontSize: 24,
+                  fontSize: fontSizes.section, lineHeight: lineHeights.section,
                   color: TW.bgSecondary,
                   fontWeight: "500",
                 }}
@@ -390,7 +391,7 @@ export function SharedCalendar({
             >
               <Text
                 style={{
-                  fontSize: 24,
+                  fontSize: fontSizes.section, lineHeight: lineHeights.section,
                   color: TW.bgSecondary,
                   fontWeight: "500",
                 }}
@@ -421,7 +422,7 @@ export function SharedCalendar({
           >
             <Text
               style={{
-                fontSize: 13,
+                fontSize: fontSizes.caption, lineHeight: lineHeights.caption,
                 fontWeight: "700",
                 color: TW.bgSecondary,
               }}
@@ -442,7 +443,7 @@ export function SharedCalendar({
             >
               <Text
                 style={{
-                  fontSize: 13,
+                  fontSize: fontSizes.caption, lineHeight: lineHeights.caption,
                   fontWeight: "700",
                   color: colors.dangerText,
                 }}
@@ -472,7 +473,7 @@ export function SharedCalendar({
             >
               <Text
                 style={{
-                  fontSize: 12,
+                  fontSize: fontSizes.caption, lineHeight: lineHeights.caption,
                   fontWeight: "600",
                   color: colors.muted,
                 }}
@@ -540,7 +541,7 @@ export function SharedCalendar({
                     marginRight: 6,
                   }}
                 />
-                <Text style={{ fontSize: 12, color: colors.muted, fontWeight: "500" }}>
+                <Text style={{ fontSize: fontSizes.caption, lineHeight: lineHeights.caption, color: colors.muted, fontWeight: "500" }}>
                   Range
                 </Text>
               </View>
@@ -555,7 +556,7 @@ export function SharedCalendar({
                     marginRight: 6,
                   }}
                 />
-                <Text style={{ fontSize: 12, color: colors.muted, fontWeight: "500" }}>
+                <Text style={{ fontSize: fontSizes.caption, lineHeight: lineHeights.caption, color: colors.muted, fontWeight: "500" }}>
                   Selected
                 </Text>
               </View>

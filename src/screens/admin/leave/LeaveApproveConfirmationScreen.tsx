@@ -12,17 +12,17 @@ export default function LeaveApproveConfirmationScreen() {
     <View style={tw`flex-1 bg-canvas items-center justify-center px-6`}>
       <CheckCircle size={72} color={colors.success} />
 
-      <Text style={tw`text-xl font-semibold mt-4`}>
+      <Text style={tw`text-section font-semibold mt-4`}>
         Leave request approved
       </Text>
 
-      <Text style={tw`text-sm text-gray-500 text-center mt-2`}>
+      <Text style={tw`text-description text-gray-500 text-center mt-2`}>
         You have approved the leave request.
       </Text>
 
       <Pressable style={tw`bg-blue-600 py-3 rounded-lg w-full mt-8`}>
         <Text style={tw`text-center text-white font-semibold`}
-          onPress={() => router.push('/(admin)/leave')}>
+          onPress={() => router.push('/(admin)/(main-tabs)/leave')}>
           Back to leave page
         </Text>
       </Pressable>
@@ -30,7 +30,7 @@ export default function LeaveApproveConfirmationScreen() {
         <Text style={tw`text-center text-blue-600 font-semibold`}
           onPress={() =>
             router.push({
-              pathname: '/(admin)/leave/approved-details',
+              pathname: '/(admin)/(main-tabs)/leave/approved-details',
               params: { id: id } // pass leave id
             })
           }>

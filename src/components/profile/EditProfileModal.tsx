@@ -67,7 +67,7 @@ export default function EditProfileModal({
             onChangeText={onChange}
             onBlur={onBlur}
             placeholder="Enter first name"
-            placeholderTextColor={colors.borderStrong}
+            placeholderTextColor={colors.placeholder}
             error={errors.firstName?.message}
             containerStyle={tw`mb-4`}
           />
@@ -86,7 +86,7 @@ export default function EditProfileModal({
             onChangeText={onChange}
             onBlur={onBlur}
             placeholder="Enter last name"
-            placeholderTextColor={colors.borderStrong}
+            placeholderTextColor={colors.placeholder}
             error={errors.lastName?.message}
             containerStyle={tw`mb-4`}
           />

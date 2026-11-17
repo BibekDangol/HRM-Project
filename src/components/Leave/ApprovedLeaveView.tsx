@@ -18,7 +18,7 @@ export default function ApprovedLeaveView({ leave }: Props) {
     >
       <View style={tw`bg-white m-4 rounded-xl p-4 shadow`}>
         {/* Header */}
-        <Text style={tw`text-lg font-bold text-gray-900 mb-1`}>
+        <Text style={tw`text-section font-bold text-gray-900 mb-1`}>
           Leave Approved
         </Text>
         <Text style={tw`text-green-600 font-semibold mb-4`}>
@@ -27,44 +27,44 @@ export default function ApprovedLeaveView({ leave }: Props) {
 
         {/* Employee Info */}
         <View style={tw`mb-4`}>
-          <Text style={tw`text-gray-500 text-sm`}>Employee Name</Text>
-          <Text style={tw`text-gray-900 text-base font-semibold`}>
+          <Text style={tw`text-gray-500 text-description`}>Employee Name</Text>
+          <Text style={tw`text-gray-900 text-body font-semibold`}>
             {leave.first_name} {leave.last_name}
           </Text>
         </View>
         {/* Leave Type */}
         <View style={tw`mb-4`}>
-          <Text style={tw`text-gray-500 text-sm`}>Leave Type</Text>
+          <Text style={tw`text-gray-500 text-description`}>Leave Type</Text>
           <Text style={tw`text-gray-900`}>{leave.leave_type_name}</Text>
         </View>
         {/* Dates */}
         <View style={tw`flex-row justify-between mb-4`}>
           <View>
-            <Text style={tw`text-gray-500 text-sm`}>Start Date</Text>
+            <Text style={tw`text-gray-500 text-description`}>Start Date</Text>
             <Text style={tw`text-gray-900`}>{leave.start_date}</Text>
           </View>
           <View>
-            <Text style={tw`text-gray-500 text-sm`}>End Date</Text>
+            <Text style={tw`text-gray-500 text-description`}>End Date</Text>
             <Text style={tw`text-gray-900`}>{leave.end_date}</Text>
           </View>
         </View>
         {/* Duration */}
         <View style={tw`mb-4`}>
-          <Text style={tw`text-gray-500 text-sm`}>Duration</Text>
+          <Text style={tw`text-gray-500 text-description`}>Duration</Text>
           <Text style={tw`text-gray-900`}>{leaveDuration}</Text>
         </View>
         {/* Reason */}
         <View style={tw`mb-4`}>
-          <Text style={tw`text-gray-500 text-sm`}>Reason</Text>
+          <Text style={tw`text-gray-500 text-description`}>Reason</Text>
           <Text style={tw`text-gray-900`}>{leave.reason || "N/A"}</Text>
         </View>
         {/* Approved Info */}
         <View style={tw`border-t border-gray-200 pt-4`}>
-          <Text style={tw`text-gray-500 text-sm`}>Status</Text>
+          <Text style={tw`text-gray-500 text-description`}>Status</Text>
           <Text style={tw`text-green-600 font-semibold mb-2`}>
             {leave.status?.toUpperCase()}
           </Text>
-          <Text style={tw`text-gray-500 text-sm`}>Approved By</Text>
+          <Text style={tw`text-gray-500 text-description`}>Approved By</Text>
           <Text style={tw`text-gray-900 mb-2`}>
             {leave.action_taken_by_name || "N/A"}
           </Text>

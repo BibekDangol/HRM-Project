@@ -175,7 +175,7 @@ export function ListScreen<T, K extends string = string>({
                 >
                   <Text
                     style={[
-                      tw`text-sm font-bold`,
+                      tw`text-description font-bold`,
                       isActive ? tw`${TW.textButton}` : tw`${TW.textPrimary}`,
                     ]}
                   >

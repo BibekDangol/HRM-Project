@@ -6,7 +6,6 @@ import { LeaveCalendarModal } from "@/src/components/userLeave/LeaveCalendarModa
 import { LeaveFormFields } from "@/src/components/userLeave/LeaveFormFields";
 import LoadingState from "@/src/components/states/LoadingState";
 import React from "react";
-import { TW } from "@/theme/twStyles";
 import { firstParam } from "@/src/utils/leaveUtils";
 import tw from "@/theme/tw";
 import { useLeaveForm } from "@/src/hooks/users/useLeaveForm";
@@ -29,7 +28,7 @@ export default function EditLeaveScreen() {
 
   const goBackToLeaves = () => {
     router.replace({
-      pathname: "/(users)/leaves/(tabs)",
+      pathname: "/(users)/(main-tabs)/leaves/(tabs)",
       params: { tab: returnTab },
     });
   };
@@ -89,10 +88,10 @@ export default function EditLeaveScreen() {
         }}
       >
         <View style={tw`mb-2`}>
-          <Text style={[tw`text-2xl font-bold`, { color: TW.bgSecondary }]}>
+          <Text style={tw`text-page font-bold text-ink`}>
             Edit Leave Request
           </Text>
-          <Text style={tw`mt-1.5 text-[13px] text-slate-400`}>
+          <Text style={tw`mt-1.5 text-description text-muted`}>
             Update the details of your pending leave
           </Text>
         </View>

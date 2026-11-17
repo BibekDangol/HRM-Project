@@ -42,11 +42,11 @@ const PendingLeaveView = ({
         contentContainerStyle={tw`${showActions ? "pb-32" : "pb-10"}`}>
         <View
           style={tw`mx-5 mt-5 rounded-3xl bg-slate-50 border border-slate-100 px-5 py-6 items-center`}>
-          <Text style={tw`text-lg font-bold text-slate-900`}>
+          <Text style={tw`text-section font-bold text-slate-900`}>
             {leave.first_name} {leave.last_name}
           </Text>
 
-          <Text style={tw`text-sm text-slate-400 mt-0.5`}>
+          <Text style={tw`text-description text-slate-400 mt-0.5`}>
             {leave.leave_type_name ?? "Leave Request"}
           </Text>
 
@@ -55,17 +55,17 @@ const PendingLeaveView = ({
               tw`mt-3 px-4 py-1.5 rounded-full`,
               { backgroundColor: cfg.bg },
             ]}>
-            <Text style={[tw`text-xs font-bold`, { color: cfg.text }]}>
+            <Text style={[tw`text-caption font-bold`, { color: cfg.text }]}>
               {cfg.label}
             </Text>
           </View>
 
           <View style={tw`mt-4 flex-row gap-4`}>
             <View style={tw`items-center`}>
-              <Text style={tw`text-lg font-bold text-slate-900`}>
+              <Text style={tw`text-section font-bold text-slate-900`}>
                 {leave.days_count ?? 0}
               </Text>
-              <Text style={tw`text-xs text-slate-400`}>Days</Text>
+              <Text style={tw`text-caption text-slate-400`}>Days</Text>
             </View>
 
             {remainingDays !== null && (
@@ -74,30 +74,30 @@ const PendingLeaveView = ({
                 <View style={tw`items-center`}>
                   <Text
                     style={[
-                      tw`text-lg font-bold`,
+                      tw`text-section font-bold`,
                       remainingDays <= 0
                         ? tw`text-red-500`
                         : tw`text-emerald-600`,
                     ]}>
                     {remainingDays}
                   </Text>
-                  <Text style={tw`text-xs text-slate-400`}>Remaining</Text>
+                  <Text style={tw`text-caption text-slate-400`}>Remaining</Text>
                 </View>
               </>
             )}
 
             <View style={tw`w-px bg-slate-200`} />
             <View style={tw`items-center`}>
-              <Text style={tw`text-lg font-bold text-slate-900`}>
+              <Text style={tw`text-section font-bold text-slate-900`}>
                 {leave.leave_limit}
               </Text>
-              <Text style={tw`text-xs text-slate-400`}>Limit</Text>
+              <Text style={tw`text-caption text-slate-400`}>Limit</Text>
             </View>
           </View>
         </View>
         <View style={tw`px-5 mt-6 border-t border-slate-100`}>
           <Text
-            style={tw`text-xs font-bold text-slate-400 uppercase tracking-wider mb-2`}>
+            style={tw`text-caption font-bold text-slate-400 uppercase tracking-wider mb-2`}>
             Details
           </Text>
 
@@ -127,7 +127,7 @@ const PendingLeaveView = ({
         {usedDays !== null && remainingDays !== null && (
           <View style={tw`px-5 mt-6`}>
             <Text
-              style={tw`text-xs font-bold text-slate-400 uppercase tracking-wider mb-2`}>
+              style={tw`text-caption font-bold text-slate-400 uppercase tracking-wider mb-2`}>
               Leave Balance
             </Text>
 

@@ -1,4 +1,6 @@
+import { mapAppError } from "@/src/utils/mapAppError";
 import { colors } from "@/theme/colors";
+import { HomeScreenHeader } from "@/src/components/navigation/header/AppHeader";
 import AddUserModal, { AddUserFormData } from "../manage-users/AddUserModal";
 import { Alert, RefreshControl, ScrollView, View } from "react-native";
 import { useCallback, useRef, useState } from "react";
@@ -19,8 +21,7 @@ import { useUsersStore } from "@/src/store/useUsersStore";
 
 export default function DashboardScreen() {
   const router = useRouter();
-  const { session, user } = useAuthStore();
-  const token = session?.access_token;
+  const user = useAuthStore((state) => state.user);
   const { users, currentUserProfile, setUsers } = useUsersStore();
   const {
     calendarItems,
@@ -65,12 +66,7 @@ export default function DashboardScreen() {
 
   const handleAddUser = async (data: AddUserFormData) => {
     if (!currentUserProfile?.organization_id) {
-      Alert.alert("Error", "Organization or user information is missing.");
-      return false;
-    }
-    if (!token) {
-      Alert.alert("Error", "No token");
-      return false;
+      return { success: false as const, error: mapAppError({ status: 422, fields: { orgId: "required" } }, { endpoint: "admin-add-user" }) };
     }
     try {
       setIsSubmittingUser(true);
@@ -81,16 +77,14 @@ export default function DashboardScreen() {
         orgId: currentUserProfile.organization_id,
         supervisor_id: data.supervisor_id,
       });
-      setTempPassword(res.tempPassword ?? null);
-      if (!res.tempPassword) {
+      if (!res.success) return res;
+      setTempPassword(res.data.tempPassword ?? null);
+      if (!res.data.tempPassword) {
         setAddUserModalVisible(false);
         Alert.alert("User created", "No temporary password was returned. Ask the user to reset their password before signing in.");
       }
       void loadAll();
-      return true;
-    } catch (err: any) {
-      Alert.alert("Error", err.message ?? "Failed to add user.");
-      return false;
+      return res;
     } finally {
       setIsSubmittingUser(false);
     }
@@ -105,17 +99,20 @@ export default function DashboardScreen() {
   return (
     <View style={tw`flex-1 bg-canvas`}>
       <ScrollView
-        contentContainerStyle={tw`px-4 pt-6 pb-10`}
+        contentContainerStyle={tw`px-4 pb-10`}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
+        <View style={{ marginHorizontal: -16, marginBottom: 16 }}>
+          <HomeScreenHeader />
+        </View>
         <AdminOverview
           overview={overview}
           error={overviewError}
-          onReviewLeaves={() => router.push("/(admin)/leave")}
-          onViewAttendance={() => router.push("/(admin)/more/attendance-list")}
+          onReviewLeaves={() => router.push("/(admin)/(main-tabs)/leave")}
+          onViewAttendance={() => router.push("/(admin)/(main-tabs)/more/attendance-list")}
         />
         <MetricCard
           title="Total employees"
@@ -136,17 +133,17 @@ export default function DashboardScreen() {
             {
               label: "Manage Leave",
               icon: <CalendarPlus size={24} color={colors.primary} />,
-              onPress: () => router.replace("/(admin)/leave"),
+              onPress: () => router.replace("/(admin)/(main-tabs)/leave"),
             },
             {
               label: "Attendance",
               icon: <Clock size={24} color={colors.primary} />,
-              onPress: () => router.replace("/(admin)/more/attendance-list"),
+              onPress: () => router.replace("/(admin)/(main-tabs)/more/attendance-list"),
             },
             {
               label: "Holidays",
               icon: <FileText size={24} color={colors.primary} />,
-              onPress: () => router.replace("/(admin)/more/holidays"),
+              onPress: () => router.replace("/(admin)/(main-tabs)/more/holidays"),
             },
           ]}
         />

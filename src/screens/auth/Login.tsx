@@ -40,9 +40,9 @@ export default function LoginScreen() {
       return;
     }
     if (result.role === "admin") {
-      router.replace("/(admin)/dashboard");
+      router.replace("/(admin)/(main-tabs)/dashboard");
     } else {
-      router.replace("/(users)/dashboard");
+      router.replace("/(users)/(main-tabs)/dashboard");
     }
   };
 

@@ -105,12 +105,12 @@ export default function LeaveView({
                 pressed && !isActive && tw`opacity-70`,
               ]}>
               <Text
-                style={tw`text-sm font-bold ${
+                style={tw`text-description font-bold ${
                   isActive ? TW.textButton : TW.textPrimary
                 }`}>
                 {tab.toUpperCase()}{" "}
                 <Text
-                  style={tw`text-xs ${
+                  style={tw`text-caption ${
                     isActive ? TW.textButton : TW.textPrimary
                   }`}>
                   ({counts[tab]})
@@ -148,10 +148,10 @@ export default function LeaveView({
 
               {/* Info */}
               <View style={tw`flex-1`}>
-                <Text style={tw`text-sm font-semibold ${TW.textPrimary}`}>
+                <Text style={tw`text-description font-semibold ${TW.textPrimary}`}>
                   {leave.first_name} {leave.last_name ?? ""}
                 </Text>
-                <Text style={tw`text-xs ${TW.textSecondary} mt-0.5`}>
+                <Text style={tw`text-caption ${TW.textSecondary} mt-0.5`}>
                   {leave.start_date}
                   {leave.end_date && leave.end_date !== leave.start_date
                     ? ` → ${leave.end_date}`
@@ -163,7 +163,7 @@ export default function LeaveView({
               <View
                 style={tw`flex-row items-center px-3 py-1.5 rounded-xl mr-3 ${cfg.bg}`}>
                 <View style={tw`h-1.5 w-1.5 rounded-full mr-1.5 ${cfg.dot}`} />
-                <Text style={tw`text-xs font-bold ${cfg.text}`}>
+                <Text style={tw`text-caption font-bold ${cfg.text}`}>
                   {leave.status.toUpperCase()}
                 </Text>
               </View>

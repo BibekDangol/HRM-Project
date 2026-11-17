@@ -1,3 +1,4 @@
+import { fontSizes, lineHeights } from "@/theme/typography";
 import { colors } from "@/theme/colors";
 import { CircleCheck, LogOut } from "lucide-react-native";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
@@ -46,7 +47,7 @@ export function CheckInCard({
     >
       {/* LEFT SIDE */}
       <View style={{ gap: 4, flexGrow: 1, flexShrink: 1, flexBasis: 160 }}>
-        <Text style={{ color: colors.muted, fontSize: 14 }}>
+        <Text style={{ color: colors.muted, fontSize: fontSizes.label, lineHeight: lineHeights.label }}>
           {isLocked && !pendingAction ? "Attendance" : isCheckedIn ? "Currently working" : "Not checked in"}
         </Text>
 
@@ -54,7 +55,7 @@ export function CheckInCard({
           <>
             <Text
               style={{
-                fontSize: 28,
+                fontSize: fontSizes.metric, lineHeight: lineHeights.metric,
                 fontWeight: "800",
                 color: colors.ink,
               }}
@@ -62,12 +63,12 @@ export function CheckInCard({
               {formatElapsed(elapsedMs)}
             </Text>
 
-            <Text style={{ color: colors.muted, fontSize: 14 }}>
+            <Text style={{ color: colors.muted, fontSize: fontSizes.label, lineHeight: lineHeights.label }}>
               Since {formatSinceTime(checkedInAt)}
             </Text>
           </>
         ) : (
-          <Text style={{ fontSize: 18, fontWeight: "600", color: colors.ink }}>
+          <Text style={{ fontSize: fontSizes.section, lineHeight: lineHeights.section, fontWeight: "600", color: colors.ink }}>
             {idleMessage}
           </Text>
         )}

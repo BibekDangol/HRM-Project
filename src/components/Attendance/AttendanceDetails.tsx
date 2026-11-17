@@ -1,3 +1,4 @@
+import { fontSizes, lineHeights } from "@/theme/typography";
 import { colors } from "@/theme/colors";
 import * as FileSystem from "expo-file-system/legacy";
 import * as Sharing from "expo-sharing";
@@ -186,7 +187,7 @@ const exportCSV = async (csvString: string, filename: string) => {
 //       <View
 //         style={[tw`w-1.5 h-1.5 rounded-full`, { backgroundColor: cfg.dot }]}
 //       />
-//       <Text style={tw`text-sm font-medium ${cfg.text}`}>{cfg.label}</Text>
+//       <Text style={tw`text-description font-medium ${cfg.text}`}>{cfg.label}</Text>
 //     </View>
 //   );
 // };
@@ -195,7 +196,7 @@ const SectionLabel = ({ children }: { children: string }) => (
   <View style={tw`flex-row items-center gap-2 mb-4`}>
     <Text
       style={[
-        tw`text-xs uppercase tracking-widest`,
+        tw`text-caption uppercase tracking-widest`,
         { color: TW.BRAND_MUTED, letterSpacing: 1.5 },
       ]}
     >
@@ -224,17 +225,17 @@ const StatBox = ({
       },
     ]}
   >
-    <Text style={[tw`text-2xl font-bold mb-0.5`, { color: accent }]}>
+    <Text style={[tw`text-page font-bold mb-0.5`, { color: accent }]}>
       {value}
     </Text>
     <Text
       style={{
-        fontSize: 10,
+        fontSize: fontSizes.caption,
         textAlign: "center",
         color: accent + "bb",
         letterSpacing: 0.4,
         textTransform: "uppercase",
-        lineHeight: 14,
+        lineHeight: lineHeights.caption,
       }}
     >
       {label}
@@ -313,13 +314,13 @@ const AttendanceView: React.FC<Props> = ({ userId, name }) => {
                 <View style={tw`flex-1 pr-4`}>
                   <Text
                     style={[
-                      tw`text-xs mb-1`,
-                      { color: TW.BRAND_MUTED, letterSpacing: 1.2 },
+                      tw`text-caption mb-1`,
+                      { color: colors.onPrimarySoft, letterSpacing: 1.2 },
                     ]}
                   >
                     ATTENDANCE REPORT
                   </Text>
-                  <Text style={[tw`text-2xl font-bold`, { color: colors.surface }]}>
+                  <Text style={[tw`text-page font-bold`, { color: colors.surface }]}>
                     {currentMonth}
                   </Text>
                 </View>
@@ -330,7 +331,7 @@ const AttendanceView: React.FC<Props> = ({ userId, name }) => {
                   ].map(([lbl, val]) => (
                     <Text
                       key={lbl}
-                      style={[tw`text-xs mb-0.5`, { color: TW.BRAND_MUTED }]}
+                      style={[tw`text-caption mb-0.5`, { color: colors.onPrimarySoft }]}
                     >
                       {lbl}:{" "}
                       <Text
@@ -357,7 +358,7 @@ const AttendanceView: React.FC<Props> = ({ userId, name }) => {
                 <Text
                   style={{
                     color: TW.BRAND_LIGHT,
-                    fontSize: 13,
+                    fontSize: fontSizes.caption, lineHeight: lineHeights.caption,
                     fontWeight: "600",
                   }}
                 >
@@ -382,7 +383,7 @@ const AttendanceView: React.FC<Props> = ({ userId, name }) => {
                   <Text
                     style={{
                       color: TW.BRAND_LIGHT,
-                      fontSize: 12,
+                      fontSize: fontSizes.caption, lineHeight: lineHeights.caption,
                       fontWeight: "500",
                     }}
                   >
@@ -405,7 +406,7 @@ const AttendanceView: React.FC<Props> = ({ userId, name }) => {
                   <Text
                     style={{
                       color: TW.BRAND_LIGHT,
-                      fontSize: 12,
+                      fontSize: fontSizes.caption, lineHeight: lineHeights.caption,
                       fontWeight: "500",
                     }}
                   >
@@ -480,14 +481,14 @@ const AttendanceView: React.FC<Props> = ({ userId, name }) => {
                     (!canDecYear || pressed) && { opacity: 0.4 },
                   ]}
                 >
-                  <Text style={[tw`font-bold text-base`, { color: colors.ink }]}>
+                  <Text style={[tw`font-bold text-body`, { color: colors.ink }]}>
                     ‹
                   </Text>
                 </Pressable>
 
                 <Text
                   style={[
-                    tw`text-lg font-bold w-16 text-center`,
+                    tw`text-section font-bold w-16 text-center`,
                     { color: colors.ink },
                   ]}
                 >
@@ -505,7 +506,7 @@ const AttendanceView: React.FC<Props> = ({ userId, name }) => {
                     (!canIncYear || pressed) && { opacity: 0.4 },
                   ]}
                 >
-                  <Text style={[tw`font-bold text-base`, { color: colors.ink }]}>
+                  <Text style={[tw`font-bold text-body`, { color: colors.ink }]}>
                     ›
                   </Text>
                 </Pressable>
@@ -553,7 +554,7 @@ const AttendanceView: React.FC<Props> = ({ userId, name }) => {
                     >
                       <Text
                         style={[
-                          tw`text-sm font-semibold text-center`,
+                          tw`text-description font-semibold text-center`,
                           isActive
                             ? { color: colors.surface }
                             : isFuture
@@ -577,7 +578,7 @@ const AttendanceView: React.FC<Props> = ({ userId, name }) => {
                   pressed && { opacity: 0.85 },
                 ]}
               >
-                <Text style={[tw`font-bold text-base`, { color: colors.surface }]}>
+                <Text style={[tw`font-bold text-body`, { color: colors.surface }]}>
                   Done
                 </Text>
               </Pressable>

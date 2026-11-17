@@ -1,3 +1,4 @@
+import { fontSizes, lineHeights } from "@/theme/typography";
 import { colors } from "@/theme/colors";
 import {
   PlatformPressable,
@@ -151,7 +152,7 @@ export default function BaseTabBar({
 
   const tabHeight = isTablet ? 64 : isSmallDevice ? 56 : 60;
   const iconSize = isTablet ? 25 : isSmallDevice ? 20 : 22;
-  const fontSize = isTablet ? 14 : isSmallDevice ? 12 : 13;
+  const fontSize = isTablet ? fontSizes.label : fontSizes.caption;
 
   const visibleRoutes = useMemo(
     () =>
@@ -347,7 +348,7 @@ const styles = StyleSheet.create({
   },
   badgeText: {
     color: colors.surface,
-    fontSize: 11,
+    fontSize: fontSizes.caption, lineHeight: lineHeights.caption,
     fontWeight: "700",
   },
   label: {

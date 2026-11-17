@@ -24,11 +24,11 @@ export function LabelValue({
 }) {
   return (
     <View style={[{ paddingVertical: 12 }, containerStyle]}>
-      <Text style={[tw`text-sm`, { color: colors.muted }, labelStyle]}>
+      <Text style={[tw`text-description`, { color: colors.muted }, labelStyle]}>
         {label}
       </Text>
       <Text
-        style={[tw`text-sm font-semibold`, { color: colors.ink }, valueStyle]}>
+        style={[tw`text-description font-semibold`, { color: colors.ink }, valueStyle]}>
         {value}
       </Text>
     </View>

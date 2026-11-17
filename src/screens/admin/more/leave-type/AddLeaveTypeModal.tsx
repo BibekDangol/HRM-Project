@@ -87,7 +87,7 @@ export default function AddLeaveTypeModal({
         label="Leave Name"
         variant="outlined"
         placeholder="Annual, Sick..."
-        placeholderTextColor={colors.subtle}
+        placeholderTextColor={colors.placeholder}
         value={name}
         onChangeText={setName}
         containerStyle={tw`mb-4`}
@@ -97,7 +97,7 @@ export default function AddLeaveTypeModal({
         label="Leave Limit (days)"
         variant="outlined"
         placeholder="10"
-        placeholderTextColor={colors.subtle}
+        placeholderTextColor={colors.placeholder}
         keyboardType="numeric"
         value={limit}
         onChangeText={setLimit}

@@ -12,26 +12,26 @@ type Params = {
 };
 
 const ADMIN_ROOT_TAB_PATHS = [
-  "/(admin)/dashboard",
+  "/(admin)/(main-tabs)/dashboard",
   "/dashboard",
-  "/(admin)/manage-users",
+  "/(admin)/(main-tabs)/manage-users",
   "/manage-users",
-  "/(admin)/more",
+  "/(admin)/(main-tabs)/more",
   "/more",
-  "/(admin)/leave",
+  "/(admin)/(main-tabs)/leave",
   "/leave",
   "/(admin)/profile",
   "/profile",
 ];
 
-const ADMIN_HOME_PATHS = ["/(admin)/dashboard", "/dashboard"];
+const ADMIN_HOME_PATHS = ["/(admin)/(main-tabs)/dashboard", "/dashboard"];
 
 const ADMIN_MAIN_TABS_THAT_SHOULD_GO_HOME = [
-  "/(admin)/manage-users",
+  "/(admin)/(main-tabs)/manage-users",
   "/manage-users",
-  "/(admin)/more",
+  "/(admin)/(main-tabs)/more",
   "/more",
-  "/(admin)/leave",
+  "/(admin)/(main-tabs)/leave",
   "/leave",
   "/(admin)/profile",
   "/profile",
@@ -55,7 +55,7 @@ export function useAdminHeaderController({
   const handleBackPress = useCallback(() => {
     // Main tab screens should always go to dashboard
     if (ADMIN_MAIN_TABS_THAT_SHOULD_GO_HOME.includes(pathname)) {
-      router.replace("/(admin)/dashboard");
+      router.replace("/(admin)/(main-tabs)/dashboard");
       return true;
     }
 
@@ -71,7 +71,7 @@ export function useAdminHeaderController({
     }
 
     // Fallback
-    router.replace("/(admin)/dashboard");
+    router.replace("/(admin)/(main-tabs)/dashboard");
     return true;
   }, [pathname, router]);
 

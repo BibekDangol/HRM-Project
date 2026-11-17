@@ -1,4 +1,3 @@
-import { supabase } from "@/src/supabase/supabaseClient";
 import { z } from "zod";
 
 
@@ -26,18 +25,7 @@ export const addUserSchema = z.object({
     .trim()
     .toLowerCase()
     .email("Enter a valid email address")
-    .max(100, "Email cannot exceed 100 characters")
-    .refine(async (email) => {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("email")
-        .eq("email", email)
-        .maybeSingle(); 
-
-      if (error) throw new Error(error.message);
-
-      return data === null; 
-    }, "Email address is taken"),
+    .max(100, "Email cannot exceed 100 characters"),
 
   supervisor_id: z.string().nullable(),
 });

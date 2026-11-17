@@ -17,8 +17,8 @@ export function StatPill({
         { backgroundColor: color + "18" },
       ]}
     >
-      <Text style={[tw`text-xl font-extrabold`, { color }]}>{count}</Text>
-      <Text style={[tw`text-xs font-semibold mt-0.5`, { color: color + "cc" }]}>
+      <Text style={[tw`text-section font-extrabold`, { color }]}>{count}</Text>
+      <Text style={[tw`text-caption font-semibold mt-0.5`, { color: color + "cc" }]}>
         {label}
       </Text>
     </View>

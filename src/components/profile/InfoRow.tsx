@@ -1,3 +1,4 @@
+import { fontSizes, lineHeights } from "@/theme/typography";
 import { colors } from "@/theme/colors";
 import { TW } from "@/theme/twStyles";
 import { Text, View } from "react-native";
@@ -50,7 +51,7 @@ export default function InfoRow({
       <View style={{ flex: 1 }}>
         <Text
           style={{
-            fontSize: 13,
+            fontSize: fontSizes.caption, lineHeight: lineHeights.caption,
             fontWeight: "600",
             color: colors.subtle,
             letterSpacing: 0.3,
@@ -62,7 +63,7 @@ export default function InfoRow({
 
         <Text
           style={{
-            fontSize: 14,
+            fontSize: fontSizes.body, lineHeight: lineHeights.body,
             fontWeight: "500",
             color: locked ? colors.muted : colors.ink,
             letterSpacing: 0.1,

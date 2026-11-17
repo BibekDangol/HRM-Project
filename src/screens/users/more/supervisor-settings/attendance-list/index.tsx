@@ -10,7 +10,7 @@ export default function SupervisorAttendanceUserList() {
   const handleUserPress = (user: UserProfile) => {
     router.navigate({
       pathname:
-        "/(users)/more/supervisor-settings/attendance-list/attendance-details",
+        "/(users)/(main-tabs)/more/supervisor-settings/attendance-list/attendance-details",
       params: {
         userId: user.id,
         name: `${user.first_name} ${user.last_name}`.trim(),

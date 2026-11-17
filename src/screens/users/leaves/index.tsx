@@ -1,6 +1,7 @@
 import { colors } from "@/theme/colors";
 import { useCallback, useMemo, useRef, useState } from "react";
-import { FlatList, RefreshControl, View } from "react-native";
+import { FlatList, Platform, Pressable, RefreshControl, View } from "react-native";
+import { SafeAreaView } from "react-native-screens/experimental";
 import { FilterTab, Header } from "./components/Header";
 import EmptyState from "@/src/components/states/EmptyState";
 import LoadingState from "@/src/components/states/LoadingState";
@@ -9,7 +10,6 @@ import { useLeaves } from "@/src/hooks/users/useLeaves";
 import { usePagination } from "@/src/hooks/usePagination";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { CalendarClock, Plus } from "lucide-react-native";
-import AppButton from "@/src/components/ui/AppButton";
 import tw from "@/theme/tw";
 import { LeaveCard } from "./components/LeaveCard";
 
@@ -88,7 +88,7 @@ export default function LeavesScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
           paddingHorizontal: 16,
-          paddingBottom: 24,
+          paddingBottom: 96,
         }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -143,14 +143,30 @@ export default function LeavesScreen() {
         }
       />
 
-      <View style={tw`px-4 py-3 border-t border-border bg-surface`}>
-        <AppButton
-          title="Request leave"
-          fullWidth
-          icon={<Plus color={colors.surface} size={20} />}
-          onPress={() => router.push("/(users)/leaves/calendar/applyLeave")}
-        />
-      </View>
+      <SafeAreaView
+        pointerEvents="box-none"
+        edges={{ bottom: Platform.OS === "ios" }}
+        style={{ position: "absolute", bottom: 0, right: 0, left: 0 }}
+      >
+        <View pointerEvents="box-none" style={{ padding: 16, alignItems: "flex-end" }}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Request leave"
+            onPress={() => router.push("/(users)/(main-tabs)/leaves/calendar/applyLeave")}
+            style={({ pressed }) => ({
+              width: 56,
+              height: 56,
+              borderRadius: 28,
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: pressed ? colors.primaryPressed : colors.primary,
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.18)",
+            })}
+          >
+            <Plus color={colors.surface} size={28} />
+          </Pressable>
+        </View>
+      </SafeAreaView>
     </View>
   );
 }

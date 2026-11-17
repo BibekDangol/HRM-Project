@@ -1,3 +1,4 @@
+import { fontSizes, lineHeights } from "@/theme/typography";
 import { colors } from "@/theme/colors";
 import { Text, View } from "react-native";
 
@@ -54,7 +55,7 @@ export function AttendanceStatsCard({ stats, loading }: Props) {
         >
           <Text
             style={{
-              fontSize: 28,
+              fontSize: fontSizes.metric, lineHeight: lineHeights.metric,
               fontWeight: "800",
               color: colors.ink,
             }}
@@ -64,7 +65,7 @@ export function AttendanceStatsCard({ stats, loading }: Props) {
 
           <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, marginTop: 4 }}>
             <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: item.color }} />
-            <Text style={{ fontSize: 14, color: colors.muted, flexShrink: 1, textAlign: "center" }}>
+            <Text style={{ fontSize: fontSizes.label, lineHeight: lineHeights.label, color: colors.muted, flexShrink: 1, textAlign: "center" }}>
               {item.label}
             </Text>
           </View>

@@ -1,3 +1,4 @@
+import { fontSizes, lineHeights } from "@/theme/typography";
 import { colors } from "@/theme/colors";
 import UploadAvatar from "@/src/screens/profileImage";
 import { TW } from "@/theme/twStyles";
@@ -76,7 +77,7 @@ export default function ProfileHero({
         style={{
           marginTop: 14,
           color: colors.surface,
-          fontSize: 22,
+          fontSize: fontSizes.page, lineHeight: lineHeights.page,
           fontWeight: "700",
           letterSpacing: -0.5,
         }}
@@ -99,7 +100,7 @@ export default function ProfileHero({
           <Text
             style={{
               color: colors.surface,
-              fontSize: 14,
+              fontSize: fontSizes.label, lineHeight: lineHeights.label,
               fontWeight: "700",
               letterSpacing: 0.4,
             }}
@@ -122,7 +123,7 @@ export default function ProfileHero({
           <Text
             style={{
               color: colors.surface,
-              fontSize: 14,
+              fontSize: fontSizes.label, lineHeight: lineHeights.label,
               fontWeight: "600",
             }}
           >

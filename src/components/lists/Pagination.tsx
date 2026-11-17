@@ -51,7 +51,7 @@ export const Pagination = ({
             page === 1 && tw`opacity-30`,
           ]}
         >
-          <Text style={tw`${theme.text} font-bold text-base`}>‹ Prev</Text>
+          <Text style={tw`${theme.text} font-bold text-body`}>‹ Prev</Text>
         </Pressable>
 
         {pageNumbers.map((p) => (
@@ -65,7 +65,7 @@ export const Pagination = ({
           >
             <Text
               style={[
-                tw`text-sm font-semibold`,
+                tw`text-description font-semibold`,
                 p === page ? tw`${theme.activeText}` : tw`${theme.text}`,
               ]}
             >
@@ -82,7 +82,7 @@ export const Pagination = ({
             page === totalPages && tw`opacity-30`,
           ]}
         >
-          <Text style={tw`${theme.text} font-bold text-base`}>Next ›</Text>
+          <Text style={tw`${theme.text} font-bold text-body`}>Next ›</Text>
         </Pressable>
       </View>
     </View>

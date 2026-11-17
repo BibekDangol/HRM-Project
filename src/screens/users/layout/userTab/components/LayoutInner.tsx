@@ -1,19 +1,16 @@
-import { AppHeaderRight, AppScreenLayout, HeaderCheckMenu, HomePageIntro } from "@/src/components/navigation/header/AppHeader";
+import { AppHeaderRight, AppScreenLayout, HomeScreenHeaderContext, HeaderCheckMenu, HomePageIntro } from "@/src/components/navigation/header/AppHeader";
 import { colors } from "@/theme/colors";
 import { StatusBar } from "expo-status-bar";
-import { Tabs, usePathname, useRouter } from "expo-router";
+import { Stack, usePathname, useRouter } from "expo-router";
 import { useAttendanceContext } from "@/src/context/AttendanceContext";
 import { useUserHeaderController } from "@/src/hooks/navigation/useUserHeaderController";
 import { useHeaderMenu } from "@/src/hooks/useHeaderMenu";
-import { getTabScreenOptions } from "@/src/config/tabScreenOptions";
-import MyTabBar from "@/src/components/navigation/tabbar/UserTabBar";
 import ReasonModel from "./ReasonModel";
 
 export default function LayoutInner() {
   const att = useAttendanceContext();
   const router = useRouter();
   const pathname = usePathname();
-  const sharedOptions = getTabScreenOptions();
   const menu = useHeaderMenu();
   const hideBackRow =
     pathname.endsWith("/attendance-list") ||
@@ -37,7 +34,29 @@ export default function LayoutInner() {
   });
 
   return (
-    <>
+    <HomeScreenHeaderContext.Provider value={
+      <HomePageIntro name={menu.currentUserProfile?.first_name ?? "Home"}>
+        <AppHeaderRight
+          variant="user"
+          isLocked={att.isLocked}
+          profileMenuOpen={menu.open}
+          onProfileTrigger={handleProfileTrigger}
+          onProfileClose={menu.close}
+          onProfilePress={handleProfilePress}
+          onLogoutPress={onLogout}
+        >
+          <HeaderCheckMenu
+            isLocked={att.isLocked}
+            isCheckedIn={att.isCheckedIn}
+            isOpen={checkOpen}
+            checkedInAt={att.checkedInAt}
+            elapsedMs={att.elapsedMs}
+            onTriggerPress={handleCheckTrigger}
+            onTogglePress={handleToggleCheck}
+          />
+        </AppHeaderRight>
+      </HomePageIntro>
+    }>
       <StatusBar style="dark" />
       <ReasonModel
         commentModalOpen={att.commentModalOpen}
@@ -50,73 +69,26 @@ export default function LayoutInner() {
         setCommentText={att.setCommentText}
       />
 
-      <Tabs
+      <Stack
         screenLayout={({ children, route }) => (
           <AppScreenLayout
-            isHome={route.name === "dashboard"}
+            isHome={false}
+            insetBottom={route.name !== "(main-tabs)"}
             backgroundColor={colors.canvas}
-            homeContent={
-              <HomePageIntro name={menu.currentUserProfile?.first_name ?? "Home"}>
-                <AppHeaderRight
-                  variant="user"
-                  isLocked={att.isLocked}
-                  profileMenuOpen={menu.open}
-                  onProfileTrigger={handleProfileTrigger}
-                  onProfileClose={menu.close}
-                  onProfilePress={handleProfilePress}
-                  onLogoutPress={onLogout}
-                >
-                  <HeaderCheckMenu
-                    isLocked={att.isLocked}
-                    isCheckedIn={att.isCheckedIn}
-                    isOpen={checkOpen}
-                    checkedInAt={att.checkedInAt}
-                    elapsedMs={att.elapsedMs}
-                    onTriggerPress={handleCheckTrigger}
-                    onTogglePress={handleToggleCheck}
-                  />
-                </AppHeaderRight>
-              </HomePageIntro>
-            }
             onBack={!hideBackRow && (showBackButton || ["profile/index", "holidays", "activity-log"].includes(route.name)) ? () => {
-              if (!handleBackPress()) router.replace("/(users)/dashboard");
+              if (!handleBackPress()) router.replace("/(users)/(main-tabs)/dashboard");
             } : undefined}
           >
             {children}
           </AppScreenLayout>
         )}
-        screenOptions={{
-          ...sharedOptions,
-          sceneStyle: {
-            ...sharedOptions.sceneStyle,
-            flex: 1,
-          },
-        }}
-        tabBar={(props) => <MyTabBar {...props} />}
+        screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.canvas } }}
       >
-        <Tabs.Screen name="dashboard" options={{ title: "Dashboard" }} />
-        <Tabs.Screen name="leaves" options={{ title: "Leaves" }} />
-        <Tabs.Screen
-          name="profile/index"
-          options={{ title: "Profile", href: null }}
-        />
-        <Tabs.Screen name="more" options={{ title: "Settings" }} />
-
-        <Tabs.Screen
-          name="holidays"
-          options={{
-            title: "Holidays and Events",
-            href: null,
-          }}
-        />
-        <Tabs.Screen
-          name="activity-log"
-          options={{
-            title: "Recent Activity",
-            href: null,
-          }}
-        />
-      </Tabs>
-    </>
+        <Stack.Screen name="(main-tabs)" />
+        <Stack.Screen name="profile/index" />
+        <Stack.Screen name="holidays" />
+        <Stack.Screen name="activity-log" />
+      </Stack>
+    </HomeScreenHeaderContext.Provider>
   );
 }

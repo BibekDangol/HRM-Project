@@ -85,11 +85,11 @@ export default function HeaderWithSearch({
         <Search size={18} color={colors.primaryMuted} />
 
         <TextInput
-          style={tw`flex-1 ml-2 text-base text-black`}
+          style={tw`flex-1 ml-2 text-body text-ink`}
           placeholder={placeholder}
           value={text}
           onChangeText={handleChangeText}
-          placeholderTextColor={colors.primaryMuted}
+          placeholderTextColor={colors.placeholder}
           autoFocus={autoFocus}
           autoCapitalize="none"
           autoCorrect={false}

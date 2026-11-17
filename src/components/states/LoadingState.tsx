@@ -29,7 +29,7 @@ export default function LoadingState({
     >
       <ActivityIndicator size={size} color={color} />
       {message ? (
-        <Text style={tw`mt-2 text-base text-gray-700`}>{message}</Text>
+        <Text style={tw`mt-2 text-body text-gray-700`}>{message}</Text>
       ) : null}
     </View>
   );

@@ -9,7 +9,7 @@ export default function AttendanceUserList() {
 
   const handleUserPress = (user: UserProfile) => {
     router.navigate({
-      pathname: "/(admin)/more/attendance-list/attendance-details",
+      pathname: "/(admin)/(main-tabs)/more/attendance-list/attendance-details",
       params: {
         userId: user.id,
         name: `${user.first_name} ${user.last_name}`.trim(),

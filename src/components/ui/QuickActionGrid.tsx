@@ -21,7 +21,7 @@ export default function QuickActionGrid({
 }: Props) {
   return (
     <View>
-      <Text style={tw`font-semibold ${TW.textPrimary} py-2 text-lg`}>
+      <Text style={tw`font-semibold ${TW.textPrimary} py-2 text-section`}>
         {title}
       </Text>
 
@@ -35,7 +35,7 @@ export default function QuickActionGrid({
             style={tw`w-[48%] ${TW.bgCards} p-4 rounded-xl mb-3 items-center min-h-[96px] justify-center`}
           >
             {item.icon}
-            <Text style={tw`${TW.textPrimary} mt-2 text-sm text-center font-medium`}>
+            <Text style={tw`${TW.textPrimary} mt-2 text-description text-center font-medium`}>
               {item.label}
             </Text>
           </TouchableOpacity>

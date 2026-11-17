@@ -296,7 +296,7 @@ export function DayCell({ date, state, marking, onPress }: Props) {
               },
           ]}
         >
-          <Text style={[tw`text-sm`, { fontWeight, color: textColor }]}>
+          <Text style={[tw`text-description`, { fontWeight, color: textColor }]}>
             {day}
           </Text>
         </View>

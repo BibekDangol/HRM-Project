@@ -1,3 +1,4 @@
+import { fontSizes, lineHeights } from "@/theme/typography";
 import { colors } from "@/theme/colors";
 import * as Clipboard from "expo-clipboard";
 import { Pressable, Text, useWindowDimensions, View } from "react-native";
@@ -26,12 +27,12 @@ export default function TempPasswordContent({
 
   const sizes = useMemo(
     () => ({
-      labelSize: isSmallPhone ? 11 : 12,
-      passwordSize: isSmallPhone ? 18 : 22,
+      labelSize: fontSizes.label,
+      passwordSize: fontSizes.section,
       actionSize: isSmallPhone ? 40 : 44,
       doneHeight: isSmallPhone ? 48 : 52,
-      doneText: isSmallPhone ? 15 : 16,
-      copyMsgSize: isSmallPhone ? 12 : 13,
+      doneText: fontSizes.body,
+      copyMsgSize: fontSizes.caption,
     }),
     [isSmallPhone],
   );
@@ -65,7 +66,7 @@ export default function TempPasswordContent({
         <Text
           style={[
             tw`${TW.textSecondary} mb-2`,
-            { fontSize: sizes.labelSize },
+            { fontSize: sizes.labelSize, lineHeight: lineHeights.label },
           ]}
         >
           Temporary Password
@@ -79,7 +80,7 @@ export default function TempPasswordContent({
             style={[
               tw`flex-1 font-bold ${TW.textPrimary}`,
               {
-                fontSize: sizes.passwordSize,
+                fontSize: sizes.passwordSize, lineHeight: lineHeights.section,
                 letterSpacing: isSmallPhone ? 1.5 : 2,
               },
             ]}
@@ -134,7 +135,7 @@ export default function TempPasswordContent({
         <Text
           style={[
             tw`text-center text-green-600 mb-4`,
-            { fontSize: sizes.copyMsgSize, fontWeight: "600" },
+            { fontSize: sizes.copyMsgSize, lineHeight: lineHeights.caption, fontWeight: "600" },
           ]}
         >
           Password copied to clipboard
@@ -145,7 +146,7 @@ export default function TempPasswordContent({
         title="Done"
         onPress={onDone}
         style={{ backgroundColor: TW.bgSecondary, height: sizes.doneHeight }}
-        textStyle={{ fontSize: sizes.doneText }}
+        textStyle={{ fontSize: sizes.doneText, lineHeight: lineHeights.body }}
       />
     </>
   );

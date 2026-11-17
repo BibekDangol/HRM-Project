@@ -135,7 +135,7 @@ export default function LeaveTypeSettings() {
       <View style={tw`pt-3`}></View>
       {/* Header */}
       <View style={tw`flex-row items-center justify-between mb-5`}>
-        <Text style={tw`text-xl font-bold ${TW.textPrimary}`}>Leave Types</Text>
+        <Text style={tw`text-section font-bold ${TW.textPrimary}`}>Leave Types</Text>
 
         <Pressable
           onPress={() => {
@@ -168,11 +168,11 @@ export default function LeaveTypeSettings() {
             >
               {/* Leave Info */}
               <View>
-                <Text style={tw`text-base font-semibold ${TW.textPrimary}`}>
+                <Text style={tw`text-body font-semibold ${TW.textPrimary}`}>
                   {item.name}
                 </Text>
 
-                <Text style={tw`text-sm ${TW.textSecondary}`}>
+                <Text style={tw`text-description ${TW.textSecondary}`}>
                   {item.leave_limit} days allowed
                 </Text>
               </View>

@@ -35,11 +35,11 @@ export default function EmptyState({
       ]}
     >
       {icon ? <View style={tw`mb-3`}>{icon}</View> : null}
-      <Text style={tw`text-base font-semibold ${TW.textPrimary} text-center`}>
+      <Text style={tw`text-body font-semibold ${TW.textPrimary} text-center`}>
         {title}
       </Text>
       {message ? (
-        <Text style={tw`text-sm ${TW.textSecondary} text-center mt-1`}>
+        <Text style={tw`text-description ${TW.textSecondary} text-center mt-1`}>
           {message}
         </Text>
       ) : null}

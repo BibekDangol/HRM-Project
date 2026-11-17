@@ -1,3 +1,4 @@
+import { fontSizes, lineHeights, typography } from "@/theme/typography";
 import { colors } from "@/theme/colors";
 import React, { useEffect, useState } from "react";
 import { Pressable, Text, View } from "react-native";
@@ -254,7 +255,7 @@ export const ActivityLogSection = ({ onViewAll, hideTitle }: Props) => {
             marginBottom: 16,
           }}
         >
-          <Text style={tw`font-semibold ${TW.textPrimary} text-lg`}>
+          <Text style={tw`font-semibold ${TW.textPrimary} text-section`}>
             Recent Activity
           </Text>
 
@@ -272,7 +273,7 @@ export const ActivityLogSection = ({ onViewAll, hideTitle }: Props) => {
               })}
             >
               <Text
-                style={{ color: colors.muted, fontSize: 13, fontWeight: "600" }}
+                style={typography.link}
               >
                 View All
               </Text>
@@ -297,10 +298,10 @@ export const ActivityLogSection = ({ onViewAll, hideTitle }: Props) => {
           borderColor: colors.border,
           backgroundColor: colors.surface,
         }}>
-          <Text style={{ color: colors.ink, fontWeight: "600", fontSize: 14 }}>
+          <Text style={typography.cardTitle}>
             No activity found
           </Text>
-          <Text style={{ color: colors.muted, fontSize: 14 }}>
+          <Text style={{ color: colors.muted, fontSize: fontSizes.label, lineHeight: lineHeights.label }}>
             {onViewAll
               ? "No records in the last 7 days"
               : "No attendance records yet"}
@@ -343,7 +344,7 @@ export const ActivityLogSection = ({ onViewAll, hideTitle }: Props) => {
                   <Text
                     style={{
                       color: colors.subtle,
-                      fontSize: 14,
+                      fontSize: fontSizes.label, lineHeight: lineHeights.label,
                       fontWeight: "600",
                       letterSpacing: 0.5,
                       textTransform: "uppercase",
@@ -355,9 +356,9 @@ export const ActivityLogSection = ({ onViewAll, hideTitle }: Props) => {
                   <Text
                     style={{
                       color: colors.ink,
-                      fontSize: 20,
+                      fontSize: fontSizes.section,
                       fontWeight: "700",
-                      lineHeight: 24,
+                      lineHeight: lineHeights.section,
                     }}
                   >
                     {dayNum}
@@ -366,7 +367,7 @@ export const ActivityLogSection = ({ onViewAll, hideTitle }: Props) => {
                   <Text
                     style={{
                       color: colors.subtle,
-                      fontSize: 14,
+                      fontSize: fontSizes.label, lineHeight: lineHeights.label,
                       fontWeight: "500",
                     }}
                   >
@@ -405,7 +406,7 @@ export const ActivityLogSection = ({ onViewAll, hideTitle }: Props) => {
                     />
                     <Text
                       style={{
-                        fontSize: 14,
+                        fontSize: fontSizes.label, lineHeight: lineHeights.label,
                         fontWeight: "600",
                         color: status.badgeText,
                       }}
@@ -418,8 +419,8 @@ export const ActivityLogSection = ({ onViewAll, hideTitle }: Props) => {
                     <Text
                       style={{
                         color: colors.subtle,
-                        fontSize: 13,
-                        lineHeight: 16,
+                        fontSize: fontSizes.caption,
+                        lineHeight: lineHeights.caption,
                       }}
                       numberOfLines={2}
                     >
@@ -429,8 +430,8 @@ export const ActivityLogSection = ({ onViewAll, hideTitle }: Props) => {
                     <Text
                       style={{
                         color: colors.subtle,
-                        fontSize: 13,
-                        lineHeight: 16,
+                        fontSize: fontSizes.caption,
+                        lineHeight: lineHeights.caption,
                       }}
                     >
                       {record.check_in_time && record.check_out_time
@@ -444,7 +445,7 @@ export const ActivityLogSection = ({ onViewAll, hideTitle }: Props) => {
                   <Text
                     style={{
                       color: colors.ink,
-                      fontSize: 14,
+                      fontSize: fontSizes.label, lineHeight: lineHeights.label,
                       fontWeight: "600",
                     }}
                   >
@@ -455,7 +456,7 @@ export const ActivityLogSection = ({ onViewAll, hideTitle }: Props) => {
                   <Text
                     style={{
                       color: colors.subtle,
-                      fontSize: 13,
+                      fontSize: fontSizes.caption, lineHeight: lineHeights.caption,
                       fontWeight: "500",
                     }}
                   >

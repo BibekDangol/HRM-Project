@@ -1,8 +1,9 @@
+import { fontSizes, lineHeights, typography } from "@/theme/typography";
 import { colors } from "@/theme/colors";
 import { BackButton } from "@/src/components/BackButton";
 import { formatElapsed, formatSinceTime } from "@/src/utils/attendanceHelper";
 import { ChevronLeft, CircleCheck, LogOut, User, UserCircle } from "lucide-react-native";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import {
   Animated,
   Dimensions,
@@ -17,21 +18,29 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { getDropdownPosition, type AnchorLayout } from "../common/getDropdownPosition";
 
+export const HomeScreenHeaderContext = createContext<React.ReactNode>(null);
+
+export function HomeScreenHeader() {
+  return useContext(HomeScreenHeaderContext);
+}
+
 export function AppScreenLayout({
   isHome,
+  insetBottom = false,
   onBack,
   homeContent,
   backgroundColor = colors.canvas,
   children,
 }: {
   isHome: boolean;
+  insetBottom?: boolean;
   onBack?: () => void;
   homeContent?: React.ReactNode;
   backgroundColor?: string;
   children: React.ReactNode;
 }) {
   return (
-    <SafeAreaView edges={["top", "left", "right"]} style={{ flex: 1, backgroundColor }}>
+    <SafeAreaView edges={insetBottom ? ["top", "left", "right", "bottom"] : ["top", "left", "right"]} style={{ flex: 1, backgroundColor }}>
       {isHome ? homeContent : onBack ? (
         <View style={{ paddingHorizontal: 12, paddingVertical: 4 }}>
           <BackButton onPress={onBack} color={backgroundColor === colors.primary ? colors.surface : colors.primary} />
@@ -46,8 +55,8 @@ export function HomePageIntro({ name, children }: { name: string; children: Reac
   return (
     <View style={{ flexDirection: "row", alignItems: "center", gap: 16, paddingHorizontal: 16, paddingTop: 12, paddingBottom: 8 }}>
       <View style={{ flex: 1, gap: 4 }}>
-        <Text style={{ fontSize: 13, color: colors.muted }}>Welcome back</Text>
-        <Text accessibilityRole="header" style={{ fontSize: 24, fontWeight: "700", color: colors.ink }}>{name}</Text>
+        <Text style={typography.description}>Welcome back</Text>
+        <Text accessibilityRole="header" style={typography.pageTitle}>{name}</Text>
       </View>
       {children}
     </View>
@@ -294,7 +303,7 @@ const HeaderProfileMenu: React.FC<HeaderProfileMenuProps> = ({
                     <UserCircle size={18} color={colors.ink} />
                     <Text
                       style={{
-                        fontSize: 15,
+                        fontSize: fontSizes.body, lineHeight: lineHeights.body,
                         fontWeight: "600",
                         color: colors.ink,
                       }}
@@ -331,7 +340,7 @@ const HeaderProfileMenu: React.FC<HeaderProfileMenuProps> = ({
                     <LogOut size={18} color={colors.danger} />
                     <Text
                       style={{
-                        fontSize: 15,
+                        fontSize: fontSizes.body, lineHeight: lineHeights.body,
                         fontWeight: "600",
                         color: colors.danger,
                       }}
@@ -652,7 +661,7 @@ export const HeaderCheckMenu: React.FC<HeaderCheckMenuProps> = ({
                       <View style={{ alignItems: "center" }}>
                         <Text
                           style={{
-                            fontSize: 14,
+                            fontSize: fontSizes.label, lineHeight: lineHeights.label,
                             color: colors.muted,
                             marginBottom: 2,
                           }}
@@ -662,7 +671,7 @@ export const HeaderCheckMenu: React.FC<HeaderCheckMenuProps> = ({
 
                         <Text
                           style={{
-                            fontSize: 16,
+                            fontSize: fontSizes.body, lineHeight: lineHeights.body,
                             fontWeight: "700",
                             color: colors.ink,
                             marginBottom: 8,
@@ -691,7 +700,7 @@ export const HeaderCheckMenu: React.FC<HeaderCheckMenuProps> = ({
                           <LogOut size={14} color={colors.ink} />
                           <Text
                             style={{
-                              fontSize: 14,
+                              fontSize: fontSizes.label, lineHeight: lineHeights.label,
                               fontWeight: "600",
                               color: colors.ink,
                             }}
@@ -720,7 +729,7 @@ export const HeaderCheckMenu: React.FC<HeaderCheckMenuProps> = ({
                         <CircleCheck size={14} color={colors.ink} />
                         <Text
                           style={{
-                            fontSize: 14,
+                            fontSize: fontSizes.label, lineHeight: lineHeights.label,
                             fontWeight: "600",
                             color: colors.ink,
                           }}

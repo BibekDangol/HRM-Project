@@ -58,11 +58,11 @@ const ReasonModel: React.FC<Props> = ({
         value={commentText}
         onChangeText={setCommentText}
         placeholder="Write your reason here..."
-        placeholderTextColor={colors.subtle}
+        placeholderTextColor={colors.placeholder}
         multiline
         editable={!isLocked}
         variant="filled"
-        inputStyle={tw`min-h-[100px] text-sm`}
+        inputStyle={tw`min-h-[100px] text-description`}
       />
     </ModalShell>
   );

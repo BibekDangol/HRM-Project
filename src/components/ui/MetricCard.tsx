@@ -25,7 +25,7 @@ export default function MetricCard({
 }: Props) {
   return (
     <>
-      <Text style={tw`font-semibold ${TW.textPrimary} pb-2 text-lg`}>
+      <Text style={tw`font-semibold ${TW.textPrimary} pb-2 text-section`}>
         {sectionTitle}
       </Text>
       <View
@@ -40,12 +40,12 @@ export default function MetricCard({
           </View>
           <View style={{ flexGrow: 1, flexBasis: 120 }}>
             <Text
-              style={tw`${TW.textSecondary} text-sm font-semibold`}
+              style={tw`${TW.textSecondary} text-description font-semibold`}
             >
               {title}
             </Text>
             <Text
-              style={tw`${TW.textPrimary} text-2xl font-extrabold leading-tight`}
+              style={tw`${TW.textPrimary} text-metric font-extrabold leading-tight`}
             >
               {value}
             </Text>
@@ -53,11 +53,11 @@ export default function MetricCard({
           <View style={tw`items-end gap-0.5`}>
             <View style={tw`flex-row items-center gap-1`}>
               <View style={tw`w-1.5 h-1.5 rounded-full ${accent}`} />
-              <Text style={tw`${TW.textSecondary} text-[13px] font-medium`}>
+              <Text style={tw`${TW.textSecondary} text-caption font-medium`}>
                 {statusLabel}
               </Text>
             </View>
-            <Text style={tw`${TW.textSecondary} text-[13px]`}>{statusMeta}</Text>
+            <Text style={tw`${TW.textSecondary} text-caption`}>{statusMeta}</Text>
           </View>
         </View>
       </View>

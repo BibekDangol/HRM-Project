@@ -1,3 +1,4 @@
+import { fontSizes, lineHeights, typography } from "@/theme/typography";
 import { BackButton } from "@/src/components/BackButton";
 import { colors } from "@/theme/colors";
 import { StatusBar } from "expo-status-bar";
@@ -83,21 +84,21 @@ export const authStyles = StyleSheet.create({
   brand: { flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 28 },
   logo: { width: 48, height: 48 },
   brandText: { flex: 1, gap: 3 },
-  brandName: { fontSize: 22, fontWeight: "700", color: colors.ink },
-  brandDescription: { fontSize: 13, lineHeight: 20, color: colors.muted },
+  brandName: { fontSize: fontSizes.section, lineHeight: lineHeights.section, fontWeight: "700", color: colors.ink },
+  brandDescription: { fontSize: fontSizes.caption, lineHeight: lineHeights.caption, color: colors.muted },
   introduction: { gap: 8, marginBottom: 24 },
   headingRow: { flexDirection: "row", alignItems: "center", gap: 12 },
-  headingWithBack: { flex: 1, fontSize: 24 },
-  heading: { fontSize: 28, fontWeight: "700", letterSpacing: -0.6, color: colors.ink },
-  subtitle: { fontSize: 15, lineHeight: 22, color: colors.muted },
+  headingWithBack: { flex: 1 },
+  heading: { ...typography.pageTitle, letterSpacing: -0.6 },
+  subtitle: typography.subtitle,
   form: { gap: 16 },
-  label: { fontSize: 14, fontWeight: "600", color: colors.ink },
-  input: { fontSize: 16, paddingVertical: 10 },
+  label: typography.label,
+  input: { ...typography.input, paddingVertical: 10 },
   forgotPassword: { alignSelf: "flex-end", minHeight: 48, paddingLeft: 12, justifyContent: "center" },
-  link: { fontSize: 14, fontWeight: "600", color: colors.primary },
-  buttonText: { fontSize: 16 },
+  link: typography.link,
+  buttonText: typography.button,
   footer: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", justifyContent: "center", columnGap: 4, marginTop: 12 },
-  footerText: { fontSize: 14, color: colors.muted },
+  footerText: typography.description,
   footerLink: { minHeight: 48, justifyContent: "center" },
   pressed: { opacity: 0.7 },
 });

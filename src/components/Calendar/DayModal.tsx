@@ -141,14 +141,14 @@ export function DayModal({
 
             {mode === "view" && (
               <>
-                <Text style={tw`text-lg font-bold text-slate-900`}>
+                <Text style={tw`text-section font-bold text-slate-900`}>
                   {displayDate}
                 </Text>
 
                 <View style={tw`flex-row items-center gap-2 mt-1 mb-4`}>
                   <Dot color={typeColor} size={9} />
                   <Text
-                    style={[tw`text-sm font-semibold`, { color: typeColor }]}
+                    style={[tw`text-description font-semibold`, { color: typeColor }]}
                   >
                     {typeLabel}
                   </Text>
@@ -164,7 +164,7 @@ export function DayModal({
                     <View style={tw`flex-row items-center gap-2`}>
                       <Text
                         style={[
-                          tw`text-sm font-semibold`,
+                          tw`text-description font-semibold`,
                           { color: store.colors.publicHoliday },
                         ]}
                       >
@@ -175,7 +175,7 @@ export function DayModal({
                       onPress={() => calendarStore.removeHoliday(dateStr)}
                       hitSlop={10}
                     >
-                      <Text style={tw`text-red-400 font-bold text-base`}>
+                      <Text style={tw`text-red-400 font-bold text-body`}>
                         ✕
                       </Text>
                     </TouchableOpacity>
@@ -193,7 +193,7 @@ export function DayModal({
                     <View style={tw`flex-row items-center gap-2`}>
                       <Dot color={ev.color} size={8} />
                       <Text
-                        style={[tw`text-sm font-medium`, { color: ev.color }]}
+                        style={[tw`text-description font-medium`, { color: ev.color }]}
                       >
                         {ev.label}
                       </Text>
@@ -202,7 +202,7 @@ export function DayModal({
                       onPress={() => calendarStore.removeEvent(dateStr, ev.id)}
                       hitSlop={10}
                     >
-                      <Text style={tw`text-red-400 font-bold text-base`}>
+                      <Text style={tw`text-red-400 font-bold text-body`}>
                         ✕
                       </Text>
                     </TouchableOpacity>
@@ -219,7 +219,7 @@ export function DayModal({
                   >
                     <Text
                       style={[
-                        tw`text-sm font-bold`,
+                        tw`text-description font-bold`,
                         { color: store.colors.publicHoliday },
                       ]}
                     >
@@ -231,7 +231,7 @@ export function DayModal({
                     onPress={() => setMode("addEvent")}
                     style={tw`flex-1 py-3 rounded-xl items-center bg-blue-50`}
                   >
-                    <Text style={tw`text-sm font-bold text-blue-600`}>
+                    <Text style={tw`text-description font-bold text-blue-600`}>
                       Add Event
                     </Text>
                   </TouchableOpacity>
@@ -241,7 +241,7 @@ export function DayModal({
                   onPress={close}
                   style={tw`mt-3 py-3 rounded-xl items-center bg-slate-100`}
                 >
-                  <Text style={tw`text-sm font-semibold text-slate-500`}>
+                  <Text style={tw`text-description font-semibold text-slate-500`}>
                     Close
                   </Text>
                 </TouchableOpacity>
@@ -250,17 +250,17 @@ export function DayModal({
 
             {mode === "addHoliday" && (
               <>
-                <Text style={tw`text-lg font-bold text-slate-900 mb-1`}>
+                <Text style={tw`text-section font-bold text-slate-900 mb-1`}>
                   Add Public Holiday
                 </Text>
-                <Text style={tw`text-sm text-slate-400 mb-4`}>
+                <Text style={tw`text-description text-slate-400 mb-4`}>
                   {displayDate}
                 </Text>
 
                 <TextInput
                   autoFocus
                   placeholder="e.g. New Year's Day"
-                  placeholderTextColor={colors.subtle}
+                  placeholderTextColor={colors.placeholder}
                   value={inputText}
                   onChangeText={setInputText}
                   returnKeyType="done"
@@ -269,7 +269,7 @@ export function DayModal({
                     if (!v) return;
                     addHoliday(v);
                   }}
-                  style={tw`bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-900 text-sm mb-4`}
+                  style={tw`bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-900 text-description mb-4`}
                 />
 
                 <View style={tw`flex-row gap-3`}>
@@ -284,7 +284,7 @@ export function DayModal({
                       { backgroundColor: store.colors.publicHoliday },
                     ]}
                   >
-                    <Text style={tw`text-sm font-bold text-white`}>Add</Text>
+                    <Text style={tw`text-description font-bold text-white`}>Add</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
@@ -294,7 +294,7 @@ export function DayModal({
                     }}
                     style={tw`flex-1 py-3 rounded-xl items-center bg-slate-100`}
                   >
-                    <Text style={tw`text-sm font-semibold text-slate-500`}>
+                    <Text style={tw`text-description font-semibold text-slate-500`}>
                       Cancel
                     </Text>
                   </TouchableOpacity>
@@ -304,17 +304,17 @@ export function DayModal({
 
             {mode === "addEvent" && (
               <>
-                <Text style={tw`text-lg font-bold text-slate-900 mb-1`}>
+                <Text style={tw`text-section font-bold text-slate-900 mb-1`}>
                   Add Event
                 </Text>
-                <Text style={tw`text-sm text-slate-400 mb-4`}>
+                <Text style={tw`text-description text-slate-400 mb-4`}>
                   {displayDate}
                 </Text>
 
                 <TextInput
                   autoFocus
                   placeholder="Event name"
-                  placeholderTextColor={colors.subtle}
+                  placeholderTextColor={colors.placeholder}
                   value={inputText}
                   onChangeText={setInputText}
                   returnKeyType="done"
@@ -323,11 +323,11 @@ export function DayModal({
                     if (!v) return;
                     addEvent(v, eventColor);
                   }}
-                  style={tw`bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-900 text-sm mb-3`}
+                  style={tw`bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-900 text-description mb-3`}
                 />
 
                 <Text
-                  style={tw`text-xs font-bold text-slate-400 uppercase tracking-wider mb-2`}
+                  style={tw`text-caption font-bold text-slate-400 uppercase tracking-wider mb-2`}
                 >
                   Colour
                 </Text>
@@ -345,7 +345,7 @@ export function DayModal({
                       { backgroundColor: eventColor },
                     ]}
                   >
-                    <Text style={tw`text-sm font-bold text-white`}>
+                    <Text style={tw`text-description font-bold text-white`}>
                       Add Event
                     </Text>
                   </TouchableOpacity>
@@ -357,7 +357,7 @@ export function DayModal({
                     }}
                     style={tw`flex-1 py-3 rounded-xl items-center bg-slate-100`}
                   >
-                    <Text style={tw`text-sm font-semibold text-slate-500`}>
+                    <Text style={tw`text-description font-semibold text-slate-500`}>
                       Cancel
                     </Text>
                   </TouchableOpacity>

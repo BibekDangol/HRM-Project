@@ -1,3 +1,4 @@
+import { typography } from "@/theme/typography";
 import { colors } from "@/theme/colors";
 import { Pressable, Text, View } from "react-native";
 
@@ -26,14 +27,9 @@ export default function Section({
         }}
       >
         <Text
-          style={{
-            fontSize: 14,
-            fontWeight: "600",
-            letterSpacing: 1,
-            color: colors.muted,
-          }}
+          style={typography.sectionTitle}
         >
-          {title.toUpperCase()}
+          {title}
         </Text>
 
         {rightText && (
@@ -43,11 +39,7 @@ export default function Section({
             style={{ minHeight: 48, paddingHorizontal: 8, justifyContent: "center" }}
           >
             <Text
-              style={{
-                fontSize: 14,
-                fontWeight: "600",
-                color: colors.muted,
-              }}
+              style={typography.link}
             >
               {rightText}
             </Text>

@@ -25,13 +25,13 @@ export default function MoreScreen() {
       title: "Leave Management",
       description: "Add, Update",
       icon: CalendarFold,
-      path: "/(admin)/more/leave-type",
+      path: "/(admin)/(main-tabs)/more/leave-type",
     },
     {
       title: "Holidays",
       description: "Manage Holidays",
       icon: CalendarX,
-      path: "/(admin)/more/holidays",
+      path: "/(admin)/(main-tabs)/more/holidays",
     },
   ];
 
@@ -57,11 +57,11 @@ export default function MoreScreen() {
                 </View>
 
                 <View>
-                  <Text style={tw`text-base font-semibold ${TW.textPrimary}`}>
+                  <Text style={tw`text-body font-semibold ${TW.textPrimary}`}>
                     {item.title}
                   </Text>
 
-                  <Text style={tw`text-sm ${TW.textSecondary}`}>
+                  <Text style={tw`text-description ${TW.textSecondary}`}>
                     {item.description}
                   </Text>
                 </View>

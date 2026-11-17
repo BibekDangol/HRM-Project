@@ -1,6 +1,7 @@
 import * as Linking from "expo-linking";
 
-import { Stack } from "expo-router";
+import { DefaultTheme, Stack, ThemeProvider } from "expo-router";
+import { colors } from "@/theme/colors";
 import { StatusBar } from "expo-status-bar";
 import * as NativeSplashScreen from "expo-splash-screen";
 import { useEffect, useState } from "react";
@@ -11,6 +12,19 @@ import { useAuthStore } from "../store/useAuthStore";
 import { supabase } from "../supabase/supabaseClient";
 
 void NativeSplashScreen.preventAutoHideAsync().catch(console.warn);
+
+const navigationTheme = {
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    primary: colors.primary,
+    background: colors.canvas,
+    card: colors.canvas,
+    text: colors.ink,
+    border: colors.border,
+    notification: colors.danger,
+  },
+};
 
 export default function Layout() {
   const restoreSession = useAuthStore((state) => state.restoreSession);
@@ -53,10 +67,12 @@ export default function Layout() {
 
   return (
     <>
-      <GestureHandlerRootView style={{ flex: 1 }}>
+      <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.canvas }}>
         <SafeAreaProvider>
-          <StatusBar style="light" />
-          <Stack screenOptions={{ headerShown: false }} />
+          <ThemeProvider value={navigationTheme}>
+            <StatusBar style="dark" />
+            <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.canvas } }} />
+          </ThemeProvider>
         </SafeAreaProvider>
         <Toast position="top" topOffset={60} />
       </GestureHandlerRootView>

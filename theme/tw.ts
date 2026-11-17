@@ -1,5 +1,6 @@
 import { create } from "twrnc";
 import { colors } from "./colors";
+import { fontSizeConfig } from "./typography";
 
 const neutral = {
   50: colors.canvas,
@@ -30,6 +31,7 @@ const warning = {
 export default create({
   theme: {
     extend: {
+      fontSize: fontSizeConfig,
       colors: {
         ...colors,
         white: colors.surface,

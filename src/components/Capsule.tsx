@@ -21,7 +21,7 @@ const Capsule = ({ text, color }: CapsuleProps) => {
   const cfg = capsuleConfig[color];
   return (
     <View style={tw`px-3 py-1 rounded-full ${cfg.bg} self-start`}>
-      <Text style={tw`text-sm ${cfg.text}`}>{text}</Text>
+      <Text style={tw`text-description ${cfg.text}`}>{text}</Text>
     </View>
   );
 };

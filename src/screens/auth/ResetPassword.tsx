@@ -60,7 +60,7 @@ const ResetPassword = () => {
         >
           {/* Header */}
           <View style={tw`items-center mb-6`}>
-            <Text style={tw`text-2xl font-bold ${TW.textPrimary}`}>
+            <Text style={tw`text-page font-bold ${TW.textPrimary}`}>
               Reset Password
             </Text>
             <Text style={tw`${TW.textSecondary} text-center mt-1`}>
@@ -95,7 +95,7 @@ const ResetPassword = () => {
             loadingTitle="Updating..."
             onPress={handleReset}
             loading={loading}
-            textStyle={tw`text-[16px]`}
+            textStyle={tw`text-body`}
             style={tw`mt-2`}
           />
         </ScrollView>

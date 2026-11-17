@@ -1,4 +1,10 @@
 import TempPasswordContent from "./TempPasswordContent";
+import ErrorState from "@/src/components/states/ErrorState";
+import type { AdminAddUserResponse } from "@/src/services/admin/add-user-service";
+import type { AppError, ValidationFields } from "@/src/types/appError";
+import { useAuthStore } from "@/src/store/useAuthStore";
+import { useUsersStore } from "@/src/store/useUsersStore";
+import { useRouter } from "expo-router";
 import { colors } from "@/theme/colors";
 import { Controller, useForm } from "react-hook-form";
 import {
@@ -23,7 +29,7 @@ import { ChevronDown, ChevronUp } from "lucide-react-native";
 interface Props {
   visible: boolean;
   onClose: () => void;
-  onSubmit: (data: AddUserFormData) => Promise<boolean>;
+  onSubmit: (data: AddUserFormData) => Promise<AdminAddUserResponse>;
   tempPassword?: string | null;
   supervisors: UserProfile[];
   currentUserId: string;
@@ -40,7 +46,8 @@ export default function AddUserModal({
   isSubmitting,
   supervisors,
 }: Props) {
-  const { control, handleSubmit, reset } = useForm<AddUserFormData>({
+  const router = useRouter();
+  const { control, handleSubmit, reset, setError, clearErrors } = useForm<AddUserFormData>({
     resolver: zodResolver(addUserSchema),
     defaultValues: {
       first_name: "",
@@ -51,6 +58,7 @@ export default function AddUserModal({
   });
 
   const [showOptions, setShowOptions] = useState(false);
+  const [submitError, setSubmitError] = useState<AppError | null>(null);
   const [dropdownLayout, setDropdownLayout] = useState({ top: 0, left: 0, width: 0 });
   const triggerRef = useRef<View>(null);
 
@@ -65,9 +73,29 @@ export default function AddUserModal({
   };
 
   const submit = async (data: AddUserFormData) => {
-    if (!(await onSubmit(data))) return;
+    clearErrors();
+    setSubmitError(null);
+    const result = await onSubmit(data);
+    if (!result.success) {
+      setSubmitError(result.error);
+      if (result.error.kind === "validation") {
+        const fieldNames: Partial<Record<keyof ValidationFields, keyof AddUserFormData>> = {
+          email: "email", firstName: "first_name", lastName: "last_name",
+          first_name: "first_name", last_name: "last_name", supervisor_id: "supervisor_id",
+        };
+        for (const [field, issue] of Object.entries(result.error.fields)) {
+          const name = fieldNames[field as keyof ValidationFields];
+          if (name) setError(name, {
+            type: "server",
+            message: issue === "alreadyExists" ? "This value is already in use." : issue === "required" ? "This field is required." : "Enter a valid value.",
+          });
+        }
+      }
+      return;
+    }
     Keyboard.dismiss();
     reset();
+    setSubmitError(null);
     setShowOptions(false);
   };
 
@@ -76,7 +104,15 @@ export default function AddUserModal({
     Keyboard.dismiss();
     reset();
     setShowOptions(false);
+    setSubmitError(null);
     onClose();
+  };
+
+  const handleSignIn = async () => {
+    await useAuthStore.getState().signOut();
+    useUsersStore.setState({ currentUserProfile: null, selectedUserProfile: null, users: [], organizationName: "" });
+    handleClose();
+    router.replace("/(auth)/login");
   };
 
   const dropdownOverlay = showOptions ? (
@@ -124,7 +160,7 @@ export default function AddUserModal({
                     }}
                     style={tw`px-4 py-3 border-b border-gray-100`}
                   >
-                    <Text>
+                    <Text style={tw`text-body text-ink`}>
                       {sup.first_name} {sup.last_name}
                     </Text>
                   </Pressable>
@@ -151,13 +187,21 @@ export default function AddUserModal({
         <FormActions
           onCancel={handleClose}
           onSubmit={handleSubmit(submit)}
-          submitLabel="Add User"
+          submitLabel={submitError && submitError.kind !== "validation" && submitError.kind !== "unauthorized" ? "Try again" : "Add User"}
           loadingTitle="Adding..."
           loading={isSubmitting}
           cancelDisabled={isSubmitting}
+          submitDisabled={submitError?.kind === "unauthorized"}
         />
       )}
     >
+      {!tempPassword && submitError ? (
+        <ErrorState
+          error={submitError}
+          onRetry={submitError.kind === "unauthorized" ? handleSignIn : undefined}
+          retryLabel="Sign in again"
+        />
+      ) : null}
       {tempPassword ? (
         <TempPasswordContent tempPassword={tempPassword} onDone={handleClose} />
       ) : (
@@ -175,7 +219,7 @@ export default function AddUserModal({
                 labelVariant="compact"
                 variant="filled"
                 placeholder="John"
-                placeholderTextColor={colors.subtle}
+                placeholderTextColor={colors.placeholder}
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}
@@ -199,7 +243,7 @@ export default function AddUserModal({
                 labelVariant="compact"
                 variant="filled"
                 placeholder="Doe"
-                placeholderTextColor={colors.subtle}
+                placeholderTextColor={colors.placeholder}
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}
@@ -223,7 +267,7 @@ export default function AddUserModal({
                 labelVariant="compact"
                 variant="filled"
                 placeholder="example@gmail.com"
-                placeholderTextColor={colors.subtle}
+                placeholderTextColor={colors.placeholder}
                 autoCapitalize="none"
                 keyboardType="email-address"
                 value={value}
@@ -248,13 +292,13 @@ export default function AddUserModal({
 
               return (
                 <View style={tw`mb-2`}>
-                  <Text style={tw`text-sm font-semibold mb-1 text-gray-600`}>Supervisor</Text>
+                  <Text style={tw`text-description font-semibold mb-1 text-gray-600`}>Supervisor</Text>
                   <Pressable
                     ref={triggerRef}
                     onPress={openDropdown}
                     style={tw`h-12 px-4 rounded-2xl bg-gray-100 flex-row items-center justify-between`}
                   >
-                    <Text style={tw`text-[15px] text-gray-800`}>
+                    <Text style={tw`text-body text-gray-800`}>
                       {typeof selected === "string"
                         ? selected
                         : selected

@@ -104,12 +104,12 @@ export default function ModalShell({
         <View style={tw`flex-row items-center justify-between mb-4`}>
           <View style={tw`flex-1 pr-3`}>
             {title ? (
-              <Text style={tw`text-[18px] font-bold ${TW.textPrimary}`}>
+              <Text style={tw`text-section font-bold ${TW.textPrimary}`}>
                 {title}
               </Text>
             ) : null}
             {subtitle ? (
-              <Text style={tw`text-sm text-muted mt-1`}>{subtitle}</Text>
+              <Text style={tw`text-description text-muted mt-1`}>{subtitle}</Text>
             ) : null}
           </View>
 

@@ -1,3 +1,4 @@
+import { fontSizes, lineHeights } from "@/theme/typography";
 import { colors } from "@/theme/colors";
 import { MAX_YEAR, MIN_YEAR, MONTHS } from "@/src/utils/userDashboard";
 import { TW } from "@/theme/twStyles";
@@ -412,14 +413,14 @@ const s = StyleSheet.create({
     backgroundColor: TW.bgSecondary,
   },
   headerLabel: {
-    fontSize: 11,
+    fontSize: fontSizes.caption, lineHeight: lineHeights.caption,
     color: colors.onPrimarySoft,
     fontWeight: "600",
     letterSpacing: 1,
     textTransform: "uppercase",
   },
   headerDate: {
-    fontSize: 30,
+    fontSize: fontSizes.metric, lineHeight: lineHeights.metric,
     color: colors.surface,
   },
   divider: { height: 1, backgroundColor: colors.border },
@@ -429,7 +430,7 @@ const s = StyleSheet.create({
     padding: 20,
   },
   toggleBtn: { flexDirection: "row", alignItems: "center", gap: 6 },
-  toggleText: { fontSize: 15, fontWeight: "700", color: TW.bgSecondary },
+  toggleText: { fontSize: fontSizes.body, lineHeight: lineHeights.body, fontWeight: "700", color: TW.bgSecondary },
   toggleActive: {},
   grid: { maxHeight: 280 },
   gridContent: { padding: 8 },
@@ -443,7 +444,7 @@ const s = StyleSheet.create({
     justifyContent: "center",
   },
   cellPillSelected: { backgroundColor: TW.bgYellow, borderRadius:999 },
-  cellText: { fontSize: 16, color: TW.bgSecondary },
+  cellText: { fontSize: fontSizes.body, lineHeight: lineHeights.body, color: TW.bgSecondary },
   cellTextSelected: { fontWeight: "800" },
   actions: {
     flexDirection: "row",

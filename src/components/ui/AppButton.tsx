@@ -44,9 +44,9 @@ const SIZE: Record<AppButtonSize, string> = {
 };
 
 const TEXT_SIZE: Record<AppButtonSize, string> = {
-  sm: "text-sm",
-  md: "text-[15px]",
-  lg: "text-lg",
+  sm: "text-label",
+  md: "text-action",
+  lg: "text-action",
 };
 
 export default function AppButton({

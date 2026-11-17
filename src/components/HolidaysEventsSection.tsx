@@ -1,3 +1,4 @@
+import { fontSizes, lineHeights, typography } from "@/theme/typography";
 import { colors } from "@/theme/colors";
 import React, { useEffect, useMemo, useRef } from "react";
 import { Pressable, Text, useWindowDimensions, View } from "react-native";
@@ -102,7 +103,7 @@ function CardDateBlock({
       <Text
         style={{
           color: colors.subtle,
-          fontSize: 14,
+          fontSize: fontSizes.label, lineHeight: lineHeights.label,
           fontWeight: "600",
           letterSpacing: 0.5,
           textTransform: "uppercase",
@@ -114,15 +115,15 @@ function CardDateBlock({
       <Text
         style={{
           color: colors.ink,
-          fontSize: 20,
+          fontSize: fontSizes.section,
           fontWeight: "700",
-          lineHeight: 24,
+          lineHeight: lineHeights.section,
         }}
       >
         {day}
       </Text>
 
-      <Text style={{ color: colors.subtle, fontSize: 14, fontWeight: "500" }}>
+      <Text style={{ color: colors.subtle, fontSize: fontSizes.label, lineHeight: lineHeights.label, fontWeight: "500" }}>
         {dayName}
       </Text>
     </View>
@@ -156,7 +157,7 @@ function TypeBadge({ isHoliday }: { isHoliday: boolean }) {
         }}
       />
 
-      <Text style={{ fontSize: 13, fontWeight: "600", color: badgeText }}>
+      <Text style={{ fontSize: fontSizes.caption, lineHeight: lineHeights.caption, fontWeight: "600", color: badgeText }}>
         {isHoliday ? "Holiday" : "Event"}
       </Text>
     </View>
@@ -344,13 +345,13 @@ function AnimatedCard({
 
         <View style={{ flex: 1, gap: 4 }}>
           <Text
-            style={{ color: colors.ink, fontSize: 14, fontWeight: "600" }}
+            style={{ color: colors.ink, fontSize: fontSizes.label, lineHeight: lineHeights.label, fontWeight: "600" }}
             numberOfLines={1}
           >
             {item.title}
           </Text>
 
-          <Text style={{ color: colors.subtle, fontSize: 14 }} numberOfLines={1}>
+          <Text style={{ color: colors.subtle, fontSize: fontSizes.label, lineHeight: lineHeights.label }} numberOfLines={1}>
             {formatWeekday(item.start_date)}
           </Text>
           <TypeBadge isHoliday={isHoliday} />
@@ -456,7 +457,7 @@ export const HolidaysEventsSection = ({
           marginBottom: 16,
         }}
       >
-        <Text style={tw`font-semibold ${TW.textPrimary} text-lg`}>
+        <Text style={tw`font-semibold ${TW.textPrimary} text-section`}>
           Holidays &amp; Events
         </Text>
 
@@ -472,7 +473,7 @@ export const HolidaysEventsSection = ({
             paddingHorizontal: 10,
           })}
         >
-          <Text style={{ color: colors.muted, fontSize: 14, fontWeight: "600" }}>
+          <Text style={typography.link}>
             View All
           </Text>
         </Pressable>
@@ -492,10 +493,10 @@ export const HolidaysEventsSection = ({
             gap: 6,
           }}
         >
-          <Text style={{ color: colors.ink, fontWeight: "600", fontSize: 14 }}>
+          <Text style={typography.cardTitle}>
             No upcoming events
           </Text>
-          <Text style={{ color: colors.muted, fontSize: 14 }}>
+          <Text style={{ color: colors.muted, fontSize: fontSizes.label, lineHeight: lineHeights.label }}>
             No holidays or events scheduled
           </Text>
         </View>

@@ -1,3 +1,4 @@
+import { mapAppError } from "@/src/utils/mapAppError";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Alert } from "react-native";
 
@@ -193,8 +194,7 @@ export function useUserDirectory({
   const handleAddUser = useCallback(
     async (data: AddUserFormData) => {
       if (!organizationId) {
-        Alert.alert("Error", "Organization not ready");
-        return false;
+        return { success: false as const, error: mapAppError({ status: 422, fields: { orgId: "required" } }, { endpoint: "admin-add-user" }) };
       }
 
       try {
@@ -207,16 +207,14 @@ export function useUserDirectory({
           supervisor_id: data.supervisor_id,
         });
 
-        setTempPassword(response.tempPassword ?? null);
-        if (!response.tempPassword) {
+        if (!response.success) return response;
+        setTempPassword(response.data.tempPassword ?? null);
+        if (!response.data.tempPassword) {
           setShowAddModal(false);
           Alert.alert("User created", "No temporary password was returned. Ask the user to reset their password before signing in.");
         }
         void onRefresh();
-        return true;
-      } catch (err: any) {
-        Alert.alert("Error", err.message ?? "Failed to add user");
-        return false;
+        return response;
       } finally {
         setIsAddingUser(false);
       }

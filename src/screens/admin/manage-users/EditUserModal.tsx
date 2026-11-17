@@ -74,7 +74,7 @@ const EditUserModal = ({
     >
       {/* Role Section */}
       <View style={tw`mb-5`}>
-        <Text style={tw`text-sm font-semibold ${TW.textSecondary} mb-2`}>
+        <Text style={tw`text-description font-semibold ${TW.textSecondary} mb-2`}>
           Role
         </Text>
 
@@ -97,7 +97,7 @@ const EditUserModal = ({
               >
                 <Text
                   style={[
-                    tw`text-xs font-bold capitalize`,
+                    tw`text-caption font-bold capitalize`,
                     selected
                       ? tw`${TW.textButton}`
                       : tw`${TW.textSecondary}`,
@@ -113,7 +113,7 @@ const EditUserModal = ({
 
       {/* Supervisor Section */}
       <View style={tw`mb-5`}>
-        <Text style={tw`text-sm font-semibold ${TW.textSecondary} mb-2`}>
+        <Text style={tw`text-description font-semibold ${TW.textSecondary} mb-2`}>
           Supervisor
         </Text>
 
@@ -125,7 +125,7 @@ const EditUserModal = ({
             (pressed || isSubmitting) && tw`opacity-60`,
           ]}
         >
-          <Text style={tw`text-sm font-medium ${TW.textPrimary}`}>
+          <Text style={tw`text-description font-medium ${TW.textPrimary}`}>
             {supervisorName()}
           </Text>
           <ChevronDown size={18} color={colors.subtle} />
@@ -142,7 +142,7 @@ const EditUserModal = ({
                 }}
                 style={tw`flex-row items-center justify-between px-4 py-3.5 border-b border-gray-100`}
               >
-                <Text>Self</Text>
+                <Text style={tw`text-body text-ink`}>Self</Text>
               </Pressable>
 
               {users
@@ -157,7 +157,7 @@ const EditUserModal = ({
                     }}
                     style={tw`flex-row items-center justify-between px-4 py-3.5 border-b border-gray-100`}
                   >
-                    <Text>
+                    <Text style={tw`text-body text-ink`}>
                       {`${u.first_name ?? ""} ${u.last_name ?? ""}`}
                     </Text>
                   </Pressable>

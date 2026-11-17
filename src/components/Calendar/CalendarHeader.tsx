@@ -8,7 +8,7 @@ interface Props {
 export function CalendarHeader({ onSettingsPress }: Props) {
   return (
     <View style={tw`flex-row items-center justify-between p-5`}>
-      <Text style={tw`text-2xl font-extrabold text-slate-900`}>Calendar</Text>
+      <Text style={tw`text-page font-extrabold text-slate-900`}>Calendar</Text>
       <Pressable
         onPress={onSettingsPress}
         hitSlop={10}

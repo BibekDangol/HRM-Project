@@ -64,36 +64,36 @@ export function LeaveDetailCard({ leave, status }: LeaveDetailCardProps) {
         {/* Header Banner */}
         <View style={tw`mb-5 pb-4 border-b border-slate-100`}>
           <View style={tw`flex-row items-center justify-between mb-1`}>
-            <Text style={tw`text-lg font-bold text-slate-900`}>{cfg.title}</Text>
+            <Text style={tw`text-section font-bold text-slate-900`}>{cfg.title}</Text>
             <View
               style={tw`px-3 py-1 rounded-full ${cfg.bgColor} border ${cfg.borderColor}`}
             >
-              <Text style={tw`text-xs font-bold ${cfg.textColor}`}>
+              <Text style={tw`text-caption font-bold ${cfg.textColor}`}>
                 {cfg.badgeText}
               </Text>
             </View>
           </View>
-          <Text style={tw`text-xs ${cfg.textColor} font-medium`}>
+          <Text style={tw`text-caption ${cfg.textColor} font-medium`}>
             {cfg.subtitle}
           </Text>
         </View>
 
         {/* Employee Info */}
         <View style={tw`mb-4`}>
-          <Text style={tw`text-slate-400 text-xs font-semibold uppercase tracking-wider mb-1`}>
+          <Text style={tw`text-slate-400 text-caption font-semibold uppercase tracking-wider mb-1`}>
             Employee Name
           </Text>
-          <Text style={tw`text-slate-900 text-base font-semibold`}>
+          <Text style={tw`text-slate-900 text-body font-semibold`}>
             {leave.first_name} {leave.last_name}
           </Text>
         </View>
 
         {/* Leave Type */}
         <View style={tw`mb-4`}>
-          <Text style={tw`text-slate-400 text-xs font-semibold uppercase tracking-wider mb-1`}>
+          <Text style={tw`text-slate-400 text-caption font-semibold uppercase tracking-wider mb-1`}>
             Leave Type
           </Text>
-          <Text style={tw`text-slate-800 text-sm font-medium`}>
+          <Text style={tw`text-slate-800 text-description font-medium`}>
             {leaveTypeName}
           </Text>
         </View>
@@ -101,18 +101,18 @@ export function LeaveDetailCard({ leave, status }: LeaveDetailCardProps) {
         {/* Dates */}
         <View style={tw`flex-row justify-between mb-4`}>
           <View style={tw`flex-1 pr-2`}>
-            <Text style={tw`text-slate-400 text-xs font-semibold uppercase tracking-wider mb-1`}>
+            <Text style={tw`text-slate-400 text-caption font-semibold uppercase tracking-wider mb-1`}>
               Start Date
             </Text>
-            <Text style={tw`text-slate-800 text-sm font-medium`}>
+            <Text style={tw`text-slate-800 text-description font-medium`}>
               {leave.start_date || "N/A"}
             </Text>
           </View>
           <View style={tw`flex-1 pl-2`}>
-            <Text style={tw`text-slate-400 text-xs font-semibold uppercase tracking-wider mb-1`}>
+            <Text style={tw`text-slate-400 text-caption font-semibold uppercase tracking-wider mb-1`}>
               End Date
             </Text>
-            <Text style={tw`text-slate-800 text-sm font-medium`}>
+            <Text style={tw`text-slate-800 text-description font-medium`}>
               {leave.end_date || "N/A"}
             </Text>
           </View>
@@ -120,39 +120,39 @@ export function LeaveDetailCard({ leave, status }: LeaveDetailCardProps) {
 
         {/* Duration */}
         <View style={tw`mb-4`}>
-          <Text style={tw`text-slate-400 text-xs font-semibold uppercase tracking-wider mb-1`}>
+          <Text style={tw`text-slate-400 text-caption font-semibold uppercase tracking-wider mb-1`}>
             Duration
           </Text>
-          <Text style={tw`text-slate-800 text-sm font-medium`}>
+          <Text style={tw`text-slate-800 text-description font-medium`}>
             {leaveDuration}
           </Text>
         </View>
 
         {/* Reason */}
         <View style={tw`mb-4`}>
-          <Text style={tw`text-slate-400 text-xs font-semibold uppercase tracking-wider mb-1`}>
+          <Text style={tw`text-slate-400 text-caption font-semibold uppercase tracking-wider mb-1`}>
             Reason
           </Text>
-          <Text style={tw`text-slate-700 text-sm`}>
+          <Text style={tw`text-slate-700 text-description`}>
             {leave.reason || "N/A"}
           </Text>
         </View>
 
         {/* Status & Review Audit */}
         <View style={tw`border-t border-slate-100 pt-4 mt-2`}>
-          <Text style={tw`text-slate-400 text-xs font-semibold uppercase tracking-wider mb-1`}>
+          <Text style={tw`text-slate-400 text-caption font-semibold uppercase tracking-wider mb-1`}>
             Status
           </Text>
-          <Text style={tw`text-sm font-bold ${cfg.textColor} mb-3`}>
+          <Text style={tw`text-description font-bold ${cfg.textColor} mb-3`}>
             {cfg.badgeText}
           </Text>
 
           {effectiveStatus !== "pending" && (
             <>
-              <Text style={tw`text-slate-400 text-xs font-semibold uppercase tracking-wider mb-1`}>
+              <Text style={tw`text-slate-400 text-caption font-semibold uppercase tracking-wider mb-1`}>
                 {cfg.auditLabel}
               </Text>
-              <Text style={tw`text-slate-800 text-sm font-medium`}>
+              <Text style={tw`text-slate-800 text-description font-medium`}>
                 {leave.action_taken_by_name || "N/A"}
               </Text>
             </>

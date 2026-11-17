@@ -18,7 +18,7 @@ export function CalendarLegend({ items }: Props) {
       {items.map((item) => (
         <View key={item.key} style={tw`flex-row items-center gap-1.5`}>
           <Circle color={item.color} fill={item.color} size={9} />
-          <Text style={tw`text-sm text-slate-500`}>{item.label}</Text>
+          <Text style={tw`text-description text-slate-500`}>{item.label}</Text>
         </View>
       ))}
     </View>

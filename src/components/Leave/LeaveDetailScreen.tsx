@@ -35,24 +35,24 @@ export function LeaveDetailScreen({
       if (role === "admin") {
         if (newStatus === "approved") {
           router.replace({
-            pathname: "/(admin)/leave/approved-details",
+            pathname: "/(admin)/(main-tabs)/leave/approved-details",
             params: { id: updatedLeave.id },
           });
         } else if (newStatus === "rejected") {
           router.replace({
-            pathname: "/(admin)/leave/rejected-details",
+            pathname: "/(admin)/(main-tabs)/leave/rejected-details",
             params: { id: updatedLeave.id },
           });
         }
       } else {
         if (newStatus === "approved") {
           router.replace({
-            pathname: "/(users)/more/supervisor-settings/leave/approved-details",
+            pathname: "/(users)/(main-tabs)/more/supervisor-settings/leave/approved-details",
             params: { id: updatedLeave.id },
           });
         } else if (newStatus === "rejected") {
           router.replace({
-            pathname: "/(users)/more/supervisor-settings/leave/rejected-details",
+            pathname: "/(users)/(main-tabs)/more/supervisor-settings/leave/rejected-details",
             params: { id: updatedLeave.id },
           });
         }

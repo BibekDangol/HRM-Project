@@ -1,3 +1,4 @@
+import { fontSizes, lineHeights } from "@/theme/typography";
 import { colors } from "@/theme/colors";
 import { LeaveTypeRow, LeaveTypeWithStats } from "@/src/types/userLeave";
 import { TW } from "@/theme/twStyles";
@@ -121,14 +122,14 @@ export function LeaveTypeDropdown({
                 >
                   Leave Type
                 </Text> */}
-                <Text style={tw`text-[15px] font-semibold text-slate-600`}>
+                <Text style={tw`text-body font-semibold text-slate-600`}>
                   {currentLabel}
                 </Text>
               </>
             ) : (
               <Text
                 style={{
-                  fontSize: 15,
+                  fontSize: fontSizes.body, lineHeight: lineHeights.body,
                   fontWeight: "400",
                   color: colors.subtle,
                 }}
@@ -150,7 +151,7 @@ export function LeaveTypeDropdown({
                 }}
               >
                 <Text
-                  style={{ fontSize: 13, fontWeight: "700", color: pillText }}
+                  style={{ fontSize: fontSizes.caption, lineHeight: lineHeights.caption, fontWeight: "700", color: pillText }}
                 >
                   {remaining} left
                 </Text>
@@ -225,7 +226,7 @@ export function LeaveTypeDropdown({
                 >
                   {leaveTypes.length === 0 ? (
                     <View style={{ padding: 20, alignItems: "center" }}>
-                      <Text style={{ fontSize: 13, color: colors.subtle }}>
+                      <Text style={{ fontSize: fontSizes.caption, lineHeight: lineHeights.caption, color: colors.subtle }}>
                         No leave types available.
                       </Text>
                     </View>
@@ -287,7 +288,7 @@ export function LeaveTypeDropdown({
                           >
                             <Text
                               style={{
-                                fontSize: 13,
+                                fontSize: fontSizes.caption, lineHeight: lineHeights.caption,
                                 fontWeight: "700",
                                 color: isSelected ? colors.surface : TW.bgSecondary,
                               }}
@@ -300,7 +301,7 @@ export function LeaveTypeDropdown({
                           <View style={{ flex: 1 }}>
                             <Text
                               style={{
-                                fontSize: 14,
+                                fontSize: fontSizes.label, lineHeight: lineHeights.label,
                                 fontWeight: isSelected ? "700" : "500",
                                 color: TW.bgSecondary,
                               }}
@@ -310,7 +311,7 @@ export function LeaveTypeDropdown({
                             {stats != null && (
                               <Text
                                 style={{
-                                  fontSize: 13,
+                                  fontSize: fontSizes.caption, lineHeight: lineHeights.caption,
                                   color: colors.subtle,
                                   marginTop: 2,
                                 }}
@@ -334,7 +335,7 @@ export function LeaveTypeDropdown({
                             >
                               <Text
                                 style={{
-                                  fontSize: 13,
+                                  fontSize: fontSizes.caption, lineHeight: lineHeights.caption,
                                   fontWeight: "700",
                                   color: rowPillText,
                                 }}

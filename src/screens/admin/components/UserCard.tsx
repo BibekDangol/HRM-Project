@@ -36,7 +36,7 @@ export const UserCard = ({
             ) : (
               <View
                 style={tw`w-12 h-12 rounded-full bg-gray-300 items-center justify-center`}>
-                <Text style={tw`text-sm font-bold text-white`}>
+                <Text style={tw`text-description font-bold text-white`}>
                   {`${user.first_name?.[0] ?? ""}${user.last_name?.[0] ?? ""}`.toUpperCase()}
                 </Text>
               </View>
@@ -46,7 +46,7 @@ export const UserCard = ({
           {/* User Info */}
           <View style={tw`flex-col gap-1`}>
             <View style={tw`flex-row gap-4`}>
-              <Text style={tw`text-base font-bold ${TW.textPrimary}`}>
+              <Text style={tw`text-body font-bold ${TW.textPrimary}`}>
                 {user.first_name}  {user.last_name}
               </Text>
               <Capsule
@@ -55,11 +55,11 @@ export const UserCard = ({
               />
             </View>
             <View style={tw`mr-4 gap-0.5`}>
-              <Text style={tw`text-sm ${TW.textSecondary}`} numberOfLines={1}>
+              <Text style={tw`text-description ${TW.textSecondary}`} numberOfLines={1}>
                 {user.email}
               </Text>
             </View>
-            <Text style={tw`text-xs ${TW.textTertiary}`}>
+            <Text style={tw`text-caption ${TW.textTertiary}`}>
               Supervisor: {getSupervisorName(user.supervisor_id)}
             </Text>
           </View>

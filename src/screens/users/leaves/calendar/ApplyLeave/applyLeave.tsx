@@ -5,7 +5,6 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 import { LeaveCalendarModal } from "@/src/components/userLeave/LeaveCalendarModal";
 import { LeaveFormFields } from "@/src/components/userLeave/LeaveFormFields";
 import React from "react";
-import { TW } from "@/theme/twStyles";
 import tw from "@/theme/tw";
 import { useLeaveForm } from "@/src/hooks/users/useLeaveForm";
 import { useRouter } from "expo-router";
@@ -70,10 +69,10 @@ export default function ApplyLeaveScreen() {
         }}
       >
         <View>
-          <Text style={[tw`text-2xl font-bold`, { color: TW.bgSecondary }]}>
+          <Text style={tw`text-page font-bold text-ink`}>
             New Leave Request
           </Text>
-          <Text style={tw`mt-1.5 text-[13px] text-slate-400`}>
+          <Text style={tw`mt-1.5 text-description text-muted`}>
             Fill in the details to submit a leave request
           </Text>
         </View>
