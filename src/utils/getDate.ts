@@ -1,5 +1,11 @@
 import { NEPAL_OFFSET_MIN } from "../constants";
 
+export function parseDate(value: string | null | undefined): Date | null {
+  if (!value) return null;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
 export function nepalDateYYYYMMDD(now = new Date()) {
   const nepalNow = new Date(now.getTime() + NEPAL_OFFSET_MIN * 60 * 1000);
   return nepalNow.toISOString().slice(0, 10);

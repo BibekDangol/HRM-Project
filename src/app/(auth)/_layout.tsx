@@ -1,7 +1,11 @@
 import { Stack } from "expo-router";
 
 function Layout() {
-  return <Stack screenOptions={{ headerShown: false }} />;
+  return (
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="signup" options={{ gestureEnabled: true }} />
+    </Stack>
+  );
 }
 
 export default Layout;

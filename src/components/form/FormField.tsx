@@ -1,6 +1,6 @@
 import { colors } from "@/theme/colors";
 import { useState } from "react";
-import type { ReactNode } from "react";
+import type { ReactNode, Ref } from "react";
 import { Text, TextInput, View } from "react-native";
 import type {
   StyleProp,
@@ -16,6 +16,7 @@ export type FormFieldVariant = "auth" | "outlined" | "filled";
 export type FormFieldLabelVariant = "default" | "compact" | "uppercase";
 
 export type FormFieldProps = {
+  inputRef?: Ref<TextInput>;
   label?: string;
   value: string;
   onChangeText: (value: string) => void;
@@ -64,6 +65,7 @@ const LABEL: Record<FormFieldLabelVariant, string> = {
 };
 
 export default function FormField({
+  inputRef,
   label,
   value,
   onChangeText,
@@ -109,6 +111,7 @@ export default function FormField({
         {leftAccessory}
 
         <TextInput
+          ref={inputRef}
           accessibilityLabel={label ?? placeholder}
           aria-invalid={hasError}
           value={value}

@@ -6,9 +6,9 @@ const Logo = () => {
     <View style={tw`items-center justify-center mb-2`}>
       <View style={tw`w-35 h-35`}>
         <Image
-          source={require("@/src/assets/images/hrm.png")}
+          source={require("@/src/assets/images/oddoo-hrm-symbol-v1.png")}
           style={tw`w-full h-full rounded-xl`}
-          resizeMode="stretch"
+          resizeMode="contain"
         />
       </View>
     </View>

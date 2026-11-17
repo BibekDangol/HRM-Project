@@ -2,6 +2,7 @@
 
 import { getAttendanceRulesService } from "../services/users/attendance.service";
 import { AttendanceRow, AttendanceRules } from "../types/attendance";
+export { parseDate } from "./getDate";
 
 export const CHECKIN_NOTIFICATION_ID = "attendance-checkin";
 export const CHECKOUT_NOTIFICATION_ID = "attendance-checkout";
@@ -129,10 +130,4 @@ export function formatElapsed(ms: number) {
 
   if (h === 0) return `${pad2(m)}:${pad2(s)}`;
   return `${pad2(h)}:${pad2(m)}:${pad2(s)}`;
-}
-
-export function parseDate(value: string | null | undefined): Date | null {
-  if (!value) return null;
-  const d = new Date(value);
-  return Number.isNaN(d.getTime()) ? null : d;
 }

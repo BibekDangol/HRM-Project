@@ -35,7 +35,6 @@ export default function DashboardScreen() {
   const [tempPassword, setTempPassword] = useState<string | null>(null);
   const totalusers = users.length;
   const [overview, setOverview] = useState<AdminDashboardOverview | null>(null);
-  const [overviewLoading, setOverviewLoading] = useState(true);
   const [overviewError, setOverviewError] = useState(false);
   const loadId = useRef(0);
 
@@ -44,7 +43,6 @@ export default function DashboardScreen() {
   const loadAll = useCallback(async () => {
     if (!organizationId) return;
     const requestId = ++loadId.current;
-    setOverviewLoading(true);
     setOverviewError(false);
     const [userResult, , overviewResult] = await Promise.allSettled([
       fetchUsersService(organizationId),
@@ -59,7 +57,6 @@ export default function DashboardScreen() {
       setOverview(null);
       setOverviewError(true);
     }
-    setOverviewLoading(false);
   }, [organizationId, setUsers, fetchCalendarItems]);
 
   useFocusEffect(useCallback(() => {
@@ -118,7 +115,6 @@ export default function DashboardScreen() {
       >
         <AdminOverview
           overview={overview}
-          loading={overviewLoading}
           error={overviewError}
           onReviewLeaves={() => router.push("/(admin)/leave")}
           onViewAttendance={() => router.push("/(admin)/more/attendance-list")}

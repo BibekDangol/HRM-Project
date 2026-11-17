@@ -1,58 +1,50 @@
-import { BackButton } from "@/src/components/BackButton";
+import AuthScreen, { authStyles } from "@/src/components/auth/AuthScreen";
 import FormField from "@/src/components/form/FormField";
 import PasswordField from "@/src/components/form/PasswordField";
 import AppButton from "@/src/components/ui/AppButton";
-import { useDimension } from "@/src/hooks/useDimension";
 import { signupSchema } from "@/src/schema/auth";
 import { useAuthStore } from "@/src/store/useAuthStore";
-import { TW } from "@/theme/twStyles";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
-import React from "react";
+import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import {
-  Alert,
-  Keyboard,
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import tw from "@/theme/tw";
+import { Alert, Keyboard, Pressable, Text, View } from "react-native";
 import { z } from "zod";
 
 type FormData = z.infer<typeof signupSchema>;
 
+const steps: { title: string; subtitle: string; fields: (keyof FormData)[] }[] = [
+  { title: "Admin full name", subtitle: "Enter the administrator’s first and last name.", fields: ["firstName", "lastName"] },
+  { title: "Your organization", subtitle: "Add your organization and account email.", fields: ["organizationName", "email"] },
+  { title: "Set your password", subtitle: "Choose a password to protect your account.", fields: ["password", "confirmPassword"] },
+];
+
 export default function SignupScreen() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
-  const { signUp, loading } = useAuthStore();
-  const { isSmallPhone, isTablet } = useDimension();
-
+  const signUp = useAuthStore((state) => state.signUp);
+  const [step, setStep] = useState(0);
   const {
     control,
     handleSubmit,
-    formState: { errors },
+    trigger,
+    setFocus,
+    formState: { errors, isSubmitting },
   } = useForm<FormData>({
     resolver: zodResolver(signupSchema),
-    defaultValues: {
-      firstName: "",
-      lastName: "",
-      organizationName: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-    },
+    shouldUnregister: false,
+    defaultValues: { firstName: "", lastName: "", organizationName: "", email: "", password: "", confirmPassword: "" },
   });
-
-  const horizontalPadding = isTablet ? 40 : isSmallPhone ? 16 : 24;
-  const labelFontSize = isTablet ? 16 : 14;
-  const inputFontSize = isTablet ? 16 : 14;
-  const fieldGap = isTablet ? 20 : isSmallPhone ? 14 : 16;
+  const currentStep = steps[step];
+  const returnToSignIn = () => router.dismissTo("/(auth)/login");
+  const goBack = () => {
+    Keyboard.dismiss();
+    if (step > 0) setStep(step - 1);
+    else returnToSignIn();
+  };
+  const nextStep = async () => {
+    Keyboard.dismiss();
+    if (await trigger(currentStep.fields)) setStep(step + 1);
+  };
   const handleSignup = async (data: FormData) => {
     try {
       await signUp({
@@ -63,255 +55,201 @@ export default function SignupScreen() {
         organizationName: data.organizationName,
       });
       Alert.alert("Success", "Organization created. Please login.");
-      router.push("/(auth)/login");
+      returnToSignIn();
     } catch (error: any) {
       Alert.alert("Signup Failed", error.message);
-      console.log("SIGNUP ERROR", error);
     }
   };
+  const submit = handleSubmit(handleSignup, (fieldErrors) => {
+    Keyboard.dismiss();
+    const invalidStep = steps.findIndex((item) => item.fields.some((field) => fieldErrors[field]));
+    if (invalidStep >= 0) setStep(invalidStep);
+  });
 
   return (
-    <View style={[tw`flex-1 ${TW.bgPrimary}`, { paddingTop: insets.top }]}>
-      {/* Back button */}
-      <View
-        style={[
-          tw`absolute z-10`,
-          {
-            top: insets.top + (isTablet ? 10 : 6),
-            left: horizontalPadding,
-          },
-        ]}
-      >
-        <BackButton />
-      </View>
-
-      <KeyboardAvoidingView
-        style={tw`flex-1`}
-        behavior={Platform.OS === "ios" ? "padding" : "padding"}
-      >
-        <ScrollView
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{
-            paddingHorizontal: horizontalPadding,
-            paddingTop: isTablet ? 68 : 56,
-            flexGrow: 1,
-          }}
-        >
-          <Pressable onPress={Keyboard.dismiss} accessible={false}>
-            <View
-              style={[
-                tw`w-full self-center`,
-                { maxWidth: isTablet ? 620 : 480 },
-              ]}
-            >
-              {/* TITLE */}
-              <View style={tw`items-center mb-8`}>
-                <Text
-                  style={[
-                    tw`font-bold ${TW.textPrimary} text-center`,
-                    { fontSize: isTablet ? 34 : 28 },
-                  ]}
-                >
-                  Get Started
-                </Text>
-                <Text
-                  style={[
-                    tw`${TW.textSecondary} text-center mt-2`,
-                    {
-                      fontSize: isTablet ? 17 : 15,
-                      lineHeight: isTablet ? 24 : 21,
-                    },
-                  ]}
-                >
-                  Set up your organization in a few simple steps
-                </Text>
-              </View>
-
-              {/* FORM FIELDS */}
-              <View style={tw`w-full`}>
-                {/* First Name */}
-                <Controller
-                  control={control}
-                  name="firstName"
-                  render={({ field: { value, onChange, onBlur } }) => (
-                    <FormField
-                      label="First Name *"
-                      value={value}
-                      onChangeText={onChange}
-                      onBlur={onBlur}
-                      placeholder="First Name"
-                      returnKeyType="next"
-                      autoCapitalize="words"
-                      error={errors.firstName?.message}
-                      labelStyle={{ fontSize: labelFontSize }}
-                      inputStyle={{ fontSize: inputFontSize }}
-                      containerStyle={{ marginBottom: fieldGap }}
-                    />
-                  )}
-                />
-
-                {/* Last Name */}
-                <Controller
-                  control={control}
-                  name="lastName"
-                  render={({ field: { value, onChange, onBlur } }) => (
-                    <FormField
-                      label="Last Name *"
-                      value={value}
-                      onChangeText={onChange}
-                      onBlur={onBlur}
-                      placeholder="Last Name"
-                      returnKeyType="next"
-                      autoCapitalize="words"
-                      error={errors.lastName?.message}
-                      labelStyle={{ fontSize: labelFontSize }}
-                      inputStyle={{ fontSize: inputFontSize }}
-                      containerStyle={{ marginBottom: fieldGap }}
-                    />
-                  )}
-                />
-
-                {/* Organization Name */}
-                <Controller
-                  control={control}
-                  name="organizationName"
-                  render={({ field: { value, onChange, onBlur } }) => (
-                    <FormField
-                      label="Organization Name *"
-                      value={value}
-                      onChangeText={onChange}
-                      onBlur={onBlur}
-                      placeholder="Organization Name"
-                      returnKeyType="next"
-                      autoCapitalize="words"
-                      error={errors.organizationName?.message}
-                      labelStyle={{ fontSize: labelFontSize }}
-                      inputStyle={{ fontSize: inputFontSize }}
-                      containerStyle={{ marginBottom: fieldGap }}
-                    />
-                  )}
-                />
-
-                {/* Email */}
-                <Controller
-                  control={control}
-                  name="email"
-                  render={({ field: { value, onChange, onBlur } }) => (
-                    <FormField
-                      label="Email *"
-                      placeholder="info@company.com"
-                      keyboardType="email-address"
-                      autoCapitalize="none"
-                      autoCorrect={false}
-                      autoComplete="email"
-                      textContentType="emailAddress"
-                      returnKeyType="next"
-                      value={value}
-                      onChangeText={onChange}
-                      onBlur={onBlur}
-                      error={errors.email?.message}
-                      labelStyle={{ fontSize: labelFontSize }}
-                      inputStyle={{ fontSize: inputFontSize }}
-                      containerStyle={{ marginBottom: fieldGap }}
-                    />
-                  )}
-                />
-
-                {/* Password */}
-                <Controller
-                  control={control}
-                  name="password"
-                  render={({ field: { value, onChange, onBlur } }) => (
-                    <PasswordField
-                      label="Password *"
-                      placeholder="•••••••••••••"
-                      autoCapitalize="none"
-                      autoCorrect={false}
-                      textContentType="newPassword"
-                      autoComplete="new-password"
-                      returnKeyType="next"
-                      value={value}
-                      onChangeText={onChange}
-                      onBlur={onBlur}
-                      error={errors.password?.message}
-                      labelStyle={{ fontSize: labelFontSize }}
-                      inputStyle={{ fontSize: inputFontSize }}
-                      containerStyle={{ marginBottom: fieldGap }}
-                      iconSize={isTablet ? 24 : 22}
-                    />
-                  )}
-                />
-
-                {/* Confirm Password */}
-                <Controller
-                  control={control}
-                  name="confirmPassword"
-                  render={({ field: { value, onChange, onBlur } }) => (
-                    <PasswordField
-                      label="Confirm Password *"
-                      placeholder="•••••••••••••"
-                      autoCapitalize="none"
-                      autoCorrect={false}
-                      textContentType="newPassword"
-                      autoComplete="new-password"
-                      returnKeyType="done"
-                      onSubmitEditing={handleSubmit(handleSignup)}
-                      value={value}
-                      onChangeText={onChange}
-                      onBlur={onBlur}
-                      error={errors.confirmPassword?.message}
-                      labelStyle={{ fontSize: labelFontSize }}
-                      inputStyle={{ fontSize: inputFontSize }}
-                      containerStyle={{ marginBottom: fieldGap }}
-                      iconSize={isTablet ? 24 : 22}
-                    />
-                  )}
-                />
-                <View style={[tw`flex-col w-full`, { gap: 16, marginTop: 16 }]}>
-                  {/* Submit Button */}
-                  <AppButton
-                    title="Register"
-                    loadingTitle="Creating..."
-                    onPress={handleSubmit(handleSignup)}
-                    loading={loading}
-                    size={isTablet ? "lg" : isSmallPhone ? "sm" : "md"}
-                    textStyle={{ fontSize: isTablet ? 18 : 14 }}
-                    style={tw`mt-1`}
-                  />
-
-                  {/* Login redirect */}
-
-                  <View style={tw`flex-row justify-center`}>
-                    <Text
-                      style={[
-                        tw`${TW.textPrimary}`,
-                        { fontSize: isTablet ? 15 : 14 },
-                      ]}
-                    >
-                      Already have an account?{" "}
-                    </Text>
-
-                    <TouchableOpacity
-                      onPress={() => router.push("/(auth)/login")}
-                    >
-                      <Text
-                        style={[
-                          tw`${TW.textPrimary} font-semibold underline`,
-                          { fontSize: isTablet ? 15 : 14 },
-                        ]}
-                      >
-                        Log in
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              </View>
-            </View>
+    <AuthScreen
+      title={currentStep.title}
+      subtitle={currentStep.subtitle}
+      onBack={goBack}
+      footer={
+        <>
+          <Text style={authStyles.footerText}>Already have an account?</Text>
+          <Pressable
+            accessibilityRole="button"
+            disabled={isSubmitting}
+            onPress={returnToSignIn}
+            style={({ pressed }) => [authStyles.footerLink, pressed && authStyles.pressed]}
+          >
+            <Text style={authStyles.link}>Sign in</Text>
           </Pressable>
-          <View style={{ height: insets.bottom + 10 }} />
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </View>
+        </>
+      }
+    >
+      <Text accessibilityLiveRegion="polite" style={authStyles.footerText}>Step {step + 1} of {steps.length}</Text>
+      {step === 0 ? (
+        <>
+          <Controller
+            control={control}
+            name="firstName"
+            render={({ field: { value, onChange, onBlur, ref } }) => (
+              <FormField
+                inputRef={ref}
+                variant="outlined"
+                label="First name"
+                placeholder="First name"
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                autoCapitalize="words"
+                returnKeyType="next"
+                onSubmitEditing={() => setFocus("lastName")}
+                editable={!isSubmitting}
+                error={errors.firstName?.message}
+                labelStyle={authStyles.label}
+                inputStyle={authStyles.input}
+              />
+            )}
+          />
+          <Controller
+            control={control}
+            name="lastName"
+            render={({ field: { value, onChange, onBlur, ref } }) => (
+              <FormField
+                inputRef={ref}
+                variant="outlined"
+                label="Last name"
+                placeholder="Last name"
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                autoCapitalize="words"
+                returnKeyType="next"
+                onSubmitEditing={nextStep}
+                editable={!isSubmitting}
+                error={errors.lastName?.message}
+                labelStyle={authStyles.label}
+                inputStyle={authStyles.input}
+              />
+            )}
+          />
+        </>
+      ) : step === 1 ? (
+        <>
+          <Controller
+            control={control}
+            name="organizationName"
+            render={({ field: { value, onChange, onBlur, ref } }) => (
+              <FormField
+                inputRef={ref}
+                variant="outlined"
+                label="Organization name"
+                placeholder="Your organization"
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                autoCapitalize="words"
+                returnKeyType="next"
+                onSubmitEditing={() => setFocus("email")}
+                editable={!isSubmitting}
+                error={errors.organizationName?.message}
+                labelStyle={authStyles.label}
+                inputStyle={authStyles.input}
+              />
+            )}
+          />
+          <Controller
+            control={control}
+            name="email"
+            render={({ field: { value, onChange, onBlur, ref } }) => (
+              <FormField
+                inputRef={ref}
+                variant="outlined"
+                label="Email address"
+                placeholder="you@company.com"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+                autoComplete="email"
+                textContentType="emailAddress"
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                returnKeyType="next"
+                onSubmitEditing={nextStep}
+                editable={!isSubmitting}
+                error={errors.email?.message}
+                labelStyle={authStyles.label}
+                inputStyle={authStyles.input}
+              />
+            )}
+          />
+        </>
+      ) : (
+        <>
+          <Controller
+            control={control}
+            name="password"
+            render={({ field: { value, onChange, onBlur, ref } }) => (
+              <PasswordField
+                inputRef={ref}
+                variant="outlined"
+                label="Password"
+                placeholder="Create a password"
+                textContentType="newPassword"
+                autoComplete="new-password"
+                returnKeyType="next"
+                onSubmitEditing={() => setFocus("confirmPassword")}
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                editable={!isSubmitting}
+                error={errors.password?.message}
+                labelStyle={authStyles.label}
+                inputStyle={authStyles.input}
+              />
+            )}
+          />
+          <Controller
+            control={control}
+            name="confirmPassword"
+            render={({ field: { value, onChange, onBlur, ref } }) => (
+              <PasswordField
+                inputRef={ref}
+                variant="outlined"
+                label="Confirm password"
+                placeholder="Re-enter your password"
+                textContentType="newPassword"
+                autoComplete="new-password"
+                returnKeyType="done"
+                onSubmitEditing={submit}
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                editable={!isSubmitting}
+                error={errors.confirmPassword?.message}
+                labelStyle={authStyles.label}
+                inputStyle={authStyles.input}
+              />
+            )}
+          />
+        </>
+      )}
+      <View style={{ flexDirection: "row", gap: 12 }}>
+        <AppButton
+          title="Back"
+          variant="secondary"
+          disabled={isSubmitting}
+          onPress={goBack}
+          style={{ width: 88, paddingHorizontal: 12 }}
+        />
+        <AppButton
+          title={step === steps.length - 1 ? "Create account" : "Continue"}
+          loadingTitle="Creating…"
+          loading={isSubmitting}
+          onPress={step === steps.length - 1 ? submit : nextStep}
+          style={{ flex: 1 }}
+        />
+      </View>
+    </AuthScreen>
   );
 }

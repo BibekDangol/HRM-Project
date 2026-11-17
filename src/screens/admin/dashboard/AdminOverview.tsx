@@ -1,19 +1,17 @@
 import AppButton from "@/src/components/ui/AppButton";
 import type { AdminDashboardOverview } from "@/src/services/admin/dashboard.service";
-import { colors } from "@/theme/colors";
 import tw from "@/theme/tw";
-import { ActivityIndicator, Text, View } from "react-native";
+import { Text, View } from "react-native";
 
 type Props = {
   overview: AdminDashboardOverview | null;
-  loading: boolean;
   error: boolean;
   onReviewLeaves: () => void;
   onViewAttendance: () => void;
 };
 
-export default function AdminOverview({ overview, loading, error, onReviewLeaves, onViewAttendance }: Props) {
-  const available = !loading && !error && overview != null;
+export default function AdminOverview({ overview, error, onReviewLeaves, onViewAttendance }: Props) {
+  const available = !error && overview != null;
   const dateLabel = overview && new Date(`${overview.date}T00:00:00Z`).toLocaleDateString("en-GB", {
     day: "numeric", month: "short", timeZone: "UTC",
   });
@@ -23,7 +21,6 @@ export default function AdminOverview({ overview, loading, error, onReviewLeaves
       <Text accessibilityRole="header" style={tw`text-lg font-semibold text-ink`}>
         Needs your attention
       </Text>
-      {loading && <ActivityIndicator accessibilityLabel="Loading dashboard counts" color={colors.primary} />}
       {error && (
         <Text accessibilityRole="alert" style={tw`text-sm text-dangerText`}>
           Dashboard counts could not be loaded. Pull down to retry.

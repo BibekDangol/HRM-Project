@@ -4,7 +4,7 @@
     "slug": "techhaus-hrm",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./src/assets/images/icon.png",
+    "icon": "./src/assets/images/oddoo-hrm-symbol-v1.png",
     "scheme": "techhaushrm",
     "userInterfaceStyle": "automatic",
 
@@ -18,10 +18,8 @@
 
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./src/assets/images/android-icon-foreground.png",
-        "backgroundImage": "./src/assets/images/android-icon-background.png",
-        "monochromeImage": "./src/assets/images/android-icon-monochrome.png"
+        "backgroundColor": "#FFFFFF",
+        "foregroundImage": "./src/assets/images/oddoo-hrm-symbol-v1.png"
       },
       "softwareKeyboardLayoutMode": "resize",
       "permissions": [
@@ -49,13 +47,10 @@
       [
         "expo-splash-screen",
         {
-          "image": "./src/assets/images/splash-icon.png",
-          "imageWidth": 200,
+          "image": "./src/assets/images/oddoo-hrm-symbol-v1.png",
+          "imageWidth": 112,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
-          "dark": {
-            "backgroundColor": "#000000"
-          }
+          "backgroundColor": "#ffffff"
         }
       ],
       "expo-font",

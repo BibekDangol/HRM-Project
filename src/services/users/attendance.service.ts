@@ -1,7 +1,6 @@
 import { AttendanceRow } from "@/src/types/attendance";
 import { getUserLocationOrThrow } from "../../utils/locationHelper";
-import { nepalDateYYYYMMDD } from "../../utils/getDate";
-import { parseDate } from "@/src/utils/attendanceHelper";
+import { nepalDateYYYYMMDD, parseDate } from "../../utils/getDate";
 import { supabase } from "@/src/supabase/supabaseClient";
 
 export const fetchLatestAttendanceService = async (): Promise<{
