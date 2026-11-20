@@ -3,6 +3,8 @@ import { FlatList, Pressable } from "react-native";
 
 import AddUserModal from "@/src/screens/admin/manage-users/AddUserModal";
 import EditUserModal from "@/src/screens/admin/manage-users/EditUserModal";
+import ManageUsersHeader from "@/src/screens/admin/manage-users/ManageUsersHeader";
+import ManageUserCard from "@/src/screens/admin/manage-users/ManageUserCard";
 import { ListScreen } from "@/src/components/lists/ListScreen";
 import { UserCard } from "./UserCard";
 import { UserProfile } from "@/src/types/admin";
@@ -25,7 +27,7 @@ export default function UserDirectoryList({
   onBack,
   searchPlaceholder = "Search by name or email...",
 }: Props) {
-  const directory = useUserDirectory({ mode });
+  const directory = useUserDirectory({ mode, initialTab: mode === "manage" ? "active" : undefined });
   const flatListRef = useRef<FlatList<UserProfile>>(null);
 
   const {
@@ -49,17 +51,24 @@ export default function UserDirectoryList({
     <>
       <ListScreen<UserProfile>
         flatListRef={flatListRef as any}
+        contentContainerStyle={mode === "manage" ? { paddingBottom: 128 } : undefined}
+        showHeaderSearch={mode !== "manage"}
+        ListHeaderComponent={mode === "manage" ? (
+          <ManageUsersHeader
+            search={directory.search}
+            onSearchChange={directory.setSearch}
+            loading={directory.loading}
+            tabs={directory.tabs}
+            activeTab={directory.activeTab}
+            onTabChange={directory.setActiveTab}
+            onAdd={() => directory.setShowAddModal(true)}
+            count={directory.users.length}
+          />
+        ) : undefined}
         search={directory.search}
         onSearchChange={directory.setSearch}
         searchPlaceholder={searchPlaceholder}
         onBack={onBack}
-        tabs={mode === "manage" ? directory.tabs : undefined}
-        activeTab={directory.activeTab}
-        onTabChange={(tab) => directory.setActiveTab(tab as any)}
-        onPrimaryAction={
-          mode === "manage" ? () => directory.setShowAddModal(true) : undefined
-        }
-        primaryActionLabel="Add User"
         loading={directory.loading}
         refreshing={directory.refreshing}
         onRefresh={directory.onRefresh}
@@ -94,15 +103,21 @@ export default function UserDirectoryList({
         shouldShowPagination={shouldShowPagination}
         isChangingPage={isChangingPage}
         renderItem={({ item }) => {
+          if (mode === "manage") {
+            return (
+              <ManageUserCard
+                user={item}
+                onEdit={directory.handleEditUser}
+                onDelete={directory.handleDeleteUser}
+                getSupervisorName={directory.getSupervisorName}
+              />
+            );
+          }
           const card = (
             <UserCard
               user={item}
-              onEdit={mode === "manage" ? directory.handleEditUser : undefined}
-              onDelete={
-                mode === "manage" ? directory.handleDeleteUser : undefined
-              }
               getSupervisorName={directory.getSupervisorName}
-              showRightArrow={mode !== "manage"}
+              showRightArrow
             />
           );
 

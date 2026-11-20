@@ -1,4 +1,4 @@
-import { fontSizes, lineHeights } from "@/theme/typography";
+import { fontSizes, inputTextMetrics, lineHeights } from "@/theme/typography";
 import { colors } from "@/theme/colors";
 import React from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
@@ -269,7 +269,7 @@ export function LeaveFormFields({
                 borderColor: errors.reason ? colors.danger : colors.border,
                 color: colors.ink,
                 fontSize: fontSizes.label,
-                lineHeight: lineHeights.label,
+                ...inputTextMetrics,
                 minHeight: 90,
                 backgroundColor: colors.surface,
               }}

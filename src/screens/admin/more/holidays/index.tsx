@@ -1,29 +1,30 @@
 import { colors } from "@/theme/colors";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { RefreshControl, ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 import { DayCell } from "@/src/components/Calendar/DayCell";
+import { CalendarHeader } from "@/src/components/Calendar/CalendarHeader";
+import CalendarSettingsModal from "@/src/components/Calendar/CalendarSettingsModal";
+import { useUsersStore } from "@/src/store/useUsersStore";
+import { useAuthStore } from "@/src/store/useAuthStore";
 import { HolidayRangeModal } from "@/src/components/Calendar/HolidayRangeModal";
 import { SharedCalendar } from "@/src/components/SharedCalendar";
 import useAdminCalendarActions from "@/src/hooks/admin/useAdminCalendarActions";
 import useAdminCalendarMarks from "@/src/hooks/admin/useAdminCalendarMarks";
 import useCalendarRange from "@/src/hooks/admin/useCalendarRange";
+import { useCalendarSync } from "@/src/hooks/useCalendarSync";
 import { TW } from "@/theme/twStyles";
 import React from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import tw from "@/theme/tw";
 
-interface Props {
-  currentUserId: string;
-  currentOrgId: string;
-}
-
-export default function AdminCalendarScreen({
-  currentUserId,
-  currentOrgId,
-}: Props) {
+export default function AdminCalendarScreen() {
+  const organizationId = useUsersStore(state => state.currentUserProfile?.organization_id);
+  const isAdmin = useAuthStore(state => state.role === "admin");
+  const [settingsOpen, setSettingsOpen] = React.useState(false);
   const now = new Date();
   const [year, setYear] = React.useState(now.getFullYear());
   const [month, setMonth] = React.useState(now.getMonth() + 1);
+  const { refreshing, refresh } = useCalendarSync(year, month);
 
   const { rangeStart, rangeEnd, showModal, handleDayPress, clearRange } =
     useCalendarRange();
@@ -50,7 +51,15 @@ export default function AdminCalendarScreen({
 
   return (
     <SafeAreaView edges={["bottom"]} style={tw`flex-1 bg-canvas`}>
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ flexGrow: 1 }}
+        alwaysBounceVertical
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} />}
+      >
+        {isAdmin && organizationId != null && (
+          <CalendarHeader onSettingsPress={() => setSettingsOpen(true)} />
+        )}
         <SharedCalendar
           year={year}
           month={month}
@@ -93,6 +102,9 @@ export default function AdminCalendarScreen({
         )}
       </ScrollView>
 
+      {settingsOpen && isAdmin && organizationId != null && (
+        <CalendarSettingsModal key={organizationId} organizationId={organizationId} onClose={() => setSettingsOpen(false)} />
+      )}
       <HolidayRangeModal
         visible={showModal}
         startDate={rangeStart ?? ""}

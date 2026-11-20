@@ -1,6 +1,7 @@
 import { colors } from "@/theme/colors";
 import {
   CreateLeaveInput,
+  calculateLeaveDays,
   createLeaveRequest,
   fetchLeaveById,
   fetchUserLeavesByYear,
@@ -11,10 +12,10 @@ import {
   LeaveTypeRow,
   LeaveTypeWithStats,
 } from "@/src/types/userLeave";
-import { calcLeaveDays, diffDaysInclusive } from "@/src/utils/leaveUtils";
+import { calcLeaveDays } from "@/src/utils/leaveUtils";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
-import { Alert } from "react-native";
+import { Alert, AppState } from "react-native";
 import { fetchLeaveTypesService } from "@/src/services/leave.type.service";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { useUsersStore } from "@/src/store/useUsersStore";
@@ -86,12 +87,29 @@ export function useLeaveForm(options: UseLeaveFormOptions = {}) {
     return leaveTypes.find((t) => t.id === selectedLeaveType) ?? null;
   }, [leaveTypes, selectedLeaveType]);
 
-  const computedDaysCount = useMemo(() => {
-    if (!localStartDate || !localEndDate) return null;
-    if (localStartDate > localEndDate) return null;
-    if (localStartDate === localEndDate) return isHalfDay ? 0.5 : 1;
-    return diffDaysInclusive(localStartDate, localEndDate) ?? null;
-  }, [localStartDate, localEndDate, isHalfDay]);
+  const dayCountKey = JSON.stringify([orgId, localStartDate, localEndDate, isHalfDay]);
+  const [dayCount, setDayCount] = useState<{ key: string; days: number | null; error?: string } | null>(null);
+  const hasDateRange = orgId != null && !!localStartDate && !!localEndDate && localStartDate <= localEndDate;
+  const computedDaysCount = dayCount?.key === dayCountKey ? dayCount.days : null;
+  const calculatingDays = hasDateRange && dayCount?.key !== dayCountKey;
+  const calculationError = dayCount?.key === dayCountKey ? dayCount.error : undefined;
+
+  useEffect(() => {
+    if (!hasDateRange || orgId == null) return;
+    let active = true;
+    let requestId = 0;
+    const refresh = () => {
+      const id = ++requestId;
+      calculateLeaveDays(orgId, localStartDate, localEndDate, isHalfDay && localStartDate === localEndDate ? "FIRST_SHIFT" : "FULL")
+        .then(days => { if (active && id === requestId) setDayCount({ key: dayCountKey, days }); })
+        .catch(() => {
+          if (active && id === requestId) setDayCount({ key: dayCountKey, days: null, error: "Could not calculate working days. Choose your dates again to retry." });
+        });
+    };
+    refresh();
+    const subscription = AppState.addEventListener("change", state => { if (state === "active") refresh(); });
+    return () => { active = false; subscription.remove(); };
+  }, [orgId, localStartDate, localEndDate, isHalfDay, hasDateRange, dayCountKey, calendarVisible]);
 
   const markedDates = useMemo(() => {
     const marks: Record<string, any> = {};
@@ -177,6 +195,13 @@ export function useLeaveForm(options: UseLeaveFormOptions = {}) {
     }
   }, [userId, orgId, leaveId]);
 
+  useEffect(() => {
+    const subscription = AppState.addEventListener("change", state => {
+      if (state === "active") void loadLeaveTypesWithStats();
+    });
+    return () => subscription.remove();
+  }, [loadLeaveTypesWithStats]);
+
   // Initial load via Promise.then
   useEffect(() => {
     if (!userId || !orgId) return;
@@ -259,7 +284,7 @@ export function useLeaveForm(options: UseLeaveFormOptions = {}) {
         setLocalStartDate(existing.start_date || "");
         setLocalEndDate(existing.end_date || "");
 
-        const isHalf = existing.days_count < 1 || existing.day_type !== "FULL";
+        const isHalf = existing.days_count === 0.5 || existing.day_type === "FIRST_SHIFT" || existing.day_type === "SECOND_SHIFT";
         const session =
           existing.day_type === "SECOND_SHIFT" ? "second_shift" : "first_shift";
 
@@ -367,15 +392,6 @@ export function useLeaveForm(options: UseLeaveFormOptions = {}) {
           return;
         }
 
-        const days = diffDaysInclusive(localStartDate, selectedDate);
-        if (selectedType && days && days > selectedType.remaining) {
-          Alert.alert(
-            "Leave limit exceeded",
-            `You selected ${days} day(s) but only ${selectedType.remaining} day(s) remaining for "${selectedType.name ?? "this leave type"}".`,
-          );
-          return;
-        }
-
         setLocalEndDate(selectedDate);
         setDateError("");
         closeCalendar();
@@ -390,7 +406,6 @@ export function useLeaveForm(options: UseLeaveFormOptions = {}) {
       closeCalendar,
       localStartDate,
       hasRangeOverlap,
-      selectedType,
     ],
   );
 
@@ -435,8 +450,8 @@ export function useLeaveForm(options: UseLeaveFormOptions = {}) {
       }
 
       const daysCount = computedDaysCount;
-      if (daysCount == null) {
-        setDateError("Could not calculate days. Please re-pick dates.");
+      if (daysCount == null || daysCount <= 0) {
+        setDateError(daysCount === 0 ? "Choose at least one working day. Weekends and holidays do not use leave." : "Wait for the working-day calculation, or choose your dates again to retry.");
         return;
       }
 
@@ -537,7 +552,8 @@ export function useLeaveForm(options: UseLeaveFormOptions = {}) {
     loadingTypes,
     localStartDate,
     localEndDate,
-    dateError,
+    dateError: dateError || calculationError || (computedDaysCount === 0 ? "These dates contain no working days." : ""),
+    calculatingDays,
     submitting,
     screenLoading,
     calendarVisible,

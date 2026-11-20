@@ -1,3 +1,4 @@
+import { inputTextMetrics } from "@/theme/typography";
 import { colors } from "@/theme/colors";
 import {
   ActivityIndicator,
@@ -159,7 +160,7 @@ export function HolidayRangeModal({
 
               <TextInput
                 autoFocus
-                style={tw`border border-slate-200 rounded-xl px-4 py-3 mb-5`}
+                style={[tw`border border-slate-200 rounded-xl px-4 py-3 mb-5`, inputTextMetrics]}
                 placeholder="e.g. Dashain"
                 value={label}
                 onChangeText={setLabel}
@@ -188,7 +189,7 @@ export function HolidayRangeModal({
 
               <TextInput
                 autoFocus
-                style={tw`border border-slate-200 rounded-xl px-4 py-3 mb-4`}
+                style={[tw`border border-slate-200 rounded-xl px-4 py-3 mb-4`, inputTextMetrics]}
                 placeholder="e.g. Meeting"
                 value={label}
                 onChangeText={setLabel}

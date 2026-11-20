@@ -1,4 +1,5 @@
 import { colors } from "@/theme/colors";
+import { typography } from "@/theme/typography";
 import { Plus, Search } from "lucide-react-native";
 import React from "react";
 import {
@@ -28,6 +29,7 @@ export type ListScreenTab<K extends string = string> = {
 
 export type ListScreenProps<T, K extends string = string> = {
   // Search / Header
+  title?: string;
   search?: string;
   onSearchChange?: (text: string) => void;
   searchPlaceholder?: string;
@@ -85,6 +87,7 @@ export type ListScreenProps<T, K extends string = string> = {
 };
 
 export function ListScreen<T, K extends string = string>({
+  title,
   search,
   onSearchChange,
   searchPlaceholder = "Search...",
@@ -148,6 +151,11 @@ export function ListScreen<T, K extends string = string>({
 
   return (
     <View style={tw`flex-1 bg-canvas`}>
+      {title ? (
+        <View style={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 4 }}>
+          <Text accessibilityRole="header" style={typography.pageTitle}>{title}</Text>
+        </View>
+      ) : null}
       {shouldShowSearch && onSearchChange ? (
         <HeaderWithSearch
           search={search ?? ""}

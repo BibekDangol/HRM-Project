@@ -47,7 +47,7 @@ export function LeaveDetailCard({ leave, status }: LeaveDetailCardProps) {
   const cfg = STATUS_CONFIG[effectiveStatus] ?? STATUS_CONFIG.pending;
 
   const leaveDuration =
-    leave.days_count < 1
+    leave.days_count === 0.5
       ? `Half Day (${leave.day_type ?? "HALF"})`
       : `${leave.days_count} ${leave.days_count === 1 ? "Day" : "Days"}`;
 

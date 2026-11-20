@@ -56,8 +56,10 @@ function getTextColor(
   switch (priority) {
     case "selected":
     case "range":
-    case "weekend":
       return appColors.surface;
+
+    case "weekend":
+      return colors.weekend;
 
     case "today":
       return appColors.primary;
@@ -97,7 +99,10 @@ function getBgColor(
       return rangeColor;
 
     case "weekend":
-      return colors.weekend;
+      return colors.weekend + "14";
+
+    case "holiday":
+      return colors.publicHoliday + "14";
 
     default:
       return "transparent";
@@ -143,9 +148,9 @@ function getBorderStyle(
 
   if (flags.isHoliday) {
     return {
-      borderWidth: 1.5,
+      borderWidth: 1,
       borderRadius: PILL_RADIUS,
-      borderColor: colors.publicHoliday,
+      borderColor: colors.publicHoliday + "33",
     };
   }
 

@@ -29,7 +29,7 @@ If the security migration reports that `public.v_daily_attendance_stats` or the
 stats table/functions do not exist, run the entire `supabase/repair_attendance_setup.sql`
 file in SQL Editor as `postgres`. It installs missing stats objects, applies both
 fixes, and creates or updates the two named cron jobs in one transaction. Existing
-attendance and summary records are preserved. This replaces the separate setup
+raw attendance records are preserved. Leave durations and derived summaries are recalculated using organization weekends and holidays. This replaces the separate setup
 and corrective SQL steps for manual deployment; do not run them again afterward.
 
 Like any manual SQL deployment, this does not update Supabase CLI migration history.
@@ -90,7 +90,20 @@ SELECT public.backfill_daily_attendance_stats('2026-01-01', '2026-12-31');
 - Functions use `AT TIME ZONE 'Asia/Kathmandu'` for Nepal date calculations
 
 ## Weekend/Holiday Logic
-- **Skips Saturdays** (Nepal weekend) - no absent marking
+
+Apply `20261117000001_calendar_weekend_settings.sql` first, then
+`20261120000001_sync_calendar_working_days.sql` in SQL Editor. If the first
+migration is already installed, run only the second. The standalone repair
+script includes both updates and can be rerun.
+
+The working-day migration recalculates existing leave durations and derived
+attendance summaries. Future weekend or holiday edits automatically do the
+same. Raw attendance records are preserved. Full-day leave counts only working
+days; shift leave counts 0.5 on one working date. Requests containing no working
+days cannot be newly created. An existing request can become zero-charge after
+a calendar change. Legacy `MORNING` requests are normalized to `FIRST_SHIFT`; their dates are preserved.
+
+- **Skips organization weekend days** from `calendar_settings.weekend_days` (Sunday and Saturday when no setting exists) - no absent marking
 - **Skips org holidays** from `admin_calendar` where `type = 'holiday'`
 - Only marks absent for users hired **on or before** the target date
 - Users on **approved leave** are not marked absent

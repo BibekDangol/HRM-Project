@@ -1,4 +1,5 @@
 import { colors } from "@/theme/colors";
+import { typography } from "@/theme/typography";
 import { RelativePathString, useFocusEffect, useRouter } from "expo-router";
 import { CalendarClock, ChevronRight } from "lucide-react-native";
 import { useCallback, useRef } from "react";
@@ -91,6 +92,10 @@ export default function LeaveView({
 
   return (
     <View style={tw`flex-1 bg-canvas`}>
+      {/* Page Header */}
+      <View style={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 4 }}>
+        <Text accessibilityRole="header" style={typography.pageTitle}>Leaves</Text>
+      </View>
       {/* Tabs */}
       <View style={tw`flex-row mx-2 mt-2 rounded-2xl p-1 bg-slate-100`}>
         {TABS.map((tab) => {

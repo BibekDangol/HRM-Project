@@ -31,6 +31,7 @@ export default function ApplyLeaveScreen() {
     dateError,
     submitting,
     computedDaysCount,
+    calculatingDays,
     selectedType,
     calendarVisible,
     calYear,
@@ -97,6 +98,7 @@ export default function ApplyLeaveScreen() {
 
         <LeaveRequestSummary
           days={computedDaysCount}
+          calculatingDays={calculatingDays}
           leaveType={selectedType}
           loading={loadingTypes}
         />
@@ -113,6 +115,7 @@ export default function ApplyLeaveScreen() {
             title="Submit request"
             loadingTitle="Submitting…"
             loading={submitting}
+            disabled={loadingTypes || calculatingDays || computedDaysCount == null || computedDaysCount <= 0}
             onPress={handleSubmitPress}
             style={{ flexGrow: 1, flexBasis: 140 }}
           />

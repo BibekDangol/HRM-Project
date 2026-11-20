@@ -1,9 +1,12 @@
 import { colors } from "@/theme/colors";
+import { DAY_OPTIONS } from "@/src/constants/adminCalendar";
+import { formatDateKey } from "@/src/utils/getDate";
 import { useEffect, useState } from "react";
 import {
   CalendarColors,
   CalendarEvent,
   CalendarState,
+  CalendarItem,
   DayConfig,
   WeekendRules,
 } from "../types/Calendar";
@@ -17,8 +20,6 @@ const DAY_NAME_TO_DOW: Record<string, number> = {
   friday: 5,
   saturday: 6,
 };
-
-const DEFAULT_WEEKENDS: string[] = ["sunday", "saturday"];
 
 // ---- helpers ----
 const DATE_RE = /^(\d{4})-(\d{2})-(\d{2})$/;
@@ -39,8 +40,7 @@ function weekendArrayToDows(weekendDays: string[]): number[] {
   return dows;
 }
 
-// ✅ cache array so we don't recompute every time
-let _weekendDows: number[] = weekendArrayToDows(DEFAULT_WEEKENDS); // [0,3]
+let _organizationId: number | null = null;
 
 const DEFAULT_STATE: CalendarState = {
   colors: {
@@ -50,12 +50,12 @@ const DEFAULT_STATE: CalendarState = {
   },
   weekendRules: {
     sundayOff: true,
-    mondayOff: true,
+    mondayOff: false,
     tuesdayOff: false,
     wednesdayOff: false,
     thursdayOff: false,
     fridayOff: false,
-    saturdayOff: false,
+    saturdayOff: true,
   },
   days: {},
 };
@@ -63,6 +63,35 @@ const DEFAULT_STATE: CalendarState = {
 let _state: CalendarState = JSON.parse(JSON.stringify(DEFAULT_STATE));
 const _listeners = new Set<() => void>();
 const _notify = () => _listeners.forEach((fn) => fn());
+
+function applyCalendarItems(
+  days: Record<string, DayConfig>,
+  items: CalendarItem[],
+  start?: string,
+  end?: string,
+) {
+  for (const item of items) {
+    const first = start && item.start_date < start ? start : item.start_date;
+    const itemEnd = item.end_date ?? item.start_date;
+    const last = end && itemEnd > end ? end : itemEnd;
+    const cursor = parseLocalYMD(first);
+    const endDate = parseLocalYMD(last);
+    while (cursor <= endDate) {
+      const key = formatDateKey(cursor);
+      const previous = days[key] ?? {};
+      days[key] = item.type === "holiday"
+        ? { ...previous, type: "publicHoliday", holidayLabel: item.title }
+        : {
+            ...previous,
+            events: [
+              ...(previous.events ?? []).filter(event => event.id !== String(item.id)),
+              { id: String(item.id), label: item.title, color: item.color || colors.primary },
+            ],
+          };
+      cursor.setDate(cursor.getDate() + 1);
+    }
+  }
+}
 
 // ✅ Defined before calendarStore so the delegation in calendarStore.getMonthStats works
 export function getMonthStats(year: number, month: number) {
@@ -87,7 +116,7 @@ export function getMonthStats(year: number, month: number) {
     else if (cfg?.type === "officeDay") type = "officeDay";
     else {
       const dow = parseLocalYMD(key).getDay();
-      type = _weekendDows.includes(dow) ? "weekend" : "officeDay";
+      type = _state.weekendRules[DAY_OPTIONS[dow].key] ? "weekend" : "officeDay";
     }
 
     if (type === "publicHoliday") publicHolidays++;
@@ -118,7 +147,7 @@ export const calendarStore = {
     if (cfg?.type === "officeDay") return "officeDay";
 
     const dow = parseLocalYMD(dateStr).getDay();
-    if (_weekendDows.includes(dow)) return "weekend";
+    if (_state.weekendRules[DAY_OPTIONS[dow].key]) return "weekend";
 
     return "officeDay";
   },
@@ -136,25 +165,42 @@ export const calendarStore = {
     _notify();
   },
 
-  // ✅ call when backend returns ["sunday","monday"]
-  setWeekendsFromBackend(weekendDays: string[]) {
-    _weekendDows = weekendArrayToDows(weekendDays);
+  setOrganization(organizationId: number | null) {
+    if (_organizationId === organizationId) return;
+    calendarStore.reset();
+    _organizationId = organizationId;
+  },
 
-    // optional: keep weekendRules in sync
-    _state = {
-      ..._state,
-      weekendRules: {
-        sundayOff: _weekendDows.includes(0),
-        mondayOff: _weekendDows.includes(1),
-        tuesdayOff: _weekendDows.includes(2),
-        wednesdayOff: _weekendDows.includes(3),
-        thursdayOff: _weekendDows.includes(4),
-        fridayOff: _weekendDows.includes(5),
-        saturdayOff: _weekendDows.includes(6),
-      },
-    };
-
+  setWeekendDays(weekendDays: number[]) {
+    const weekendRules = { ..._state.weekendRules };
+    DAY_OPTIONS.forEach((day, index) => {
+      weekendRules[day.key] = weekendDays.includes(index);
+    });
+    _state = { ..._state, weekendRules };
     _notify();
+  },
+
+  replaceMonthItems(year: number, month: number, items: CalendarItem[]) {
+    const prefix = `${year}-${String(month).padStart(2, "0")}-`;
+    const start = `${prefix}01`;
+    const end = `${prefix}${new Date(year, month, 0).getDate()}`;
+    const days = Object.fromEntries(
+      Object.entries(_state.days).filter(([date]) => !date.startsWith(prefix)),
+    );
+    applyCalendarItems(days, items, start, end);
+    _state = { ..._state, days };
+    _notify();
+  },
+
+  addCalendarItem(item: CalendarItem) {
+    const days = { ..._state.days };
+    applyCalendarItems(days, [item]);
+    _state = { ..._state, days };
+    _notify();
+  },
+
+  setWeekendsFromBackend(weekendDays: string[]) {
+    calendarStore.setWeekendDays(weekendArrayToDows(weekendDays));
   },
 
   setHoliday(dateStr: string, label: string) {
@@ -220,7 +266,7 @@ export const calendarStore = {
   },
   reset() {
     _state = JSON.parse(JSON.stringify(DEFAULT_STATE));
-    _weekendDows = weekendArrayToDows(DEFAULT_WEEKENDS);
+    _organizationId = null;
     _notify();
   },
 };

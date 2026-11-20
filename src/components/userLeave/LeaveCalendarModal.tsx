@@ -2,6 +2,7 @@ import React from "react";
 import { Modal, Pressable, View } from "react-native";
 import { SharedCalendar } from "@/src/components/SharedCalendar";
 import tw from "@/theme/tw";
+import { useCalendarSync } from "@/src/hooks/useCalendarSync";
 
 export type LeaveCalendarModalProps = {
   visible: boolean;
@@ -24,6 +25,8 @@ export function LeaveCalendarModal({
   onDayPress,
   onMonthChange,
 }: LeaveCalendarModalProps) {
+  useCalendarSync(calYear, calMonth);
+
   return (
     <Modal
       visible={visible}

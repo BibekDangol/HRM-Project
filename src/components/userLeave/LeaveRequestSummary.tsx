@@ -9,9 +9,10 @@ type Props = {
   days: number | null;
   leaveType: LeaveTypeWithStats | null;
   loading: boolean;
+  calculatingDays?: boolean;
 };
 
-export function LeaveRequestSummary({ days, leaveType, loading }: Props) {
+export function LeaveRequestSummary({ days, leaveType, loading, calculatingDays = false }: Props) {
   const balanceAfterRequest = leaveType && days != null
     ? leaveType.remaining - days
     : null;
@@ -21,7 +22,7 @@ export function LeaveRequestSummary({ days, leaveType, loading }: Props) {
     <View style={tw`rounded-xl border border-border bg-surface p-4 gap-2`}>
       <Text style={tw`text-description font-semibold text-muted`}>Request summary</Text>
       <Text style={tw`text-section font-bold text-ink`}>
-        {days == null ? "Choose your dates" : days === 0.5 ? "Half day" : `${formatDays(days)} ${days === 1 ? "day" : "days"}`}
+        {calculatingDays ? "Calculating working days…" : days == null ? "Choose your dates" : days === 0.5 ? "Half day" : `${formatDays(days)} ${days === 1 ? "day" : "days"}`}
         {leaveType ? ` · ${leaveType.name ?? "Leave"}` : ""}
       </Text>
       <Text style={tw`text-description text-muted`}>
@@ -40,7 +41,7 @@ export function LeaveRequestSummary({ days, leaveType, loading }: Props) {
         </Text>
       )}
       <Text style={tw`text-description text-muted`}>
-        Duration includes weekends and holidays. Available balance accounts for pending requests.
+        Weekends and holidays do not use leave. Available balance accounts for pending requests.
       </Text>
     </View>
   );

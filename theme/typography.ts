@@ -4,6 +4,9 @@ import { colors } from "./colors";
 export const fontSizes = { caption: 12, label: 14, body: 16, section: 20, page: 28, metric: 32 } as const;
 export const lineHeights = { caption: 18, label: 20, body: 24, section: 28, page: 36, metric: 40 } as const;
 
+// Let native inputs use their font metrics instead of the display-text line height.
+export const inputTextMetrics: TextStyle = { lineHeight: undefined, includeFontPadding: false };
+
 export const typography = {
   pageTitle: { fontSize: fontSizes.page, lineHeight: lineHeights.page, fontWeight: "700", color: colors.ink },
   sectionTitle: { fontSize: fontSizes.section, lineHeight: lineHeights.section, fontWeight: "600", color: colors.ink },
@@ -13,7 +16,7 @@ export const typography = {
   description: { fontSize: fontSizes.label, lineHeight: lineHeights.label, color: colors.muted },
   caption: { fontSize: fontSizes.caption, lineHeight: lineHeights.caption, color: colors.subtle },
   label: { fontSize: fontSizes.label, lineHeight: lineHeights.label, fontWeight: "600", color: colors.ink },
-  input: { fontSize: fontSizes.body, lineHeight: lineHeights.body, color: colors.ink },
+  input: { fontSize: fontSizes.body, ...inputTextMetrics, color: colors.ink },
   button: { fontSize: fontSizes.body, lineHeight: lineHeights.body, fontWeight: "600" },
   link: { fontSize: fontSizes.label, lineHeight: lineHeights.label, fontWeight: "600", color: colors.primary },
   metric: { fontSize: fontSizes.metric, lineHeight: lineHeights.metric, fontWeight: "700", color: colors.ink },
@@ -32,6 +35,6 @@ export const fontSizeConfig = {
   caption: metric(fontSizes.caption, lineHeights.caption),
   label: metric(fontSizes.label, lineHeights.label),
   action: metric(fontSizes.body, lineHeights.body),
-  input: metric(fontSizes.body, lineHeights.body),
+  input: `${fontSizes.body}px`,
   metric: metric(fontSizes.metric, lineHeights.metric),
 };

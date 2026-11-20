@@ -17,6 +17,7 @@ import {
 } from "react-native";
 
 import { useAttendance } from "@/src/hooks/supervisor/useAttendanceDetails";
+import { useAttendanceStats } from "@/src/hooks/users/useAttendanceStats";
 import { TW } from "@/theme/twStyles";
 import { useState } from "react";
 import tw from "@/theme/tw";
@@ -267,18 +268,12 @@ const AttendanceView: React.FC<Props> = ({ userId, name }) => {
   );
   const filteredByMonth = Object.fromEntries(filteredEntries);
 
-  const monthSummary = filteredEntries.reduce(
-    (acc, [, records]) => {
-      const status = records[0]?.status ?? "";
-      if (status === "present" || status === "late") acc.present += 1;
-      else if (status === "absent") acc.absent += 1;
-      else if (status === "on_leave") acc.leave += 1;
-      return acc;
-    },
-    { present: 0, absent: 0, leave: 0 },
-  );
+  const [summaryYear, summaryMonth] = currentMonth.split("-").map(Number);
+  const { stats: attendanceSummary, loading: summaryLoading } = useAttendanceStats(userId, summaryYear, summaryMonth - 1);
+  const monthSummary = { present: attendanceSummary.present, absent: attendanceSummary.absent, leave: attendanceSummary.leaveTaken };
 
   const handleDownload = () => {
+    if (summaryLoading) return;
     const csvString = buildCSV(
       name,
       currentMonth,
@@ -393,6 +388,7 @@ const AttendanceView: React.FC<Props> = ({ userId, name }) => {
 
                 <Pressable
                   onPress={handleDownload}
+                  disabled={summaryLoading}
                   style={[
                     tw`flex-1 flex-row items-center justify-center gap-1.5 py-2.5 rounded-xl`,
                     {
@@ -421,17 +417,17 @@ const AttendanceView: React.FC<Props> = ({ userId, name }) => {
               <SectionLabel>Summary</SectionLabel>
               <View style={tw`flex-row -mx-1 mb-2`}>
                 <StatBox
-                  value={monthSummary.present}
+                  value={summaryLoading ? "—" : monthSummary.present}
                   label={"Days\nPresent"}
                   accent={colors.successText}
                 />
                 <StatBox
-                  value={monthSummary.absent}
+                  value={summaryLoading ? "—" : monthSummary.absent}
                   label={"Days\nAbsent"}
                   accent={colors.dangerText}
                 />
                 <StatBox
-                  value={monthSummary.leave}
+                  value={summaryLoading ? "—" : monthSummary.leave}
                   label={"On\nLeave"}
                   accent={colors.warningText}
                 />

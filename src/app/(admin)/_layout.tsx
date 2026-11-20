@@ -1,8 +1,8 @@
-import { AppHeaderRight, AppScreenLayout, HomeScreenHeaderContext, HomePageIntro } from "@/src/components/navigation/header/AppHeader";
+import { AppHeaderRight, AppScreenLayout, HomeScreenHeaderContext } from "@/src/components/navigation/header/AppHeader";
 import { colors } from "@/theme/colors";
 import { Stack, usePathname, useRouter } from "expo-router";
 import { useState } from "react";
-import { StatusBar } from "react-native";
+import { Image, StatusBar, Text, View } from "react-native";
 
 import { useAdminHeaderController } from "@/src/hooks/navigation/useAdminHeaderController";
 import { useDimension } from "@/src/hooks/useDimension";
@@ -36,7 +36,12 @@ export default function AdminLayout() {
 
   return (
     <HomeScreenHeaderContext.Provider value={
-      <HomePageIntro name={currentUserProfile?.first_name ?? "Admin"}>
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: 16, paddingVertical: 12 }}>
+        <Image source={require("@/src/assets/images/oddoo-hrm-symbol-v1.png")} style={{ width: 36, height: 36, borderRadius: 8 }} resizeMode="contain" accessibilityLabel="Oddooo HRM" />
+        <View style={{ flex: 1, gap: 3 }}>
+          <Text style={{ fontSize: 17, lineHeight: 22, fontWeight: "700", color: colors.ink }}>Oddooo HRM</Text>
+          <Text style={{ fontSize: 11, lineHeight: 16, color: colors.muted }}>{currentUserProfile?.first_name ?? "Admin"} · Admin workspace</Text>
+        </View>
         <AppHeaderRight
           variant="admin"
           isLocked={isLocked}
@@ -47,7 +52,7 @@ export default function AdminLayout() {
           onLogoutPress={menu.logout}
           profileButtonSize={buttonSize}
         />
-      </HomePageIntro>
+      </View>
     }>
       <StatusBar
         barStyle="dark-content"

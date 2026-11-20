@@ -1,3 +1,4 @@
+import { inputTextMetrics } from "@/theme/typography";
 import { colors } from "@/theme/colors";
 import { useState } from "react";
 import type { ReactNode, Ref } from "react";
@@ -125,9 +126,11 @@ export default function FormField({
           placeholderTextColor={placeholderTextColor}
           style={[
             tw`flex-1 text-input ${TW.textPrimary}`,
+            { paddingVertical: 0, textAlignVertical: "center" },
             inputProps.multiline && tw`min-h-[96px] text-top`,
             inputProps.editable === false && tw`text-gray-500`,
             inputStyle,
+            inputTextMetrics,
           ]}
           {...inputProps}
         />

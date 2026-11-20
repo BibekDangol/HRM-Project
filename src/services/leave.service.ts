@@ -5,6 +5,23 @@ import { supabase } from "../supabase/supabaseClient";
 
 export type LeaveStatus = "pending" | "approved" | "rejected";
 
+export async function calculateLeaveDays(
+  organizationId: number,
+  startDate: string,
+  endDate: string,
+  dayType: "FULL" | "FIRST_SHIFT" | "SECOND_SHIFT" = "FULL",
+) {
+  const { data, error } = await supabase.rpc("calculate_leave_days", {
+    p_organization_id: organizationId,
+    p_start_date: startDate,
+    p_end_date: endDate,
+    p_day_type: dayType,
+  });
+  if (error) throw error;
+  if (data == null || !Number.isFinite(Number(data))) throw new Error("Working-day calculation is unavailable.");
+  return Number(data);
+}
+
 export type LeaveType = {
   id: number;
   leave_limit: number;

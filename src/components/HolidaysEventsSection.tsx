@@ -1,7 +1,7 @@
 import { fontSizes, lineHeights, typography } from "@/theme/typography";
 import { colors } from "@/theme/colors";
 import React, { useEffect, useMemo, useRef } from "react";
-import { Pressable, Text, useWindowDimensions, View } from "react-native";
+import { Pressable, Text, useWindowDimensions, View, type StyleProp, type ViewStyle } from "react-native";
 import Animated, {
   interpolate,
   interpolateColor,
@@ -26,6 +26,7 @@ type Props = {
   calendarLoading: boolean;
   onViewAll: () => void;
   onCardPress?: (item: CalendarItem) => void;
+  style?: StyleProp<ViewStyle>;
 };
 
 const CARD_RADIUS = 12;
@@ -377,6 +378,7 @@ export const HolidaysEventsSection = ({
   calendarLoading,
   onViewAll,
   onCardPress,
+  style,
 }: Props) => {
   const { width: screenWidth } = useWindowDimensions();
   const carouselRef = useRef<any>(null);
@@ -448,16 +450,15 @@ export const HolidaysEventsSection = ({
   );
 
   return (
-    <View style={{ marginTop: 20 }}>
+    <View style={[{ marginTop: 20, gap: 12 }, style]}>
       <View
         style={{
           flexDirection: "row",
           alignItems: "center",
           justifyContent: "space-between",
-          marginBottom: 16,
         }}
       >
-        <Text style={tw`font-semibold ${TW.textPrimary} text-section`}>
+        <Text accessibilityRole="header" style={tw`font-semibold ${TW.textPrimary} text-section`}>
           Holidays &amp; Events
         </Text>
 

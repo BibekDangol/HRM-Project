@@ -26,19 +26,6 @@ const ADMIN_ROOT_TAB_PATHS = [
 
 const ADMIN_HOME_PATHS = ["/(admin)/(main-tabs)/dashboard", "/dashboard"];
 
-const ADMIN_MAIN_TABS_THAT_SHOULD_GO_HOME = [
-  "/(admin)/(main-tabs)/manage-users",
-  "/manage-users",
-  "/(admin)/(main-tabs)/more",
-  "/more",
-  "/(admin)/(main-tabs)/leave",
-  "/leave",
-  "/(admin)/profile",
-  "/profile",
-  "/(admin)/holidays",
-  "/holidays",
-];
-
 export function useAdminHeaderController({
   pathname,
   router,
@@ -53,18 +40,12 @@ export function useAdminHeaderController({
   const showBackButton = !isRootTab;
 
   const handleBackPress = useCallback(() => {
-    // Main tab screens should always go to dashboard
-    if (ADMIN_MAIN_TABS_THAT_SHOULD_GO_HOME.includes(pathname)) {
-      router.replace("/(admin)/(main-tabs)/dashboard");
-      return true;
-    }
-
     // Already on dashboard -> allow Android to exit app
     if (ADMIN_HOME_PATHS.includes(pathname)) {
       return false;
     }
 
-    // Inner screens -> normal back
+    // Return to the existing screen before considering a fallback.
     if (router.canGoBack()) {
       router.back();
       return true;

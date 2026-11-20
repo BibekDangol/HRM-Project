@@ -9,7 +9,7 @@ interface Props {
 
 export default function ApprovedLeaveView({ leave }: Props) {
   const leaveDuration =
-    leave.days_count < 1 ? `Half Day (${leave.day_type})` : "Full Day";
+    leave.days_count === 0 ? "0 chargeable days" : leave.days_count === 0.5 ? `Half Day (${leave.day_type})` : "Full Day";
 
   return (
     <ScrollView

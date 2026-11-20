@@ -24,8 +24,8 @@ export default function MetricCard({
   statusMeta = "Refresh to update",
 }: Props) {
   return (
-    <>
-      <Text style={tw`font-semibold ${TW.textPrimary} pb-2 text-section`}>
+    <View style={tw`gap-3`}>
+      <Text accessibilityRole="header" style={tw`font-semibold ${TW.textPrimary} text-section`}>
         {sectionTitle}
       </Text>
       <View
@@ -61,6 +61,6 @@ export default function MetricCard({
           </View>
         </View>
       </View>
-    </>
+    </View>
   );
 }

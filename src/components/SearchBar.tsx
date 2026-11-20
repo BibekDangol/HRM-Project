@@ -1,3 +1,4 @@
+import { inputTextMetrics } from "@/theme/typography";
 import { colors } from "@/theme/colors";
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { ArrowLeft, Search, X } from "lucide-react-native";
@@ -85,7 +86,7 @@ export default function HeaderWithSearch({
         <Search size={18} color={colors.primaryMuted} />
 
         <TextInput
-          style={tw`flex-1 ml-2 text-body text-ink`}
+          style={[tw`flex-1 ml-2 text-body text-ink`, inputTextMetrics]}
           placeholder={placeholder}
           value={text}
           onChangeText={handleChangeText}

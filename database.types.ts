@@ -261,6 +261,18 @@ export type Database = {
           },
         ]
       }
+      calendar_settings: {
+        Row: { organization_id: number; weekend_days: number[] }
+        Insert: { organization_id: number; weekend_days?: number[] }
+        Update: { organization_id?: number; weekend_days?: number[] }
+        Relationships: [{
+          foreignKeyName: "calendar_settings_organization_id_fkey"
+          columns: ["organization_id"]
+          isOneToOne: true
+          referencedRelation: "organization"
+          referencedColumns: ["id"]
+        }]
+      }
       organization: {
         Row: {
           created_at: string
@@ -331,6 +343,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calculate_leave_days: {
+        Args: { p_organization_id: number; p_start_date: string; p_end_date: string; p_day_type?: string }
+        Returns: number
+      }
+      get_user_attendance_summary: {
+        Args: { p_user_id: string; p_start_date: string; p_end_date: string }
+        Returns: { present: number; absent: number; incomplete: number; leave_taken: number }[]
+      }
       search_users: {
         Args: { org_id: number; prefix: string }
         Returns: {

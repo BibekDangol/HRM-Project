@@ -5,7 +5,7 @@ export const TW = {
   bgYellow: colors.accent,
 
   bgWhite: "bg-white",
-  bgAction: "bg-primary",
+  bgAction: "bg-action",
   bgButton: "bg-white",
   bgCards: "bg-surface border border-border",
   textButton: "text-white",

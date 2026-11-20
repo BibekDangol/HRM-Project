@@ -27,6 +27,10 @@ export default function EditLeaveScreen() {
   const returnTab = firstParam(params.returnTab) || "pending";
 
   const goBackToLeaves = () => {
+    if (router.canGoBack()) {
+      router.back();
+      return;
+    }
     router.replace({
       pathname: "/(users)/(main-tabs)/leaves/(tabs)",
       params: { tab: returnTab },
@@ -47,6 +51,7 @@ export default function EditLeaveScreen() {
     dateError,
     submitting,
     computedDaysCount,
+    calculatingDays,
     selectedType,
     screenLoading,
     calendarVisible,
@@ -116,6 +121,7 @@ export default function EditLeaveScreen() {
 
         <LeaveRequestSummary
           days={computedDaysCount}
+          calculatingDays={calculatingDays}
           leaveType={selectedType}
           loading={loadingTypes}
         />
@@ -132,6 +138,7 @@ export default function EditLeaveScreen() {
             title="Save changes"
             loadingTitle="Saving…"
             loading={submitting}
+            disabled={loadingTypes || calculatingDays || computedDaysCount == null || computedDaysCount <= 0}
             onPress={handleSubmitPress}
             style={{ flexGrow: 1, flexBasis: 140 }}
           />

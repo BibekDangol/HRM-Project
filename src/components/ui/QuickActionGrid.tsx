@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { Text, Pressable, View } from "react-native";
 
 import { TW } from "@/theme/twStyles";
 import tw from "@/theme/tw";
@@ -17,28 +17,31 @@ type Props = {
 
 export default function QuickActionGrid({
   items,
-  title = "Quick Actions",
+  title = "Quick actions",
 }: Props) {
   return (
-    <View>
-      <Text style={tw`font-semibold ${TW.textPrimary} py-2 text-section`}>
+    <View style={tw`gap-3`}>
+      <Text accessibilityRole="header" style={tw`font-semibold ${TW.textPrimary} text-section`}>
         {title}
       </Text>
 
-      <View style={tw`flex-row flex-wrap justify-between`}>
+      <View style={tw`flex-row flex-wrap gap-3`}>
         {items.map((item) => (
-          <TouchableOpacity
+          <Pressable
             key={item.label}
             accessibilityRole="button"
             accessibilityLabel={item.label}
             onPress={item.onPress}
-            style={tw`w-[48%] ${TW.bgCards} p-4 rounded-xl mb-3 items-center min-h-[96px] justify-center`}
+            style={({ pressed }) => [
+              tw`${TW.bgCards} p-4 rounded-xl items-center min-h-[96px] justify-center gap-2`,
+              { flexBasis: "45%", flexGrow: 1, opacity: pressed ? 0.7 : 1 },
+            ]}
           >
             {item.icon}
-            <Text style={tw`${TW.textPrimary} mt-2 text-description text-center font-medium`}>
+            <Text style={tw`${TW.textPrimary} text-description text-center font-medium`}>
               {item.label}
             </Text>
-          </TouchableOpacity>
+          </Pressable>
         ))}
       </View>
     </View>

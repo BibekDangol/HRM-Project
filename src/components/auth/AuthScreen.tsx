@@ -93,7 +93,7 @@ export const authStyles = StyleSheet.create({
   subtitle: typography.subtitle,
   form: { gap: 16 },
   label: typography.label,
-  input: { ...typography.input, paddingVertical: 10 },
+  input: typography.input,
   forgotPassword: { alignSelf: "flex-end", minHeight: 48, paddingLeft: 12, justifyContent: "center" },
   link: typography.link,
   buttonText: typography.button,

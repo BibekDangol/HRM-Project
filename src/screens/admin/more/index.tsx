@@ -1,4 +1,5 @@
 import { colors } from "@/theme/colors";
+import { typography } from "@/theme/typography";
 import {
   BookUser,
   CalendarFold,
@@ -37,6 +38,10 @@ export default function MoreScreen() {
 
   return (
     <View style={tw`flex-1 bg-canvas`}>
+      {/* Page Header */}
+      <View style={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 4 }}>
+        <Text accessibilityRole="header" style={typography.pageTitle}>Settings</Text>
+      </View>
       <ScrollView
         contentContainerStyle={tw`p-4`}
         showsVerticalScrollIndicator={false}>

@@ -1,3 +1,4 @@
+import { inputTextMetrics } from "@/theme/typography";
 import { colors } from "@/theme/colors";
 import { parseLocalYMD } from "@/src/constants/adminCalendar";
 import { supabase } from "@/src/supabase/supabaseClient";
@@ -269,7 +270,7 @@ export function DayModal({
                     if (!v) return;
                     addHoliday(v);
                   }}
-                  style={tw`bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-900 text-description mb-4`}
+                  style={[tw`bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-900 text-description mb-4`, inputTextMetrics]}
                 />
 
                 <View style={tw`flex-row gap-3`}>
@@ -323,7 +324,7 @@ export function DayModal({
                     if (!v) return;
                     addEvent(v, eventColor);
                   }}
-                  style={tw`bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-900 text-description mb-3`}
+                  style={[tw`bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-900 text-description mb-3`, inputTextMetrics]}
                 />
 
                 <Text

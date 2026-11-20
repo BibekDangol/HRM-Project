@@ -10,6 +10,6 @@ export async function getCalendarItems(
     .select("id, title, type, color, start_date, end_date")
     .eq("organization_id", orgId)
     .lte("start_date", end)
-    .or(`end_date.gte.${start},end_date.is.null`)
+    .or(`end_date.gte.${start},and(end_date.is.null,start_date.gte.${start})`)
     .order("start_date");
 }
